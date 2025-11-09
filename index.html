@@ -1,0 +1,178 @@
+﻿<!-- BUILD: PPD-2025-11-08T12:30Z -->
+<!DOCTYPE html>
+<html lang="pl" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PapaData | Cloud Analytics & Automation • PPD-2025-11-08</title>
+
+  <meta name="theme-color" content="#1BA6F2" />
+  <meta name="color-scheme" content="dark light" />
+
+  <link rel="stylesheet" href="style.css?v=ppd-2025-11-08-2" />
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+  <link rel="manifest" href="manifest.json?v=ppd-2025-11-08-2" />
+</head>
+
+<body>
+  <!-- ===== Header / Nawigacja / Sterowanie ===== -->
+  <header class="header">
+    <a href="#home" class="logo">PapaData</span></a>
+
+    <nav id="primary-nav" class="navbar" aria-label="Główna nawigacja">
+      <a href="#home" data-i18n="nav.home">Home</a>
+      <a href="#uslugi" data-i18n="nav.services">Services</a>
+      <a href="#technologia" data-i18n="nav.tech">Technology</a>
+      <a href="#integracje" data-i18n="nav.integration">Integrations</a>
+      <a href="#contact" data-i18n="nav.contact">Contact</a>
+    </nav>
+
+    <div class="controls">
+      <button id="theme-toggle" aria-label="Switch theme" aria-pressed="false" type="button">
+        <i class="bx bx-moon" aria-hidden="true"></i>
+      </button>
+      <button id="lang-pl" class="lang-btn" data-lang="pl" type="button">PL</button>
+      <button id="lang-en" class="lang-btn" data-lang="en" type="button">EN</button>
+    </div>
+
+    <button
+      id="menu-icon"
+      class="bx bx-menu"
+      aria-label="Otwórz menu"
+      aria-expanded="false"
+      aria-controls="primary-nav"
+      type="button">
+    </button>
+  </header>
+  <!-- ===== koniec: Header ===== -->
+
+  <!-- ===== HOME ===== -->
+  <section class="home" id="home">
+    <div class="home-content">
+      <h3 data-i18n="home.subtitle">Bezpieczna chmura</h3>
+      <h1>PapaData</h1>
+      <p data-i18n="home.text">
+        PapaData to zespół ekspertów chmurowych specjalizujących się w automatyzacji analityki danych w Google Cloud Platform.
+        Tworzymy i utrzymujemy platformy danych dla firm e-commerce, SaaS i agencji marketingowych.
+      </p>
+      <a href="#uslugi" class="btn" data-i18n="btn.more">Dowiedz się więcej</a>
+    </div>
+  </section>
+  <!-- ===== koniec: HOME ===== -->
+
+  <!-- ===== USŁUGI ===== -->
+  <section class="services" id="uslugi">
+    <h2 class="heading"><span data-i18n="services.title">Nasze usługi</span></h2>
+
+    <div class="services-container">
+      <article class="services-box">
+        <i class="bx bx-data" aria-hidden="true"></i>
+        <h3 data-i18n="services.etl.title">Automatyzacja ETL bez kodu</h3>
+        <p data-i18n="services.etl.text">Łączymy źródła i przetwarzamy dane do BigQuery bez pisania kodu.</p>
+      </article>
+
+      <article class="services-box">
+        <i class="bx bxs-bar-chart-alt-2" aria-hidden="true"></i>
+        <h3 data-i18n="services.analytics.title">Analityka w Looker Studio</h3>
+        <p data-i18n="services.analytics.text">Gotowe dashboardy KPI oparte o modele danych w BigQuery.</p>
+      </article>
+
+      <article class="services-box">
+        <i class="bx bx-network-chart" aria-hidden="true"></i>
+        <h3 data-i18n="services.integration.title">Integracja z GCP</h3>
+        <p data-i18n="services.integration.text">Bezpieczna infrastruktura jako kod, Cloud Functions i Scheduler.</p>
+      </article>
+    </div>
+  </section>
+  <!-- ===== koniec: USŁUGI ===== -->
+
+  <!-- ===== TECHNOLOGIE ===== -->
+  <section class="tech" id="technologia">
+    <h2 class="heading"><span data-i18n="tech.title">Technologia</span></h2>
+
+    <div class="tech-container">
+      <article class="tech-box">
+        <i class="bx bx-data" aria-hidden="true"></i>
+        <h3 data-i18n="tech.etl.title">Technologia - opis.</h3>
+        <p data-i18n="tech.etl.text">Różne technologie - opis.</p>
+      </article>
+
+      <article class="tech-box">
+        <i class="bx bxs-bar-chart-alt-2" aria-hidden="true"></i>
+        <h3 data-i18n="tech.analytics.title">Technologia - opis.</h3>
+        <p data-i18n="tech.analytics.text">Różne technologie - opis.</p>
+      </article>
+
+      <article class="tech-box">
+        <i class="bx bx-network-chart" aria-hidden="true"></i>
+        <h3 data-i18n="tech.integration.title">Technologia - opis.</h3>
+        <p data-i18n="tech.integration.text">Różne technologie - opis.</p>
+      </article>
+    </div>
+  </section>
+  <!-- ===== koniec: TECHNOLOGIE ===== -->
+
+  <!-- ===== INTEGRACJE ===== -->
+  <section class="integration" id="integracje">
+    <h2 class="heading"><span data-i18n="integration.title">Integracje</span></h2>
+
+    <div class="integration-container">
+      <article class="integration-box">
+        <i class="bx bx-cloud-upload" aria-hidden="true"></i>
+        <h3 data-i18n="integration.etl.title">Automatyzacja ETL do BigQuery</h3>
+        <p data-i18n="integration.etl.text">
+          Laczymy e-commerce, CRM i marketing z BigQuery z wykorzystaniem zarzadzanych konektorow.
+        </p>
+      </article>
+
+      <article class="integration-box">
+        <i class="bx bx-analyse" aria-hidden="true"></i>
+        <h3 data-i18n="integration.analytics.title">Integracje BI i raportowe</h3>
+        <p data-i18n="integration.analytics.text">
+          Synchronizujemy Looker Studio, Power BI i Data Studio na jednym modelu danych.
+        </p>
+      </article>
+
+      <article class="integration-box">
+        <i class="bx bx-shield-quarter" aria-hidden="true"></i>
+        <h3 data-i18n="integration.integration.title">Bezpieczne przeplywy operacyjne</h3>
+        <p data-i18n="integration.integration.text">
+          Laczymy ERP, systemy magazynowe i aplikacje SaaS z kontrola dostepu.
+        </p>
+      </article>
+    </div>
+  </section>
+  <!-- ===== koniec: INTEGRACJE ===== -->
+
+  <!-- ===== KONTAKT ===== -->
+  <section class="contact" id="contact">
+    <h2 class="heading"><span data-i18n="contact.title">Skontaktuj się z nami</span></h2>
+
+    <form>
+      <div class="input-box">
+        <input type="text" placeholder="Imię i nazwisko" data-i18n-placeholder="contact.name" required />
+        <input type="email" placeholder="Adres e-mail" data-i18n-placeholder="contact.email" required />
+      </div>
+
+      <textarea rows="6" placeholder="Twoja wiadomość" data-i18n-placeholder="contact.message"></textarea>
+
+      <button type="submit" class="btn" data-i18n="contact.send">Wyślij</button>
+    </form>
+  </section>
+  <!-- ===== koniec: KONTAKT ===== -->
+
+  <!-- ===== Footer ===== -->
+  <footer class="footer">
+    <div class="footer-text">
+      <p data-i18n="footer.text">© 2025 PapaData | Wszystkie prawa zastrzeżone.</p>
+    </div>
+    <div class="footer-iconTop">
+      <a href="#home" aria-label="Wróć na górę"><i class="bx bx-up-arrow-alt" aria-hidden="true"></i></a>
+    </div>
+  </footer>
+  <!-- ===== koniec: Footer ===== -->
+
+  <!-- jeden skrypt, bez lang.js -->
+  <script defer src="js/script.js?v=ppd-2025-11-08-2"></script>
+</body>
+</html>
