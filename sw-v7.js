@@ -1,5 +1,5 @@
-// sw-v7.js — PapaData SW (bez "body used" błędów)
-// Wersja: v7 — 2025-11-08
+﻿// sw-v7.js â€” PapaData SW (bez "body used" bĹ‚Ä™dĂłw)
+// Wersja: v7 â€” 2025-11-08
 
 const CACHE_NAME = 'papadata-cache-v7';
 const ORIGIN = self.location.origin;
@@ -7,7 +7,7 @@ const ASSETS = [
   'index.html',
   'style.css',
   'js/script.js',
-  'images/PapaData.png'
+  'images/papadata.png'
 ];
 
 /* Install: precache tylko lokalne, GET */
@@ -18,7 +18,7 @@ self.addEventListener('install', (event) => {
   );
 });
 
-/* Activate: usuń stare cache i przejmij kontrolę */
+/* Activate: usuĹ„ stare cache i przejmij kontrolÄ™ */
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
@@ -45,7 +45,7 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(req)
         .then((res) => {
-          // KLON PRZED cache.put — unikamy "body used"
+          // KLON PRZED cache.put â€” unikamy "body used"
           const copy = res.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put('index.html', copy)).catch(() => {});
           return res;
@@ -58,17 +58,17 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  /* 2) Tylko GET i ten sam origin — nadają się do cache */
+  /* 2) Tylko GET i ten sam origin â€” nadajÄ… siÄ™ do cache */
   if (req.method !== 'GET' || url.origin !== ORIGIN) {
-    // brak cache — zwykły fetch
-    return; // pozwól przeglądarce normalnie obsłużyć
+    // brak cache â€” zwykĹ‚y fetch
+    return; // pozwĂłl przeglÄ…darce normalnie obsĹ‚uĹĽyÄ‡
   }
 
   /* 3) Assety: cache-first + revalidate w tle */
   event.respondWith(
     caches.match(req).then((cached) => {
       if (cached) {
-        // Odśwież w tle (z KLONEM)
+        // OdĹ›wieĹĽ w tle (z KLONEM)
         fetch(req)
           .then((netRes) => {
             if (netRes && netRes.ok) {
@@ -78,7 +78,7 @@ self.addEventListener('fetch', (event) => {
           .catch(() => {});
         return cached;
       }
-      // Brak w cache → pobierz i zapisz KLON
+      // Brak w cache â†’ pobierz i zapisz KLON
       return fetch(req)
         .then((netRes) => {
           if (netRes && netRes.ok) {
@@ -88,10 +88,11 @@ self.addEventListener('fetch', (event) => {
           return netRes;
         })
         .catch(async () => {
-          // fallback: spróbuj jednak coś z cache (np. po offline)
+          // fallback: sprĂłbuj jednak coĹ› z cache (np. po offline)
           const cache = await caches.open(CACHE_NAME);
           return cache.match(req);
         });
     })
   );
 });
+
