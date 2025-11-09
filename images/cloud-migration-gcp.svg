@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg4" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#031125" />
+      <stop offset="100%" stop-color="#061b34" />
+    </linearGradient>
+    <linearGradient id="flow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1ba6f2" />
+      <stop offset="100%" stop-color="#22d3ee" />
+    </linearGradient>
+    <linearGradient id="gcp" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ea4335" />
+      <stop offset="25%" stop-color="#fbbc04" />
+      <stop offset="50%" stop-color="#34a853" />
+      <stop offset="75%" stop-color="#4285f4" />
+      <stop offset="100%" stop-color="#6f6ff2" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg4)" />
+  <g fill="none" stroke="#123157" stroke-width="2">
+    <path d="M48 120h416" opacity="0.45" />
+    <path d="M48 180h416" opacity="0.35" />
+    <path d="M48 240h416" opacity="0.3" />
+    <path d="M48 300h416" opacity="0.25" />
+    <path d="M48 360h416" opacity="0.2" />
+    <path d="M120 72v368" opacity="0.35" />
+    <path d="M200 72v368" opacity="0.3" />
+    <path d="M280 72v368" opacity="0.25" />
+    <path d="M360 72v368" opacity="0.2" />
+    <path d="M440 72v368" opacity="0.15" />
+  </g>
+  <path d="M336 188a88 88 0 0 0-164-36c-20-18-46-28-74-28-60 0-108 48-108 108 0 12 2 24 6 34C-2 280-32 320-32 368c0 66 54 120 120 120h256c70 0 128-58 128-128s-58-128-128-128c-1 0-2 0-4 0z" fill="#0b162d" opacity="0.78" />
+  <g fill="#0b162d" stroke="#3ec9ff" stroke-width="12" opacity="0.9">
+    <rect x="80" y="260" width="104" height="140" rx="24" />
+    <rect x="212" y="220" width="112" height="180" rx="28" />
+  </g>
+  <g fill="#0b162d" stroke="#5ce1ff" stroke-width="12" opacity="0.85">
+    <rect x="344" y="248" width="120" height="152" rx="28" />
+  </g>
+  <g fill="none" stroke="url(#flow)" stroke-width="16" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M116 320c56 0 84-72 140-72s72 48 104 48 52-28 88-28" />
+    <path d="M116 360c56 0 84-72 140-72s72 48 104 48 52-28 88-28" opacity="0.6" />
+  </g>
+  <g transform="translate(348 284)">
+    <path d="M72 0C32 0 0 32 0 72s32 72 72 72 72-32 72-72S112 0 72 0zm0 120c-26 0-48-22-48-48s22-48 48-48 48 22 48 48-22 48-48 48z" fill="url(#gcp)" />
+    <path d="M72 44 40 76l20 20 12-12 12 12 20-20z" fill="#051224" />
+  </g>
+  <g fill="#23d1ff">
+    <circle cx="126" cy="312" r="12" />
+    <circle cx="260" cy="248" r="12" />
+    <circle cx="400" cy="292" r="12" />
+  </g>
+</svg>
