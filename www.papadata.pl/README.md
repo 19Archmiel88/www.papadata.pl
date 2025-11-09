@@ -1,1 +1,0 @@
-"# www.papadata.pl" 
