@@ -1,10 +1,13 @@
 const CACHE_NAME = 'papadata-cache-v7';
 const ORIGIN = self.location.origin;
+const ASSET_VERSION = 'ppd-2025-11-08-2';
 const ASSETS = [
   'index.html',
-  'style.css',
-  'js/script.js',
-  'images/papadata.png'
+  `style.css?v=${ASSET_VERSION}`,
+  `js/script.js?v=${ASSET_VERSION}`,
+  `manifest.json?v=${ASSET_VERSION}`,
+  'images/PapaData-192.png',
+  'images/PapaData.png'
 ];
 
 self.addEventListener('install', (event) => {
@@ -77,5 +80,3 @@ self.addEventListener('fetch', (event) => {
     })
   );
 });
-
-

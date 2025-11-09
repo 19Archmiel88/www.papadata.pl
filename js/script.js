@@ -105,7 +105,7 @@ const translations = {
     "contact.message": "Your message",
     "contact.send": "Send",
 
-    "footer.text": "Â© 2025 PapaData | All rights reserved.",
+    "footer.text": "© 2025 PapaData | All rights reserved.",
     "aria.menu": "Open menu",
     "aria.menuClose": "Close menu",
     "aria.top": "Back to top",
@@ -121,6 +121,17 @@ function detectLanguage() {
   try {
     return navigator.language && navigator.language.startsWith("pl") ? "pl" : "en";
   } catch { return "en"; }
+}
+
+function matchesMedia(query) {
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+    return false;
+  }
+  try {
+    return !!window.matchMedia(query)?.matches;
+  } catch {
+    return false;
+  }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -226,8 +237,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // PARALLAX (wyłąćz na touch/reduced-motion)
   (function initParallax() {
-    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-    const coarse = window.matchMedia?.('(pointer: coarse)').matches;
+    const reduce = matchesMedia('(prefers-reduced-motion: reduce)');
+    const coarse = matchesMedia('(pointer: coarse)');
     if (reduce || coarse) return;
     let raf;
     function onMove(e) {
@@ -255,7 +266,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const THEME_LOCK_KEY = 'themeLocked';
 
   function systemPrefersLight() {
-    return window.matchMedia?.('(prefers-color-scheme: light)').matches;
+    return matchesMedia('(prefers-color-scheme: light)');
   }
   function getInitialTheme() {
     const saved = localStorage.getItem(THEME_KEY);
@@ -392,7 +403,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   ensureLangButtons();
   applyLanguage(detectLanguage());
-// SCROLL REVEAL (opcjonalnie, jeżeli biblioteka obecna)
   if (typeof ScrollReveal !== "undefined") {
     ScrollReveal({ reset: true, distance: '80px', duration: 2000, delay: 200 });
     ScrollReveal().reveal('.home-content, .heading', { origin: 'top' });
@@ -401,7 +411,6 @@ document.addEventListener('DOMContentLoaded', () => {
     ScrollReveal().reveal('.home-content h3, .home-content p, .about-content', { origin: 'right' });
   }
 
-// SERVICE WORKER (jedna rejestracja)
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('sw-v7.js', { scope: './' })
@@ -414,11 +423,9 @@ document.addEventListener('DOMContentLoaded', () => {
               }
             });
           });
-           console.log('âś… ServiceWorker registered:', reg.scope);
+           console.log('ServiceWorker registered:', reg.scope);
         })
-      .catch(err => console.error('âťŚ SW register error:', err));
+      .catch(err => console.error('SW register error:', err));
     });
   }
 });
-
-
