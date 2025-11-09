@@ -19,6 +19,14 @@ const translations = {
     "home.text": "PapaData to zespół ekspertów chmurowych specjalizujących się w automatyzacji analityki danych w Google Cloud Platform. Tworzymy i utrzymujemy platformy danych dla firm e-commerce, SaaS i agencji marketingowych.",
     "btn.more": "Dowiedz się więcej",
 
+    "gallery.title": "Wizualizacje PapaData",
+    "gallery.lead": "Poznaj nasze motywy graficzne obrazujące integracje danych, automatyzację raportowania oraz migracje do Google Cloud.",
+    "gallery.cards.analytics": "Analityka chmurowa i dashboard KPI",
+    "gallery.cards.ads": "Automatyzacja kampanii Google Ads",
+    "gallery.cards.research": "Badania danych i wizualizacje",
+    "gallery.cards.migration": "Migracja hurtowni danych do GCP",
+    "gallery.cards.logo": "Podpis i identyfikacja wizualna PapaData",
+
     "services.title": "Nasze usługi",
     "services.etl.title": "Automatyzacja ETL bez kodu",
     "services.etl.text": "Łączymy źródła i przetwarzamy dane do BigQuery bez pisania kodu.",
@@ -66,6 +74,14 @@ const translations = {
     "home.subtitle": "Secure Cloud",
     "home.text": "PapaData is a team of cloud experts specializing in automating data analytics in Google Cloud Platform. We build and maintain data platforms for e-commerce, SaaS companies, and marketing agencies.",
     "btn.more": "Learn more",
+
+    "gallery.title": "PapaData Visuals",
+    "gallery.lead": "Explore our artwork illustrating data integrations, automated reporting, and migrations to Google Cloud.",
+    "gallery.cards.analytics": "Cloud analytics & KPI dashboards",
+    "gallery.cards.ads": "Google Ads automation",
+    "gallery.cards.research": "Data research and visualisations",
+    "gallery.cards.migration": "Data warehouse migration to GCP",
+    "gallery.cards.logo": "PapaData visual identity",
 
     "services.title": "Our Services",
     "services.etl.title": "No-Code ETL Automation",

@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg5" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#041022" />
+      <stop offset="100%" stop-color="#061c34" />
+    </linearGradient>
+    <radialGradient id="glow5" cx="50%" cy="38%" r="60%">
+      <stop offset="0%" stop-color="#2bc0ff" stop-opacity="0.55" />
+      <stop offset="100%" stop-color="transparent" />
+    </radialGradient>
+    <linearGradient id="logoCloud" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1ba6f2" />
+      <stop offset="100%" stop-color="#6f6ff2" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg5)" />
+  <rect width="512" height="512" fill="url(#glow5)" />
+  <g fill="none" stroke="#13325a" stroke-width="2" opacity="0.4">
+    <path d="M64 128h384" />
+    <path d="M64 192h384" />
+    <path d="M64 256h384" />
+    <path d="M64 320h384" />
+    <path d="M64 384h384" />
+    <path d="M128 80v352" />
+    <path d="M192 80v352" />
+    <path d="M256 80v352" />
+    <path d="M320 80v352" />
+    <path d="M384 80v352" />
+    <path d="M448 80v352" />
+  </g>
+  <g fill="none" stroke="#2ed2ff" stroke-width="3" opacity="0.35">
+    <path d="M120 120l272 272" />
+    <path d="M120 392l272-272" />
+  </g>
+  <g transform="translate(92 108)">
+    <path d="M260 140a92 92 0 0 0-172-36c-22-18-50-28-80-28-68 0-124 56-124 124s56 124 124 124h200c72 0 132-60 132-132 0-70-56-128-126-128-6 0-12 0-18 2z" fill="#0b152a" opacity="0.75" />
+  </g>
+  <path d="M166 260c0-50 40-90 90-90 50 0 90 40 90 90s-40 90-90 90c-50 0-90-40-90-90z" fill="url(#logoCloud)" stroke="#52d7ff" stroke-width="10" />
+  <circle cx="256" cy="260" r="46" fill="#08162c" stroke="#41c3ff" stroke-width="12" />
+  <circle cx="256" cy="260" r="22" fill="#1ba6f2" />
+  <text x="50%" y="414" font-family="'Poppins', 'Segoe UI', sans-serif" font-weight="600" font-size="72" fill="#ffffff" text-anchor="middle">PapaData</text>
+</svg>
