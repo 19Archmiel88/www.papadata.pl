@@ -156,8 +156,7 @@ body.light-mode {
 }
 
 .logo span {
-  background: var(--pd-hover);
-  box-shadow: 0 0 25px rgba(73, 192, 255, 0.4);
+  color: var(--pd-primary);
 }
 
 .navbar a {
@@ -508,6 +507,9 @@ section {
   color: var(--pd-text-heading);
   margin-bottom: 2rem;
   color: var(--pd-secondary);
+  color: var(--pd-secondary);
+
+
 }
 .heading span {
   color: var(--pd-primary);
