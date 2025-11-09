@@ -1,35 +1,27 @@
-/* ============================================================
-   đźŚ PapaData â€” script.js (clean)
-   Wersja: 2025-11-02
-   Zakres: nawigacja, motyw, i18n, parallax, SW
-   ============================================================ */
-
-/* --------------------------------------------
-   0) SĹOWNIKI PL / EN
--------------------------------------------- */
+// Słownik
 const translations = {
   pl: {
-    "nav.home": "Strona gĹ‚Ăłwna",
-    "nav.services": "UsĹ‚ugi",
+    "nav.home": "Strona główna",
+    "nav.services": "Usługi",
     "nav.tech": "Technologie",
     "nav.integration": "Integracje",
     "nav.contact": "Kontakt",
 
     "home.subtitle": "Bezpieczna chmura",
-    "home.text": "PapaData to zespĂłĹ‚ ekspertĂłw chmurowych specjalizujÄ…cych siÄ™ w automatyzacji analityki danych w Google Cloud Platform. Tworzymy i utrzymujemy platformy danych dla firm e-commerce, SaaS i agencji marketingowych.",
-    "btn.more": "Dowiedz siÄ™ wiÄ™cej",
+    "home.text": "PapaData to zespół ekspertów chmurowych specjalizujących się w automatyzacji analityki danych w Google Cloud Platform. Tworzymy i utrzymujemy platformy danych dla firm e-commerce, SaaS i agencji marketingowych.",
+    "btn.more": "Dowiedz się więcej",
 
     "gallery.title": "Wizualizacje PapaData",
-    "gallery.lead": "Poznaj nasze motywy graficzne obrazujÄ…ce integracje danych, automatyzacjÄ™ raportowania oraz migracje do Google Cloud.",
+    "gallery.lead": "Poznaj nasze motywy graficzne obrazujące integracje danych, automatyzację raportowania oraz migracje do Google Cloud.",
     "gallery.cards.analytics": "Analityka chmurowa i dashboard KPI",
     "gallery.cards.ads": "Automatyzacja kampanii Google Ads",
     "gallery.cards.research": "Badania danych i wizualizacje",
     "gallery.cards.migration": "Migracja hurtowni danych do GCP",
     "gallery.cards.logo": "Podpis i identyfikacja wizualna PapaData",
 
-    "services.title": "Nasze usĹ‚ugi",
+    "services.title": "Nasze usługi",
     "services.etl.title": "Automatyzacja ETL bez kodu",
-    "services.etl.text": "ĹÄ…czymy ĹşrĂłdĹ‚a i przetwarzamy dane do BigQuery bez pisania kodu.",
+    "services.etl.text": "Łączymy źródła i przetwarzamy dane do BigQuery bez pisania kodu.",
     "services.analytics.title": "Analityka w Looker Studio",
     "services.analytics.text": "Gotowe dashboardy KPI oparte o modele danych w BigQuery.",
     "services.integration.title": "Integracja z GCP",
@@ -37,32 +29,32 @@ const translations = {
 
     "tech.title": "Technologie",
     "tech.etl.title": "Technologia - opis.",
-    "tech.etl.text": "RĂłĹĽne technologie - opis.",
+    "tech.etl.text": "Różne technologie - opis.",
     "tech.analytics.title": "Technologia - opis.",
-    "tech.analytics.text": "RĂłĹĽne technologie - opis.",
+    "tech.analytics.text": "Różne technologie - opis.",
     "tech.integration.title": "Technologia - opis.",
-    "tech.integration.text": "RĂłĹĽne technologie - opis.",
+    "tech.integration.text": "Różne technologie - opis.",
 
     "integration.title": "Integracje",
     "integration.etl.title": "Automatyzacja ETL do BigQuery",
-    "integration.etl.text": "Laczymy e-commerce, CRM i marketing z BigQuery z wykorzystaniem zarzadzanych konektorow.",
+    "integration.etl.text": "Łączymy e-commerce, CRM i marketing z BigQuery z wykorzystaniem zarządzanych konektorów.",
     "integration.analytics.title": "Integracje BI i raportowe",
     "integration.analytics.text": "Synchronizujemy Looker Studio, Power BI i Data Studio na jednym modelu danych.",
-    "integration.integration.title": "Bezpieczne przeplywy operacyjne",
-    "integration.integration.text": "Laczymy ERP, systemy magazynowe i aplikacje SaaS z kontrola dostepu.",
+    "integration.integration.title": "Bezpieczne przepływy operacyjne",
+    "integration.integration.text": "Łączymy ERP, systemy magazynowe i aplikacje SaaS z kontrolą dostępu.",
 
-    "contact.title": "Skontaktuj siÄ™ z nami",
-    "contact.name": "ImiÄ™ i nazwisko",
+    "contact.title": "Skontaktuj się z nami",
+    "contact.name": "Imię i nazwisko",
     "contact.email": "Adres e-mail",
-    "contact.message": "Twoja wiadomoĹ›Ä‡",
-    "contact.send": "WyĹ›lij",
+    "contact.message": "Twoja wiadomość",
+    "contact.send": "Wyślij",
 
-    "footer.text": "Â© 2025 PapaData | Wszystkie prawa zastrzeĹĽone.",
-    "aria.menu": "OtwĂłrz menu",
+    "footer.text": "© 2025 PapaData | Wszystkie prawa zastrzeżone.",
+    "aria.menu": "Otwórz menu",
     "aria.menuClose": "Zamknij menu",
-    "aria.top": "WrĂłÄ‡ na gĂłrÄ™",
-    "aria.themeLight": "WĹ‚Ä…cz jasny motyw",
-    "aria.themeDark": "WĹ‚Ä…cz ciemny motyw"
+    "aria.top": "Wróć na górę",
+    "aria.themeLight": "Włącz jasny motyw",
+    "aria.themeDark": "Włącz ciemny motyw"
   },
   en: {
     "nav.home": "Home",
@@ -122,9 +114,7 @@ const translations = {
   }
 };
 
-/* --------------------------------------------
-   1) JÄZYK
--------------------------------------------- */
+// Język
 function detectLanguage() {
   const saved = localStorage.getItem("lang");
   if (saved === "pl" || saved === "en") return saved;
@@ -133,11 +123,7 @@ function detectLanguage() {
   } catch { return "en"; }
 }
 
-/* --------------------------------------------
-   2) START PO DOMContentLoaded
--------------------------------------------- */
 document.addEventListener('DOMContentLoaded', () => {
-  // Elementy
   const menuIcon   = document.querySelector('#menu-icon');
   const navbar     = document.querySelector('.navbar');
   const headerEl   = document.querySelector('.header');
@@ -145,12 +131,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const sections   = document.querySelectorAll('section');
   const navLinks   = document.querySelectorAll('header nav a');
   const themeToggle= document.querySelector('#theme-toggle');
-
-  // zapamiÄ™tanie oryginalnej pozycji .controls
   const controlsHomeParent = controlsEl ? controlsEl.parentElement : null;
   const controlsNextSibling = controlsEl ? controlsEl.nextElementSibling : null;
-
-  // pomocnicze
   const currentLang = () => localStorage.getItem('lang') || detectLanguage();
 
   function setMenuAria(isOpen) {
@@ -162,9 +144,8 @@ document.addEventListener('DOMContentLoaded', () => {
     menuIcon.setAttribute('aria-label', label);
   }
 
-  /* ---------- 2a) MENU MOBILNE + STICKY + ACTIVE LINK ---------- */
+  // MENU MOBILNE + STICKY + ACTIVE LINK
   if (menuIcon && navbar) {
-    // stan poczÄ…tkowy dla ARIA/ikony
     menuIcon.classList.add('bx', 'bx-menu');
     setMenuAria(false);
 
@@ -194,7 +175,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     headerEl && headerEl.classList.toggle('sticky', top > 100);
 
-    // auto-zamykanie menu podczas scrolla
     if (navbar && navbar.classList.contains('active')) {
       navbar.classList.remove('active');
       menuIcon?.classList.remove('bx-x');
@@ -205,7 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  /* ---------- 2b) RELOKACJA .controls NA WÄ„SKICH EKRANACH ---------- */
+  // RELOKACJA .controls NA WĄSKICH EKRANACH
   function ensureNavControls() {
     if (!navbar) return null;
     let slot = navbar.querySelector('.nav-controls');
@@ -244,7 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
     relocateControls();
   });
 
-  /* ---------- 2c) PARALLAX (wyĹ‚Ä…cz na touch/reduced-motion) ---------- */
+  // PARALLAX (wyłąćz na touch/reduced-motion)
   (function initParallax() {
     const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
     const coarse = window.matchMedia?.('(pointer: coarse)').matches;
@@ -270,8 +250,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   })();
 
-  /* ---------- 2d) MOTYW (data-theme + color-scheme) ---------- */
-  const THEME_KEY = 'theme';      // ujednolicone
+// MOTYW (data-theme + color-scheme)
+  const THEME_KEY = 'theme';      
   const THEME_LOCK_KEY = 'themeLocked';
 
   function systemPrefersLight() {
@@ -302,14 +282,14 @@ document.addEventListener('DOMContentLoaded', () => {
         icon.classList.toggle('bx-sun', isLight);
         icon.classList.toggle('bx-moon', !isLight);
       }
-      // aria-pressed = true traktujemy jako "wĹ‚Ä…czony dark"
       themeToggle.setAttribute('aria-pressed', isLight ? 'false' : 'true');
       const dict = translations[currentLang()];
       const labelKey = isLight ? 'aria.themeDark' : 'aria.themeLight';
       if (dict?.[labelKey]) themeToggle.setAttribute('aria-label', dict[labelKey]);
     }
   }
-  // inicjalizacja i nasĹ‚uch
+
+  // inicjalizacja i nasłuch
   applyTheme(getInitialTheme(), { persist: false });
   themeToggle?.addEventListener('click', () => {
     const next = (localStorage.getItem(THEME_KEY) || getInitialTheme()) === 'light' ? 'dark' : 'light';
@@ -321,7 +301,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!locked) applyTheme(getInitialTheme(), { persist: false });
   });
 
-  /* ---------- 2e) I18N ---------- */
+// I18N
   function applyLanguage(lang) {
     document.documentElement.lang = lang;
     localStorage.setItem('lang', lang);
@@ -336,7 +316,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (dict[key] != null) el.setAttribute('placeholder', dict[key]);
     });
 
-    // fallback dla linkĂłw w nav
+    // fallback dla linków w nav
     const navMap = {
       "nav.home": ['header .navbar a[href="#home"]'],
       "nav.services": ['header .navbar a[href="#uslugi"]', 'header .navbar a[href="#services"]'],
@@ -353,7 +333,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // stan przyciskĂłw jÄ™zyka
+    // stan przyciskówi i języka
     const btnPL = document.getElementById('lang-pl');
     const btnEN = document.getElementById('lang-en');
     if (btnPL && btnEN) {
@@ -403,7 +383,6 @@ document.addEventListener('DOMContentLoaded', () => {
       controls.appendChild(enBtn);
     }
 
-    // odĹ›wieĹĽ nasĹ‚uchy
     [plBtn, enBtn].forEach(btn => {
       const clone = btn.cloneNode(true);
       btn.replaceWith(clone);
@@ -413,8 +392,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   ensureLangButtons();
   applyLanguage(detectLanguage());
-
-  /* ---------- 2f) SCROLL REVEAL (opcjonalnie, jeĹ›li biblioteka obecna) ---------- */
+// SCROLL REVEAL (opcjonalnie, jeżeli biblioteka obecna)
   if (typeof ScrollReveal !== "undefined") {
     ScrollReveal({ reset: true, distance: '80px', duration: 2000, delay: 200 });
     ScrollReveal().reveal('.home-content, .heading', { origin: 'top' });
@@ -423,7 +401,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ScrollReveal().reveal('.home-content h3, .home-content p, .about-content', { origin: 'right' });
   }
 
-  /* ---------- 2g) SERVICE WORKER (jedna rejestracja) ---------- */
+// SERVICE WORKER (jedna rejestracja)
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('sw-v7.js', { scope: './' })
