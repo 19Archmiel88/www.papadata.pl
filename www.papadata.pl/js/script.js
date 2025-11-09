@@ -1,27 +1,27 @@
-/* ============================================================
-   🌐 PapaData — script.js (clean)
+﻿/* ============================================================
+   đźŚ PapaData â€” script.js (clean)
    Wersja: 2025-11-02
    Zakres: nawigacja, motyw, i18n, parallax, SW
    ============================================================ */
 
 /* --------------------------------------------
-   0) SŁOWNIKI PL / EN
+   0) SĹOWNIKI PL / EN
 -------------------------------------------- */
 const translations = {
   pl: {
-    "nav.home": "Strona główna",
-    "nav.services": "Usługi",
+    "nav.home": "Strona gĹ‚Ăłwna",
+    "nav.services": "UsĹ‚ugi",
     "nav.tech": "Technologie",
     "nav.integration": "Integracje",
     "nav.contact": "Kontakt",
 
     "home.subtitle": "Bezpieczna chmura",
-    "home.text": "PapaData to zespół ekspertów chmurowych specjalizujących się w automatyzacji analityki danych w Google Cloud Platform. Tworzymy i utrzymujemy platformy danych dla firm e-commerce, SaaS i agencji marketingowych.",
-    "btn.more": "Dowiedz się więcej",
+    "home.text": "PapaData to zespĂłĹ‚ ekspertĂłw chmurowych specjalizujÄ…cych siÄ™ w automatyzacji analityki danych w Google Cloud Platform. Tworzymy i utrzymujemy platformy danych dla firm e-commerce, SaaS i agencji marketingowych.",
+    "btn.more": "Dowiedz siÄ™ wiÄ™cej",
 
-    "services.title": "Nasze usługi",
+    "services.title": "Nasze usĹ‚ugi",
     "services.etl.title": "Automatyzacja ETL bez kodu",
-    "services.etl.text": "Łączymy źródła i przetwarzamy dane do BigQuery bez pisania kodu.",
+    "services.etl.text": "ĹÄ…czymy ĹşrĂłdĹ‚a i przetwarzamy dane do BigQuery bez pisania kodu.",
     "services.analytics.title": "Analityka w Looker Studio",
     "services.analytics.text": "Gotowe dashboardy KPI oparte o modele danych w BigQuery.",
     "services.integration.title": "Integracja z GCP",
@@ -29,11 +29,11 @@ const translations = {
 
     "tech.title": "Technologie",
     "tech.etl.title": "Technologia - opis.",
-    "tech.etl.text": "Różne technologie - opis.",
+    "tech.etl.text": "RĂłĹĽne technologie - opis.",
     "tech.analytics.title": "Technologia - opis.",
-    "tech.analytics.text": "Różne technologie - opis.",
+    "tech.analytics.text": "RĂłĹĽne technologie - opis.",
     "tech.integration.title": "Technologia - opis.",
-    "tech.integration.text": "Różne technologie - opis.",
+    "tech.integration.text": "RĂłĹĽne technologie - opis.",
 
     "integration.title": "Integracje",
     "integration.etl.title": "Automatyzacja ETL do BigQuery",
@@ -43,18 +43,18 @@ const translations = {
     "integration.integration.title": "Bezpieczne przeplywy operacyjne",
     "integration.integration.text": "Laczymy ERP, systemy magazynowe i aplikacje SaaS z kontrola dostepu.",
 
-    "contact.title": "Skontaktuj się z nami",
-    "contact.name": "Imię i nazwisko",
+    "contact.title": "Skontaktuj siÄ™ z nami",
+    "contact.name": "ImiÄ™ i nazwisko",
     "contact.email": "Adres e-mail",
-    "contact.message": "Twoja wiadomość",
-    "contact.send": "Wyślij",
+    "contact.message": "Twoja wiadomoĹ›Ä‡",
+    "contact.send": "WyĹ›lij",
 
-    "footer.text": "© 2025 PapaData | Wszystkie prawa zastrzeżone.",
-    "aria.menu": "Otwórz menu",
+    "footer.text": "Â© 2025 PapaData | Wszystkie prawa zastrzeĹĽone.",
+    "aria.menu": "OtwĂłrz menu",
     "aria.menuClose": "Zamknij menu",
-    "aria.top": "Wróć na górę",
-    "aria.themeLight": "Włącz jasny motyw",
-    "aria.themeDark": "Włącz ciemny motyw"
+    "aria.top": "WrĂłÄ‡ na gĂłrÄ™",
+    "aria.themeLight": "WĹ‚Ä…cz jasny motyw",
+    "aria.themeDark": "WĹ‚Ä…cz ciemny motyw"
   },
   en: {
     "nav.home": "Home",
@@ -97,7 +97,7 @@ const translations = {
     "contact.message": "Your message",
     "contact.send": "Send",
 
-    "footer.text": "© 2025 PapaData | All rights reserved.",
+    "footer.text": "Â© 2025 PapaData | All rights reserved.",
     "aria.menu": "Open menu",
     "aria.menuClose": "Close menu",
     "aria.top": "Back to top",
@@ -107,7 +107,7 @@ const translations = {
 };
 
 /* --------------------------------------------
-   1) JĘZYK
+   1) JÄZYK
 -------------------------------------------- */
 function detectLanguage() {
   const saved = localStorage.getItem("lang");
@@ -130,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const navLinks   = document.querySelectorAll('header nav a');
   const themeToggle= document.querySelector('#theme-toggle');
 
-  // zapamiętanie oryginalnej pozycji .controls
+  // zapamiÄ™tanie oryginalnej pozycji .controls
   const controlsHomeParent = controlsEl ? controlsEl.parentElement : null;
   const controlsNextSibling = controlsEl ? controlsEl.nextElementSibling : null;
 
@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ---------- 2a) MENU MOBILNE + STICKY + ACTIVE LINK ---------- */
   if (menuIcon && navbar) {
-    // stan początkowy dla ARIA/ikony
+    // stan poczÄ…tkowy dla ARIA/ikony
     menuIcon.classList.add('bx', 'bx-menu');
     setMenuAria(false);
 
@@ -189,7 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  /* ---------- 2b) RELOKACJA .controls NA WĄSKICH EKRANACH ---------- */
+  /* ---------- 2b) RELOKACJA .controls NA WÄ„SKICH EKRANACH ---------- */
   function ensureNavControls() {
     if (!navbar) return null;
     let slot = navbar.querySelector('.nav-controls');
@@ -228,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
     relocateControls();
   });
 
-  /* ---------- 2c) PARALLAX (wyłącz na touch/reduced-motion) ---------- */
+  /* ---------- 2c) PARALLAX (wyĹ‚Ä…cz na touch/reduced-motion) ---------- */
   (function initParallax() {
     const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
     const coarse = window.matchMedia?.('(pointer: coarse)').matches;
@@ -286,14 +286,14 @@ document.addEventListener('DOMContentLoaded', () => {
         icon.classList.toggle('bx-sun', isLight);
         icon.classList.toggle('bx-moon', !isLight);
       }
-      // aria-pressed = true traktujemy jako "włączony dark"
+      // aria-pressed = true traktujemy jako "wĹ‚Ä…czony dark"
       themeToggle.setAttribute('aria-pressed', isLight ? 'false' : 'true');
       const dict = translations[currentLang()];
       const labelKey = isLight ? 'aria.themeDark' : 'aria.themeLight';
       if (dict?.[labelKey]) themeToggle.setAttribute('aria-label', dict[labelKey]);
     }
   }
-  // inicjalizacja i nasłuch
+  // inicjalizacja i nasĹ‚uch
   applyTheme(getInitialTheme(), { persist: false });
   themeToggle?.addEventListener('click', () => {
     const next = (localStorage.getItem(THEME_KEY) || getInitialTheme()) === 'light' ? 'dark' : 'light';
@@ -320,7 +320,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (dict[key] != null) el.setAttribute('placeholder', dict[key]);
     });
 
-    // fallback dla linków w nav
+    // fallback dla linkĂłw w nav
     const navMap = {
       "nav.home": ['header .navbar a[href="#home"]'],
       "nav.services": ['header .navbar a[href="#uslugi"]', 'header .navbar a[href="#services"]'],
@@ -337,7 +337,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // stan przycisków języka
+    // stan przyciskĂłw jÄ™zyka
     const btnPL = document.getElementById('lang-pl');
     const btnEN = document.getElementById('lang-en');
     if (btnPL && btnEN) {
@@ -387,7 +387,7 @@ document.addEventListener('DOMContentLoaded', () => {
       controls.appendChild(enBtn);
     }
 
-    // odśwież nasłuchy
+    // odĹ›wieĹĽ nasĹ‚uchy
     [plBtn, enBtn].forEach(btn => {
       const clone = btn.cloneNode(true);
       btn.replaceWith(clone);
@@ -398,7 +398,7 @@ document.addEventListener('DOMContentLoaded', () => {
   ensureLangButtons();
   applyLanguage(detectLanguage());
 
-  /* ---------- 2f) SCROLL REVEAL (opcjonalnie, jeśli biblioteka obecna) ---------- */
+  /* ---------- 2f) SCROLL REVEAL (opcjonalnie, jeĹ›li biblioteka obecna) ---------- */
   if (typeof ScrollReveal !== "undefined") {
     ScrollReveal({ reset: true, distance: '80px', duration: 2000, delay: 200 });
     ScrollReveal().reveal('.home-content, .heading', { origin: 'top' });
@@ -420,9 +420,10 @@ document.addEventListener('DOMContentLoaded', () => {
               }
             });
           });
-           console.log('✅ ServiceWorker registered:', reg.scope);
+           console.log('âś… ServiceWorker registered:', reg.scope);
         })
-      .catch(err => console.error('❌ SW register error:', err));
+      .catch(err => console.error('âťŚ SW register error:', err));
     });
   }
 });
+
