@@ -1,4 +1,4 @@
-﻿// sw-v7.js â€” PapaData SW (bez "body used" bĹ‚Ä™dĂłw)
+// sw-v7.js â€” PapaData SW (bez "body used" bĹ‚Ä™dĂłw)
 // Wersja: v7 â€” 2025-11-08
 
 const CACHE_NAME = 'papadata-cache-v7';
