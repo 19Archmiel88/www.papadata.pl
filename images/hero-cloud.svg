@@ -1,0 +1,89 @@
+<svg width="1400" height="900" viewBox="0 0 1400 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#050c17"/>
+      <stop offset="60%" stop-color="#070f1e"/>
+      <stop offset="100%" stop-color="#0a1024"/>
+    </linearGradient>
+    <linearGradient id="cloudStroke" x1="260" y1="120" x2="1180" y2="720" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#22d6ff"/>
+      <stop offset="50%" stop-color="#4a9fff"/>
+      <stop offset="100%" stop-color="#9f60ff"/>
+    </linearGradient>
+    <linearGradient id="linkGrad" x1="240" y1="220" x2="1120" y2="640" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#44d8ff"/>
+      <stop offset="100%" stop-color="#b469ff"/>
+    </linearGradient>
+    <radialGradient id="sphereGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#4de1ff"/>
+      <stop offset="55%" stop-color="#267afc"/>
+      <stop offset="100%" stop-color="#0a1b42"/>
+    </radialGradient>
+    <radialGradient id="nodeFill" cx="0" cy="0" r="1">
+      <stop offset="0%" stop-color="#8ffff9"/>
+      <stop offset="100%" stop-color="#3f8fff" stop-opacity="0.6"/>
+    </radialGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="25" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <clipPath id="sphereClip">
+      <circle cx="735" cy="420" r="135"/>
+    </clipPath>
+  </defs>
+  <rect width="1400" height="900" fill="url(#bgGrad)"/>
+  <g filter="url(#glow)">
+    <ellipse cx="715" cy="465" rx="330" ry="230" fill="rgba(34,148,255,0.08)"/>
+    <ellipse cx="750" cy="420" rx="210" ry="160" fill="rgba(111,111,242,0.12)"/>
+  </g>
+  <path d="M290,620c-95,0-172-77-172-172c0-79,55-146,129-166C257,171,344,89,449,89c75,0,141,42,173,104
+            c33-16,70-25,109-25c131,0,241,94,262,217c80,15,140,86,140,170c0,97-79,176-176,176H420" 
+        stroke="url(#cloudStroke)" stroke-width="10" stroke-linecap="round" fill="none"/>
+  <g stroke="url(#linkGrad)" stroke-width="3">
+    <line x1="320" y1="420" x2="460" y2="330"/>
+    <line x1="460" y1="330" x2="640" y2="300"/>
+    <line x1="640" y1="300" x2="800" y2="360"/>
+    <line x1="800" y1="360" x2="940" y2="460"/>
+    <line x1="940" y1="460" x2="1090" y2="570"/>
+    <line x1="940" y1="460" x2="950" y2="640"/>
+    <line x1="800" y1="360" x2="700" y2="540"/>
+    <line x1="640" y1="300" x2="520" y2="540"/>
+    <line x1="580" y1="430" x2="760" y2="410"/>
+    <line x1="520" y1="540" x2="360" y2="480"/>
+    <line x1="360" y1="480" x2="320" y2="420"/>
+    <line x1="760" y1="410" x2="920" y2="500"/>
+    <line x1="700" y1="540" x2="520" y2="540"/>
+    <line x1="700" y1="540" x2="900" y2="620"/>
+  </g>
+  <g fill="url(#nodeFill)">
+    <circle cx="320" cy="420" r="10"/>
+    <circle cx="360" cy="480" r="10"/>
+    <circle cx="460" cy="330" r="10"/>
+    <circle cx="520" cy="540" r="11"/>
+    <circle cx="580" cy="430" r="9"/>
+    <circle cx="640" cy="300" r="10"/>
+    <circle cx="700" cy="540" r="11"/>
+    <circle cx="760" cy="410" r="9"/>
+    <circle cx="800" cy="360" r="11"/>
+    <circle cx="920" cy="500" r="10"/>
+    <circle cx="940" cy="460" r="11"/>
+    <circle cx="950" cy="640" r="10"/>
+    <circle cx="1090" cy="570" r="10"/>
+    <circle cx="900" cy="620" r="10"/>
+  </g>
+  <g clip-path="#sphereClip">
+    <circle cx="735" cy="420" r="135" fill="url(#sphereGlow)"/>
+    <g stroke="#4dd3ff" stroke-opacity="0.4" stroke-width="2">
+      <path d="M600 430 Q 640 330 720 340 T 840 390"/>
+      <path d="M595 480 Q 660 520 740 500 T 860 520"/>
+      <path d="M680 320 Q 755 315 810 360"/>
+      <path d="M680 520 Q 720 430 780 470 T 850 550"/>
+      <path d="M610 360 Q 640 430 650 500"/>
+      <path d="M740 300 Q 760 360 780 420"/>
+    </g>
+  </g>
+  <circle cx="735" cy="420" r="135" stroke="rgba(255,255,255,0.08)" stroke-width="1.5" fill="none"/>
+</svg>

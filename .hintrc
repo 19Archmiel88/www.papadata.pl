@@ -1,8 +1,44 @@
 {
   "extends": [
-    "development"
+    "development",
+    "progressive-web-apps",
+    "accessibility"
+  ],
+  "connector": {
+    "name": "local"
+  },
+  "formatters": [
+    "summary"
   ],
   "hints": {
+    "meta-charset-utf-8": "error",
+    "meta-viewport": "error",
+
+    "manifest-exists": "error",
+    "manifest-is-valid": "error",
+    "manifest-app-name": "warning",
+
+    "apple-touch-icons": "off",
+
+    "content-type": "error",
+    "http-cache": "warning",
+    "http-compression": "warning",
+
+    "disown-opener": "error",
+    "x-content-type-options": "error",
+    "highest-available-document-mode": "off",
+    "x-ua-compatible": "off",
+
+    "sri": [
+      "default",
+      {
+        "baseline": "recommended",
+        "check": "all"
+      }
+    ],
+
+    "no-inline-styles": "off",
+
     "compat-api/html": [
       "default",
       {
@@ -11,21 +47,31 @@
         ]
       }
     ],
-    "no-inline-styles": "off",
+    "compat-api/css": [
+      "default",
+      {
+        "ignore": [
+          "color-mix()",
+          "backdrop-filter",
+          "aspect-ratio",
+          "position: sticky",
+          "scroll-behavior: smooth"
+        ]
+      }
+    ],
+
     "axe/name-role-value": [
       "default",
       {
         "link-name": "off"
       }
     ],
-    "compat-api/css": [
-      "default",
-      {
-        "ignore": [
-          "min-height: auto"
-        ]
-      }
-    ],
-    "apple-touch-icons": "off"
+    "axe/color-contrast": "default",
+    "axe/aria-allowed-attr": "default",
+    "axe/aria-allowed-role": "default",
+
+    "no-bom": "error",
+    "no-protocol-relative-urls": "error",
+    "button-type": "error"
   }
 }
