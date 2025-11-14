@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Animated PapaData logo.
+  A minimal network of nodes and connections with subtle pulsing
+  circles. The animation uses SMIL to keep the file self-contained
+  without external CSS. The main nodes pulse in size to suggest
+  activity, while the connecting lines maintain a cohesive data
+  network motif. Colors derive from the brand palette: blue and
+  cyan on a transparent background.
+-->
+<svg width="120" height="120" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PapaData animated logo">
+  <defs>
+    <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1BA6F2" />
+      <stop offset="100%" stop-color="#6F6FF2" />
+    </linearGradient>
+  </defs>
+  <!-- connecting lines -->
+  <line x1="50" y1="50" x2="20" y2="30" stroke="url(#grad)" stroke-width="2" />
+  <line x1="50" y1="50" x2="80" y2="40" stroke="url(#grad)" stroke-width="2" />
+  <line x1="50" y1="50" x2="60" y2="80" stroke="url(#grad)" stroke-width="2" />
+  <!-- outer nodes -->
+  <circle cx="20" cy="30" r="4" fill="#1BA6F2">
+    <animate attributeName="r" values="4;5;4" dur="3s" repeatCount="indefinite" />
+  </circle>
+  <circle cx="80" cy="40" r="5" fill="#6F6FF2">
+    <animate attributeName="r" values="5;6;5" dur="2.5s" repeatCount="indefinite" />
+  </circle>
+  <circle cx="60" cy="80" r="4.5" fill="#8EC5FC">
+    <animate attributeName="r" values="4.5;5.5;4.5" dur="3.5s" repeatCount="indefinite" />
+  </circle>
+  <!-- central node -->
+  <circle cx="50" cy="50" r="10" fill="url(#grad)" stroke="#FFFFFF" stroke-width="0.5">
+    <animate attributeName="r" values="10;12;10" dur="4s" repeatCount="indefinite" />
+  </circle>
+</svg>

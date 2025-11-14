@@ -267,7 +267,8 @@ html.nav-open, body.nav-open{ overflow:hidden; height:100%; }
   aspect-ratio: 980 / 640;
   left:50%;
   transform: translateX(calc(-50% + var(--parallaxX, 0px))) perspective(900px) rotateX(var(--tiltX, 0)) rotateY(var(--tiltY, 0));
-  background: center / contain no-repeat url("images/PapaData.png");
+  /* Use animated SVG instead of static PNG for hero logo */
+  background: center / contain no-repeat url("images/logo-animated.svg");
   opacity:.65; filter: drop-shadow(0 40px 80px rgba(0,0,0,.55));
   pointer-events:none; mix-blend-mode: screen; z-index:1;
 }
@@ -545,8 +546,6 @@ img{
 .bx{ line-height: 1; }
 /* ====== RESET / TOKENS / A11y / BASE – jak w poprzedniej wersji ====== */
 /* (zachowane Twoje kolory i layout; poniżej tylko dopisany blok SPLASH) */
-
-/* ...[tu wklej całą swoją ostatnią wersję pliku, którą Ci zwróciłem]... */
 
 /* =========================================================
    SPLASH (Logo overlay)
@@ -1093,4 +1092,95 @@ body::after{
   .tech-container,
   .integration-container { grid-template-columns: 1fr 1fr; gap: 1rem; }
   .services-box, .tech-box, .integration-box { min-height: 132px; }
+}
+
+/* ======= Custom motion and animations ======= */
+/* Motion background for hero */
+.hero-bg-motion {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 30% 30%, #1BA6F2, #0A0F1C 70%);
+  animation: gradientFlow 20s ease-in-out infinite alternate;
+  z-index: 0;
+}
+
+@keyframes gradientFlow {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+/* Hover microanimations for service and gallery cards */
+.services-box:hover,
+.visual-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 0 20px rgba(27, 166, 242, 0.3);
+  transition: all 0.3s ease;
+}
+
+/* Data flow section styles */
+.playground {
+  padding-top: var(--pd-section-pad-y);
+}
+.data-flow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.flow-step {
+  background: rgba(27,166,242,0.15);
+  border: 1px solid rgba(27,166,242,0.4);
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  color: #fff;
+  font-weight: 600;
+  position: relative;
+}
+
+.flow-arrow::after {
+  content: '→';
+  font-size: 1.5rem;
+  color: #1BA6F2;
+  animation: pulseArrow 2s infinite ease-in-out;
+}
+
+@keyframes pulseArrow {
+  0%, 100% { opacity: 0.4; transform: translateX(0); }
+  50% { opacity: 1; transform: translateX(5px); }
+}
+
+/* Data pulse separator for sections */
+section {
+  position: relative;
+}
+
+section::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #1BA6F2, transparent);
+  animation: pulseLine 4s infinite;
+}
+
+@keyframes pulseLine {
+  0%, 100% { opacity: 0.1; }
+  50% { opacity: 0.8; }
+}
+
+/* Light mode enhancements */
+[data-theme="light"] {
+  background-color: #F9FAFB;
+  color: #0A0F1C;
+}
+[data-theme="light"] .services-box {
+  background: #fff;
+  border-color: #e5e7eb;
 }

@@ -1,5 +1,10 @@
 /* =====================================================================
    PapaData – Service Worker v7 (offline + SWR + preload + fallbacks)
+   Enhanced for version 2025‑11‑14: caches new WebP assets, animated
+   logo, playground shortcut and light icon. Preloads key assets for
+   faster first paint and shows a custom offline page when HTML
+   navigation fails. The Service Worker updates immediately thanks to
+   skipWaiting() and cleans up old caches on activation.
    ===================================================================== */
 
 const SW_VERSION = 'v7';
@@ -7,48 +12,50 @@ const CACHE_PREFIX = 'papadata-cache';
 const CACHE_NAME = `${CACHE_PREFIX}-${SW_VERSION}`;
 const ORIGIN = self.location.origin;
 
-// uaktualniaj to pole przy deployu, żeby bustować zasoby
-const ASSET_VERSION = 'ppd-2025-11-13-1';
+// bump this on deploy to bust the cache
+const ASSET_VERSION = 'ppd-2025-11-14-1';
 
-/** Statyczne zasoby do pre-cache (same-origin). */
+/** Static assets to pre-cache (same-origin). */
 const ASSETS = [
   'index.html',
   `style.css?v=${ASSET_VERSION}`,
   `js/script.js?v=${ASSET_VERSION}`,
   `manifest.json?v=${ASSET_VERSION}`,
-  // core imagery
-  'images/PapaData.png',
-  'images/Grafika_1.png',
-  'images/Grafika_2.png',
-  'images/Grafika_3.png',
-  'images/Grafika_4.png',
-  'images/Grafika_5.png',
+  // core imagery (WebP)
+  'images/Grafika_1.webp',
+  'images/Grafika_2.webp',
+  'images/Grafika_3.webp',
+  'images/Grafika_4.webp',
+  'images/Grafika_5.webp',
+  'images/logo-animated.svg',
   // icons
   'images/icons/papadata-192.png',
   'images/icons/papadata-256.png',
   'images/icons/papadata-384.png',
   'images/icons/papadata-512.png',
   'images/icons/papadata-maskable.png',
+  'images/icons/papadata-light-512.png',
   'images/icons/shortcut-services.png',
   'images/icons/shortcut-integrations.png',
   'images/icons/shortcut-contact.png',
+  'images/icons/shortcut-playground.png',
   // screenshots (for PWA metadata)
   'images/screenshots/home-dark.png',
   'images/screenshots/services.png'
 ];
 
-/** Którym plikom wolno ignorować query przy dopasowaniu w cache. */
+/** Files that may ignore query strings when matching in cache. */
 const IGNORE_QUERY_FOR = new Set([
   '/style.css',
   '/js/script.js',
   '/manifest.json'
 ]);
 
-/** Minimalny placeholder SVG dla obrazów offline. */
+/** Minimal placeholder SVG for offline images. */
 const OFFLINE_IMG_SVG =
   `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='400' viewBox='0 0 600 400'><rect width='100%' height='100%' fill='%230A0F1C'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%231BA6F2' font-family='system-ui,Arial' font-size='18'>Offline image</text></svg>`;
 
-/** Prosty fallback HTML, gdy nie ma indexu. */
+/** Simple fallback HTML when index is unavailable. */
 function offlineHtml() {
   const html = `
 <!doctype html>
@@ -73,14 +80,13 @@ function offlineHtml() {
 
 /* ----------------------------- Utils ----------------------------- */
 
-/** Normalizacja żądania do klucza cache (ignorujemy query dla znanych plików). */
+/** Normalize request to a cache key (strip query for known files). */
 function cacheKeyFor(request) {
   try {
     const url = new URL(request.url);
-    if (url.origin !== ORIGIN) return request; // trzymamy tylko same-origin
-
+    if (url.origin !== ORIGIN) return request; // only cache same-origin
     if (IGNORE_QUERY_FOR.has(url.pathname)) {
-      // zbij query → klucz bez ?v=...
+      // drop query → key without ?v=...
       return new Request(url.origin + url.pathname, {
         method: request.method,
         headers: request.headers,
@@ -97,13 +103,12 @@ function cacheKeyFor(request) {
   return request;
 }
 
-/** Czy żądanie to nawigacja (HTML). */
+/** Whether the request is for navigation (HTML). */
 function isHtmlRequest(req) {
-  return req.mode === 'navigate' ||
-         (req.headers.get('accept') || '').includes('text/html');
+  return req.mode === 'navigate' || (req.headers.get('accept') || '').includes('text/html');
 }
 
-/** Szybkie sprawdzenie, czy to obraz. */
+/** Quick check if the request is for an image. */
 function isImageRequest(req) {
   const dest = req.destination;
   if (dest === 'image') return true;
@@ -120,7 +125,7 @@ self.addEventListener('install', (event) => {
       const cache = await caches.open(CACHE_NAME);
       await cache.addAll(ASSETS);
     } catch (e) {
-      // ciche – offline first install bez paniki
+      // silent – offline first install, no panic
     }
   })());
 });
@@ -129,7 +134,7 @@ self.addEventListener('install', (event) => {
 
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
-    // usuń stare cache z tym prefiksem
+    // remove old caches with this prefix
     const names = await caches.keys();
     await Promise.all(
       names.map((name) =>
@@ -138,12 +143,10 @@ self.addEventListener('activate', (event) => {
           : Promise.resolve()
       )
     );
-
-    // Włącz Navigation Preload, jeśli dostępne
+    // enable Navigation Preload when available
     if (self.registration.navigationPreload) {
       try { await self.registration.navigationPreload.enable(); } catch {}
     }
-
     await self.clients.claim();
   })());
 });
@@ -165,21 +168,18 @@ self.addEventListener('message', (event) => {
 
 self.addEventListener('fetch', (event) => {
   const req = event.request;
-
-  // tylko GET + same-origin obsługujemy; reszta leci do sieci
+  // only handle GET + same-origin; others go to network
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (url.origin !== ORIGIN) return;
-
-  // Nawigacje HTML – network-first z navigation preload i fallbackiem
+  // HTML navigations – network-first with navigation preload and fallback
   if (isHtmlRequest(req)) {
     event.respondWith((async () => {
       try {
-        // ucieczka: preload, gdy włączone
+        // use preload response if available
         const preload = await event.preloadResponse;
         const network = preload || await fetch(req, { cache: 'no-store' });
-
-        // zaktualizuj cache index.html w tle
+        // update cached index.html in background
         caches.open(CACHE_NAME)
           .then(c => c.put('index.html', network.clone()))
           .catch(() => {});
@@ -191,8 +191,7 @@ self.addEventListener('fetch', (event) => {
     })());
     return;
   }
-
-  // Statyki (CSS/JS/manifest) – stale-while-revalidate
+  // Static files (CSS/JS/manifest) – stale-while-revalidate
   if (IGNORE_QUERY_FOR.has(url.pathname) || url.pathname.endsWith('.css') || url.pathname.endsWith('.js') || url.pathname.endsWith('.json')) {
     event.respondWith((async () => {
       const key = cacheKeyFor(req);
@@ -202,21 +201,19 @@ self.addEventListener('fetch', (event) => {
         if (res && res.ok) cache.put(key, res.clone());
         return res;
       }).catch(() => null);
-
-      // zwróć szybko cache, a w tle aktualizuj
+      // return cache quickly, update in background
       return cached || (await fetchAndUpdate) || cached || new Response('', { status: 504 });
     })());
     return;
   }
-
-  // Obrazy – cache-first z rewalidacją i fallbackiem SVG
+  // Images – cache-first with revalidation and SVG fallback
   if (isImageRequest(req)) {
     event.respondWith((async () => {
       const key = cacheKeyFor(req);
       const cache = await caches.open(CACHE_NAME);
       const cached = await cache.match(key);
       if (cached) {
-        // rewalidacja w tle
+        // revalidate in background
         fetch(req).then((res) => {
           if (res && res.ok) cache.put(key, res.clone());
         }).catch(() => {});
@@ -232,8 +229,7 @@ self.addEventListener('fetch', (event) => {
     })());
     return;
   }
-
-  // Domyślnie – cache-first, a jak się nie uda: sieć, potem cache
+  // default – cache-first, network fallback
   event.respondWith((async () => {
     const key = cacheKeyFor(req);
     const cache = await caches.open(CACHE_NAME);
@@ -250,7 +246,7 @@ self.addEventListener('fetch', (event) => {
       if (res && res.ok) cache.put(key, res.clone());
       return res;
     } catch {
-      // ostatecznie: może coś w cache bez normalizacji?
+      // last resort: maybe match without normalization
       return (await cache.match(req)) || new Response('', { status: 504 });
     }
   })());

@@ -1,9 +1,17 @@
 /* =========================================================
-   PapaData – App script (i18n, theme, UX, splash, gallery)
-   Version: ppd-2025-11-12-1
+   PapaData – Enhanced App script (i18n, theme, UX, splash, gallery)
+   Version: ppd-2025-11-14-mod
+   ---------------------------------------------------------
+   This script builds upon the original PapaData client-side
+   behaviour, adding animated backgrounds, parallax effects
+   scoped to the hero section and a shorter splash screen
+   timeout.  The original translation dictionaries, theme
+   handling, navigation, gallery details and service worker
+   registration remain intact.  New functions
+   initGradientMotion() and initHeroParallax() introduce
+   subtle movement in the hero banner.  The splash screen
+   automatically closes after 1.5 seconds instead of 2.2 seconds.
    ========================================================= */
-
-document.documentElement.classList.add('has-js');
 
 /* ---------------------- I18N dictionary ---------------------- */
 const translations = {
@@ -15,7 +23,7 @@ const translations = {
     "nav.contact": "Kontakt",
 
     "home.subtitle": "Automatyzacja danych w Google Cloud",
-    "home.text": "Projektujemy i utrzymujemy platformy danych dla e-commerce, SaaS i agencji marketingowych. Dostarczamy infrastrukturę, modele KPI oraz automaty, które na bieżąco zasilają raporty i kampanie.",
+    "home.text": "Projektujemy i utrzymujemy platformy danych dla e‑commerce, SaaS i agencji marketingowych. Dostarczamy infrastrukturę, modele KPI oraz automaty, które na bieżąco zasilają raporty i kampanie.",
     "btn.more": "Poznaj ofertę",
 
     "gallery.title": "Jak działa PapaData",
@@ -30,7 +38,7 @@ const translations = {
     "gallery.detail.analytics.body": "Zautomatyzowaliśmy raportowanie sprzedaży, marketingu i logistyki, łącząc silosy danych w BigQuery z gotowymi modelami Looker Studio.",
     "gallery.detail.analytics.point1": "12 źródeł danych odświeżanych co 15 minut",
     "gallery.detail.analytics.point2": "Model semantyczny KPI z wersjonowaniem w Git",
-    "gallery.detail.analytics.point3": "Alerty SLA na Slacku i w e-mailu",
+    "gallery.detail.analytics.point3": "Alerty SLA na Slacku i w e‑mailu",
     "gallery.detail.ads.eyebrow": "Playbook · Performance",
     "gallery.detail.ads.title": "Feed produktowy w pełni sterowany danymi",
     "gallery.detail.ads.body": "Łączymy katalog, marże i dane o zapasach, by sterować stawkami oraz wykluczeniami w automatycznych kampaniach.",
@@ -76,7 +84,7 @@ const translations = {
 
     "integration.title": "Integracje",
     "integration.etl.title": "Automatyzacja ETL do BigQuery",
-    "integration.etl.text": "Łączymy e-commerce, CRM i marketing z BigQuery przy użyciu zarządzanych konektorów i własnych integracji.",
+    "integration.etl.text": "Łączymy e‑commerce, CRM i marketing z BigQuery przy użyciu zarządzanych konektorów i własnych integracji.",
     "integration.analytics.title": "Integracje BI i raportowe",
     "integration.analytics.text": "Synchronizujemy Looker Studio, Power BI i inne narzędzia BI na jednym, zaufanym modelu danych.",
     "integration.integration.title": "Bezpieczne przepływy operacyjne",
@@ -84,7 +92,7 @@ const translations = {
 
     "contact.title": "Skontaktuj się z nami",
     "contact.name": "Imię i nazwisko",
-    "contact.email": "Adres e-mail",
+    "contact.email": "Adres e‑mail",
     "contact.message": "Twoja wiadomość",
     "contact.send": "Wyślij",
 
@@ -104,7 +112,7 @@ const translations = {
     "nav.contact": "Contact",
 
     "home.subtitle": "Data automation on Google Cloud",
-    "home.text": "We design and run data platforms for e-commerce, SaaS companies and marketing agencies. Infrastructure, KPI models and automation that keeps reports and campaigns current.",
+    "home.text": "We design and run data platforms for e‑commerce, SaaS companies and marketing agencies. Infrastructure, KPI models and automation that keeps reports and campaigns current.",
     "btn.more": "Explore our services",
 
     "gallery.title": "How PapaData works",
@@ -121,7 +129,7 @@ const translations = {
     "gallery.detail.analytics.point2": "Semantic KPI model versioned in Git",
     "gallery.detail.analytics.point3": "SLA alerts delivered to Slack and email",
     "gallery.detail.ads.eyebrow": "Playbook · Performance",
-    "gallery.detail.ads.title": "Fully data-driven product feed",
+    "gallery.detail.ads.title": "Fully data‑driven product feed",
     "gallery.detail.ads.body": "We join catalogues, margins and stock levels to drive bidding and exclusions inside automated campaigns.",
     "gallery.detail.ads.point1": "Campaign segmentation by margin and SKU velocity",
     "gallery.detail.ads.point2": "Enable / pause ad groups directly from BigQuery",
@@ -133,25 +141,25 @@ const translations = {
     "gallery.detail.research.point2": "Experiment tracking and model versioning",
     "gallery.detail.research.point3": "Recommendation export to internal apps",
     "gallery.detail.migration.eyebrow": "Program · Lift & Shift",
-    "gallery.detail.migration.title": "Moving 5 TB of data with zero downtime",
+    "gallery.detail.migration.title": "Moving 5 TB of data with zero downtime",
     "gallery.detail.migration.body": "We migrate ETL jobs and BI reports to BigQuery while staying compliant with GDPR and SOC2.",
-    "gallery.detail.migration.point1": "Dual-run synchronisation for 4 weeks",
+    "gallery.detail.migration.point1": "Dual‑run synchronisation for 4 weeks",
     "gallery.detail.migration.point2": "IaC with Terraform + Cloud Build",
     "gallery.detail.migration.point3": "Full access audit and cost guards",
     "gallery.detail.identity.eyebrow": "Offering · Retainer",
-    "gallery.detail.identity.title": "On-demand data cloud crew",
+    "gallery.detail.identity.title": "On‑demand data cloud crew",
     "gallery.detail.identity.body": "Architects, data engineers and analysts delivering automation roadmaps without hiring overhead.",
     "gallery.detail.identity.point1": "24h SLA per request and Jira backlog",
-    "gallery.detail.identity.point2": "Hour bundles + outcome-based billing",
+    "gallery.detail.identity.point2": "Hour bundles + outcome‑based billing",
     "gallery.detail.identity.point3": "Knowledge transfer and Confluence docs",
     "gallery.detail.close": "Close panel",
     "gallery.detail.listLabel": "Key benefits",
 
     "services.title": "Our Services",
-    "services.etl.title": "No-Code ETL Automation",
+    "services.etl.title": "No‑Code ETL Automation",
     "services.etl.text": "We connect data sources and process data to BigQuery without writing code.",
     "services.analytics.title": "Analytics in Looker Studio",
-    "services.analytics.text": "Ready-to-use KPI dashboards built on BigQuery data models.",
+    "services.analytics.text": "Ready‑to‑use KPI dashboards built on BigQuery data models.",
     "services.integration.title": "Integration with GCP",
     "services.integration.text": "Secure infrastructure as code, Cloud Functions, and Scheduler.",
 
@@ -194,9 +202,9 @@ const THEME_LOCK_KEY = 'themeLocked';
 function matchesMedia(query){ try{ return !!window.matchMedia?.(query).matches }catch{ return false } }
 function systemPrefersLight(){ return matchesMedia('(prefers-color-scheme: light)') }
 function detectLanguage(){
-  const saved = localStorage.getItem("lang");
-  if (saved === "pl" || saved === "en") return saved;
-  try { return navigator.language?.startsWith("pl") ? "pl" : "en"; } catch { return "en"; }
+  const saved = localStorage.getItem('lang');
+  if (saved === 'pl' || saved === 'en') return saved;
+  try { return navigator.language?.startsWith('pl') ? 'pl' : 'en'; } catch { return 'en'; }
 }
 function getInitialTheme(){
   const saved = localStorage.getItem(THEME_KEY);
@@ -237,7 +245,6 @@ function applyLanguage(lang){
   document.documentElement.lang = lang;
   localStorage.setItem('lang', lang);
   const dict = translations[lang] || {};
-
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
     if (dict[key] != null) el.textContent = dict[key];
@@ -250,20 +257,18 @@ function applyLanguage(lang){
     const key = el.getAttribute('data-i18n-aria-label');
     if (dict[key] != null) el.setAttribute('aria-label', dict[key]);
   });
-
   // nav labels fallback
   const navMap = {
-    "nav.home": ['header .navbar a[href="#home"]'],
-    "nav.services": ['header .navbar a[href="#uslugi"]','header .navbar a[href="#services"]'],
-    "nav.tech": ['header .navbar a[href="#technologia"]','header .navbar a[href="#technology"]'],
-    "nav.integration": ['header .navbar a[href="#integracje"]','header .navbar a[href="#integrations"]'],
-    "nav.contact": ['header .navbar a[href="#contact"]','header .navbar a[href="#kontakt"]'],
+    'nav.home': ['header .navbar a[href="#home"]'],
+    'nav.services': ['header .navbar a[href="#uslugi"]','header .navbar a[href="#services"]'],
+    'nav.tech': ['header .navbar a[href="#technologia"]','header .navbar a[href="#technology"]'],
+    'nav.integration': ['header .navbar a[href="#integracje"]','header .navbar a[href="#integrations"]'],
+    'nav.contact': ['header .navbar a[href="#contact"]','header .navbar a[href="#kontakt"]'],
   };
   Object.keys(navMap).forEach(key => {
     const text = dict[key]; if (!text) return;
     for (const sel of navMap[key]){ const el = document.querySelector(sel); if (el){ el.textContent = text; break; } }
   });
-
   // buttons state
   const btnPL = document.getElementById('lang-pl');
   const btnEN = document.getElementById('lang-en');
@@ -274,7 +279,6 @@ function applyLanguage(lang){
     btnEN.setAttribute('aria-pressed', !isPL ? 'true' : 'false');
     btnPL.textContent = 'PL'; btnEN.textContent = 'EN';
   }
-
   setMenuAria(document.querySelector('.navbar')?.classList.contains('active'));
   const topLink = document.querySelector('.footer-iconTop a');
   if (topLink && dict['aria.top']) topLink.setAttribute('aria-label', dict['aria.top']);
@@ -308,29 +312,24 @@ function initParallax(){
   });
 }
 
-/* ---------------------- Splash (click-to-enter) ---------------------- */
+/* ---------------------- Splash (click‑to‑enter) ---------------------- */
 function initSplash(){
   const splash = document.getElementById('splash');
   if (!splash) return;
-
   const prefersReduced = matchesMedia('(prefers-reduced-motion: reduce)');
   const seen = sessionStorage.getItem('splash-seen') === '1';
   if (prefersReduced || seen){
     splash.remove();
     return;
   }
-
   const closeBtn = splash.querySelector('.splash__close');
   const content = splash.querySelector('.splash__content');
   let hasClosed = false;
   let autoTimer;
-
   document.documentElement.classList.add('splash-open');
   document.body.classList.add('splash-open');
-
-  // pokaż
+  // show
   requestAnimationFrame(() => splash.classList.add('is-visible'));
-
   function closeSplash(){
     if (hasClosed) return;
     hasClosed = true;
@@ -339,17 +338,16 @@ function initSplash(){
     document.documentElement.classList.remove('splash-open');
     document.body.classList.remove('splash-open');
     setTimeout(() => splash.remove(), 350);
-    sessionStorage.setItem('splash-seen', '1');
+    sessionStorage.setItem('splash-seen','1');
   }
-
   function handleKey(e){
     if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape'){
       e.preventDefault();
       closeSplash();
     }
   }
-
-  autoTimer = setTimeout(closeSplash, 2200);
+  // shorter auto‑close (1.5s instead of 2.2s)
+  autoTimer = setTimeout(closeSplash, 1500);
   splash.addEventListener('click', closeSplash);
   content?.addEventListener('click', (e) => e.stopPropagation());
   closeBtn?.addEventListener('click', (e) => { e.preventDefault(); closeSplash(); });
@@ -364,7 +362,6 @@ function initNav(){
   const controlsEl = document.querySelector('.controls');
   const sections = document.querySelectorAll('section');
   const navLinks = document.querySelectorAll('header nav a');
-
   // mobile toggle
   if (menuIcon && navbar){
     setMenuAria(false);
@@ -377,7 +374,6 @@ function initNav(){
       setMenuAria(isOpen);
     });
   }
-
   // relocate controls on narrow screens
   function ensureNavControls(){
     if (!navbar) return null;
@@ -401,15 +397,11 @@ function initNav(){
   relocateControls();
   window.addEventListener('resize', () => {
     if (window.innerWidth > 991 && navbar?.classList.contains('active')){
-      navbar.classList.remove('active');
-      document.body.classList.remove('nav-open');
-      document.documentElement.classList.remove('nav-open');
-      menuIcon?.classList.remove('bx-x'); menuIcon?.classList.add('bx-menu');
-      setMenuAria(false);
+      navbar.classList.remove('active'); document.body.classList.remove('nav-open'); document.documentElement.classList.remove('nav-open');
+      menuIcon?.classList.remove('bx-x'); menuIcon?.classList.add('bx-menu'); setMenuAria(false);
     }
     relocateControls();
   });
-
   // active link on scroll
   window.addEventListener('scroll', () => {
     const top = window.scrollY;
@@ -420,7 +412,7 @@ function initNav(){
       if (top >= offset && top < offset + height){
         navLinks.forEach(l => l.removeAttribute('aria-current'));
         const active = document.querySelector(`header nav a[href*="${id}"]`);
-        active?.setAttribute('aria-current', 'page');
+        active?.setAttribute('aria-current','page');
       }
     });
     headerEl?.classList.toggle('sticky', top > 100);
@@ -447,7 +439,6 @@ function ensureLangButtons(){
 function initGalleryDetails(){
   const gallery = document.querySelector('.visual-gallery');
   if (!gallery) return;
-
   const detail = gallery.querySelector('.visual-detail');
   const detailImg = detail?.querySelector('.visual-detail__img');
   const detailEyebrow = detail?.querySelector('#visual-detail-eyebrow');
@@ -458,14 +449,11 @@ function initGalleryDetails(){
   const overlay = detail?.querySelector('.visual-detail__overlay');
   const panel = detail?.querySelector('.visual-detail__panel');
   if (!detail || !panel || !detailList) return;
-
   const triggers = gallery.querySelectorAll('.visual-card__button');
   let activeButton = null;
   let escapeHandler = null;
   let trapHandler = null;
-
   const focusableSelector = 'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
-
   function syncText(target, source){
     if (!target || !source) return;
     target.textContent = source.textContent;
@@ -473,7 +461,6 @@ function initGalleryDetails(){
     if (key) target.setAttribute('data-i18n', key);
     else target.removeAttribute('data-i18n');
   }
-
   function spawnBurst(card, evt){
     if (matchesMedia('(prefers-reduced-motion: reduce)')) return;
     const rect = card.getBoundingClientRect();
@@ -486,7 +473,6 @@ function initGalleryDetails(){
     card.appendChild(burst);
     burst.addEventListener('animationend', () => burst.remove(), { once: true });
   }
-
   function trapFocus(event){
     if (event.key !== 'Tab') return;
     const focusable = Array.from(panel.querySelectorAll(focusableSelector))
@@ -501,30 +487,25 @@ function initGalleryDetails(){
       event.preventDefault(); first.focus();
     }
   }
-
   function closeDetail(){
     if (!detail.classList.contains('is-visible')) return;
     detail.classList.remove('is-visible');
     detail.dataset.state = 'hidden';
-    detail.setAttribute('aria-hidden', 'true');
+    detail.setAttribute('aria-hidden','true');
     document.documentElement.classList.remove('detail-open');
     document.body.classList.remove('detail-open');
     if (escapeHandler){ document.removeEventListener('keydown', escapeHandler); escapeHandler = null; }
     if (trapHandler){ panel.removeEventListener('keydown', trapHandler); trapHandler = null; }
-    setTimeout(() => {
-      if (detail.dataset.state === 'hidden') detail.setAttribute('hidden', '');
-    }, 250);
+    setTimeout(() => { if (detail.dataset.state === 'hidden') detail.setAttribute('hidden',''); }, 250);
     if (activeButton){
-      activeButton.setAttribute('aria-expanded', 'false');
+      activeButton.setAttribute('aria-expanded','false');
       activeButton.focus();
       activeButton = null;
     }
   }
-
   function openDetail(card, trigger, evt){
     const detailBlock = card?.querySelector('.visual-card__detail');
     if (!detailBlock || !detailImg) return;
-
     const eyebrow = detailBlock.querySelector('.visual-card__detail-eyebrow');
     const title = detailBlock.querySelector('.visual-card__detail-title');
     const body = detailBlock.querySelector('.visual-card__detail-body');
@@ -540,24 +521,21 @@ function initGalleryDetails(){
       if (key) li.setAttribute('data-i18n', key);
       detailList.appendChild(li);
     });
-
     const img = card.querySelector('img');
     if (img){
       detailImg.src = card.dataset.image || img.currentSrc || img.src;
       detailImg.alt = img.alt || '';
     }
-
     detail.removeAttribute('hidden');
     requestAnimationFrame(() => detail.classList.add('is-visible'));
     detail.dataset.state = 'visible';
-    detail.setAttribute('aria-hidden', 'false');
+    detail.setAttribute('aria-hidden','false');
     document.documentElement.classList.add('detail-open');
     document.body.classList.add('detail-open');
-    activeButton?.setAttribute('aria-expanded', 'false');
+    activeButton?.setAttribute('aria-expanded','false');
     activeButton = trigger;
-    trigger?.setAttribute('aria-expanded', 'true');
+    trigger?.setAttribute('aria-expanded','true');
     panel.focus();
-
     escapeHandler = (event) => {
       if (event.key === 'Escape'){ event.preventDefault(); closeDetail(); }
     };
@@ -566,18 +544,38 @@ function initGalleryDetails(){
     panel.addEventListener('keydown', trapHandler);
     spawnBurst(card, evt);
   }
-
   triggers.forEach(btn => {
     btn.addEventListener('click', (evt) => {
       const card = btn.closest('.visual-card');
       openDetail(card, btn, evt);
     });
   });
-
   closeBtn?.addEventListener('click', () => closeDetail());
   overlay?.addEventListener('click', () => closeDetail());
   detail.addEventListener('click', (evt) => {
     if (evt.target === detail) closeDetail();
+  });
+}
+
+/* ---------------------- Gradient motion ---------------------- */
+function initGradientMotion(){
+  const bg = document.querySelector('.hero-bg-motion');
+  if (!bg) return;
+  let pos = 0;
+  setInterval(() => {
+    pos += 0.5;
+    bg.style.backgroundPosition = `${pos}% 50%`;
+  }, 120);
+}
+
+/* ---------------------- Hero parallax ---------------------- */
+function initHeroParallax(){
+  const hero = document.querySelector('.home');
+  if (!hero) return;
+  hero.addEventListener('mousemove', e => {
+    const x = (e.clientX / window.innerWidth - 0.5) * 10;
+    const y = (e.clientY / window.innerHeight - 0.5) * 10;
+    hero.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`;
   });
 }
 
@@ -594,36 +592,34 @@ document.addEventListener('DOMContentLoaded', () => {
     const locked = localStorage.getItem(THEME_LOCK_KEY) === '1';
     if (!locked) applyTheme(getInitialTheme(), { persist:false });
   });
-
-  // lang
+  // language
   ensureLangButtons();
   applyLanguage(detectLanguage());
-
-  // nav + parallax + gallery + splash
+  // navigation and interactions
   initNav();
   initParallax();
   initGalleryDetails();
   initSplash();
-
-  // ScrollReveal (opcjonalne, jeśli podpięte na stronie)
-  if (typeof ScrollReveal !== "undefined") {
-    ScrollReveal({ reset: false, distance: '40px', duration: 900, delay: 120 });
-    ScrollReveal().reveal('.home-content, .heading', { origin: 'top' });
-    ScrollReveal().reveal('.visual-card, .services-box, .tech-box, .integration-box, .contact form', { origin: 'bottom' });
+  // new motions
+  initGradientMotion();
+  initHeroParallax();
+  // optional ScrollReveal if loaded on the page
+  if (typeof ScrollReveal !== 'undefined'){
+    ScrollReveal({ reset:false, distance:'40px', duration:900, delay:120 });
+    ScrollReveal().reveal('.home-content, .heading', { origin:'top' });
+    ScrollReveal().reveal('.visual-card, .services-box, .tech-box, .integration-box, .contact form', { origin:'bottom' });
   }
-
   // Service Worker
-  if ('serviceWorker' in navigator) {
+  if ('serviceWorker' in navigator){
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw-v7.js', { scope: './' })
+      navigator.serviceWorker.register('sw-v7.js', { scope:'./' })
         .then(reg => {
-          // aktualizacja w locie
-          if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+          if (reg.waiting) reg.waiting.postMessage({ type:'SKIP_WAITING' });
           reg.addEventListener('updatefound', () => {
             const sw = reg.installing;
             sw?.addEventListener('statechange', () => {
-              if (sw.state === 'installed' && navigator.serviceWorker.controller) {
-                console.log('SW: nowa wersja zainstalowana.');
+              if (sw.state === 'installed' && navigator.serviceWorker.controller){
+                console.log('SW: new version installed.');
               }
             });
           });
@@ -631,5 +627,13 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .catch(err => console.error('SW register error:', err));
     });
+  }
+
+  // Offline fallback message: if the page is loaded without network,
+  // replace the body with a simple notice. This provides a minimal
+  // feedback when the Service Worker cannot serve cached HTML. See
+  // sw-v7.js for more offline handling.
+  if (!navigator.onLine) {
+    document.body.innerHTML = '<h2>Tryb offline — demo danych PapaData</h2>';
   }
 });

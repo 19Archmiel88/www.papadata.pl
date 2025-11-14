@@ -1,108 +1,119 @@
-﻿{
-    "id":  "./",
-    "name":  "PapaData",
-    "short_name":  "PapaData",
-    "description":  "Automatyzacja analityki danych w Google Cloud Platform.",
-    "lang":  "pl",
-    "dir":  "ltr",
-    "start_url":  "./index.html?utm_source=pwa",
-    "scope":  "./",
-    "display":  "standalone",
-    "display_override":  [
-                             "standalone",
-                             "browser"
-                         ],
-    "background_color":  "#0A0F1C",
-    "theme_color":  "#1BA6F2",
-    "categories":  [
-                       "business",
-                       "productivity",
-                       "utilities"
-                   ],
-    "orientation":  "any",
-    "icons":  [
-                  {
-                      "src":  "images/icons/papadata-192.png",
-                      "sizes":  "192x192",
-                      "type":  "image/png",
-                      "purpose":  "any"
-                  },
-                  {
-                      "src":  "images/icons/papadata-256.png",
-                      "sizes":  "256x256",
-                      "type":  "image/png",
-                      "purpose":  "any"
-                  },
-                  {
-                      "src":  "images/icons/papadata-384.png",
-                      "sizes":  "384x384",
-                      "type":  "image/png",
-                      "purpose":  "any"
-                  },
-                  {
-                      "src":  "images/icons/papadata-512.png",
-                      "sizes":  "512x512",
-                      "type":  "image/png",
-                      "purpose":  "any"
-                  },
-                  {
-                      "src":  "images/icons/papadata-maskable.png",
-                      "sizes":  "512x512",
-                      "type":  "image/png",
-                      "purpose":  "maskable"
-                  }
-              ],
-    "shortcuts":  [
-                      {
-                          "name":  "Usługi",
-                          "short_name":  "Usługi",
-                          "url":  "./index.html#uslugi",
-                          "icons":  [
-                                        {
-                                            "src":  "images/icons/shortcut-services.png",
-                                            "sizes":  "96x96",
-                                            "type":  "image/png"
-                                        }
-                                    ]
-                      },
-                      {
-                          "name":  "Integracje",
-                          "short_name":  "Integracje",
-                          "url":  "./index.html#integracje",
-                          "icons":  [
-                                        {
-                                            "src":  "images/icons/shortcut-integrations.png",
-                                            "sizes":  "96x96",
-                                            "type":  "image/png"
-                                        }
-                                    ]
-                      },
-                      {
-                          "name":  "Kontakt",
-                          "short_name":  "Kontakt",
-                          "url":  "./index.html#contact",
-                          "icons":  [
-                                        {
-                                            "src":  "images/icons/shortcut-contact.png",
-                                            "sizes":  "96x96",
-                                            "type":  "image/png"
-                                        }
-                                    ]
-                      }
-                  ],
-    "screenshots":  [
-                        {
-                            "src":  "images/screenshots/home-dark.png",
-                            "sizes":  "1280x720",
-                            "type":  "image/png",
-                            "label":  "Home screen (Dark)"
-                        },
-                        {
-                            "src":  "images/screenshots/services.png",
-                            "sizes":  "1280x720",
-                            "type":  "image/png",
-                            "label":  "Services section"
-                        }
-                    ],
-    "prefer_related_applications":  false
+{
+  "id": "./",
+  "name": "PapaData",
+  "short_name": "PapaData",
+  "description": "Automatyzacja analityki danych w Google Cloud Platform.",
+  "lang": "pl",
+  "dir": "ltr",
+  "start_url": "./index.html?utm_source=pwa",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "browser"],
+  "background_color": "#0A0F1C",
+  "theme_color": "#1BA6F2",
+  "categories": ["business", "productivity", "utilities"],
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "images/icons/papadata-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "images/icons/papadata-256.png",
+      "sizes": "256x256",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "images/icons/papadata-384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "images/icons/papadata-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "images/icons/papadata-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "images/icons/papadata-light-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Usługi",
+      "short_name": "Usługi",
+      "url": "./index.html#uslugi",
+      "icons": [
+        {
+          "src": "images/icons/shortcut-services.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Integracje",
+      "short_name": "Integracje",
+      "url": "./index.html#integracje",
+      "icons": [
+        {
+          "src": "images/icons/shortcut-integrations.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Kontakt",
+      "short_name": "Kontakt",
+      "url": "./index.html#contact",
+      "icons": [
+        {
+          "src": "images/icons/shortcut-contact.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Playground",
+      "short_name": "Playground",
+      "url": "./index.html#playground",
+      "icons": [
+        {
+          "src": "images/icons/shortcut-playground.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "images/screenshots/home-dark.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "label": "Home screen (Dark)"
+    },
+    {
+      "src": "images/screenshots/services.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "label": "Services section"
+    }
+  ],
+  "prefer_related_applications": false
 }

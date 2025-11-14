@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pl" data-theme="dark">
 
 <head>
@@ -6,16 +6,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>PapaData | Cloud Analytics & Automation</title>
   <meta name="description"
-    content="PapaData to zespół ekspertów chmurowych specjalizujących się w automatyzacji analityki danych w Google Cloud Platform dla e-commerce, SaaS i agencji marketingowych." />
+    content="PapaData to zespół ekspertów chmurowych specjalizujących się w automatyzacji analityki danych w Google Cloud Platform dla e‑commerce, SaaS i agencji marketingowych." />
   <meta name="theme-color" content="#1BA6F2" />
   <meta name="color-scheme" content="dark light" />
 
   <!-- Favicons and PWA manifest -->
   <link rel="icon" type="image/png" href="images/icons/papadata-192.png" sizes="192x192" />
   <link rel="apple-touch-icon" href="images/icons/papadata-192.png" />
-  <link rel="manifest" href="manifest.json?v=ppd-2025-11-13-1" />
+  <link rel="manifest" href="manifest.json?v=ppd-2025-11-14-1" />
+
+  <!-- Preload main stylesheet and fonts for performance -->
+  <link rel="preload" href="style.css?v=ppd-2025-11-14-1" as="style">
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" as="style">
+
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="style.css?v=ppd-2025-11-13-1" />
+  <link rel="stylesheet" href="style.css?v=ppd-2025-11-14-1" />
   <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
 </head>
 
@@ -29,7 +34,8 @@
       <span aria-hidden="true">&times;</span>
     </button>
     <div class="splash__content" tabindex="-1">
-      <img src="images/PapaData.png" alt="Logo PapaData" class="splash__logo" width="980" height="640" />
+      <!-- Animated logo SVG instead of static PNG -->
+      <img src="images/logo-animated.svg" alt="Logo PapaData" class="splash__logo" width="980" height="640" />
       <h1 id="splash-title" class="splash__title">PapaData</h1>
       <p class="splash__hint">Kliknij, aby wejść</p>
     </div>
@@ -64,11 +70,13 @@
   <main id="main">
     <!-- Home -->
     <section class="home" id="home" aria-labelledby="home-title">
+      <!-- Motion background layer for hero -->
+      <div class="hero-bg-motion"></div>
       <div class="home-content">
         <h3 id="home-subtitle" data-i18n="home.subtitle">Automatyzacja danych w Google Cloud</h3>
         <h1 id="home-title">PapaData</h1>
         <p data-i18n="home.text">
-          Projektujemy i utrzymujemy platformy danych dla e-commerce, SaaS i agencji marketingowych. Dostarczamy
+          Projektujemy i utrzymujemy platformy danych dla e‑commerce, SaaS i agencji marketingowych. Dostarczamy
           infrastrukturę, modele KPI oraz automaty, które na bieżąco karmią raporty i kampanie.
         </p>
         <a href="#uslugi" class="btn" data-i18n="btn.more">Poznaj ofertę</a>
@@ -84,9 +92,9 @@
       </div>
 
       <div class="visual-gallery__grid" role="list">
-        <article class="visual-card" data-card-id="analytics" data-image="images/Grafika_4.png" role="listitem">
+        <article class="visual-card" data-card-id="analytics" data-image="images/Grafika_4.webp" role="listitem">
           <button type="button" class="visual-card__button" aria-expanded="false">
-            <img src="images/Grafika_4.png" alt="Chmura danych z wykresem oraz serwerami" loading="lazy"
+            <img src="images/Grafika_4.webp" alt="Chmura danych z wykresem oraz serwerami" loading="lazy"
               decoding="async" width="800" height="600" />
             <span class="visual-card__caption" data-i18n="gallery.cards.analytics">Analityka chmurowa i dashboard KPI</span>
           </button>
@@ -98,14 +106,14 @@
             <ul class="visual-card__detail-list">
               <li data-i18n="gallery.detail.analytics.point1">12 źródeł danych odświeżanych co 15 minut</li>
               <li data-i18n="gallery.detail.analytics.point2">Model semantyczny KPI z wersjonowaniem w Git</li>
-              <li data-i18n="gallery.detail.analytics.point3">Alerty SLA na Slacku i w e-mailu</li>
+              <li data-i18n="gallery.detail.analytics.point3">Alerty SLA na Slacku i w e‑mailu</li>
             </ul>
           </div>
         </article>
 
-        <article class="visual-card" data-card-id="ads" data-image="images/Grafika_3.png" role="listitem">
+        <article class="visual-card" data-card-id="ads" data-image="images/Grafika_3.webp" role="listitem">
           <button type="button" class="visual-card__button" aria-expanded="false">
-            <img src="images/Grafika_3.png" alt="Integracja Google Ads z chmurą i wzrostem" loading="lazy"
+            <img src="images/Grafika_3.webp" alt="Integracja Google Ads z chmurą i wzrostem" loading="lazy"
               decoding="async" width="800" height="600" />
             <span class="visual-card__caption" data-i18n="gallery.cards.ads">Automatyzacja kampanii Google Ads</span>
           </button>
@@ -122,9 +130,9 @@
           </div>
         </article>
 
-        <article class="visual-card" data-card-id="research" data-image="images/Grafika_1.png" role="listitem">
+        <article class="visual-card" data-card-id="research" data-image="images/Grafika_1.webp" role="listitem">
           <button type="button" class="visual-card__button" aria-expanded="false">
-            <img src="images/Grafika_1.png" alt="Analiza danych i wykres kolumnowy" loading="lazy" decoding="async"
+            <img src="images/Grafika_1.webp" alt="Analiza danych i wykres kolumnowy" loading="lazy" decoding="async"
               width="800" height="600" />
             <span class="visual-card__caption" data-i18n="gallery.cards.research">Badania danych i wizualizacje</span>
           </button>
@@ -141,14 +149,14 @@
           </div>
         </article>
 
-        <article class="visual-card" data-card-id="migration" data-image="images/Grafika_5.png" role="listitem">
+        <article class="visual-card" data-card-id="migration" data-image="images/Grafika_5.webp" role="listitem">
           <button type="button" class="visual-card__button" aria-expanded="false">
-            <img src="images/Grafika_5.png" alt="Migracja danych do Google Cloud" loading="lazy" decoding="async"
+            <img src="images/Grafika_5.webp" alt="Migracja danych do Google Cloud" loading="lazy" decoding="async"
               width="800" height="600" />
             <span class="visual-card__caption" data-i18n="gallery.cards.migration">Migracja hurtowni danych do GCP</span>
           </button>
           <div class="visual-card__detail" aria-hidden="true">
-            <p class="visual-card__detail-eyebrow" data-i18n="gallery.detail.migration.eyebrow">Program · Lift & Shift</p>
+            <p class="visual-card__detail-eyebrow" data-i18n="gallery.detail.migration.eyebrow">Program · Lift &amp; Shift</p>
             <h3 class="visual-card__detail-title" data-i18n="gallery.detail.migration.title">Przeniesienie 5 TB danych bez przestoju</h3>
             <p class="visual-card__detail-body" data-i18n="gallery.detail.migration.body">Automatycznie przepinamy procesy ETL oraz raporty BI do BigQuery,
               zachowując zgodność z RODO i SOC2.</p>
@@ -160,9 +168,9 @@
           </div>
         </article>
 
-        <article class="visual-card visual-card--logo" data-card-id="identity" data-image="images/Grafika_2.png" role="listitem">
+        <article class="visual-card visual-card--logo" data-card-id="identity" data-image="images/Grafika_2.webp" role="listitem">
           <button type="button" class="visual-card__button" aria-expanded="false">
-            <img src="images/Grafika_2.png" alt="Logo PapaData na tle chmury" loading="lazy" decoding="async" width="800"
+            <img src="images/Grafika_2.webp" alt="Logo PapaData na tle chmury" loading="lazy" decoding="async" width="800"
               height="600" />
             <span class="visual-card__caption" data-i18n="gallery.cards.logo">Podpis i identyfikacja wizualna PapaData</span>
           </button>
@@ -189,7 +197,7 @@
             <span aria-hidden="true">&times;</span>
           </button>
           <div class="visual-detail__media">
-            <img class="visual-detail__img" src="images/Grafika_4.png" alt="" loading="lazy" decoding="async" />
+            <img class="visual-detail__img" src="images/Grafika_4.webp" alt="" loading="lazy" decoding="async" />
           </div>
           <div class="visual-detail__content">
             <p id="visual-detail-eyebrow" class="visual-detail__eyebrow"></p>
@@ -208,21 +216,22 @@
       <h2 class="heading" id="services-title"><span data-i18n="services.title">Nasze usługi</span></h2>
 
       <div class="services-container">
-        <article class="services-box">
-          <i class="bx bx-data" aria-hidden="true"></i>
-          <h3 data-i18n="services.etl.title">Automatyzacja ETL bez kodu</h3>
+        <article class="services-box" aria-labelledby="services-etl">
+          <!-- Replace icons with illustrative WebP thumbnails -->
+          <img src="images/Grafika_3.webp" alt="" loading="lazy" decoding="async" width="96" height="72" />
+          <h3 id="services-etl" data-i18n="services.etl.title">Automatyzacja ETL bez kodu</h3>
           <p data-i18n="services.etl.text">Łączymy źródła i przetwarzamy dane do BigQuery bez pisania kodu.</p>
         </article>
 
-        <article class="services-box">
-          <i class="bx bxs-bar-chart-alt-2" aria-hidden="true"></i>
-          <h3 data-i18n="services.analytics.title">Analityka w Looker Studio</h3>
+        <article class="services-box" aria-labelledby="services-analytics">
+          <img src="images/Grafika_4.webp" alt="" loading="lazy" decoding="async" width="96" height="72" />
+          <h3 id="services-analytics" data-i18n="services.analytics.title">Analityka w Looker Studio</h3>
           <p data-i18n="services.analytics.text">Gotowe dashboardy KPI oparte o modele danych w BigQuery.</p>
         </article>
 
-        <article class="services-box">
-          <i class="bx bx-network-chart" aria-hidden="true"></i>
-          <h3 data-i18n="services.integration.title">Integracja z GCP</h3>
+        <article class="services-box" aria-labelledby="services-integration">
+          <img src="images/Grafika_5.webp" alt="" loading="lazy" decoding="async" width="96" height="72" />
+          <h3 id="services-integration" data-i18n="services.integration.title">Integracja z GCP</h3>
           <p data-i18n="services.integration.text">Bezpieczna infrastruktura jako kod, Cloud Functions i Scheduler.</p>
         </article>
       </div>
@@ -257,6 +266,23 @@
       </div>
     </section>
     <!-- /Technologie -->
+
+    <!-- Data Cloud Playground -->
+    <section id="playground" class="playground" aria-labelledby="playground-title">
+      <h2 id="playground-title">Data Cloud Playground</h2>
+      <p>Symulacja przepływu danych: CRM → BigQuery → Looker Studio → Kampanie Google Ads</p>
+      <div class="data-flow">
+        <div class="flow-step">CRM</div>
+        <div class="flow-arrow"></div>
+        <div class="flow-step">BigQuery</div>
+        <div class="flow-arrow"></div>
+        <div class="flow-step">Looker Studio</div>
+        <div class="flow-arrow"></div>
+        <div class="flow-step">Google Ads</div>
+      </div>
+    </section>
+    <!-- /Playground -->
+
     <!-- Integracje -->
     <section class="integration" id="integracje" aria-labelledby="integration-title">
       <h2 class="heading" id="integration-title"><span data-i18n="integration.title">Integracje</span></h2>
@@ -266,7 +292,7 @@
           <i class="bx bx-cloud-upload" aria-hidden="true"></i>
           <h3 data-i18n="integration.etl.title">Automatyzacja ETL do BigQuery</h3>
           <p data-i18n="integration.etl.text">
-            Łączymy e-commerce, CRM i marketing z BigQuery przy użyciu zarządzanych konektorów oraz naszych integracji.
+            Łączymy e‑commerce, CRM i marketing z BigQuery przy użyciu zarządzanych konektorów oraz naszych integracji.
           </p>
         </article>
 
@@ -276,12 +302,7 @@
           <p data-i18n="integration.analytics.text">
             Synchronizujemy Looker Studio, Power BI i inne narzędzia BI na jednym, zaufanym modelu danych.
           </p>
-        </article><section id="playground" class="playground">
-  <h2>Data Cloud Playground</h2>
-  <p>Symulacja przepływu danych: CRM → BigQuery → Looker Studio → Kampanie Google Ads</p
-  </div>
-</section>
-
+        </article>
 
         <article class="integration-box">
           <i class="bx bx-shield-quarter" aria-hidden="true"></i>
@@ -306,8 +327,8 @@
               data-i18n-placeholder="contact.name" autocomplete="name" required />
           </div>
           <div class="field">
-            <label class="sr-only" for="contact-email" data-i18n="contact.email.label">Adres e-mail</label>
-            <input id="contact-email" name="email" type="email" placeholder="Adres e-mail"
+            <label class="sr-only" for="contact-email" data-i18n="contact.email.label">Adres e‑mail</label>
+            <input id="contact-email" name="email" type="email" placeholder="Adres e‑mail"
               data-i18n-placeholder="contact.email" autocomplete="email" inputmode="email" required />
           </div>
         </div>
@@ -336,7 +357,7 @@
   <!-- /Footer -->
 
   <noscript>Ta strona najlepiej działa z włączoną obsługą JavaScript.</noscript>
-  <script defer src="js/script.js?v=ppd-2025-11-13-1"></script>
+  <script defer src="js/script.js?v=ppd-2025-11-14-1"></script>
 </body>
 
 </html>
