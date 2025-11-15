@@ -1,31 +1,35 @@
 /* =========================================================
-   PapaData – Enhanced App script (i18n, theme, UX, splash, gallery)
-   Version: ppd-2025-11-14-mod
+   PapaData – Frontend Upgrade (i18n, theme, UX, splash, gallery, playground)
+   Version: ppd-2025-11-14-upgraded
    ---------------------------------------------------------
-   This script builds upon the original PapaData client-side
-   behaviour, adding animated backgrounds, parallax effects
-   scoped to the hero section and a shorter splash screen
-   timeout.  The original translation dictionaries, theme
-   handling, navigation, gallery details and service worker
-   registration remain intact.  New functions
-   initGradientMotion() and initHeroParallax() introduce
-   subtle movement in the hero banner.  The splash screen
-   automatically closes after 1.5 seconds instead of 2.2 seconds.
+   This script extends the original PapaData client-side logic to
+   support interactive cards across services, technology and
+   integration sections, an interactive data playground, a click‑to‑enter
+   splash screen without an auto‑dismiss timer, and a richer
+   translation dictionary.  It preserves the existing parallax,
+   theme and language toggles, navigation handling and gallery
+   detail panel.  The detail panel has been generalised so that
+   any `.visual-card` can open it, regardless of which section it
+   belongs to.  New translation keys support the added cards
+   and labels, including a hint on the splash screen.
    ========================================================= */
 
 /* ---------------------- I18N dictionary ---------------------- */
 const translations = {
   pl: {
+    // Navigation
     "nav.home": "Strona główna",
     "nav.services": "Usługi",
     "nav.tech": "Technologie",
     "nav.integration": "Integracje",
     "nav.contact": "Kontakt",
 
+    // Home
     "home.subtitle": "Automatyzacja danych w Google Cloud",
     "home.text": "Projektujemy i utrzymujemy platformy danych dla e‑commerce, SaaS i agencji marketingowych. Dostarczamy infrastrukturę, modele KPI oraz automaty, które na bieżąco zasilają raporty i kampanie.",
     "btn.more": "Poznaj ofertę",
 
+    // Gallery
     "gallery.title": "Jak działa PapaData",
     "gallery.lead": "Pięć najczęstszych scenariuszy, które automatyzujemy w Google Cloud.",
     "gallery.cards.analytics": "Analityka chmurowa i dashboard KPI",
@@ -66,55 +70,119 @@ const translations = {
     "gallery.detail.close": "Zamknij panel",
     "gallery.detail.listLabel": "Najważniejsze korzyści",
 
+    // Services (interactive cards)
     "services.title": "Nasze usługi",
-    "services.etl.title": "Automatyzacja ETL bez kodu",
-    "services.etl.text": "Łączymy źródła i przetwarzamy dane do BigQuery bez pisania kodu.",
-    "services.analytics.title": "Analityka w Looker Studio",
-    "services.analytics.text": "Gotowe dashboardy KPI oparte o modele danych w BigQuery.",
-    "services.integration.title": "Integracja z GCP",
-    "services.integration.text": "Bezpieczna infrastruktura jako kod, Cloud Functions i Scheduler.",
+    "services.cards.etl": "Automatyzacja ETL bez kodu",
+    "services.detail.etl.eyebrow": "Oferta · ETL",
+    "services.detail.etl.title": "Bez kodu do BigQuery",
+    "services.detail.etl.body": "Łączymy źródła danych i przetwarzamy je do BigQuery w trybie bezkodowym.",
+    "services.detail.etl.point1": "Integracja CRM i e‑commerce",
+    "services.detail.etl.point2": "Przetwarzanie i normalizacja danych",
+    "services.detail.etl.point3": "Synchronizacja w czasie rzeczywistym",
+    "services.cards.analytics": "Analityka Looker Studio",
+    "services.detail.analytics.eyebrow": "Oferta · Analiza",
+    "services.detail.analytics.title": "Analityka KPI w Looker Studio",
+    "services.detail.analytics.body": "Budujemy modele danych i KPI, aby dostarczać interaktywne dashboardy w Looker Studio.",
+    "services.detail.analytics.point1": "KPI i modele semantyczne BigQuery",
+    "services.detail.analytics.point2": "Automatyczne odświeżanie i alerty",
+    "services.detail.analytics.point3": "Wizualizacje spersonalizowane",
+    "services.cards.integration": "Integracja z GCP",
+    "services.detail.integration.eyebrow": "Oferta · Integracja",
+    "services.detail.integration.title": "Bezpieczeństwo i integracja z GCP",
+    "services.detail.integration.body": "Tworzymy infrastrukturę jako kod i integrujemy usługi GCP z Twoimi systemami.",
+    "services.detail.integration.point1": "Terraform i Cloud Functions",
+    "services.detail.integration.point2": "Skalowanie i orkiestracja",
+    "services.detail.integration.point3": "Zarządzanie uprawnieniami i audyt",
 
-    "tech.title": "Technologie",
-    "tech.etl.title": "Infrastruktura jako kod",
-    "tech.etl.text": "Terraform, Cloud Build i moduły GCP pozwalają nam replikować środowiska i zarządzać dostępem z jednego repozytorium.",
-    "tech.analytics.title": "Modele danych i Looker",
-    "tech.analytics.text": "Budujemy schematy BigQuery, warstwę semantyczną LookML oraz dashboardy z kontrolą wersji.",
-    "tech.integration.title": "Automatyzacja i orkiestracja",
-    "tech.integration.text": "Cloud Functions, Workflows i Scheduler pilnują pipeline'ów ETL, synchronizacji ofert i alertów.",
+    // Technology (interactive cards)
+    "tech.title": "Technologia",
+    "tech.cards.etl": "Infrastruktura jako kod",
+    "tech.detail.etl.eyebrow": "Technologia · IaC",
+    "tech.detail.etl.title": "Terraform & Cloud Build",
+    "tech.detail.etl.body": "Automatyzujemy wdrożenia dzięki Terraform i Cloud Build, zapewniając spójne środowiska.",
+    "tech.detail.etl.point1": "Moduły i szablony GCP",
+    "tech.detail.etl.point2": "Pipeline CI/CD",
+    "tech.detail.etl.point3": "Śledzenie wersji i rollback",
+    "tech.cards.analytics": "Modele danych i Looker",
+    "tech.detail.analytics.eyebrow": "Technologia · Analiza",
+    "tech.detail.analytics.title": "Modele danych i LookML",
+    "tech.detail.analytics.body": "Projektujemy schematy BigQuery i semantyczną warstwę LookML dla precyzyjnych raportów.",
+    "tech.detail.analytics.point1": "Modelowanie miar i wymiarów",
+    "tech.detail.analytics.point2": "Repozytorium Git i testy",
+    "tech.detail.analytics.point3": "Personalizacja dashboardów",
+    "tech.cards.integration": "Automatyzacja i orkiestracja",
+    "tech.detail.integration.eyebrow": "Technologia · Orkiestracja",
+    "tech.detail.integration.title": "Functions, Workflows & Scheduler",
+    "tech.detail.integration.body": "Cloud Functions i Workflows sterują pipelines ETL, synchronizacją i alertami.",
+    "tech.detail.integration.point1": "Zarządzanie zależnościami",
+    "tech.detail.integration.point2": "Automatyczne skalowanie",
+    "tech.detail.integration.point3": "Raportowanie błędów i logowanie",
 
+    // Integrations (interactive cards)
     "integration.title": "Integracje",
-    "integration.etl.title": "Automatyzacja ETL do BigQuery",
-    "integration.etl.text": "Łączymy e‑commerce, CRM i marketing z BigQuery przy użyciu zarządzanych konektorów i własnych integracji.",
-    "integration.analytics.title": "Integracje BI i raportowe",
-    "integration.analytics.text": "Synchronizujemy Looker Studio, Power BI i inne narzędzia BI na jednym, zaufanym modelu danych.",
-    "integration.integration.title": "Bezpieczne przepływy operacyjne",
-    "integration.integration.text": "Automatyzujemy przepływy ERP, WMS i aplikacji SaaS z kontrolą dostępu i audytem.",
+    "integration.cards.etl": "ETL do BigQuery",
+    "integration.detail.etl.eyebrow": "Integracje · ETL",
+    "integration.detail.etl.title": "Automatyzacja ETL do BigQuery",
+    "integration.detail.etl.body": "Łączymy e‑commerce, CRM i marketing z BigQuery dzięki zarządzanym konektorom i własnym integracjom.",
+    "integration.detail.etl.point1": "Łatwe włączenie źródeł",
+    "integration.detail.etl.point2": "Mapowanie i harmonizacja danych",
+    "integration.detail.etl.point3": "Ustawienie harmonogramu i SLA",
+    "integration.cards.analytics": "Integracje BI",
+    "integration.detail.analytics.eyebrow": "Integracje · BI",
+    "integration.detail.analytics.title": "Raportowanie i BI",
+    "integration.detail.analytics.body": "Integrujemy Looker Studio, Power BI i inne narzędzia na jednej platformie danych.",
+    "integration.detail.analytics.point1": "Wspólne modele danych",
+    "integration.detail.analytics.point2": "Połączenia w czasie rzeczywistym",
+    "integration.detail.analytics.point3": "Zarządzanie dostępem i autoryzacja",
+    "integration.cards.integration": "Bezpieczne przepływy",
+    "integration.detail.integration.eyebrow": "Integracje · Operacyjne",
+    "integration.detail.integration.title": "Bezpieczne przepływy operacyjne",
+    "integration.detail.integration.body": "Automatyzujemy ERP, WMS i aplikacje SaaS z kontrolą dostępu i audytem.",
+    "integration.detail.integration.point1": "Integracja API i webhooków",
+    "integration.detail.integration.point2": "Monitorowanie i audyt zgodności",
+    "integration.detail.integration.point3": "Elastyczne reguły i workflow",
 
+    // Contact
     "contact.title": "Skontaktuj się z nami",
     "contact.name": "Imię i nazwisko",
     "contact.email": "Adres e‑mail",
     "contact.message": "Twoja wiadomość",
     "contact.send": "Wyślij",
+    "contact.name.label": "Imię i nazwisko",
+    "contact.email.label": "Adres e‑mail",
+    "contact.message.label": "Twoja wiadomość",
 
+    // Playground
+    "playground.description": "Symulacja przepływu danych: CRM → BigQuery → Looker Studio → Kampanie Google Ads",
+
+    // Footer
     "footer.text": "© 2025 PapaData | Wszystkie prawa zastrzeżone.",
+
+    // Aria labels
     "aria.menu": "Otwórz menu",
     "aria.menuClose": "Zamknij menu",
     "aria.top": "Wróć na górę",
     "aria.themeLight": "Włącz jasny motyw",
     "aria.themeDark": "Włącz ciemny motyw",
-    "splash.close": "Zamknij ekran powitalny"
+    "splash.close": "Zamknij ekran powitalny",
+
+    // Splash hint
+    "splash.hint": "Kliknij, aby wejść"
   },
   en: {
+    // Navigation
     "nav.home": "Home",
     "nav.services": "Services",
     "nav.tech": "Technology",
     "nav.integration": "Integrations",
     "nav.contact": "Contact",
 
+    // Home
     "home.subtitle": "Data automation on Google Cloud",
     "home.text": "We design and run data platforms for e‑commerce, SaaS companies and marketing agencies. Infrastructure, KPI models and automation that keeps reports and campaigns current.",
     "btn.more": "Explore our services",
 
+    // Gallery
     "gallery.title": "How PapaData works",
     "gallery.lead": "Five typical automation scenarios we deliver on Google Cloud.",
     "gallery.cards.analytics": "Cloud analytics & KPI dashboards",
@@ -155,43 +223,104 @@ const translations = {
     "gallery.detail.close": "Close panel",
     "gallery.detail.listLabel": "Key benefits",
 
+    // Services (interactive cards)
     "services.title": "Our Services",
-    "services.etl.title": "No‑Code ETL Automation",
-    "services.etl.text": "We connect data sources and process data to BigQuery without writing code.",
-    "services.analytics.title": "Analytics in Looker Studio",
-    "services.analytics.text": "Ready‑to‑use KPI dashboards built on BigQuery data models.",
-    "services.integration.title": "Integration with GCP",
-    "services.integration.text": "Secure infrastructure as code, Cloud Functions, and Scheduler.",
+    "services.cards.etl": "No‑Code ETL Automation",
+    "services.detail.etl.eyebrow": "Offering · ETL",
+    "services.detail.etl.title": "No‑code to BigQuery",
+    "services.detail.etl.body": "We connect data sources and load them into BigQuery without writing any code.",
+    "services.detail.etl.point1": "CRM and e‑commerce integration",
+    "services.detail.etl.point2": "Data processing and normalisation",
+    "services.detail.etl.point3": "Real‑time synchronisation",
+    "services.cards.analytics": "Looker Studio analytics",
+    "services.detail.analytics.eyebrow": "Offering · Analysis",
+    "services.detail.analytics.title": "KPI analytics in Looker Studio",
+    "services.detail.analytics.body": "We build data models and KPIs to deliver interactive dashboards in Looker Studio.",
+    "services.detail.analytics.point1": "KPI and semantic models in BigQuery",
+    "services.detail.analytics.point2": "Automatic refresh and alerts",
+    "services.detail.analytics.point3": "Personalised visualisations",
+    "services.cards.integration": "Integration with GCP",
+    "services.detail.integration.eyebrow": "Offering · Integration",
+    "services.detail.integration.title": "Secure GCP integration",
+    "services.detail.integration.body": "We build infrastructure as code and integrate GCP services with your systems.",
+    "services.detail.integration.point1": "Terraform and Cloud Functions",
+    "services.detail.integration.point2": "Scaling and orchestration",
+    "services.detail.integration.point3": "Access control and audit",
 
+    // Technology (interactive cards)
     "tech.title": "Technology",
-    "tech.etl.title": "Infrastructure as code",
-    "tech.etl.text": "Terraform, Cloud Build and reusable GCP modules let us replicate environments and manage access from one repo.",
-    "tech.analytics.title": "Data models & Looker",
-    "tech.analytics.text": "We craft BigQuery schemas, LookML semantic layers and dashboards with version control.",
-    "tech.integration.title": "Automation & orchestration",
-    "tech.integration.text": "Cloud Functions, Workflows and Scheduler keep ETL jobs, offer syncs and alerts on track.",
+    "tech.cards.etl": "Infrastructure as code",
+    "tech.detail.etl.eyebrow": "Technology · IaC",
+    "tech.detail.etl.title": "Terraform & Cloud Build",
+    "tech.detail.etl.body": "We automate deployments using Terraform and Cloud Build to ensure consistent environments.",
+    "tech.detail.etl.point1": "Reusable GCP modules and templates",
+    "tech.detail.etl.point2": "CI/CD pipelines",
+    "tech.detail.etl.point3": "Version tracking and rollback",
+    "tech.cards.analytics": "Data models & Looker",
+    "tech.detail.analytics.eyebrow": "Technology · Analysis",
+    "tech.detail.analytics.title": "Data models & LookML",
+    "tech.detail.analytics.body": "We design BigQuery schemas and a LookML semantic layer for precise reporting.",
+    "tech.detail.analytics.point1": "Measure and dimension modelling",
+    "tech.detail.analytics.point2": "Git repository and tests",
+    "tech.detail.analytics.point3": "Dashboard personalisation",
+    "tech.cards.integration": "Automation & orchestration",
+    "tech.detail.integration.eyebrow": "Technology · Orchestration",
+    "tech.detail.integration.title": "Functions, Workflows & Scheduler",
+    "tech.detail.integration.body": "Cloud Functions and Workflows steer ETL pipelines, synchronisation and alerts.",
+    "tech.detail.integration.point1": "Dependency management",
+    "tech.detail.integration.point2": "Automatic scaling",
+    "tech.detail.integration.point3": "Error reporting and logging",
 
+    // Integrations (interactive cards)
     "integration.title": "Integrations",
-    "integration.etl.title": "Automated ETL to BigQuery",
-    "integration.etl.text": "Connect commerce, CRM, and marketing sources to BigQuery with managed connectors and custom integrations.",
-    "integration.analytics.title": "BI & Reporting Integrations",
-    "integration.analytics.text": "Keep Looker Studio, Power BI, and other BI tools aligned on a single trusted data model.",
-    "integration.integration.title": "Secure Operational Workflows",
-    "integration.integration.text": "Automate ERP, warehouse, and SaaS processes with governed access and auditing.",
+    "integration.cards.etl": "Automated ETL to BigQuery",
+    "integration.detail.etl.eyebrow": "Integrations · ETL",
+    "integration.detail.etl.title": "Automated ETL to BigQuery",
+    "integration.detail.etl.body": "We connect e‑commerce, CRM and marketing to BigQuery using managed connectors and custom integrations.",
+    "integration.detail.etl.point1": "Easy source onboarding",
+    "integration.detail.etl.point2": "Data mapping and harmonisation",
+    "integration.detail.etl.point3": "Scheduling and SLA configuration",
+    "integration.cards.analytics": "BI integrations",
+    "integration.detail.analytics.eyebrow": "Integrations · BI",
+    "integration.detail.analytics.title": "Reporting & BI",
+    "integration.detail.analytics.body": "We integrate Looker Studio, Power BI and other tools on a single data platform.",
+    "integration.detail.analytics.point1": "Shared data models",
+    "integration.detail.analytics.point2": "Real‑time connections",
+    "integration.detail.analytics.point3": "Access management and authorisation",
+    "integration.cards.integration": "Secure workflows",
+    "integration.detail.integration.eyebrow": "Integrations · Operational",
+    "integration.detail.integration.title": "Secure operational workflows",
+    "integration.detail.integration.body": "We automate ERP, WMS and SaaS processes with governed access and auditing.",
+    "integration.detail.integration.point1": "API and webhook integrations",
+    "integration.detail.integration.point2": "Compliance monitoring and audit",
+    "integration.detail.integration.point3": "Flexible rules and workflows",
 
+    // Contact
     "contact.title": "Contact Us",
     "contact.name": "Full name",
     "contact.email": "Email address",
     "contact.message": "Your message",
     "contact.send": "Send",
+    "contact.name.label": "Full name",
+    "contact.email.label": "Email address",
+    "contact.message.label": "Your message",
 
+    // Playground
+    "playground.description": "Simulate the data flow: CRM → BigQuery → Looker Studio → Google Ads campaigns",
+
+    // Footer
     "footer.text": "© 2025 PapaData | All rights reserved.",
+
+    // Aria labels
     "aria.menu": "Open menu",
     "aria.menuClose": "Close menu",
     "aria.top": "Back to top",
     "aria.themeLight": "Enable light theme",
     "aria.themeDark": "Enable dark theme",
-    "splash.close": "Close intro screen"
+    "splash.close": "Close intro screen",
+
+    // Splash hint
+    "splash.hint": "Click to enter"
   }
 };
 
@@ -199,8 +328,8 @@ const translations = {
 const THEME_KEY = 'theme';
 const THEME_LOCK_KEY = 'themeLocked';
 
-function matchesMedia(query){ try{ return !!window.matchMedia?.(query).matches }catch{ return false } }
-function systemPrefersLight(){ return matchesMedia('(prefers-color-scheme: light)') }
+function matchesMedia(query){ try{ return !!window.matchMedia?.(query).matches }catch{ return false; } }
+function systemPrefersLight(){ return matchesMedia('(prefers-color-scheme: light)'); }
 function detectLanguage(){
   const saved = localStorage.getItem('lang');
   if (saved === 'pl' || saved === 'en') return saved;
@@ -257,7 +386,7 @@ function applyLanguage(lang){
     const key = el.getAttribute('data-i18n-aria-label');
     if (dict[key] != null) el.setAttribute('aria-label', dict[key]);
   });
-  // nav labels fallback
+  // nav labels fallback for anchors with id mismatches
   const navMap = {
     'nav.home': ['header .navbar a[href="#home"]'],
     'nav.services': ['header .navbar a[href="#uslugi"]','header .navbar a[href="#services"]'],
@@ -269,7 +398,7 @@ function applyLanguage(lang){
     const text = dict[key]; if (!text) return;
     for (const sel of navMap[key]){ const el = document.querySelector(sel); if (el){ el.textContent = text; break; } }
   });
-  // buttons state
+  // toggle language buttons state
   const btnPL = document.getElementById('lang-pl');
   const btnEN = document.getElementById('lang-en');
   if (btnPL && btnEN){
@@ -282,7 +411,7 @@ function applyLanguage(lang){
   setMenuAria(document.querySelector('.navbar')?.classList.contains('active'));
   const topLink = document.querySelector('.footer-iconTop a');
   if (topLink && dict['aria.top']) topLink.setAttribute('aria-label', dict['aria.top']);
-  // theme btn label
+  // theme toggle label
   const isLight = (localStorage.getItem('theme') || getInitialTheme()) === 'light';
   const labelKey = isLight ? 'aria.themeDark' : 'aria.themeLight';
   if (dict[labelKey]) document.getElementById('theme-toggle')?.setAttribute('aria-label', dict[labelKey]);
@@ -325,10 +454,11 @@ function initSplash(){
   const closeBtn = splash.querySelector('.splash__close');
   const content = splash.querySelector('.splash__content');
   let hasClosed = false;
-  let autoTimer;
+  // no auto‑close timer: splash remains until user clicks or presses a key
+  let autoTimer = null;
   document.documentElement.classList.add('splash-open');
   document.body.classList.add('splash-open');
-  // show
+  // show splash
   requestAnimationFrame(() => splash.classList.add('is-visible'));
   function closeSplash(){
     if (hasClosed) return;
@@ -341,13 +471,8 @@ function initSplash(){
     sessionStorage.setItem('splash-seen','1');
   }
   function handleKey(e){
-    if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape'){
-      e.preventDefault();
-      closeSplash();
-    }
+    if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape'){ e.preventDefault(); closeSplash(); }
   }
-  // shorter auto‑close (1.5s instead of 2.2s)
-  autoTimer = setTimeout(closeSplash, 1500);
   splash.addEventListener('click', closeSplash);
   content?.addEventListener('click', (e) => e.stopPropagation());
   closeBtn?.addEventListener('click', (e) => { e.preventDefault(); closeSplash(); });
@@ -402,7 +527,7 @@ function initNav(){
     }
     relocateControls();
   });
-  // active link on scroll
+  // update active link on scroll
   window.addEventListener('scroll', () => {
     const top = window.scrollY;
     sections.forEach(sec => {
@@ -435,21 +560,22 @@ function ensureLangButtons(){
   set('lang-pl','pl'); set('lang-en','en');
 }
 
-/* ---------------------- Visual gallery: detail panel ---------------------- */
+/* ---------------------- Visual card details ---------------------- */
 function initGalleryDetails(){
-  const gallery = document.querySelector('.visual-gallery');
-  if (!gallery) return;
-  const detail = gallery.querySelector('.visual-detail');
-  const detailImg = detail?.querySelector('.visual-detail__img');
-  const detailEyebrow = detail?.querySelector('#visual-detail-eyebrow');
-  const detailTitle = detail?.querySelector('#visual-detail-title');
-  const detailBody = detail?.querySelector('#visual-detail-body');
-  const detailList = detail?.querySelector('.visual-detail__tags');
-  const closeBtn = detail?.querySelector('.visual-detail__close');
-  const overlay = detail?.querySelector('.visual-detail__overlay');
-  const panel = detail?.querySelector('.visual-detail__panel');
-  if (!detail || !panel || !detailList) return;
-  const triggers = gallery.querySelectorAll('.visual-card__button');
+  // Use a single detail panel for all cards across sections
+  const detail = document.querySelector('.visual-detail');
+  if (!detail) return;
+  const detailImg = detail.querySelector('.visual-detail__img');
+  const detailEyebrow = detail.querySelector('#visual-detail-eyebrow');
+  const detailTitle = detail.querySelector('#visual-detail-title');
+  const detailBody = detail.querySelector('#visual-detail-body');
+  const detailList = detail.querySelector('.visual-detail__tags');
+  const closeBtn = detail.querySelector('.visual-detail__close');
+  const overlay = detail.querySelector('.visual-detail__overlay');
+  const panel = detail.querySelector('.visual-detail__panel');
+  if (!panel || !detailList) return;
+  // Select all triggers globally
+  const triggers = document.querySelectorAll('.visual-card__button');
   let activeButton = null;
   let escapeHandler = null;
   let trapHandler = null;
@@ -458,8 +584,7 @@ function initGalleryDetails(){
     if (!target || !source) return;
     target.textContent = source.textContent;
     const key = source.getAttribute('data-i18n');
-    if (key) target.setAttribute('data-i18n', key);
-    else target.removeAttribute('data-i18n');
+    if (key) target.setAttribute('data-i18n', key); else target.removeAttribute('data-i18n');
   }
   function spawnBurst(card, evt){
     if (matchesMedia('(prefers-reduced-motion: reduce)')) return;
@@ -480,12 +605,8 @@ function initGalleryDetails(){
     if (!focusable.length) return;
     const first = focusable[0];
     const last = focusable[focusable.length - 1];
-    if (event.shiftKey && document.activeElement === first){
-      event.preventDefault(); last.focus(); return;
-    }
-    if (!event.shiftKey && document.activeElement === last){
-      event.preventDefault(); first.focus();
-    }
+    if (event.shiftKey && document.activeElement === first){ event.preventDefault(); last.focus(); return; }
+    if (!event.shiftKey && document.activeElement === last){ event.preventDefault(); first.focus(); }
   }
   function closeDetail(){
     if (!detail.classList.contains('is-visible')) return;
@@ -497,11 +618,7 @@ function initGalleryDetails(){
     if (escapeHandler){ document.removeEventListener('keydown', escapeHandler); escapeHandler = null; }
     if (trapHandler){ panel.removeEventListener('keydown', trapHandler); trapHandler = null; }
     setTimeout(() => { if (detail.dataset.state === 'hidden') detail.setAttribute('hidden',''); }, 250);
-    if (activeButton){
-      activeButton.setAttribute('aria-expanded','false');
-      activeButton.focus();
-      activeButton = null;
-    }
+    if (activeButton){ activeButton.setAttribute('aria-expanded','false'); activeButton.focus(); activeButton = null; }
   }
   function openDetail(card, trigger, evt){
     const detailBlock = card?.querySelector('.visual-card__detail');
@@ -522,10 +639,7 @@ function initGalleryDetails(){
       detailList.appendChild(li);
     });
     const img = card.querySelector('img');
-    if (img){
-      detailImg.src = card.dataset.image || img.currentSrc || img.src;
-      detailImg.alt = img.alt || '';
-    }
+    if (img){ detailImg.src = card.dataset.image || img.currentSrc || img.src; detailImg.alt = img.alt || ''; }
     detail.removeAttribute('hidden');
     requestAnimationFrame(() => detail.classList.add('is-visible'));
     detail.dataset.state = 'visible';
@@ -536,9 +650,7 @@ function initGalleryDetails(){
     activeButton = trigger;
     trigger?.setAttribute('aria-expanded','true');
     panel.focus();
-    escapeHandler = (event) => {
-      if (event.key === 'Escape'){ event.preventDefault(); closeDetail(); }
-    };
+    escapeHandler = (event) => { if (event.key === 'Escape'){ event.preventDefault(); closeDetail(); } };
     document.addEventListener('keydown', escapeHandler);
     trapHandler = (event) => trapFocus(event);
     panel.addEventListener('keydown', trapHandler);
@@ -552,9 +664,7 @@ function initGalleryDetails(){
   });
   closeBtn?.addEventListener('click', () => closeDetail());
   overlay?.addEventListener('click', () => closeDetail());
-  detail.addEventListener('click', (evt) => {
-    if (evt.target === detail) closeDetail();
-  });
+  detail.addEventListener('click', (evt) => { if (evt.target === detail) closeDetail(); });
 }
 
 /* ---------------------- Gradient motion ---------------------- */
@@ -592,7 +702,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const locked = localStorage.getItem(THEME_LOCK_KEY) === '1';
     if (!locked) applyTheme(getInitialTheme(), { persist:false });
   });
-  // language
+  // language buttons and initial language
   ensureLangButtons();
   applyLanguage(detectLanguage());
   // navigation and interactions
@@ -600,16 +710,16 @@ document.addEventListener('DOMContentLoaded', () => {
   initParallax();
   initGalleryDetails();
   initSplash();
-  // new motions
+  // extra motions
   initGradientMotion();
   initHeroParallax();
-  // optional ScrollReveal if loaded on the page
+  // optional ScrollReveal if available on page
   if (typeof ScrollReveal !== 'undefined'){
     ScrollReveal({ reset:false, distance:'40px', duration:900, delay:120 });
     ScrollReveal().reveal('.home-content, .heading', { origin:'top' });
     ScrollReveal().reveal('.visual-card, .services-box, .tech-box, .integration-box, .contact form', { origin:'bottom' });
   }
-  // Service Worker
+  // register Service Worker
   if ('serviceWorker' in navigator){
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('sw-v7.js', { scope:'./' })
@@ -628,11 +738,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .catch(err => console.error('SW register error:', err));
     });
   }
-
-  // Offline fallback message: if the page is loaded without network,
-  // replace the body with a simple notice. This provides a minimal
-  // feedback when the Service Worker cannot serve cached HTML. See
-  // sw-v7.js for more offline handling.
+  // offline fallback message
   if (!navigator.onLine) {
     document.body.innerHTML = '<h2>Tryb offline — demo danych PapaData</h2>';
   }

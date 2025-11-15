@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pl" data-theme="dark">
 
 <head>
@@ -36,8 +36,8 @@
     <div class="splash__content" tabindex="-1">
       <!-- Animated logo SVG instead of static PNG -->
       <img src="images/logo-animated.svg" alt="Logo PapaData" class="splash__logo" width="980" height="640" />
-      <h1 id="splash-title" class="splash__title">PapaData</h1>
-      <p class="splash__hint">Kliknij, aby wejść</p>
+      <!-- The title is removed to allow only the animated cloud -->
+      <p class="splash__hint" data-i18n="splash.hint">Kliknij, aby wejść</p>
     </div>
   </div>
 
@@ -188,6 +188,7 @@
         </article>
       </div>
 
+      <!-- Detail panel is reused across all sections -->
       <div class="visual-detail" data-state="hidden" aria-hidden="true" hidden>
         <div class="visual-detail__overlay" role="presentation"></div>
         <section class="visual-detail__panel" role="dialog" aria-modal="true" aria-labelledby="visual-detail-title"
@@ -215,24 +216,60 @@
     <section class="services" id="uslugi" aria-labelledby="services-title">
       <h2 class="heading" id="services-title"><span data-i18n="services.title">Nasze usługi</span></h2>
 
-      <div class="services-container">
-        <article class="services-box" aria-labelledby="services-etl">
-          <!-- Replace icons with illustrative WebP thumbnails -->
-          <img src="images/Grafika_3.webp" alt="" loading="lazy" decoding="async" width="96" height="72" />
-          <h3 id="services-etl" data-i18n="services.etl.title">Automatyzacja ETL bez kodu</h3>
-          <p data-i18n="services.etl.text">Łączymy źródła i przetwarzamy dane do BigQuery bez pisania kodu.</p>
+      <!-- Each service is now a visual-card with interactive detail -->
+      <div class="services-container" role="list">
+        <article class="visual-card" data-card-id="services-etl" data-image="images/Grafika_3.webp" role="listitem">
+          <button type="button" class="visual-card__button" aria-expanded="false">
+            <img src="images/Grafika_3.webp" alt="Ilustracja automatyzacji ETL bez kodu" loading="lazy" decoding="async" width="800"
+              height="600" />
+            <span class="visual-card__caption" data-i18n="services.cards.etl">Automatyzacja ETL bez kodu</span>
+          </button>
+          <div class="visual-card__detail" aria-hidden="true">
+            <p class="visual-card__detail-eyebrow" data-i18n="services.detail.etl.eyebrow">Oferta · ETL</p>
+            <h3 class="visual-card__detail-title" data-i18n="services.detail.etl.title">Bez kodu do BigQuery</h3>
+            <p class="visual-card__detail-body" data-i18n="services.detail.etl.body">Łączymy źródła danych i przetwarzamy je do BigQuery w trybie bezkodowym.</p>
+            <ul class="visual-card__detail-list">
+              <li data-i18n="services.detail.etl.point1">Integracja CRM i e‑commerce</li>
+              <li data-i18n="services.detail.etl.point2">Przetwarzanie i normalizacja danych</li>
+              <li data-i18n="services.detail.etl.point3">Synchronizacja w czasie rzeczywistym</li>
+            </ul>
+          </div>
         </article>
 
-        <article class="services-box" aria-labelledby="services-analytics">
-          <img src="images/Grafika_4.webp" alt="" loading="lazy" decoding="async" width="96" height="72" />
-          <h3 id="services-analytics" data-i18n="services.analytics.title">Analityka w Looker Studio</h3>
-          <p data-i18n="services.analytics.text">Gotowe dashboardy KPI oparte o modele danych w BigQuery.</p>
+        <article class="visual-card" data-card-id="services-analytics" data-image="images/Grafika_4.webp" role="listitem">
+          <button type="button" class="visual-card__button" aria-expanded="false">
+            <img src="images/Grafika_4.webp" alt="Ilustracja analityki w Looker Studio" loading="lazy" decoding="async" width="800"
+              height="600" />
+            <span class="visual-card__caption" data-i18n="services.cards.analytics">Analityka Looker Studio</span>
+          </button>
+          <div class="visual-card__detail" aria-hidden="true">
+            <p class="visual-card__detail-eyebrow" data-i18n="services.detail.analytics.eyebrow">Oferta · Analiza</p>
+            <h3 class="visual-card__detail-title" data-i18n="services.detail.analytics.title">Analityka KPI w Looker Studio</h3>
+            <p class="visual-card__detail-body" data-i18n="services.detail.analytics.body">Budujemy modele danych i KPI, aby dostarczać interaktywne dashboardy w Looker Studio.</p>
+            <ul class="visual-card__detail-list">
+              <li data-i18n="services.detail.analytics.point1">KPI i modele semantyczne BigQuery</li>
+              <li data-i18n="services.detail.analytics.point2">Automatyczne odświeżanie i alerty</li>
+              <li data-i18n="services.detail.analytics.point3">Wizualizacje spersonalizowane</li>
+            </ul>
+          </div>
         </article>
 
-        <article class="services-box" aria-labelledby="services-integration">
-          <img src="images/Grafika_5.webp" alt="" loading="lazy" decoding="async" width="96" height="72" />
-          <h3 id="services-integration" data-i18n="services.integration.title">Integracja z GCP</h3>
-          <p data-i18n="services.integration.text">Bezpieczna infrastruktura jako kod, Cloud Functions i Scheduler.</p>
+        <article class="visual-card" data-card-id="services-integration" data-image="images/Grafika_5.webp" role="listitem">
+          <button type="button" class="visual-card__button" aria-expanded="false">
+            <img src="images/Grafika_5.webp" alt="Ilustracja integracji z GCP" loading="lazy" decoding="async" width="800"
+              height="600" />
+            <span class="visual-card__caption" data-i18n="services.cards.integration">Integracja z GCP</span>
+          </button>
+          <div class="visual-card__detail" aria-hidden="true">
+            <p class="visual-card__detail-eyebrow" data-i18n="services.detail.integration.eyebrow">Oferta · Integracja</p>
+            <h3 class="visual-card__detail-title" data-i18n="services.detail.integration.title">Bezpieczeństwo i integracja z GCP</h3>
+            <p class="visual-card__detail-body" data-i18n="services.detail.integration.body">Tworzymy infrastrukturę jako kod i integrujemy usługi GCP z Twoimi systemami.</p>
+            <ul class="visual-card__detail-list">
+              <li data-i18n="services.detail.integration.point1">Terraform i Cloud Functions</li>
+              <li data-i18n="services.detail.integration.point2">Skalowanie i orkiestracja</li>
+              <li data-i18n="services.detail.integration.point3">Zarządzanie uprawnieniami i audyt</li>
+            </ul>
+          </div>
         </article>
       </div>
     </section>
@@ -242,26 +279,59 @@
     <section class="tech" id="technologia" aria-labelledby="tech-title">
       <h2 class="heading" id="tech-title"><span data-i18n="tech.title">Technologia</span></h2>
 
-      <div class="tech-container">
-        <article class="tech-box">
-          <i class="bx bx-data" aria-hidden="true"></i>
-          <h3 data-i18n="tech.etl.title">Infrastruktura jako kod</h3>
-          <p data-i18n="tech.etl.text">Terraform, Cloud Build i moduły GCP pozwalają nam replikować środowiska oraz
-            zarządzać dostępem z jednego repozytorium.</p>
+      <div class="tech-container" role="list">
+        <article class="visual-card" data-card-id="tech-etl" data-image="images/Grafika_5.webp" role="listitem">
+          <button type="button" class="visual-card__button" aria-expanded="false">
+            <img src="images/Grafika_5.webp" alt="Ilustracja infrastruktury jako kod" loading="lazy" decoding="async" width="800"
+              height="600" />
+            <span class="visual-card__caption" data-i18n="tech.cards.etl">Infrastruktura jako kod</span>
+          </button>
+          <div class="visual-card__detail" aria-hidden="true">
+            <p class="visual-card__detail-eyebrow" data-i18n="tech.detail.etl.eyebrow">Technologia · IaC</p>
+            <h3 class="visual-card__detail-title" data-i18n="tech.detail.etl.title">Terraform &amp; Cloud Build</h3>
+            <p class="visual-card__detail-body" data-i18n="tech.detail.etl.body">Automatyzujemy wdrożenia dzięki Terraform i Cloud Build, zapewniając spójne środowiska.</p>
+            <ul class="visual-card__detail-list">
+              <li data-i18n="tech.detail.etl.point1">Moduły i szablony GCP</li>
+              <li data-i18n="tech.detail.etl.point2">Pipeline CI/CD</li>
+              <li data-i18n="tech.detail.etl.point3">Śledzenie wersji i rollback</li>
+            </ul>
+          </div>
         </article>
 
-        <article class="tech-box">
-          <i class="bx bxs-bar-chart-alt-2" aria-hidden="true"></i>
-          <h3 data-i18n="tech.analytics.title">Modele danych &amp; Looker</h3>
-          <p data-i18n="tech.analytics.text">Budujemy schematy BigQuery, warstwę semantyczną LookML i dashboardy z
-            kontrolą wersji.</p>
+        <article class="visual-card" data-card-id="tech-analytics" data-image="images/Grafika_1.webp" role="listitem">
+          <button type="button" class="visual-card__button" aria-expanded="false">
+            <img src="images/Grafika_1.webp" alt="Ilustracja modeli danych i Lookera" loading="lazy" decoding="async" width="800"
+              height="600" />
+            <span class="visual-card__caption" data-i18n="tech.cards.analytics">Modele danych i Looker</span>
+          </button>
+          <div class="visual-card__detail" aria-hidden="true">
+            <p class="visual-card__detail-eyebrow" data-i18n="tech.detail.analytics.eyebrow">Technologia · Analiza</p>
+            <h3 class="visual-card__detail-title" data-i18n="tech.detail.analytics.title">Modele danych i LookML</h3>
+            <p class="visual-card__detail-body" data-i18n="tech.detail.analytics.body">Projektujemy schematy BigQuery i semantyczną warstwę LookML dla precyzyjnych raportów.</p>
+            <ul class="visual-card__detail-list">
+              <li data-i18n="tech.detail.analytics.point1">Modelowanie miar i wymiarów</li>
+              <li data-i18n="tech.detail.analytics.point2">Repozytorium Git i testy</li>
+              <li data-i18n="tech.detail.analytics.point3">Personalizacja dashboardów</li>
+            </ul>
+          </div>
         </article>
 
-        <article class="tech-box">
-          <i class="bx bx-network-chart" aria-hidden="true"></i>
-          <h3 data-i18n="tech.integration.title">Automatyzacja i orkiestracja</h3>
-          <p data-i18n="tech.integration.text">Cloud Functions, Workflows i Scheduler pilnują pipeline'ów ETL,
-            synchronizacji ofert i alertów.</p>
+        <article class="visual-card" data-card-id="tech-integration" data-image="images/Grafika_3.webp" role="listitem">
+          <button type="button" class="visual-card__button" aria-expanded="false">
+            <img src="images/Grafika_3.webp" alt="Ilustracja automatyzacji i orkiestracji" loading="lazy" decoding="async" width="800"
+              height="600" />
+            <span class="visual-card__caption" data-i18n="tech.cards.integration">Automatyzacja i orkiestracja</span>
+          </button>
+          <div class="visual-card__detail" aria-hidden="true">
+            <p class="visual-card__detail-eyebrow" data-i18n="tech.detail.integration.eyebrow">Technologia · Orkiestracja</p>
+            <h3 class="visual-card__detail-title" data-i18n="tech.detail.integration.title">Functions, Workflows &amp; Scheduler</h3>
+            <p class="visual-card__detail-body" data-i18n="tech.detail.integration.body">Cloud Functions i Workflows sterują pipelines ETL, synchronizacją i alertami.</p>
+            <ul class="visual-card__detail-list">
+              <li data-i18n="tech.detail.integration.point1">Zarządzanie zależnościami</li>
+              <li data-i18n="tech.detail.integration.point2">Automatyczne skalowanie</li>
+              <li data-i18n="tech.detail.integration.point3">Raportowanie błędów i logowanie</li>
+            </ul>
+          </div>
         </article>
       </div>
     </section>
@@ -270,46 +340,76 @@
     <!-- Data Cloud Playground -->
     <section id="playground" class="playground" aria-labelledby="playground-title">
       <h2 id="playground-title">Data Cloud Playground</h2>
-      <p>Symulacja przepływu danych: CRM → BigQuery → Looker Studio → Kampanie Google Ads</p>
-      <div class="data-flow">
-        <div class="flow-step">CRM</div>
-        <div class="flow-arrow"></div>
-        <div class="flow-step">BigQuery</div>
-        <div class="flow-arrow"></div>
-        <div class="flow-step">Looker Studio</div>
-        <div class="flow-arrow"></div>
-        <div class="flow-step">Google Ads</div>
+      <p data-i18n="playground.description">Symulacja przepływu danych: CRM → BigQuery → Looker Studio → Kampanie Google Ads</p>
+      <div class="playground-steps" aria-label="Etapy symulacji danych">
+        <button type="button" class="playground-step" data-step="crm">CRM</button>
+        <span class="playground-connector" aria-hidden="true"></span>
+        <div class="playground-step" data-step="bigquery" hidden>BigQuery</div>
+        <span class="playground-connector" aria-hidden="true"></span>
+        <div class="playground-step" data-step="looker" hidden>Looker Studio</div>
+        <span class="playground-connector" aria-hidden="true"></span>
+        <div class="playground-step" data-step="ads" hidden>Google Ads</div>
       </div>
     </section>
     <!-- /Playground -->
-
+     
     <!-- Integracje -->
     <section class="integration" id="integracje" aria-labelledby="integration-title">
       <h2 class="heading" id="integration-title"><span data-i18n="integration.title">Integracje</span></h2>
 
-      <div class="integration-container">
-        <article class="integration-box">
-          <i class="bx bx-cloud-upload" aria-hidden="true"></i>
-          <h3 data-i18n="integration.etl.title">Automatyzacja ETL do BigQuery</h3>
-          <p data-i18n="integration.etl.text">
-            Łączymy e‑commerce, CRM i marketing z BigQuery przy użyciu zarządzanych konektorów oraz naszych integracji.
-          </p>
+      <div class="integration-container" role="list">
+        <article class="visual-card" data-card-id="integration-etl" data-image="images/Grafika_3.webp" role="listitem">
+          <button type="button" class="visual-card__button" aria-expanded="false">
+            <img src="images/Grafika_3.webp" alt="Ilustracja ETL do BigQuery" loading="lazy" decoding="async" width="800"
+              height="600" />
+            <span class="visual-card__caption" data-i18n="integration.cards.etl">ETL do BigQuery</span>
+          </button>
+          <div class="visual-card__detail" aria-hidden="true">
+            <p class="visual-card__detail-eyebrow" data-i18n="integration.detail.etl.eyebrow">Integracje · ETL</p>
+            <h3 class="visual-card__detail-title" data-i18n="integration.detail.etl.title">Automatyzacja ETL do BigQuery</h3>
+            <p class="visual-card__detail-body" data-i18n="integration.detail.etl.body">Łączymy e‑commerce, CRM i marketing z BigQuery dzięki zarządzanym konektorom i własnym integracjom.</p>
+            <ul class="visual-card__detail-list">
+              <li data-i18n="integration.detail.etl.point1">Łatwe włączenie źródeł</li>
+              <li data-i18n="integration.detail.etl.point2">Mapowanie i harmonizacja danych</li>
+              <li data-i18n="integration.detail.etl.point3">Ustawienie harmonogramu i SLA</li>
+            </ul>
+          </div>
         </article>
 
-        <article class="integration-box">
-          <i class="bx bx-analyse" aria-hidden="true"></i>
-          <h3 data-i18n="integration.analytics.title">Integracje BI i raportowe</h3>
-          <p data-i18n="integration.analytics.text">
-            Synchronizujemy Looker Studio, Power BI i inne narzędzia BI na jednym, zaufanym modelu danych.
-          </p>
+        <article class="visual-card" data-card-id="integration-analytics" data-image="images/Grafika_1.webp" role="listitem">
+          <button type="button" class="visual-card__button" aria-expanded="false">
+            <img src="images/Grafika_1.webp" alt="Ilustracja integracji BI i raportowych" loading="lazy" decoding="async" width="800"
+              height="600" />
+            <span class="visual-card__caption" data-i18n="integration.cards.analytics">Integracje BI</span>
+          </button>
+          <div class="visual-card__detail" aria-hidden="true">
+            <p class="visual-card__detail-eyebrow" data-i18n="integration.detail.analytics.eyebrow">Integracje · BI</p>
+            <h3 class="visual-card__detail-title" data-i18n="integration.detail.analytics.title">Raportowanie i BI</h3>
+            <p class="visual-card__detail-body" data-i18n="integration.detail.analytics.body">Integrujemy Looker Studio, Power BI i inne narzędzia na jednej platformie danych.</p>
+            <ul class="visual-card__detail-list">
+              <li data-i18n="integration.detail.analytics.point1">Wspólne modele danych</li>
+              <li data-i18n="integration.detail.analytics.point2">Połączenia w czasie rzeczywistym</li>
+              <li data-i18n="integration.detail.analytics.point3">Zarządzanie dostępem i autoryzacja</li>
+            </ul>
+          </div>
         </article>
 
-        <article class="integration-box">
-          <i class="bx bx-shield-quarter" aria-hidden="true"></i>
-          <h3 data-i18n="integration.integration.title">Bezpieczne przepływy operacyjne</h3>
-          <p data-i18n="integration.integration.text">
-            Automatyzujemy przepływy ERP, WMS i aplikacji SaaS z kontrolą dostępu i audytem.
-          </p>
+        <article class="visual-card" data-card-id="integration-integration" data-image="images/Grafika_5.webp" role="listitem">
+          <button type="button" class="visual-card__button" aria-expanded="false">
+            <img src="images/Grafika_5.webp" alt="Ilustracja bezpiecznych przepływów operacyjnych" loading="lazy" decoding="async" width="800"
+              height="600" />
+            <span class="visual-card__caption" data-i18n="integration.cards.integration">Bezpieczne przepływy</span>
+          </button>
+          <div class="visual-card__detail" aria-hidden="true">
+            <p class="visual-card__detail-eyebrow" data-i18n="integration.detail.integration.eyebrow">Integracje · Operacyjne</p>
+            <h3 class="visual-card__detail-title" data-i18n="integration.detail.integration.title">Bezpieczne przepływy operacyjne</h3>
+            <p class="visual-card__detail-body" data-i18n="integration.detail.integration.body">Automatyzujemy ERP, WMS i aplikacje SaaS z kontrolą dostępu i audytem.</p>
+            <ul class="visual-card__detail-list">
+              <li data-i18n="integration.detail.integration.point1">Integracja API i webhooków</li>
+              <li data-i18n="integration.detail.integration.point2">Monitorowanie i audyt zgodności</li>
+              <li data-i18n="integration.detail.integration.point3">Elastyczne reguły i workflow</li>
+            </ul>
+          </div>
         </article>
       </div>
     </section>
