@@ -11,8 +11,10 @@ export default defineConfig(({ mode }) => {
       },
       plugins: [react()],
       define: {
-        'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
+        // Expose only the API base URL to the client. Secrets must never
+        // be embedded in the bundle. Backend endpoints will proxy to
+        // Gemini and other services.
+        'import.meta.env.VITE_API_BASE_URL': JSON.stringify(env.VITE_API_BASE_URL || ''),
       },
       resolve: {
         alias: {

@@ -97,6 +97,81 @@ export interface ProvisioningStep {
   status: 'pending' | 'running' | 'completed';
 }
 
+// -----------------------------------------------------------------------------
+// Onboarding domain types (custom additions)
+//
+// The new onboarding wizard introduces its own domain models separate from the
+// legacy types defined above. These interfaces are kept lightweight and
+// correspond to the zod schemas defined under `src/lib/validation`.
+
+/**
+ * Roles supported on the front‑end. Only users with `owner` or `admin`
+ * privileges may access the onboarding wizard. Additional roles can be
+ * introduced here in the future.
+ */
+export type Role = 'owner' | 'admin' | 'viewer';
+
+/**
+ * Basic organisation profile collected in step 1. See
+ * `src/lib/validation/organization.ts` for the source schema.
+ */
+export interface OrganizationProfile {
+  org_name: string;
+  client_slug: string;
+  technical_email: string;
+  language: 'pl';
+  timezone: 'Europe/Warsaw';
+  currency: 'PLN';
+  data_residency: 'pl-warsaw';
+  bq_region: 'europe-central2';
+  retention_months: number;
+  pseudonymization_enabled: boolean;
+  dpa_accepted: boolean;
+}
+
+/**
+ * Definition of an enabled integration. The id corresponds to a supported
+ * connector and must match the allowed values defined in
+ * `src/lib/validation/integrations.ts`.
+ */
+export interface Integration {
+  id: string;
+  enabled: boolean;
+  alias?: string;
+  backfill_months: number;
+  plan: 'standard' | 'extended';
+}
+
+/**
+ * Map of connection secret references returned from the backend after
+ * successful connection tests. The keys correspond to the connector ids.
+ */
+export type Connection = Record<string, any>;
+
+/**
+ * Scheduling information for the data pipelines.
+ */
+export interface Schedule {
+  timezone: 'Europe/Warsaw';
+  frequency: string;
+  exact_time?: string;
+  minute_offset?: number;
+  window: number;
+  late_reprocess_days: number;
+  backfill_months: number;
+  mode: 'throttled' | 'fast';
+}
+
+/**
+ * A provisioning run returned from the backend. Contains the run id and
+ * overall status. When listening to SSE events the client will receive
+ * updates on the individual provisioning steps.
+ */
+export interface ProvisioningRun {
+  id: string;
+  status: 'pending' | 'running' | 'completed' | 'error';
+}
+
 // --- EPIC H Types: Data Health ---
 export interface JobLog {
   id: string;

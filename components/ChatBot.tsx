@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { chatWithPapaBot } from '../services/geminiService';
+// Use the backend proxy for AI chat instead of direct Gemini API calls
+import { chatWithPapaBot } from '../services/aiService';
 
 interface Message {
   id: string;
