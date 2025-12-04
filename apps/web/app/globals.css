@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  min-height: 100%;
+}
+
+/* Globalny motyw – korzystamy z dark: */
+body {
+  @apply antialiased bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-50;
+}
+
+.section-container {
+  @apply mx-auto max-w-6xl px-4 sm:px-6 lg:px-8;
+}
+
+/* Karty szklane – inny wygląd w light/dark */
+.card-glass {
+  @apply rounded-2xl backdrop-blur border;
+  @apply bg-white/70 border-slate-200 dark:bg-slate-900/40 dark:border-slate-800/80;
+}
