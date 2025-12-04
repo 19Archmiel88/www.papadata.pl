@@ -16,15 +16,25 @@ import {
   Loader2,
   Lock,
   Mail,
+  Moon,
+  Sun,
   ShieldCheck,
   Sparkles,
   Terminal,
 } from 'lucide-react';
 import { useI18n } from '@papadata/i18n';
+import { useTheme } from '../../components/theme-provider';
 
 type WizardStep = 'company' | 'integrations' | 'keys' | 'summary';
 type NipStatus = 'idle' | 'checking' | 'ok' | 'error';
-type ConnectionStatus = 'idle' | 'connecting' | 'connected' | 'testing' | 'ok' | 'error';
+type ConnectionStatus =
+  | 'idle'
+  | 'connecting'
+  | 'connected'
+  | 'testing'
+  | 'ok'
+  | 'error'
+  | 'needs_reauth';
 
 type ApiIntegrationId = 'woocommerce' | 'shopify' | 'allegro' | 'baselinker';
 type OAuthIntegrationId = 'googleAds' | 'ga4' | 'metaAds' | 'tiktokAds';
@@ -37,6 +47,8 @@ type ApiConnection = {
   status: ConnectionStatus;
   message?: string;
 };
+
+type LogEntry = { text: string; tone: 'info' | 'warn' };
 
 const wizardSteps: WizardStep[] = ['company', 'integrations', 'keys', 'summary'];
 
@@ -140,6 +152,7 @@ export default function WizardPage() {
   const isPl = t.locale === 'pl';
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { theme, toggleTheme } = useTheme();
 
   const [stepIndex, setStepIndex] = useState(0);
   const [phase, setPhase] = useState<'form' | 'provisioning'>('form');
@@ -182,10 +195,49 @@ export default function WizardPage() {
     baselinker: { status: 'idle' },
   });
 
-  const [logEntries, setLogEntries] = useState<string[]>([]);
+  const [activationHealth, setActivationHealth] = useState<
+    { id: string; status: ConnectionStatus; updatedAt: number }[]
+  >([]);
+  const [logEntries, setLogEntries] = useState<LogEntry[]>([]);
   const [logProgress, setLogProgress] = useState(0);
 
   const currentStep = wizardSteps[stepIndex];
+  const integrationById = useMemo(
+    () =>
+      integrationDefinitions.reduce<Record<string, { group: string }>>(
+        (acc, def) => {
+          acc[def.id] = { group: def.group };
+          return acc;
+        },
+        {},
+      ),
+    [],
+  );
+
+  const getStatusFor = (id: string): ConnectionStatus | undefined => {
+    if ((apiConnections as Record<string, ApiConnection>)[id]) {
+      return (apiConnections as Record<string, ApiConnection>)[id].status;
+    }
+    if ((oauthConnections as Record<string, ConnectionStatus>)[id]) {
+      return (oauthConnections as Record<string, ConnectionStatus>)[id];
+    }
+    return undefined;
+  };
+
+  const isHealthy = (status?: ConnectionStatus) =>
+    status === 'ok' || status === 'connected';
+
+  const keysHealth = useMemo(() => {
+    const hasStoreOk = Array.from(selectedIntegrations).some((id) => {
+      const group = integrationById[id]?.group;
+      return group === 'store' && isHealthy(getStatusFor(id));
+    });
+    const hasAdsOk = Array.from(selectedIntegrations).some((id) => {
+      const group = integrationById[id]?.group;
+      return (group === 'ads' || group === 'analytics') && isHealthy(getStatusFor(id));
+    });
+    return { hasStoreOk, hasAdsOk };
+  }, [integrationById, selectedIntegrations, apiConnections, oauthConnections]);
 
   useEffect(() => {
     const sourcesParam = searchParams.get('sources');
@@ -242,15 +294,31 @@ export default function WizardPage() {
     ];
 
     const logList = isPl ? logsPl : logsEn;
+
+    const baseEntries: LogEntry[] = logList.map((text) => ({
+      text,
+      tone: 'info',
+    }));
+
+    const warningEntries: LogEntry[] = activationHealth
+      .filter((item) => item.status !== 'ok' && item.status !== 'connected')
+      .map((item) => ({
+        text: isPl
+          ? `> Integracja ${item.id} - niepoprawne klucze / wymagane ponowne logowanie. Środowisko utworzone, ale dane z tego źródła nie będą pobierane.`
+          : `> Integration ${item.id} - invalid keys / re-auth needed. Workspace created, but data from this source will not be ingested.`,
+        tone: 'warn',
+      }));
+
+    const merged = [...baseEntries, ...warningEntries];
     setLogEntries([]);
     setLogProgress(0);
 
     let index = 0;
     const interval = window.setInterval(() => {
-      setLogEntries((prev) => [...prev, logList[index]]);
-      setLogProgress(Math.round(((index + 1) / logList.length) * 100));
+      setLogEntries((prev) => [...prev, merged[index]]);
+      setLogProgress(Math.round(((index + 1) / merged.length) * 100));
       index += 1;
-      if (index >= logList.length) {
+      if (index >= merged.length) {
         window.clearInterval(interval);
         window.setTimeout(() => {
           router.push('/dashboard');
@@ -259,7 +327,7 @@ export default function WizardPage() {
     }, 900);
 
     return () => window.clearInterval(interval);
-  }, [phase, isPl, company.name, selectedIntegrations, router]);
+  }, [phase, isPl, company.name, selectedIntegrations, router, activationHealth]);
 
   const canProceed = useMemo(() => {
     if (currentStep === 'company') {
@@ -272,11 +340,14 @@ export default function WizardPage() {
     if (currentStep === 'integrations') {
       return selectedIntegrations.size > 0;
     }
+    if (currentStep === 'keys') {
+      return keysHealth.hasStoreOk && keysHealth.hasAdsOk;
+    }
     if (currentStep === 'summary') {
       return summaryChecks.ownership && summaryChecks.gcp;
     }
     return true;
-  }, [company, currentStep, selectedIntegrations.size, summaryChecks]);
+  }, [company, currentStep, keysHealth, selectedIntegrations, summaryChecks]);
 
   const goNext = () => {
     if (stepIndex < wizardSteps.length - 1) {
@@ -297,7 +368,7 @@ export default function WizardPage() {
         ...prev,
         nipStatus: 'error',
         nipMessage: isPl
-          ? 'Nie udało się pobrać danych firmy. Sprawdź NIP lub uzupełnij pola ręcznie.'
+          ? 'Nie uda\u0142o si\u0119 pobra\u0107 danych firmy. Sprawd\u017a NIP lub uzupe\u0142nij pola r\u0119cznie.'
           : 'Could not fetch company data. Check the tax ID or fill the fields manually.',
       }));
       return;
@@ -316,13 +387,13 @@ export default function WizardPage() {
         ...prev,
         nipStatus: 'ok',
         nipMessage: isPl
-          ? 'Dane zostały pobrane automatycznie. Możesz je edytować.'
+          ? 'Dane zosta\u0142y pobrane automatycznie. Mo\u017cesz je edytowa\u0107.'
           : 'Data fetched automatically. You can edit before moving on.',
         name: prev.name || (isPl ? 'Moja Firma sp. z o.o.' : 'My Company LLC'),
         address:
           prev.address ||
           (isPl
-            ? 'ul. Przykładowa 10, 00-000 Warszawa, Polska'
+            ? 'ul. Przyk\u0142adowa 10, 00-000 Warszawa, Polska'
             : 'Example Street 10, 00-000 Warsaw, Poland'),
       }));
     }, 1100);
@@ -350,10 +421,19 @@ export default function WizardPage() {
     }));
 
     window.setTimeout(() => {
-      setOauthConnections((prev) => ({
-        ...prev,
-        [id]: action === 'connect' ? 'connected' : 'ok',
-      }));
+      setOauthConnections((prev) => {
+        const wasConnected = prev[id] === 'connected' || prev[id] === 'ok';
+        const nextStatus =
+          action === 'connect'
+            ? 'connected'
+            : wasConnected
+            ? 'ok'
+            : 'error';
+        return {
+          ...prev,
+          [id]: nextStatus,
+        };
+      });
     }, 900);
   };
 
@@ -371,8 +451,11 @@ export default function WizardPage() {
     }));
 
     window.setTimeout(() => {
-      const success =
-        (apiConnections[id].url || apiConnections[id].token || apiConnections[id].key) !== '';
+      const requiredFields = apiIntegrationFields[id] || [];
+      const hasAllFields = requiredFields.every(
+        (field) => (apiConnections[id] as any)[field.key]?.toString().trim().length,
+      );
+      const success = hasAllFields;
 
       setApiConnections((prev) => ({
         ...prev,
@@ -381,14 +464,38 @@ export default function WizardPage() {
           status: success ? 'ok' : 'error',
           message: success
             ? isPl
-              ? `Połączenie poprawne – ${name} gotowe do importu.`
-              : `Connection successful – ${name} is ready.`
+              ? 'Po\u0142\u0105czenie poprawne \u2013 ' + name + ' gotowe do importu.'
+              : 'Connection successful ? ' + name + ' is ready.'
             : isPl
-            ? 'Nie udało się połączyć. Sprawdź adres i klucze API.'
+            ? 'Nie uda\u0142o si\u0119 po\u0142\u0105czy\u0107. Sprawd\u017a adres i klucze API.'
             : 'Connection failed. Check the URL and API keys.',
         },
       }));
     }, 1000);
+  };
+
+  const persistIntegrationHealth = (simulateExpiry = false) => {
+    const data = Array.from(selectedIntegrations).map((id) => {
+      let status = getStatusFor(id) ?? 'error';
+      if (simulateExpiry && (status === 'ok' || status === 'connected') && Math.random() < 0.25) {
+        status = 'needs_reauth';
+      }
+      return { id, status, updatedAt: Date.now() };
+    });
+
+    if (typeof window !== 'undefined') {
+      window.sessionStorage.setItem('papadata.integrationHealth', JSON.stringify(data));
+      window.sessionStorage.setItem(
+        'papadata.integrationWarnings',
+        data.some((d) => d.status !== 'ok' && d.status !== 'connected') ? '1' : '0',
+      );
+    }
+    setActivationHealth(data);
+  };
+
+  const activatePlatform = () => {
+    persistIntegrationHealth(true);
+    setPhase('provisioning');
   };
 
   const selectedApiIntegrations = useMemo(
@@ -422,8 +529,8 @@ export default function WizardPage() {
       : 'We will auto-fill your company details from the tax ID and prepare a separate Google Cloud workspace.',
     contactLabel: isPl ? 'E-mail do kontaktu i powiadomień' : 'Contact & notifications email',
     contactHint: isPl
-      ? 'Na ten adres wyślemy podsumowanie konfiguracji i alerty o integracjach.'
-      : 'We will send configuration summary and integration alerts here.',
+      ? 'Na ten adres wyślemy podsumowanie konfiguracji, alerty o integracjach i przypomnienia o końcu okresu próbnego.'
+      : 'We will send the setup summary, integration alerts and trial reminders here.',
     industryLabel: isPl ? 'Branża / Industry' : 'Industry',
     currencyLabel: isPl ? 'Waluta raportowania' : 'Reporting currency',
     timezoneLabel: isPl ? 'Strefa czasowa' : 'Time zone',
@@ -476,7 +583,7 @@ export default function WizardPage() {
                   {isPl ? 'Provisioning' : 'Provisioning'}
                 </p>
                 <h1 className="text-xl font-semibold">
-                  {isPl ? 'Tworzymy Twoją instancję PapaData' : 'We’re creating your PapaData workspace'}
+                  {isPl ? 'Tworzymy Twoją instancję PapaData' : "We're creating your PapaData workspace"}
                 </h1>
               </div>
             </div>
@@ -488,11 +595,19 @@ export default function WizardPage() {
               />
             </div>
 
-            <div className="mt-6 space-y-2 rounded-xl border border-slate-800 bg-slate-950/70 p-4 font-mono text-xs text-emerald-200">
+            <div className="mt-6 space-y-2 rounded-xl border border-slate-800 bg-slate-950/70 p-4 font-mono text-xs">
               {logEntries.map((entry, idx) => (
                 <div key={idx} className="flex items-start gap-2">
-                  <span className="text-emerald-500">➜</span>
-                  <span>{entry}</span>
+                  <span
+                    className={entry.tone === 'warn' ? 'text-amber-300' : 'text-emerald-500'}
+                  >
+                    {'>'}
+                  </span>
+                  <span
+                    className={entry.tone === 'warn' ? 'text-amber-200' : 'text-emerald-100'}
+                  >
+                    {entry.text}
+                  </span>
                 </div>
               ))}
             </div>
@@ -511,15 +626,35 @@ export default function WizardPage() {
   return (
     <main className="min-h-screen bg-slate-950 text-slate-50">
       <div className="mx-auto max-w-5xl px-4 py-10 md:py-12">
-        <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-emerald-400">
             <Sparkles className="h-3.5 w-3.5" />
             <span>{isPl ? 'Onboarding' : 'Onboarding'}</span>
           </div>
-          <div className="text-[11px] text-slate-400">
-            {isPl
-              ? 'Zapisz konfigurację, aby wrócić do niej później – zapamiętamy ją w tej sesji.'
-              : 'You can come back to this setup later – we keep it in this session.'}
+          <div className="flex flex-wrap items-center gap-3 text-[11px] text-slate-400">
+            <span>
+              {isPl
+                ? 'Zapisz konfigurację i wróć później — zapamiętamy ją w tej sesji.'
+                : 'Save the setup and return later — we keep it in this session.'}
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => t.setLocale(isPl ? 'en' : 'pl')}
+                className="inline-flex items-center gap-1 rounded-full border border-slate-700 bg-slate-900/70 px-3 py-1.5 text-[11px] font-medium text-slate-200 transition hover:border-emerald-500 hover:text-emerald-200"
+              >
+                <Globe2 className="h-3.5 w-3.5" />
+                <span>{isPl ? 'PL' : 'EN'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={toggleTheme}
+                className="inline-flex items-center gap-1 rounded-full border border-slate-700 bg-slate-900/70 px-3 py-1.5 text-[11px] font-medium text-slate-200 transition hover:border-emerald-500 hover:text-emerald-200"
+              >
+                {theme === 'dark' ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
+                <span>{theme === 'dark' ? 'Dark' : 'Light'}</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -610,6 +745,9 @@ export default function WizardPage() {
                 apiIntegrationFields={apiIntegrationFields}
                 handleApiChange={handleApiChange}
                 handleApiTest={handleApiTest}
+                keysHealth={keysHealth}
+                isHealthy={isHealthy}
+                getStatusFor={getStatusFor}
               />
             )}
 
@@ -663,7 +801,7 @@ export default function WizardPage() {
                 <button
                   type="button"
                   disabled={!canProceed}
-                  onClick={() => setPhase('provisioning')}
+                  onClick={activatePlatform}
                   className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-sky-400 px-4 py-2 text-sm font-semibold text-slate-950 shadow-neon-emerald transition hover:from-emerald-400 hover:to-sky-300 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <BadgeCheck className="h-4 w-4" />
@@ -999,7 +1137,10 @@ function KeysStep({
   apiIntegrationFields,
   handleApiChange,
   handleApiTest,
+  keysHealth,
 }: any) {
+  const requirementNote = !keysHealth.hasStoreOk || !keysHealth.hasAdsOk;
+
   return (
     <div className="space-y-6">
       <div>
@@ -1012,7 +1153,7 @@ function KeysStep({
           <div className="flex items-center gap-2">
             <Globe2 className="h-4 w-4 text-emerald-300" />
             <p className="text-sm font-semibold text-slate-100">
-              {isPl ? 'Logowanie przez dostawcę (OAuth)' : 'Login via provider (OAuth)'}
+              {isPl ? 'Logowanie przez dostawc? (OAuth)' : 'Login via provider (OAuth)'}
             </p>
           </div>
 
@@ -1027,7 +1168,8 @@ function KeysStep({
           <div className="space-y-3">
             {selectedOAuthIntegrations.map((id: OAuthIntegrationId) => {
               const status = oauthConnections[id];
-              const name = t(`landing.integrations.items.${id}.name` as any);
+              const name = t(("landing.integrations.items." + id + ".name") as any);
+              const isIssue = status === 'error' || status === 'needs_reauth';
               const connectLabel =
                 id === 'googleAds'
                   ? isPl
@@ -1044,11 +1186,13 @@ function KeysStep({
               return (
                 <div
                   key={id}
-                  className="rounded-xl border border-slate-800 bg-slate-950/70 p-3 text-sm text-slate-200"
+                  className={`rounded-xl border bg-slate-950/70 p-3 text-sm text-slate-200 ${
+                    isIssue ? 'border-rose-500/60' : 'border-slate-800'
+                  }`}
                 >
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
-                      <Cloud className="h-4 w-4 text-emerald-300" />
+                      <Cloud className={`h-4 w-4 ${isIssue ? 'text-rose-300' : 'text-emerald-300'}`} />
                       <div>
                         <p className="font-semibold">{name}</p>
                         <p className="text-[11px] text-slate-400">
@@ -1077,7 +1221,11 @@ function KeysStep({
                       <button
                         type="button"
                         onClick={() => handleOauthAction(id, 'test')}
-                        className="rounded-lg border border-slate-700 px-3 py-1.5 text-[11px] text-slate-200 hover:border-emerald-500"
+                        className={`rounded-lg border px-3 py-1.5 text-[11px] ${
+                          isIssue
+                            ? 'border-rose-500 text-rose-200'
+                            : 'border-slate-700 text-slate-200 hover:border-emerald-500'
+                        }`}
                       >
                         {status === 'testing' ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
@@ -1089,15 +1237,27 @@ function KeysStep({
                       </button>
                     </div>
                   </div>
-                  <p className="mt-2 text-[11px] text-emerald-300">
+                  <p
+                    className={`mt-2 text-[11px] ${
+                      status === 'connected' || status === 'ok'
+                        ? 'text-emerald-300'
+                        : isIssue
+                        ? 'text-amber-300'
+                        : 'text-slate-300'
+                    }`}
+                  >
                     {status === 'connected'
                       ? isPl
-                        ? 'Połączono – token zapisany w zaszyfrowanym magazynie.'
-                        : 'Connected – token stored in encrypted vault.'
+                        ? 'Połączenie – token zapisany w zaszyfrowanym magazynie.'
+                        : 'Connected ? token stored in encrypted vault.'
                       : status === 'ok'
                       ? isPl
                         ? 'Połączenie działa. Możemy pobrać dane historyczne.'
                         : 'Connection works. We can fetch historical data.'
+                      : isIssue
+                      ? isPl
+                        ? 'Wymagane ponowne logowanie. Kliknij Połącz konto lub Testuj połączenie.'
+                        : 'Re-authentication required. Click Connect or Test connection.'
                       : ''}
                   </p>
                 </div>
@@ -1117,25 +1277,28 @@ function KeysStep({
           {selectedApiIntegrations.length === 0 && (
             <p className="text-xs text-slate-400">
               {isPl
-                ? 'Wybierz przynajmniej jedną integrację sklepową, aby dodać klucze.'
+                ? 'Wybierz przynajmniej jedn? integracj? sklepow?, aby doda? klucze.'
                 : 'Pick at least one store integration to add keys.'}
             </p>
           )}
 
           <div className="space-y-4">
             {selectedApiIntegrations.map((id: ApiIntegrationId) => {
-              const name = t(`landing.integrations.items.${id}.name` as any);
+              const name = t(("landing.integrations.items." + id + ".name") as any);
               const conn = apiConnections[id];
               const fields = apiIntegrationFields[id] || [];
+              const isIssue = conn.status === 'error' || conn.status === 'needs_reauth';
 
               return (
                 <div
                   key={id}
-                  className="space-y-3 rounded-xl border border-slate-800 bg-slate-950/70 p-3 text-sm text-slate-200"
+                  className={`space-y-3 rounded-xl border bg-slate-950/70 p-3 text-sm text-slate-200 ${
+                    isIssue ? 'border-rose-500/60' : 'border-slate-800'
+                  }`}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Lock className="h-4 w-4 text-emerald-300" />
+                      <Lock className={`h-4 w-4 ${isIssue ? 'text-rose-300' : 'text-emerald-300'}`} />
                       <div>
                         <p className="font-semibold">{name}</p>
                         <p className="text-[11px] text-slate-400">
@@ -1148,7 +1311,11 @@ function KeysStep({
                     <button
                       type="button"
                       onClick={() => handleApiTest(id, name)}
-                      className="rounded-lg border border-slate-700 px-3 py-1.5 text-[11px] text-slate-200 hover:border-emerald-500"
+                      className={`rounded-lg border px-3 py-1.5 text-[11px] ${
+                        isIssue
+                          ? 'border-rose-500 text-rose-200'
+                          : 'border-slate-700 text-slate-200 hover:border-emerald-500'
+                      }`}
                     >
                       {conn.status === 'testing' ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -1169,7 +1336,11 @@ function KeysStep({
                         <input
                           value={(conn as any)[field.key] || ''}
                           onChange={(e) => handleApiChange(id, field.key, e.target.value)}
-                          className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-[13px] text-slate-50 placeholder:text-slate-500 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                          className={`w-full rounded-lg bg-slate-950 px-3 py-2 text-[13px] text-slate-50 placeholder:text-slate-500 focus:outline-none focus:ring-1 ${
+                            isIssue
+                              ? 'border border-rose-500 focus:border-rose-400 focus:ring-rose-400'
+                              : 'border border-slate-700 focus:border-emerald-500 focus:ring-emerald-500'
+                          }`}
                           placeholder={field.placeholder}
                         />
                       </div>
@@ -1210,6 +1381,14 @@ function KeysStep({
           </div>
         </div>
       </div>
+
+      {requirementNote && (
+        <div className="rounded-xl border border-amber-500/50 bg-amber-500/10 px-4 py-3 text-xs text-amber-100">
+          {isPl
+            ? 'Aby przejść dalej, przetestuj poprawnie minimum 1 integrację sklepową oraz 1 źródło reklamowe.'
+            : 'To continue, test at least one store integration and one ad source successfully.'}
+        </div>
+      )}
     </div>
   );
 }
@@ -1254,19 +1433,24 @@ function SummaryStep({
             const apiState = (apiConnections as Record<string, ApiConnection>)[id];
             const oauthState = (oauthConnections as Record<string, ConnectionStatus>)[id];
             const ok = apiState?.status === 'ok' || oauthState === 'connected' || oauthState === 'ok';
+            const needsReauth =
+              apiState?.status === 'needs_reauth' || oauthState === 'needs_reauth';
+            const message = ok
+              ? isPl
+                ? 'Klucze / dostęp OK'
+                : 'Keys / access OK'
+              : needsReauth
+              ? isPl
+                ? 'Wymagane ponowne logowanie – kliknij Reconnect w kroku Klucze.'
+                : 'Re-authentication required – use Reconnect in the Keys step.'
+              : isPl
+              ? 'Brak połączenia – przetestuj integrację.'
+              : 'No connection yet – please test the integration.';
             return (
               <div key={id} className="flex items-center justify-between rounded-lg bg-slate-950/60 px-3 py-2">
                 <div>
                   <p className="text-sm font-semibold text-slate-100">{name}</p>
-                  <p className="text-[11px] text-slate-400">
-                    {ok
-                      ? isPl
-                        ? 'Klucze / dostęp OK'
-                        : 'Keys / access OK'
-                      : isPl
-                      ? 'Brak połączenia – przetestuj integrację'
-                      : 'No connection yet – please test the integration'}
-                  </p>
+                  <p className="text-[11px] text-slate-400">{message}</p>
                 </div>
                 {ok ? (
                   <CheckCircle2 className="h-5 w-5 text-emerald-300" />

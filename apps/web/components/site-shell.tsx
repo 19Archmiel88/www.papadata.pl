@@ -6,6 +6,7 @@ import { ScrollToTopButton } from './scroll-to-top-button';
 import { NaggingTrialModal } from './nagging-trial-modal';
 import Link from 'next/link';
 import { useI18n } from '@papadata/i18n';
+import { usePathname } from 'next/navigation';
 
 type SiteShellProps = {
   children: React.ReactNode;
@@ -14,6 +15,13 @@ type SiteShellProps = {
 export default function SiteShell({ children }: SiteShellProps) {
   const t = useI18n();
   const isPl = t.locale === 'pl';
+  const pathname = usePathname();
+  const bare =
+    pathname?.startsWith('/wizard') || pathname?.startsWith('/dashboard');
+
+  if (bare) {
+    return <main className="min-h-screen bg-slate-950 text-slate-50">{children}</main>;
+  }
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-950 text-slate-50">
