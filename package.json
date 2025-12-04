@@ -11,10 +11,10 @@
     "build": "npm run build --workspace web",
     "start": "npm run start --workspace web",
     "lint": "npm run lint --workspace web",
-    "typecheck": "tsc -b"
+    "typecheck": "npm run typecheck --workspace web && npm run build --workspace i18n --if-present"
   },
   "dependencies": {
-    "lucide-react": "^0.555.0",
-    "next": "^16.0.7"
+    "lucide-react": "^0.441.0",
+    "next": "^14.2.33"
   }
 }
