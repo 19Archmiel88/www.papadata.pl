@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
+    "@google/genai": "^1.31.0",
     "@papadata/i18n": "0.1.0",
     "framer-motion": "^11.18.2",
     "lucide-react": "^0.441.0",

@@ -8,7 +8,8 @@ import { useI18n } from '@papadata/i18n';
 const STORAGE_KEY = 'papadata.naggingModal.dismissed';
 
 export const NaggingTrialModal: React.FC = () => {
-  const  t  = useI18n();
+  const t = useI18n();
+  const isPl = t.locale === 'pl';
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [showCompact, setShowCompact] = useState(false);
@@ -45,27 +46,29 @@ export const NaggingTrialModal: React.FC = () => {
     <>
       {open && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="card-glass max-w-md w-full mx-4 p-6 shadow-neon-cyan relative">
+          <div className="card-glass relative mx-4 w-full max-w-md p-6 shadow-neon-cyan">
             <button
               type="button"
               onClick={closeModal}
-              className="absolute right-3 top-3 inline-flex h-7 w-7 items-center justify-center rounded-full text-slate-400 hover:text-slate-100 hover:bg-slate-800/80"
+              className="absolute right-3 top-3 inline-flex h-7 w-7 items-center justify-center rounded-full text-pd-muted hover:bg-brand-border/40 hover:text-pd-foreground"
               aria-label="Close"
             >
               <X className="h-4 w-4" />
             </button>
-            <h2 className="text-xl font-semibold mb-2">
-              {t('landing.global.naggingModal.title')}
+            <h2 className="mb-2 text-xl font-semibold">
+              {isPl ? 'Odbierz Pakiet Startowy' : 'Claim your Starter Package'}
             </h2>
-            <p className="text-sm text-slate-300 mb-5">
-              {t('landing.global.naggingModal.subtitle')}
+            <p className="mb-5 text-sm text-pd-muted">
+              {isPl
+                ? 'Przetestuj PapaData przez 14 dni za darmo. Bez karty, bez zobowiązań.'
+                : 'Test PapaData for 14 days for free. No card, no commitment.'}
             </p>
             <button
               type="button"
               onClick={goToWizard}
-              className="w-full rounded-full bg-emerald-500 px-4 py-2.5 text-sm font-medium text-slate-950 shadow-neon-emerald hover:bg-emerald-400 transition-colors"
+              className="w-full rounded-full bg-brand-accent px-4 py-2.5 text-sm font-medium text-pd-bg shadow-neon-cyan transition-colors hover:bg-brand-accent/90"
             >
-              {t('landing.global.naggingModal.button')}
+              {isPl ? 'Rozpocznij 14-dniowy Trial' : 'Start 14-day trial'}
             </button>
           </div>
         </div>
@@ -75,10 +78,10 @@ export const NaggingTrialModal: React.FC = () => {
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="fixed left-0 top-1/2 z-30 -translate-y-1/2 rounded-r-full bg-emerald-500 px-3 py-3 text-xs font-semibold tracking-wide text-slate-950 shadow-neon-emerald hover:bg-emerald-400 transition-colors"
+          className="fixed left-0 top-1/2 z-30 -translate-y-1/2 rounded-r-full bg-brand-accent px-3 py-3 text-xs font-semibold tracking-wide text-pd-bg shadow-neon-cyan transition-colors hover:bg-brand-accent/90"
         >
           <span className="[writing-mode:vertical-rl]">
-            {t('landing.global.naggingModal.compactLabel')}
+            {isPl ? '14 DNI FREE' : '14 DAYS FREE'}
           </span>
         </button>
       )}

@@ -1,1627 +1,1206 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
-  AlertTriangle,
   ArrowLeft,
   ArrowRight,
-  BadgeCheck,
+  Check,
   CheckCircle2,
-  ChevronRight,
-  Circle,
   Cloud,
-  Globe2,
-  KeyRound,
+  HelpCircle,
   Loader2,
   Lock,
-  Mail,
-  Moon,
-  Sun,
-  ShieldCheck,
-  Sparkles,
-  Terminal,
+  Server,
+  Shield,
 } from 'lucide-react';
-import { useI18n } from '@papadata/i18n';
-import { useTheme } from '../../components/theme-provider';
 
-type WizardStep = 'company' | 'integrations' | 'keys' | 'summary';
-type NipStatus = 'idle' | 'checking' | 'ok' | 'error';
-type ConnectionStatus =
-  | 'idle'
-  | 'connecting'
-  | 'connected'
-  | 'testing'
-  | 'ok'
-  | 'error'
-  | 'needs_reauth';
+declare global {
+  interface Window {
+    dataLayer?: Array<Record<string, unknown>>;
+  }
+}
 
-type ApiIntegrationId = 'woocommerce' | 'shopify' | 'allegro' | 'baselinker';
-type OAuthIntegrationId = 'googleAds' | 'ga4' | 'metaAds' | 'tiktokAds';
+function trackEvent(event: string, params?: Record<string, unknown>): void {
+  if (typeof window === 'undefined') return;
+  if (!window.dataLayer) window.dataLayer = [];
+  window.dataLayer.push({ event, ...params });
+}
 
-type ApiConnection = {
-  url?: string;
-  key?: string;
-  secret?: string;
-  token?: string;
-  status: ConnectionStatus;
-  message?: string;
+type WizardStep = 1 | 2 | 3 | 4;
+type View = 'wizard' | 'terminal';
+
+interface CompanyData {
+  nip: string;
+  name: string;
+  address: string;
+  industry: string;
+  currency: 'PLN' | 'EUR' | 'USD';
+  adminEmail: string;
+  notifyIncidents: boolean;
+  acceptedRules: boolean;
+}
+
+interface IntegrationsData {
+  store: 'woocommerce' | 'shopify' | 'idosell' | 'other' | '';
+  analyticsGa4: boolean;
+  adsGoogle: boolean;
+  adsMeta: boolean;
+  marketplaceAllegro: boolean;
+  marketplaceAmazon: boolean;
+  wantHistorical12m: boolean;
+  comment: string;
+}
+
+interface KeysData {
+  hasOwnGcp: boolean;
+  projectId: string;
+  datasetName: string;
+  serviceAccountJson: string;
+  expertHelp: boolean;
+  readonlyAccess: boolean;
+}
+
+interface ValidationErrors {
+  nip?: string;
+  name?: string;
+  address?: string;
+  industry?: string;
+  adminEmail?: string;
+  acceptedRules?: string;
+  projectId?: string;
+  datasetName?: string;
+  serviceAccountJson?: string;
+}
+
+const INITIAL_COMPANY: CompanyData = {
+  nip: '',
+  name: '',
+  address: '',
+  industry: '',
+  currency: 'PLN',
+  adminEmail: '',
+  notifyIncidents: true,
+  acceptedRules: false,
 };
 
-type LogEntry = { text: string; tone: 'info' | 'warn' };
-
-const wizardSteps: WizardStep[] = ['company', 'integrations', 'keys', 'summary'];
-
-const integrationDefinitions = [
-  {
-    id: 'woocommerce',
-    group: 'store',
-    status: 'available',
-    description: {
-      pl: 'Sklep internetowy na WordPress. Pobieramy zamówienia, produkty, klientów i statusy.',
-      en: 'WordPress-based store. We sync orders, products, customers and statuses.',
-    },
-  },
-  {
-    id: 'shopify',
-    group: 'store',
-    status: 'available',
-    description: {
-      pl: 'Nowoczesny sklep SaaS. Pobieramy zamówienia, produkty i klientów.',
-      en: 'Modern SaaS store. We pull orders, products and customers.',
-    },
-  },
-  {
-    id: 'allegro',
-    group: 'marketplace',
-    status: 'available',
-    description: {
-      pl: 'Marketplace Allegro. Pobieramy zamówienia i dane o ofertach.',
-      en: 'Allegro marketplace. We fetch orders and offer data.',
-    },
-  },
-  {
-    id: 'ga4',
-    group: 'analytics',
-    status: 'available',
-    description: {
-      pl: 'Analityka Google Analytics 4 dla lejka i zdarzeń e-commerce.',
-      en: 'Google Analytics 4 for funnels and e-commerce events.',
-    },
-  },
-  {
-    id: 'googleAds',
-    group: 'ads',
-    status: 'available',
-    description: {
-      pl: 'Kampanie Google Ads: koszty, kliknięcia, konwersje.',
-      en: 'Google Ads campaigns: costs, clicks and conversions.',
-    },
-  },
-  {
-    id: 'metaAds',
-    group: 'ads',
-    status: 'available',
-    description: {
-      pl: 'Kampanie Meta Ads (Facebook/Instagram): wydatki i wyniki.',
-      en: 'Meta Ads campaigns (Facebook/Instagram): spend and results.',
-    },
-  },
-  {
-    id: 'tiktokAds',
-    group: 'ads',
-    status: 'comingSoon',
-    description: {
-      pl: 'TikTok Ads – logowanie przez OAuth i raporty efektywności.',
-      en: 'TikTok Ads – OAuth login and performance reports.',
-    },
-  },
-  {
-    id: 'baselinker',
-    group: 'tool',
-    status: 'available',
-    description: {
-      pl: 'BaseLinker – synchronizacja zamówień i stanów magazynowych.',
-      en: 'BaseLinker – orders and stock sync.',
-    },
-  },
-] as const;
-
-const apiIntegrationFields: Record<
-  ApiIntegrationId,
-  { key: keyof ApiConnection; labelPl: string; labelEn: string; placeholder?: string }[]
-> = {
-  woocommerce: [
-    { key: 'url', labelPl: 'Adres sklepu (URL)', labelEn: 'Store URL', placeholder: 'https://twoj-sklep.pl' },
-    { key: 'key', labelPl: 'Consumer Key', labelEn: 'Consumer Key' },
-    { key: 'secret', labelPl: 'Consumer Secret', labelEn: 'Consumer Secret' },
-  ],
-  shopify: [
-    { key: 'url', labelPl: 'Storefront URL', labelEn: 'Storefront URL', placeholder: 'https://your-store.myshopify.com' },
-    { key: 'token', labelPl: 'API token', labelEn: 'API token' },
-  ],
-  allegro: [
-    { key: 'key', labelPl: 'Client ID', labelEn: 'Client ID' },
-    { key: 'secret', labelPl: 'Client Secret', labelEn: 'Client Secret' },
-  ],
-  baselinker: [{ key: 'token', labelPl: 'API token', labelEn: 'API token' }],
+const INITIAL_INTEGRATIONS: IntegrationsData = {
+  store: '',
+  analyticsGa4: true,
+  adsGoogle: true,
+  adsMeta: true,
+  marketplaceAllegro: false,
+  marketplaceAmazon: false,
+  wantHistorical12m: true,
+  comment: '',
 };
 
-export default function WizardPage() {
-  const t = useI18n();
-  const isPl = t.locale === 'pl';
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const { theme, toggleTheme } = useTheme();
+const INITIAL_KEYS: KeysData = {
+  hasOwnGcp: false,
+  projectId: '',
+  datasetName: 'papadata_reporting',
+  serviceAccountJson: '',
+  expertHelp: true,
+  readonlyAccess: true,
+};
 
-  const [stepIndex, setStepIndex] = useState(0);
-  const [phase, setPhase] = useState<'form' | 'provisioning'>('form');
-  const [prefillSources, setPrefillSources] = useState<string[]>([]);
-  const [policyModal, setPolicyModal] = useState<'terms' | 'privacy' | 'dpa' | null>(null);
+const TERMINAL_LOGS: string[] = [
+  'Sprawdzanie konfiguracji formularza...',
+  'Tworzenie projektu GCP w regionie europe-central2...',
+  'Konfiguracja datasetu BigQuery (papadata_reporting)...',
+  'Tworzenie bucketu Cloud Storage na pliki tymczasowe...',
+  'Tworzenie konta serwisowego i nadawanie ról IAM...',
+  'Konfiguracja pipeline ETL dla sklepu i źródeł marketingowych...',
+  'Wgrywanie przykładowych danych demonstracyjnych...',
+  'Budowanie dashboardów startowych w Looker Studio...',
+  'Konfiguracja alertów e-mail dla awarii integracji...',
+  'Finalizacja – środowisko gotowe do pierwszej synchronizacji.',
+];
 
-  const [company, setCompany] = useState({
-    nip: '',
-    name: '',
-    address: '',
-    industry: 'ecommerce',
-    currency: 'PLN',
-    timezone: 'Europe/Warsaw',
-    contactEmail: '',
-    notify: true,
-    marketing: false,
-    acceptPolicies: false,
-    nipStatus: 'idle' as NipStatus,
-    nipMessage: '',
-  });
+function Stepper({ activeStep }: { activeStep: WizardStep }) {
+  const steps: Array<{ id: WizardStep; label: string }> = [
+    { id: 1, label: 'Firma' },
+    { id: 2, label: 'Integracje' },
+    { id: 3, label: 'Klucze' },
+    { id: 4, label: 'Podsumowanie' },
+  ];
 
-  const [summaryChecks, setSummaryChecks] = useState({
-    ownership: false,
-    gcp: false,
-  });
-
-  const [selectedIntegrations, setSelectedIntegrations] = useState<Set<string>>(new Set());
-
-  const [oauthConnections, setOauthConnections] = useState<Record<OAuthIntegrationId, ConnectionStatus>>({
-    googleAds: 'idle',
-    ga4: 'idle',
-    metaAds: 'idle',
-    tiktokAds: 'idle',
-  });
-
-  const [apiConnections, setApiConnections] = useState<Record<ApiIntegrationId, ApiConnection>>({
-    woocommerce: { status: 'idle' },
-    shopify: { status: 'idle' },
-    allegro: { status: 'idle' },
-    baselinker: { status: 'idle' },
-  });
-
-  const [activationHealth, setActivationHealth] = useState<
-    { id: string; status: ConnectionStatus; updatedAt: number }[]
-  >([]);
-  const [logEntries, setLogEntries] = useState<LogEntry[]>([]);
-  const [logProgress, setLogProgress] = useState(0);
-
-  const currentStep = wizardSteps[stepIndex];
-  const integrationById = useMemo(
-    () =>
-      integrationDefinitions.reduce<Record<string, { group: string }>>(
-        (acc, def) => {
-          acc[def.id] = { group: def.group };
-          return acc;
-        },
-        {},
-      ),
-    [],
+  return (
+    <ol className="flex flex-wrap items-center gap-4 text-xs font-medium text-slate-400">
+      {steps.map((step, index) => {
+        const isActive = step.id === activeStep;
+        const isDone = step.id < activeStep;
+        return (
+          <li key={step.id} className="flex items-center gap-2">
+            <div
+              className={[
+                'flex h-7 w-7 items-center justify-center rounded-full border text-xs',
+                isDone
+                  ? 'border-cyan-500 bg-cyan-500/10 text-cyan-400'
+                  : isActive
+                  ? 'border-cyan-500 bg-cyan-500/20 text-white'
+                  : 'border-slate-700 bg-slate-900 text-slate-500',
+              ].join(' ')}
+            >
+              {isDone ? <Check className="h-3 w-3" /> : step.id}
+            </div>
+            <span className={isActive ? 'text-slate-100' : 'text-slate-500'}>
+              {step.id}. {step.label}
+            </span>
+            {index < steps.length - 1 && (
+              <span className="mx-1 h-px w-6 bg-slate-700/70" aria-hidden />
+            )}
+          </li>
+        );
+      })}
+    </ol>
   );
+}
 
-  const getStatusFor = (id: string): ConnectionStatus | undefined => {
-    if ((apiConnections as Record<string, ApiConnection>)[id]) {
-      return (apiConnections as Record<string, ApiConnection>)[id].status;
+function ExpertsAside() {
+  return (
+    <aside className="space-y-4">
+      <div className="rounded-2xl border border-sky-500/20 bg-slate-900/70 p-5 shadow-neon-cyan">
+        <div className="mb-3 flex items-start gap-3">
+          <div className="rounded-xl bg-sky-500/15 p-2 text-sky-400">
+            <Shield className="h-5 w-5" />
+          </div>
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-sky-400">
+              Eksperci od wdrożeń
+            </p>
+            <p className="mt-1 text-sm font-medium text-slate-50">
+              Zespół PapaData skonfiguruje ETL, BigQuery i raporty za Ciebie.
+            </p>
+          </div>
+        </div>
+        <ul className="mt-2 space-y-1.5 text-xs text-slate-300">
+          <li>• Audyt obecnych raportów przed startem.</li>
+          <li>• Propozycja struktury dashboardów pod zarząd / marketing.</li>
+          <li>• Wsparcie przy testach danych i odbiorze wdrożenia.</li>
+        </ul>
+      </div>
+
+      <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
+        <div className="mb-3 flex items-start gap-3">
+          <div className="rounded-xl bg-emerald-500/10 p-2 text-emerald-400">
+            <Lock className="h-5 w-5" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-slate-50">Bezpieczeństwo danych</p>
+            <p className="mt-1 text-xs text-slate-400">
+              Dane trzymamy w Twoim projekcie GCP (brak lock-inu do naszego konta).
+            </p>
+          </div>
+        </div>
+        <ul className="space-y-1.5 text-xs text-slate-300">
+          <li>• Klucze szyfrowane w Google Secret Manager.</li>
+          <li>• Logi ETL dostępne do audytu technicznego.</li>
+        </ul>
+      </div>
+    </aside>
+  );
+}
+
+interface StepCompanyProps {
+  data: CompanyData;
+  onChange: (patch: Partial<CompanyData>) => void;
+  errors: ValidationErrors;
+}
+
+function StepCompany({ data, onChange, errors }: StepCompanyProps) {
+  const [nipSuccess, setNipSuccess] = useState(false);
+  const [nipError, setNipError] = useState<string | null>(null);
+  const [isValidatingNip, setIsValidatingNip] = useState(false);
+
+  useEffect(() => {
+    if (data.nip.length === 10) {
+      setIsValidatingNip(true);
+      setNipError(null);
+      setNipSuccess(false);
+
+      const timer = window.setTimeout(() => {
+        // Mock "GUS" lookup
+        if (data.nip === '5252217463') {
+          onChange({
+            name: 'Przykładowy Sklep Sp. z o.o.',
+            address: 'ul. Przykładowa 10, 00-838 Warszawa',
+            industry: 'E-commerce (B2C)',
+          });
+        }
+        setIsValidatingNip(false);
+        setNipSuccess(true);
+      }, 1500);
+
+      return () => window.clearTimeout(timer);
     }
-    if ((oauthConnections as Record<string, ConnectionStatus>)[id]) {
-      return (oauthConnections as Record<string, ConnectionStatus>)[id];
-    }
+
+    setIsValidatingNip(false);
+    setNipSuccess(false);
+    setNipError(null);
     return undefined;
+  }, [data.nip, onChange]);
+
+  const handleNipChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const onlyDigits = e.target.value.replace(/\D/g, '');
+    onChange({ nip: onlyDigits });
   };
 
-  const isHealthy = (status?: ConnectionStatus) =>
-    status === 'ok' || status === 'connected';
+  return (
+    <div className="space-y-8">
+      <div className="flex flex-col items-start justify-between gap-4 border-b border-white/5 pb-6 md:flex-row md:items-center">
+        <div>
+          <h2 className="text-2xl font-semibold tracking-tight text-white">Dane firmy</h2>
+          <p className="mt-1 text-sm text-slate-400">
+            Uzupełnij podstawowe informacje. Dane posłużą do konfiguracji projektu GCP i
+            fakturowania.
+          </p>
+        </div>
+        <div className="hidden items-center gap-2 rounded-full border border-cyan-900/70 bg-cyan-950/40 px-3 py-1 text-xs font-mono text-cyan-300 md:flex">
+          <Server className="h-3 w-3" />
+          Region: europe-central2
+        </div>
+      </div>
 
-  const keysHealth = useMemo(() => {
-    const hasStoreOk = Array.from(selectedIntegrations).some((id) => {
-      const group = integrationById[id]?.group;
-      return group === 'store' && isHealthy(getStatusFor(id));
-    });
-    const hasAdsOk = Array.from(selectedIntegrations).some((id) => {
-      const group = integrationById[id]?.group;
-      return (group === 'ads' || group === 'analytics') && isHealthy(getStatusFor(id));
-    });
-    return { hasStoreOk, hasAdsOk };
-  }, [integrationById, selectedIntegrations, apiConnections, oauthConnections]);
+      <div className="grid gap-8 lg:grid-cols-3">
+        <div className="space-y-6 lg:col-span-2">
+          <div className="grid gap-5 md:grid-cols-2">
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-400">
+                NIP
+              </label>
+              <input
+                value={data.nip}
+                onChange={handleNipChange}
+                maxLength={10}
+                placeholder="Tylko cyfry, bez spacji"
+                className="w-full rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm font-mono tracking-[0.2em] text-slate-50 outline-none ring-1 ring-transparent focus:border-cyan-500 focus:ring-cyan-500/40"
+              />
+              {!nipError && !isValidatingNip && (
+                <p className="mt-1 text-xs text-slate-500">Wpisz NIP bez spacji i kresek.</p>
+              )}
+              {isValidatingNip && (
+                <p className="mt-1 flex items-center gap-2 text-xs text-cyan-400">
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  Weryfikacja w GUS...
+                </p>
+              )}
+              {nipSuccess && (
+                <p className="mt-1 flex items-center gap-1.5 text-xs text-emerald-400">
+                  <CheckCircle2 className="h-3 w-3" />
+                  Dane pobrane.
+                </p>
+              )}
+              {nipError && <p className="mt-1 text-xs text-rose-400">{nipError}</p>}
+              {errors.nip && !nipError && (
+                <p className="mt-1 text-xs text-rose-400">{errors.nip}</p>
+              )}
+            </div>
 
-  useEffect(() => {
-    const sourcesParam = searchParams.get('sources');
-    const sessionSources =
-      typeof window !== 'undefined'
-        ? window.sessionStorage.getItem('papadata.pricing.sources')
-        : null;
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-400">
+                Nazwa firmy
+              </label>
+              <input
+                value={data.name}
+                onChange={(e) => onChange({ name: e.target.value })}
+                placeholder="Pełna nazwa prawna"
+                className="w-full rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm text-slate-50 outline-none ring-1 ring-transparent focus:border-cyan-500 focus:ring-cyan-500/40"
+              />
+              {errors.name && <p className="mt-1 text-xs text-rose-400">{errors.name}</p>}
+            </div>
 
-    const raw = sourcesParam || sessionSources || '';
-    const normalized = raw
-      .split(',')
-      .map((s) => s.trim().toLowerCase())
-      .filter(Boolean);
+            <div className="md:col-span-2">
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-400">
+                Adres rejestrowy
+              </label>
+              <input
+                value={data.address}
+                onChange={(e) => onChange({ address: e.target.value })}
+                placeholder="Ulica, numer, kod pocztowy, miasto"
+                className="w-full rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm text-slate-50 outline-none ring-1 ring-transparent focus:border-cyan-500 focus:ring-cyan-500/40"
+              />
+              {errors.address && <p className="mt-1 text-xs text-rose-400">{errors.address}</p>}
+            </div>
 
-    if (normalized.length) {
-      const valid = normalized.filter((id) =>
-        integrationDefinitions.some((def) => def.id === id),
-      );
-      setSelectedIntegrations(new Set(valid));
-      setPrefillSources(valid);
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-400">
+                Branża
+              </label>
+              <div className="relative">
+                <select
+                  value={data.industry}
+                  onChange={(e) => onChange({ industry: e.target.value })}
+                  className="w-full appearance-none rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm text-slate-50 outline-none ring-1 ring-transparent focus:border-cyan-500 focus:ring-cyan-500/40"
+                >
+                  <option value="">Wybierz z listy</option>
+                  <option value="ecommerce_b2c">E-commerce (B2C)</option>
+                  <option value="ecommerce_b2b">E-commerce (B2B)</option>
+                  <option value="omnichannel">Omnichannel (online + retail)</option>
+                  <option value="marketplace_seller">Marketplace seller</option>
+                  <option value="other">Inna</option>
+                </select>
+                <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-500">
+                  ▼
+                </div>
+              </div>
+              {errors.industry && (
+                <p className="mt-1 text-xs text-rose-400">{errors.industry}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-400">
+                Waluta
+              </label>
+              <div className="relative">
+                <select
+                  value={data.currency}
+                  onChange={(e) =>
+                    onChange({ currency: e.target.value as CompanyData['currency'] })
+                  }
+                  className="w-full appearance-none rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm text-slate-50 outline-none ring-1 ring-transparent focus:border-cyan-500 focus:ring-cyan-500/40"
+                >
+                  <option value="PLN">PLN (Polski Złoty)</option>
+                  <option value="EUR">EUR</option>
+                  <option value="USD">USD</option>
+                </select>
+                <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-500">
+                  ▼
+                </div>
+              </div>
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-400">
+                E-mail administratora
+              </label>
+              <input
+                type="email"
+                value={data.adminEmail}
+                onChange={(e) => onChange({ adminEmail: e.target.value })}
+                placeholder="admin@firma.pl"
+                className="w-full rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm text-slate-50 outline-none ring-1 ring-transparent focus:border-cyan-500 focus:ring-cyan-500/40"
+              />
+              {errors.adminEmail && (
+                <p className="mt-1 text-xs text-rose-400">{errors.adminEmail}</p>
+              )}
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-3 border-t border-white/5 pt-4 text-xs text-slate-300">
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={data.notifyIncidents}
+                onChange={(e) => onChange({ notifyIncidents: e.target.checked })}
+                className="h-4 w-4 rounded border-slate-600 bg-slate-900 text-cyan-500 focus:ring-cyan-500"
+              />
+              <span>Chcę otrzymywać powiadomienia systemowe (awarie ETL, problemy z integracjami).</span>
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={data.acceptedRules}
+                onChange={(e) => onChange({ acceptedRules: e.target.checked })}
+                className="h-4 w-4 rounded border-slate-600 bg-slate-900 text-cyan-500 focus:ring-cyan-500"
+              />
+              <span>
+                Akceptuję{' '}
+                <Link href="/terms" className="text-cyan-400 underline underline-offset-2">
+                  Regulamin
+                </Link>{' '}
+                i{' '}
+                <Link href="/privacy-policy" className="text-cyan-400 underline underline-offset-2">
+                  Politykę Prywatności
+                </Link>
+                .
+              </span>
+            </label>
+            {errors.acceptedRules && (
+              <p className="text-xs text-rose-400">{errors.acceptedRules}</p>
+            )}
+          </div>
+
+          <div className="mt-2 space-y-1 text-xs text-amber-300/90">
+            <p>• NIP musi mieć dokładnie 10 cyfr.</p>
+            <p>• Podaj nazwę firmy i adres rejestrowy.</p>
+            <p>• Podaj e-mail administratora.</p>
+            <p>• Musisz zaakceptować Regulamin i Politykę Prywatności.</p>
+          </div>
+        </div>
+
+        <ExpertsAside />
+      </div>
+    </div>
+  );
+}
+
+interface StepIntegrationsProps {
+  data: IntegrationsData;
+  onChange: (patch: Partial<IntegrationsData>) => void;
+}
+
+function StepIntegrations({ data, onChange }: StepIntegrationsProps) {
+  const toggle = (field: keyof IntegrationsData) => {
+    const current = data[field];
+    if (typeof current === 'boolean') {
+      onChange({ [field]: !current } as Partial<IntegrationsData>);
     }
-  }, [searchParams]);
+  };
+
+  const storeOptions: Array<{ value: IntegrationsData['store']; label: string }> = [
+    { value: '', label: 'Wybierz z listy' },
+    { value: 'woocommerce', label: 'WooCommerce' },
+    { value: 'shopify', label: 'Shopify' },
+    { value: 'idosell', label: 'IdoSell' },
+    { value: 'other', label: 'Inna platforma / custom' },
+  ];
+
+  return (
+    <div className="space-y-8">
+      <div className="flex flex-col items-start justify-between gap-4 border-b border-white/5 pb-6 md:flex-row md:items-center">
+        <div>
+          <h2 className="text-2xl font-semibold tracking-tight text-white">Źródła danych</h2>
+          <p className="mt-1 text-sm text-slate-400">
+            Wersja demo zakłada przykładowy sklep i główne kanały performance (Google + Meta).
+          </p>
+        </div>
+        <div className="flex items-center gap-2 rounded-full border border-slate-700 bg-slate-900/70 px-3 py-1 text-xs text-slate-300">
+          <Cloud className="h-3 w-3" />
+          ETL + hurtownia w cenie Trialu
+        </div>
+      </div>
+
+      <div className="grid gap-8 lg:grid-cols-3">
+        <div className="space-y-6 lg:col-span-2">
+          {/* Section: Store */}
+          <div className="space-y-3">
+            <label className="block text-xs font-semibold uppercase tracking-wide text-slate-400">
+              Platforma sklepu
+            </label>
+            <div className="relative">
+              <select
+                value={data.store}
+                onChange={(e) =>
+                  onChange({ store: e.target.value as IntegrationsData['store'] })
+                }
+                className="w-full appearance-none rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm text-slate-50 outline-none ring-1 ring-transparent focus:border-cyan-500 focus:ring-cyan-500/40"
+              >
+                {storeOptions.map((opt) => (
+                  <option key={opt.value || 'none'} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-500">
+                ▼
+              </div>
+            </div>
+            <p className="text-xs text-slate-500">
+              W pełnej wersji możesz podłączyć wiele sklepów jednocześnie (np. WooCommerce +
+              Shopify).
+            </p>
+          </div>
+
+          {/* Section: Marketing & Analytics */}
+          <div className="space-y-4 rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-sm font-semibold text-slate-100">
+                Analityka i kampanie reklamowe
+              </p>
+              <span className="rounded-full bg-slate-900 px-3 py-1 text-[10px] font-mono uppercase tracking-[0.18em] text-slate-400">
+                GA4 + Google Ads + Meta
+              </span>
+            </div>
+            <div className="grid gap-3 md:grid-cols-2">
+              <label className="flex items-center gap-2 text-xs text-slate-300">
+                <input
+                  type="checkbox"
+                  checked={data.analyticsGa4}
+                  onChange={() => toggle('analyticsGa4')}
+                  className="h-4 w-4 rounded border-slate-600 bg-slate-900 text-cyan-500 focus:ring-cyan-500"
+                />
+                GA4 (zalecane) – lejek zakupowy i atrybucja
+              </label>
+              <label className="flex items-center gap-2 text-xs text-slate-300">
+                <input
+                  type="checkbox"
+                  checked={data.adsGoogle}
+                  onChange={() => toggle('adsGoogle')}
+                  className="h-4 w-4 rounded border-slate-600 bg-slate-900 text-cyan-500 focus:ring-cyan-500"
+                />
+                Google Ads – Search, Performance Max, Brand
+              </label>
+              <label className="flex items-center gap-2 text-xs text-slate-300">
+                <input
+                  type="checkbox"
+                  checked={data.adsMeta}
+                  onChange={() => toggle('adsMeta')}
+                  className="h-4 w-4 rounded border-slate-600 bg-slate-900 text-cyan-500 focus:ring-cyan-500"
+                />
+                Meta Ads – Prospecting + Remarketing
+              </label>
+              <label className="flex items-center gap-2 text-xs text-slate-300">
+                <input
+                  type="checkbox"
+                  checked={data.wantHistorical12m}
+                  onChange={() => toggle('wantHistorical12m')}
+                  className="h-4 w-4 rounded border-slate-600 bg-slate-900 text-cyan-500 focus:ring-cyan-500"
+                />
+                Wczytaj dane historyczne z ostatnich 12 miesięcy
+              </label>
+            </div>
+          </div>
+
+          {/* Section: Marketplaces */}
+          <div className="space-y-3">
+            <label className="block text-xs font-semibold uppercase tracking-wide text-slate-400">
+              Marketplace&apos;y (opcjonalnie)
+            </label>
+            <div className="flex flex-wrap gap-3 text-xs text-slate-300">
+              <button
+                type="button"
+                onClick={() => toggle('marketplaceAllegro')}
+                className={[
+                  'flex items-center gap-2 rounded-full border px-3 py-1.5',
+                  data.marketplaceAllegro
+                    ? 'border-cyan-500 bg-cyan-500/10 text-cyan-200'
+                    : 'border-slate-700 bg-slate-900 text-slate-300',
+                ].join(' ')}
+              >
+                <span className="h-2 w-2 rounded-full bg-orange-500" />
+                Allegro
+              </button>
+              <button
+                type="button"
+                onClick={() => toggle('marketplaceAmazon')}
+                className={[
+                  'flex items-center gap-2 rounded-full border px-3 py-1.5',
+                  data.marketplaceAmazon
+                    ? 'border-cyan-500 bg-cyan-500/10 text-cyan-200'
+                    : 'border-slate-700 bg-slate-900 text-slate-300',
+                ].join(' ')}
+              >
+                <span className="h-2 w-2 rounded-full bg-yellow-400" />
+                Amazon
+              </button>
+            </div>
+          </div>
+
+          {/* Comment */}
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-400">
+              Dodatkowe informacje / uwagi
+            </label>
+            <textarea
+              rows={3}
+              value={data.comment}
+              onChange={(e) => onChange({ comment: e.target.value })}
+              placeholder="Np. osobne konta Google Ads dla różnych krajów, specyficzne integracje, itp."
+              className="w-full rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm text-slate-50 outline-none ring-1 ring-transparent focus:border-cyan-500 focus:ring-cyan-500/40"
+            />
+          </div>
+        </div>
+
+        <ExpertsAside />
+      </div>
+    </div>
+  );
+}
+
+interface StepKeysProps {
+  data: KeysData;
+  onChange: (patch: Partial<KeysData>) => void;
+  errors: ValidationErrors;
+}
+
+function StepKeys({ data, onChange, errors }: StepKeysProps) {
+  const toggleBoolean = (field: keyof KeysData) => {
+    const current = data[field];
+    if (typeof current === 'boolean') {
+      onChange({ [field]: !current } as Partial<KeysData>);
+    }
+  };
+
+  return (
+    <div className="space-y-8">
+      <div className="flex flex-col items-start justify-between gap-4 border-b border-white/5 pb-6 md:flex-row md:items-center">
+        <div>
+          <h2 className="text-2xl font-semibold tracking-tight text-white">Dostęp i klucze</h2>
+          <p className="mt-1 text-sm text-slate-400">
+            W wersji demo możesz zasymulować dwa scenariusze: własny projekt GCP lub pełna
+            konfiguracja po stronie PapaData.
+          </p>
+        </div>
+        <div className="flex items-center gap-2 rounded-full border border-emerald-700 bg-emerald-950/40 px-3 py-1 text-xs text-emerald-300">
+          <Lock className="h-3 w-3" />
+          Dostęp tylko do odczytu (read-only)
+        </div>
+      </div>
+
+      <div className="grid gap-8 lg:grid-cols-3">
+        <div className="space-y-6 lg:col-span-2">
+          <div className="space-y-3 rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
+            <div className="flex items-center justify-between gap-4">
+              <p className="text-sm font-semibold text-slate-100">
+                Jak chcesz skonfigurować środowisko?
+              </p>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <button
+                type="button"
+                onClick={() => onChange({ hasOwnGcp: false })}
+                className={[
+                  'flex flex-col items-start gap-2 rounded-xl border p-4 text-left text-sm transition-all',
+                  !data.hasOwnGcp
+                    ? 'border-cyan-500/60 bg-cyan-500/10 text-slate-50 shadow-neon-cyan'
+                    : 'border-slate-700 bg-slate-950 text-slate-300 hover:border-slate-500',
+                ].join(' ')}
+              >
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-300">
+                  <Shield className="h-3 w-3" />
+                  PapaData zakłada projekt
+                </div>
+                <p>Rekomendowane – nasz zespół tworzy projekt GCP i nadaje dostęp administratorowi.</p>
+              </button>
+              <button
+                type="button"
+                onClick={() => onChange({ hasOwnGcp: true })}
+                className={[
+                  'flex flex-col items-start gap-2 rounded-xl border p-4 text-left text-sm transition-all',
+                  data.hasOwnGcp
+                    ? 'border-cyan-500/60 bg-cyan-500/10 text-slate-50 shadow-neon-cyan'
+                    : 'border-slate-700 bg-slate-950 text-slate-300 hover:border-slate-500',
+                ].join(' ')}
+              >
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-300">
+                  <Cloud className="h-3 w-3" />
+                  Użyj mojego projektu GCP
+                </div>
+                <p>
+                  Podasz identyfikator projektu i konto serwisowe z dostępem do BigQuery oraz Cloud
+                  Storage.
+                </p>
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-400">
+                ID projektu GCP
+              </label>
+              <input
+                value={data.projectId}
+                onChange={(e) => onChange({ projectId: e.target.value })}
+                placeholder={data.hasOwnGcp ? 'np. moj-sklep-production' : 'Zostanie utworzony automatycznie'}
+                className="w-full rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm text-slate-50 outline-none ring-1 ring-transparent focus:border-cyan-500 focus:ring-cyan-500/40"
+              />
+              {errors.projectId && (
+                <p className="mt-1 text-xs text-rose-400">{errors.projectId}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-400">
+                Dataset BigQuery
+              </label>
+              <input
+                value={data.datasetName}
+                onChange={(e) => onChange({ datasetName: e.target.value })}
+                placeholder="papadata_reporting"
+                className="w-full rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm text-slate-50 outline-none ring-1 ring-transparent focus:border-cyan-500 focus:ring-cyan-500/40"
+              />
+              {errors.datasetName && (
+                <p className="mt-1 text-xs text-rose-400">{errors.datasetName}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-400">
+                Klucz JSON konta serwisowego (opcjonalnie w demo)
+              </label>
+              <textarea
+                rows={4}
+                value={data.serviceAccountJson}
+                onChange={(e) => onChange({ serviceAccountJson: e.target.value })}
+                placeholder="{ ... }"
+                className="w-full rounded-lg border border-slate-700 bg-slate-900/80 px-3 py-2 text-xs font-mono text-slate-100 outline-none ring-1 ring-transparent focus:border-cyan-500 focus:ring-cyan-500/40"
+              />
+              {errors.serviceAccountJson && (
+                <p className="mt-1 text-xs text-rose-400">{errors.serviceAccountJson}</p>
+              )}
+              <p className="mt-1 text-xs text-slate-500">
+                W wersji demo nie wysyłamy żadnych danych do Google – to tylko pole treningowe.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-3 border-t border-white/5 pt-4 text-xs text-slate-300">
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={data.readonlyAccess}
+                onChange={() => toggleBoolean('readonlyAccess')}
+                className="h-4 w-4 rounded border-slate-600 bg-slate-900 text-cyan-500 focus:ring-cyan-500"
+              />
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={data.expertHelp}
+                onChange={() => toggleBoolean('expertHelp')}
+                className="h-4 w-4 rounded border-slate-600 bg-slate-900 text-cyan-500 focus:ring-cyan-500"
+              />
+              <span>Poproś eksperta PapaData o weryfikację konfiguracji (w cenie Trial).</span>
+            </label>
+          </div>
+        </div>
+
+        <ExpertsAside />
+      </div>
+    </div>
+  );
+}
+
+interface StepSummaryProps {
+  company: CompanyData;
+  integrations: IntegrationsData;
+  keys: KeysData;
+}
+
+function StepSummary({ company, integrations, keys }: StepSummaryProps) {
+  const storeLabel = useMemo(() => {
+    const map: Record<IntegrationsData['store'], string> = {
+      '': 'Nie wybrano',
+      woocommerce: 'WooCommerce',
+      shopify: 'Shopify',
+      idosell: 'IdoSell',
+      other: 'Inna / custom',
+    };
+    return map[integrations.store];
+  }, [integrations.store]);
+
+  return (
+    <div className="space-y-8">
+      <div className="flex flex-col items-start justify-between gap-4 border-b border-white/5 pb-6 md:flex-row md:items-center">
+        <div>
+          <h2 className="text-2xl font-semibold tracking-tight text-white">Podsumowanie</h2>
+          <p className="mt-1 text-sm text-slate-400">
+            Sprawdź, czy wszystkie dane wyglądają poprawnie. W wersji demo to tylko symulacja, ale
+            proces jest taki sam jak w produkcji.
+          </p>
+        </div>
+        <div className="flex items-center gap-2 rounded-full border border-emerald-700 bg-emerald-950/40 px-3 py-1 text-xs text-emerald-300">
+          <CheckCircle2 className="h-3 w-3" />
+          Konfiguracja gotowa do uruchomienia
+        </div>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-3">
+        <div className="space-y-4 rounded-2xl border border-slate-800 bg-slate-950/80 p-4 lg:col-span-2">
+          <h3 className="mb-2 text-sm font-semibold text-slate-100">Firma</h3>
+          <dl className="grid gap-2 text-xs text-slate-300 sm:grid-cols-2">
+            <div>
+              <dt className="text-slate-500">Nazwa</dt>
+              <dd className="font-medium text-slate-100">{company.name || '—'}</dd>
+            </div>
+            <div>
+              <dt className="text-slate-500">NIP</dt>
+              <dd className="font-mono text-slate-100">{company.nip || '—'}</dd>
+            </div>
+            <div>
+              <dt className="text-slate-500">Adres rejestrowy</dt>
+              <dd className="font-medium text-slate-100">{company.address || '—'}</dd>
+            </div>
+            <div>
+              <dt className="text-slate-500">Branża</dt>
+              <dd className="font-medium text-slate-100">{company.industry || '—'}</dd>
+            </div>
+            <div>
+              <dt className="text-slate-500">Waluta</dt>
+              <dd className="font-medium text-slate-100">{company.currency}</dd>
+            </div>
+            <div>
+              <dt className="text-slate-500">Administrator</dt>
+              <dd className="font-medium text-slate-100">{company.adminEmail || '—'}</dd>
+            </div>
+          </dl>
+        </div>
+
+        <div className="space-y-4 rounded-2xl border border-slate-800 bg-slate-950/80 p-4">
+          <h3 className="mb-2 text-sm font-semibold text-slate-100">Integracje</h3>
+          <ul className="space-y-1 text-xs text-slate-300">
+            <li>
+              • Sklep: <span className="font-medium text-slate-100">{storeLabel}</span>
+            </li>
+            <li>• GA4: {integrations.analyticsGa4 ? 'tak' : 'nie'}</li>
+            <li>• Google Ads: {integrations.adsGoogle ? 'tak' : 'nie'}</li>
+            <li>• Meta Ads: {integrations.adsMeta ? 'tak' : 'nie'}</li>
+            <li>• Allegro: {integrations.marketplaceAllegro ? 'tak' : 'nie'}</li>
+            <li>• Amazon: {integrations.marketplaceAmazon ? 'tak' : 'nie'}</li>
+            <li>
+              • Dane historyczne 12m:{' '}
+              {integrations.wantHistorical12m ? 'tak, pobierz' : 'nie, od momentu wdrożenia'}
+            </li>
+          </ul>
+        </div>
+
+        <div className="space-y-4 rounded-2xl border border-slate-800 bg-slate-950/80 p-4">
+          <h3 className="mb-2 text-sm font-semibold text-slate-100">Środowisko techniczne</h3>
+          <ul className="space-y-1 text-xs text-slate-300">
+            <li>• Projekt GCP: {keys.projectId || 'do utworzenia'}</li>
+            <li>• Dataset BigQuery: {keys.datasetName || 'papadata_reporting'}</li>
+            <li>• Tryb: {keys.hasOwnGcp ? 'Twój projekt GCP' : 'Projekt zarządzany przez PapaData'}</li>
+            <li>• Dostęp: {keys.readonlyAccess ? 'read-only' : 'pełny (demo)'}</li>
+            <li>• Ekspert: {keys.expertHelp ? 'tak, poproś o weryfikację' : 'nie, samodzielnie'}</li>
+          </ul>
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-emerald-700/70 bg-emerald-950/40 p-4 text-xs text-emerald-100">
+        Po kliknięciu <span className="font-semibold">„Uruchom konto demo”</span> zobaczysz ekran
+        terminala z symulacją tworzenia projektu, ETL i raportów. W realnym wdrożeniu ten etap
+        trwa zwykle od kilkunastu minut do kilku godzin – w zależności od liczby integracji i
+        wolumenu danych.
+      </div>
+    </div>
+  );
+}
+
+interface TerminalProps {
+  company: CompanyData;
+  onDone: () => void;
+}
+
+function TerminalView({ company, onDone }: TerminalProps) {
+  const [progress, setProgress] = useState(0);
+  const [currentLine, setCurrentLine] = useState(0);
+  const [isDone, setIsDone] = useState(false);
 
   useEffect(() => {
-    if (phase !== 'provisioning') return;
+    trackEvent('onboarding_terminal_open', { nip: company.nip });
 
-    const slug = (company.name || 'mojafirma')
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
-
-    const logsPl = [
-      `> Inicjalizuję środowisko klienta: ${slug || 'mojafirma-spzoo'}`,
-      '> Tworzę projekt GCP i dataset: ... (region: europe-central2)... [OK]',
-      '> Konfiguruję integracje: ' +
-        Array.from(selectedIntegrations).join(', ') +
-        '... [OK]',
-      '> Szyfruję klucze w Google Secret Manager... [OK]',
-      '> Uruchamiam potoki ETL (pobieranie danych historycznych 365 dni)... [W TOKU]',
-      '> Konfiguruję dashboardy domyślne i widok Raportów Live... [OK]',
-      '> Twoja platforma jest gotowa. Za chwilę przejdziesz do pulpitu.',
-    ];
-
-    const logsEn = [
-      `> Initialising customer workspace: ${slug || 'my-company'}`,
-      '> Creating GCP project and datasets (region: europe-central2)... [OK]',
-      '> Configuring integrations: ' +
-        Array.from(selectedIntegrations).join(', ') +
-        '... [OK]',
-      '> Encrypting keys in Google Secret Manager... [OK]',
-      '> Running ETL pipelines (365 days of historical data)... [IN PROGRESS]',
-      '> Preparing default dashboards and Live Reports view... [OK]',
-      '> Your platform is ready. Redirecting to your dashboard.',
-    ];
-
-    const logList = isPl ? logsPl : logsEn;
-
-    const baseEntries: LogEntry[] = logList.map((text) => ({
-      text,
-      tone: 'info',
-    }));
-
-    const warningEntries: LogEntry[] = activationHealth
-      .filter((item) => item.status !== 'ok' && item.status !== 'connected')
-      .map((item) => ({
-        text: isPl
-          ? `> Integracja ${item.id} - niepoprawne klucze / wymagane ponowne logowanie. Środowisko utworzone, ale dane z tego źródła nie będą pobierane.`
-          : `> Integration ${item.id} - invalid keys / re-auth needed. Workspace created, but data from this source will not be ingested.`,
-        tone: 'warn',
-      }));
-
-    const merged = [...baseEntries, ...warningEntries];
-    setLogEntries([]);
-    setLogProgress(0);
-
-    let index = 0;
+    const totalLines = TERMINAL_LOGS.length;
     const interval = window.setInterval(() => {
-      setLogEntries((prev) => [...prev, merged[index]]);
-      setLogProgress(Math.round(((index + 1) / merged.length) * 100));
-      index += 1;
-      if (index >= merged.length) {
-        window.clearInterval(interval);
-        window.setTimeout(() => {
-          router.push('/dashboard');
-        }, 1600);
-      }
+      setCurrentLine((prev) => {
+        const next = prev + 1;
+        setProgress(Math.min(100, Math.round((next / totalLines) * 100)));
+        if (next >= totalLines) {
+          window.clearInterval(interval);
+          setTimeout(() => {
+            setIsDone(true);
+            trackEvent('onboarding_terminal_done', {});
+          }, 800);
+        }
+        return Math.min(next, totalLines);
+      });
     }, 900);
 
     return () => window.clearInterval(interval);
-  }, [phase, isPl, company.name, selectedIntegrations, router, activationHealth]);
+  }, [company.nip]);
 
-  const canProceed = useMemo(() => {
-    if (currentStep === 'company') {
-      return (
-        company.nip.trim().length >= 10 &&
-        company.contactEmail.trim().length > 3 &&
-        company.acceptPolicies
-      );
-    }
-    if (currentStep === 'integrations') {
-      return selectedIntegrations.size > 0;
-    }
-    if (currentStep === 'keys') {
-      return keysHealth.hasStoreOk && keysHealth.hasAdsOk;
-    }
-    if (currentStep === 'summary') {
-      return summaryChecks.ownership && summaryChecks.gcp;
-    }
-    return true;
-  }, [company, currentStep, keysHealth, selectedIntegrations, summaryChecks]);
+  return (
+    <div className="min-h-screen bg-slate-950 text-slate-50">
+      <div className="mx-auto flex max-w-5xl flex-col gap-6 px-4 pb-10 pt-10">
+        <header className="flex items-center justify-between gap-4 border-b border-white/5 pb-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
+              Onboarding
+            </p>
+            <h1 className="mt-1 text-xl font-semibold tracking-tight text-white">
+              Uruchamiamy Twoje środowisko PapaData
+            </h1>
+            <p className="mt-1 text-xs text-slate-400">
+              Ten ekran symuluje proces tworzenia projektu GCP, datasetów BigQuery oraz konfiguracji
+              ETL.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 rounded-full border border-slate-700 bg-slate-900 px-3 py-1 text-xs text-slate-300">
+            <Server className="h-3 w-3" />
+            {company.name || 'Nowe konto demo'}
+          </div>
+        </header>
 
-  const goNext = () => {
-    if (stepIndex < wizardSteps.length - 1) {
-      setStepIndex((i) => i + 1);
-    }
+        <main className="grid gap-6 lg:grid-cols-[minmax(0,2.5fr)_minmax(0,1.2fr)]">
+          <div className="rounded-2xl border border-slate-800 bg-black/70 p-4 font-mono text-xs text-slate-200 shadow-[0_0_40px_rgba(8,47,73,0.7)]">
+            <div className="mb-3 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="inline-flex h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
+                <span className="text-[11px] text-emerald-300">LIVE DEPLOY</span>
+              </div>
+              <span className="rounded-full bg-slate-900 px-2 py-0.5 text-[10px] text-slate-400">
+                europe-central2
+              </span>
+            </div>
+
+            <div className="mb-3 h-1.5 w-full overflow-hidden rounded-full bg-slate-800">
+              <div
+                className="h-1.5 rounded-full bg-gradient-to-r from-cyan-500 via-sky-400 to-emerald-400 shadow-[0_0_12px_rgba(34,211,238,0.6)] transition-all duration-500"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              {TERMINAL_LOGS.slice(0, currentLine).map((line, index) => (
+                <p key={line} className="flex items-start gap-2 text-[11px]">
+                  <span className="text-slate-600">papadata@etl</span>
+                  <span className="text-slate-500">➜</span>
+                  <span
+                    className={
+                      index === currentLine - 1 && !isDone
+                        ? 'text-cyan-300'
+                        : index === TERMINAL_LOGS.length - 1 && isDone
+                        ? 'text-emerald-300'
+                        : 'text-slate-200'
+                    }
+                  >
+                    {line}
+                  </span>
+                </p>
+              ))}
+              {!isDone && (
+                <p className="mt-2 flex items-center gap-2 text-[11px] text-slate-500">
+                  <Loader2 className="h-3 w-3 animate-spin text-cyan-400" />
+                  Przygotowujemy środowisko demo...
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-4">
+            <div className="rounded-2xl border border-slate-800 bg-slate-950/80 p-4 text-xs text-slate-300">
+              <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-400">
+                Co się dzieje w tle?
+              </p>
+              <ul className="mt-2 space-y-1.5">
+                <li>• Tworzymy strukturę tabel w BigQuery pod raporty sprzedaży i marketingu.</li>
+                <li>• Konfigurujemy konektory ETL do sklepu, GA4 oraz kont reklamowych.</li>
+                <li>• Generujemy dashboardy startowe pod zarząd, marketing i e-commerce.</li>
+              </ul>
+            </div>
+
+            {isDone && (
+              <div className="flex flex-col items-center gap-3 rounded-2xl border border-emerald-700/70 bg-emerald-950/40 p-5 text-center text-sm text-emerald-50">
+                <CheckCircle2 className="h-10 w-10 text-emerald-400" />
+                <p className="text-base font-semibold">
+                  Konfiguracja zapisana. Środowisko demo jest gotowe.
+                </p>
+                <p className="text-xs text-emerald-100/90">
+                  Twoje dashboardy są przygotowywane. W prawdziwym koncie otrzymasz powiadomienie
+                  e-mail, gdy dane zostaną w pełni zsynchronizowane.
+                </p>
+                <button
+                  type="button"
+                  onClick={onDone}
+                  className="mt-1 inline-flex items-center justify-center rounded-xl bg-sky-500 px-5 py-2 text-xs font-semibold text-white shadow-neon-cyan transition-transform hover:-translate-y-0.5 hover:bg-sky-400"
+                >
+                  Przejdź do dashboardu
+                </button>
+              </div>
+            )}
+
+            {!isDone && (
+              <div className="rounded-2xl border border-slate-800 bg-slate-950/80 p-4 text-xs text-slate-400">
+                W wersji demo ten proces jest skrócony. W produkcji czas zależy od liczby integracji
+                i wolumenu danych – zwykle od kilkunastu minut do kilku godzin.
+              </div>
+            )}
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+}
+
+export default function WizardPage() {
+  const router = useRouter();
+  const [view, setView] = useState<View>('wizard');
+  const [step, setStep] = useState<WizardStep>(1);
+  const [company, setCompany] = useState<CompanyData>(INITIAL_COMPANY);
+  const [integrations, setIntegrations] = useState<IntegrationsData>(INITIAL_INTEGRATIONS);
+  const [keys, setKeys] = useState<KeysData>(INITIAL_KEYS);
+  const [errors, setErrors] = useState<ValidationErrors>({});
+
+  const goHome = () => {
+    router.push('/');
   };
 
-  const goPrev = () => {
-    if (stepIndex > 0) {
-      setStepIndex((i) => i - 1);
+  const validateStep = (currentStep: WizardStep): boolean => {
+    const nextErrors: ValidationErrors = {};
+    if (currentStep === 1) {
+      if (company.nip.length !== 10) {
+        nextErrors.nip = 'NIP musi mieć dokładnie 10 cyfr.';
+      }
+      if (!company.name.trim()) {
+        nextErrors.name = 'Podaj nazwę firmy.';
+      }
+      if (!company.address.trim()) {
+        nextErrors.address = 'Podaj adres rejestrowy.';
+      }
+      if (!company.industry) {
+        nextErrors.industry = 'Wybierz branżę.';
+      }
+      if (!company.adminEmail.trim()) {
+        nextErrors.adminEmail = 'Podaj e-mail administratora.';
+      }
+      if (!company.acceptedRules) {
+        nextErrors.acceptedRules = 'Musisz zaakceptować Regulamin i Politykę Prywatności.';
+      }
     }
+
+    if (currentStep === 3) {
+      if (keys.hasOwnGcp && !keys.projectId.trim()) {
+        nextErrors.projectId = 'Podaj ID istniejącego projektu GCP lub przełącz na tryb zarządzany.';
+      }
+      if (!keys.datasetName.trim()) {
+        nextErrors.datasetName = 'Podaj nazwę datasetu BigQuery.';
+      }
+    }
+
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
   };
 
-  const handleNipBlur = () => {
-    const normalized = company.nip.replace(/[^0-9]/g, '');
-    if (normalized.length < 10) {
-      setCompany((prev) => ({
-        ...prev,
-        nipStatus: 'error',
-        nipMessage: isPl
-          ? 'Nie uda\u0142o si\u0119 pobra\u0107 danych firmy. Sprawd\u017a NIP lub uzupe\u0142nij pola r\u0119cznie.'
-          : 'Could not fetch company data. Check the tax ID or fill the fields manually.',
-      }));
+  const handleNext = () => {
+    if (!validateStep(step)) {
+      trackEvent('onboarding_step_error', { step });
       return;
     }
-
-    setCompany((prev) => ({
-      ...prev,
-      nipStatus: 'checking',
-      nipMessage: isPl
-        ? 'Sprawdzam dane w rejestrze GUS...'
-        : 'Checking data in the registry...',
-    }));
-
-    window.setTimeout(() => {
-      setCompany((prev) => ({
-        ...prev,
-        nipStatus: 'ok',
-        nipMessage: isPl
-          ? 'Dane zosta\u0142y pobrane automatycznie. Mo\u017cesz je edytowa\u0107.'
-          : 'Data fetched automatically. You can edit before moving on.',
-        name: prev.name || (isPl ? 'Moja Firma sp. z o.o.' : 'My Company LLC'),
-        address:
-          prev.address ||
-          (isPl
-            ? 'ul. Przyk\u0142adowa 10, 00-000 Warszawa, Polska'
-            : 'Example Street 10, 00-000 Warsaw, Poland'),
-      }));
-    }, 1100);
-  };
-
-  const toggleIntegration = (id: string) => {
-    const definition = integrationDefinitions.find((def) => def.id === id);
-    if (definition?.status === 'comingSoon') return;
-
-    setSelectedIntegrations((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
-  };
-
-  const handleOauthAction = (id: OAuthIntegrationId, action: 'connect' | 'test') => {
-    setOauthConnections((prev) => ({
-      ...prev,
-      [id]: action === 'connect' ? 'connecting' : 'testing',
-    }));
-
-    window.setTimeout(() => {
-      setOauthConnections((prev) => {
-        const wasConnected = prev[id] === 'connected' || prev[id] === 'ok';
-        const nextStatus =
-          action === 'connect'
-            ? 'connected'
-            : wasConnected
-            ? 'ok'
-            : 'error';
-        return {
-          ...prev,
-          [id]: nextStatus,
-        };
-      });
-    }, 900);
-  };
-
-  const handleApiChange = (id: ApiIntegrationId, field: keyof ApiConnection, value: string) => {
-    setApiConnections((prev) => ({
-      ...prev,
-      [id]: { ...prev[id], [field]: value },
-    }));
-  };
-
-  const handleApiTest = (id: ApiIntegrationId, name: string) => {
-    setApiConnections((prev) => ({
-      ...prev,
-      [id]: { ...prev[id], status: 'testing', message: '' },
-    }));
-
-    window.setTimeout(() => {
-      const requiredFields = apiIntegrationFields[id] || [];
-      const hasAllFields = requiredFields.every(
-        (field) => (apiConnections[id] as any)[field.key]?.toString().trim().length,
-      );
-      const success = hasAllFields;
-
-      setApiConnections((prev) => ({
-        ...prev,
-        [id]: {
-          ...prev[id],
-          status: success ? 'ok' : 'error',
-          message: success
-            ? isPl
-              ? 'Po\u0142\u0105czenie poprawne \u2013 ' + name + ' gotowe do importu.'
-              : 'Connection successful ? ' + name + ' is ready.'
-            : isPl
-            ? 'Nie uda\u0142o si\u0119 po\u0142\u0105czy\u0107. Sprawd\u017a adres i klucze API.'
-            : 'Connection failed. Check the URL and API keys.',
-        },
-      }));
-    }, 1000);
-  };
-
-  const persistIntegrationHealth = (simulateExpiry = false) => {
-    const data = Array.from(selectedIntegrations).map((id) => {
-      let status = getStatusFor(id) ?? 'error';
-      if (simulateExpiry && (status === 'ok' || status === 'connected') && Math.random() < 0.25) {
-        status = 'needs_reauth';
-      }
-      return { id, status, updatedAt: Date.now() };
-    });
-
-    if (typeof window !== 'undefined') {
-      window.sessionStorage.setItem('papadata.integrationHealth', JSON.stringify(data));
-      window.sessionStorage.setItem(
-        'papadata.integrationWarnings',
-        data.some((d) => d.status !== 'ok' && d.status !== 'connected') ? '1' : '0',
-      );
+    if (step === 4) {
+      // Start terminal simulation
+      trackEvent('onboarding_activate', { nip: company.nip });
+      setView('terminal');
+      return;
     }
-    setActivationHealth(data);
+    const nextStep = (step + 1) as WizardStep;
+    setStep(nextStep);
+    trackEvent('onboarding_step_next', { step: nextStep });
   };
 
-  const activatePlatform = () => {
-    persistIntegrationHealth(true);
-    setPhase('provisioning');
+  const handlePrev = () => {
+    if (step === 1) return;
+    const prevStep = (step - 1) as WizardStep;
+    setStep(prevStep);
+    setErrors({});
+    trackEvent('onboarding_step_prev', { step: prevStep });
   };
 
-  const selectedApiIntegrations = useMemo(
-    () =>
-      Array.from(selectedIntegrations).filter((id): id is ApiIntegrationId =>
-        ['woocommerce', 'shopify', 'allegro', 'baselinker'].includes(id),
-      ),
-    [selectedIntegrations],
-  );
-
-  const selectedOAuthIntegrations = useMemo(
-    () =>
-      Array.from(selectedIntegrations).filter((id): id is OAuthIntegrationId =>
-        ['googleAds', 'ga4', 'metaAds', 'tiktokAds'].includes(id),
-      ),
-    [selectedIntegrations],
-  );
-
-  const integrationGroupLabels = {
-    stores: isPl ? 'Sklepy' : 'Stores',
-    ads: isPl ? 'Reklama i kampanie' : 'Ads & campaigns',
-    marketplace: isPl ? 'Marketplace' : 'Marketplace',
-    analytics: isPl ? 'Analityka' : 'Analytics',
-    tools: isPl ? 'Narzędzia / CRM / Płatności' : 'Tools / CRM / Payments',
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    handleNext();
   };
 
-  const wizardCopy = {
-    companyTitle: isPl ? 'Dane Twojej firmy' : 'Your company details',
-    companyLead: isPl
-      ? 'Na podstawie NIP automatycznie uzupełnimy dane firmy i przygotujemy osobne środowisko w Google Cloud.'
-      : 'We will auto-fill your company details from the tax ID and prepare a separate Google Cloud workspace.',
-    contactLabel: isPl ? 'E-mail do kontaktu i powiadomień' : 'Contact & notifications email',
-    contactHint: isPl
-      ? 'Na ten adres wyślemy podsumowanie konfiguracji, alerty o integracjach i przypomnienia o końcu okresu próbnego.'
-      : 'We will send the setup summary, integration alerts and trial reminders here.',
-    industryLabel: isPl ? 'Branża / Industry' : 'Industry',
-    currencyLabel: isPl ? 'Waluta raportowania' : 'Reporting currency',
-    timezoneLabel: isPl ? 'Strefa czasowa' : 'Time zone',
-    securityTitle: isPl ? 'Bezpieczeństwo Twoich danych' : 'Your data security',
-    securityBullets: isPl
-      ? [
-          'Dane firmy i konfiguracja integracji są w Google Cloud (region: europe-central2).',
-          'Klucze API i tokeny zapisujemy w zaszyfrowanym Secrecie.',
-          'Nie udostępniamy kluczy innym klientom ani osobom trzecim.',
-        ]
-      : [
-          'Company data and integration settings live in Google Cloud (region: europe-central2).',
-          'API keys and tokens are stored in encrypted secrets.',
-          'We never expose keys to other customers or third parties.',
-        ],
-    acceptLabel: isPl
-      ? 'Zapoznałem się i akceptuję Regulamin oraz Politykę Prywatności.'
-      : 'I have read and accept the Terms of Service and Privacy Policy.',
-    integrationsTitle: isPl ? 'Wybierz systemy, które chcesz podłączyć' : 'Select the systems you want to connect',
-    integrationsLead: isPl
-      ? 'Te integracje określą, jakie dane pobierzemy i jakie raporty przygotujemy.'
-      : 'These integrations define what data we ingest and which reports we prepare.',
-    integrationsInfo: isPl
-      ? 'Możesz wybrać minimum 1 integrację sklepową oraz dowolną liczbę źródeł reklamowych.'
-      : 'Select at least one store integration and any ad sources you use.',
-    keysTitle: isPl ? 'Połącz swoje konta i dodaj klucze' : 'Connect your accounts and add keys',
-    keysLead: isPl
-      ? 'Dane logowania służą wyłącznie do pobierania danych do Twojej prywatnej hurtowni.'
-      : 'Credentials are used only to fetch data into your private warehouse.',
-    summaryTitle: isPl ? 'Podsumowanie konfiguracji' : 'Configuration summary',
-    summaryLead: isPl
-      ? 'Sprawdź dane przed startem. Po aktywacji przygotujemy środowisko analityczne.'
-      : 'Review the setup. After activation we will prepare your analytics workspace.',
-    activateCta: isPl ? 'Aktywuj platformę' : 'Activate platform',
-    back: isPl ? 'Wstecz' : 'Back',
-    next: isPl ? 'Dalej' : 'Next',
-  };
-
-  if (phase === 'provisioning') {
-    return (
-      <main className="min-h-screen bg-slate-950 text-slate-50">
-        <div className="mx-auto max-w-4xl px-4 py-16">
-          <div className="rounded-2xl border border-emerald-500/40 bg-slate-950/80 p-6 shadow-neon-emerald">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-300">
-                <Terminal className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-400">
-                  {isPl ? 'Provisioning' : 'Provisioning'}
-                </p>
-                <h1 className="text-xl font-semibold">
-                  {isPl ? 'Tworzymy Twoją instancję PapaData' : "We're creating your PapaData workspace"}
-                </h1>
-              </div>
-            </div>
-
-            <div className="mt-6 h-2 rounded-full bg-slate-900">
-              <div
-                className="h-2 rounded-full bg-gradient-to-r from-emerald-500 to-sky-400 transition-all"
-                style={{ width: `${logProgress}%` }}
-              />
-            </div>
-
-            <div className="mt-6 space-y-2 rounded-xl border border-slate-800 bg-slate-950/70 p-4 font-mono text-xs">
-              {logEntries.map((entry, idx) => (
-                <div key={idx} className="flex items-start gap-2">
-                  <span
-                    className={entry.tone === 'warn' ? 'text-amber-300' : 'text-emerald-500'}
-                  >
-                    {'>'}
-                  </span>
-                  <span
-                    className={entry.tone === 'warn' ? 'text-amber-200' : 'text-emerald-100'}
-                  >
-                    {entry.text}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            <p className="mt-4 text-xs text-slate-400">
-              {isPl
-                ? 'Gotowe! Przechodzimy do Twojego pulpitu.'
-                : 'All set! Redirecting you to your dashboard.'}
-            </p>
-          </div>
-        </div>
-      </main>
-    );
+  if (view === 'terminal') {
+    return <TerminalView company={company} onDone={() => router.push('/dashboard')} />;
   }
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-50">
-      <div className="mx-auto max-w-5xl px-4 py-10 md:py-12">
-                <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-emerald-400">
-            <Sparkles className="h-3.5 w-3.5" />
-            <span>{isPl ? 'Onboarding' : 'Onboarding'}</span>
-          </div>
-          <div className="flex flex-wrap items-center gap-3 text-[11px] text-slate-400">
-            <span>
-              {isPl
-                ? 'Zapisz konfigurację i wróć później — zapamiętamy ją w tej sesji.'
-                : 'Save the setup and return later — we keep it in this session.'}
-            </span>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => t.setLocale(isPl ? 'en' : 'pl')}
-                className="inline-flex items-center gap-1 rounded-full border border-slate-700 bg-slate-900/70 px-3 py-1.5 text-[11px] font-medium text-slate-200 transition hover:border-emerald-500 hover:text-emerald-200"
-              >
-                <Globe2 className="h-3.5 w-3.5" />
-                <span>{isPl ? 'PL' : 'EN'}</span>
-              </button>
-              <button
-                type="button"
-                onClick={toggleTheme}
-                className="inline-flex items-center gap-1 rounded-full border border-slate-700 bg-slate-900/70 px-3 py-1.5 text-[11px] font-medium text-slate-200 transition hover:border-emerald-500 hover:text-emerald-200"
-              >
-                {theme === 'dark' ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
-                <span>{theme === 'dark' ? 'Dark' : 'Light'}</span>
-              </button>
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900 text-slate-50">
+      <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 pb-10 pt-8">
+        {/* Top bar */}
+        <header className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-slate-900 text-xs font-bold text-white shadow-neon-cyan ring-1 ring-slate-700">
+              PD
+            </div>
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-slate-500">
+                Onboarding
+              </p>
+              <p className="text-sm font-medium text-slate-200">
+                Konfiguracja konta PapaData
+                <span className="text-slate-500"> (demo)</span>
+              </p>
             </div>
           </div>
-        </div>
+          <button
+            type="button"
+            onClick={goHome}
+            className="inline-flex items-center gap-1 rounded-full border border-slate-700 bg-slate-900/70 px-3 py-1.5 text-xs font-medium text-slate-300 transition-colors hover:border-slate-500 hover:text-slate-100"
+          >
+            <ArrowLeft className="h-3 w-3" />
+            Wróć na stronę główną
+          </button>
+        </header>
 
-        <div className="rounded-2xl border border-slate-800 bg-slate-950/60 shadow-lg">
-          <div className="border-b border-slate-800 px-4 py-4 md:px-6">
-            <div className="flex flex-wrap items-center gap-3">
-              {wizardSteps.map((step, idx) => {
-                const isActive = idx === stepIndex;
-                const isDone = idx < stepIndex;
-                const label =
-                  step === 'company'
-                    ? isPl
-                      ? 'Dane firmy'
-                      : 'Company details'
-                    : step === 'integrations'
-                    ? isPl
-                      ? 'Integracje'
-                      : 'Integrations'
-                    : step === 'keys'
-                    ? isPl
-                      ? 'Klucze i dostęp'
-                      : 'Keys & access'
-                    : isPl
-                    ? 'Podsumowanie'
-                    : 'Summary & launch';
-
-                return (
-                  <div key={step} className="flex items-center gap-2">
-                    <span
-                      className={`flex h-8 w-8 items-center justify-center rounded-full border text-sm ${
-                        isDone
-                          ? 'border-emerald-500/60 bg-emerald-500/10 text-emerald-200'
-                          : isActive
-                          ? 'border-emerald-500/60 bg-slate-900 text-emerald-100'
-                          : 'border-slate-700 bg-slate-900 text-slate-400'
-                      }`}
-                    >
-                      {isDone ? <CheckCircle2 className="h-4 w-4" /> : idx + 1}
-                    </span>
-                    <span className={isActive ? 'text-slate-50 font-semibold' : 'text-slate-400'}>
-                      {label}
-                    </span>
-                    {idx < wizardSteps.length - 1 && (
-                      <ChevronRight className="h-4 w-4 text-slate-700" />
-                    )}
-                  </div>
-                );
-              })}
+        <div className="rounded-3xl border border-slate-800 bg-slate-950/80 p-5 shadow-[0_0_40px_rgba(15,23,42,0.8)]">
+          <div className="mb-6 flex flex-col gap-4 border-b border-white/5 pb-5 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                Krok {step}/4
+              </p>
+              <h1 className="mt-1 text-lg font-semibold tracking-tight text-white">
+                {step === 1 && 'Dane firmy'}
+                {step === 2 && 'Integracje i źródła danych'}
+                {step === 3 && 'Dostęp i klucze'}
+                {step === 4 && 'Podsumowanie i start'}
+              </h1>
             </div>
+            <Stepper activeStep={step} />
           </div>
 
-          <div className="px-4 py-6 md:px-6 md:py-8">
-            {currentStep === 'company' && (
-              <CompanyStep
-                company={company}
-                setCompany={setCompany}
-                onNipBlur={handleNipBlur}
-                wizardCopy={wizardCopy}
-                setPolicyModal={setPolicyModal}
-                isPl={isPl}
-                t={t}
+          <form onSubmit={handleSubmit}>
+            {step === 1 && (
+              <StepCompany
+                data={company}
+                onChange={(patch) => setCompany((prev) => ({ ...prev, ...patch }))}
+                errors={errors}
               />
             )}
-
-            {currentStep === 'integrations' && (
-              <IntegrationsStep
-                isPl={isPl}
-                t={t}
-                integrationGroupLabels={integrationGroupLabels}
-                integrationDefinitions={integrationDefinitions}
-                selectedIntegrations={selectedIntegrations}
-                toggleIntegration={toggleIntegration}
-                wizardCopy={wizardCopy}
-                prefillSources={prefillSources}
+            {step === 2 && (
+              <StepIntegrations
+                data={integrations}
+                onChange={(patch) => setIntegrations((prev) => ({ ...prev, ...patch }))}
               />
             )}
-
-            {currentStep === 'keys' && (
-              <KeysStep
-                isPl={isPl}
-                t={t}
-                wizardCopy={wizardCopy}
-                selectedOAuthIntegrations={selectedOAuthIntegrations}
-                oauthConnections={oauthConnections}
-                handleOauthAction={handleOauthAction}
-                selectedApiIntegrations={selectedApiIntegrations}
-                apiConnections={apiConnections}
-                apiIntegrationFields={apiIntegrationFields}
-                handleApiChange={handleApiChange}
-                handleApiTest={handleApiTest}
-                keysHealth={keysHealth}
-                isHealthy={isHealthy}
-                getStatusFor={getStatusFor}
+            {step === 3 && (
+              <StepKeys
+                data={keys}
+                onChange={(patch) => setKeys((prev) => ({ ...prev, ...patch }))}
+                errors={errors}
               />
             )}
-
-            {currentStep === 'summary' && (
-              <SummaryStep
-                isPl={isPl}
-                wizardCopy={wizardCopy}
-                company={company}
-                t={t}
-                selectedIntegrations={selectedIntegrations}
-                oauthConnections={oauthConnections}
-                apiConnections={apiConnections}
-                summaryChecks={summaryChecks}
-                setSummaryChecks={setSummaryChecks}
-              />
+            {step === 4 && (
+              <StepSummary company={company} integrations={integrations} keys={keys} />
             )}
-          </div>
 
-          <div className="flex items-center justify-between gap-3 border-t border-slate-800 px-4 py-4 md:px-6">
-            <div className="text-[11px] text-slate-500">
-              {currentStep === 'keys' && isPl
-                ? 'Najpierw podłącz kluczowe źródła – resztę możesz dodać później.'
-                : currentStep === 'keys' && !isPl
-                ? 'Connect the critical sources first – you can add more later.'
-                : null}
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={goPrev}
-                disabled={stepIndex === 0}
-                className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-900/70 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-emerald-500 hover:text-emerald-200 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                {wizardCopy.back}
-              </button>
-
-              {currentStep !== 'summary' && (
+            <div className="mt-8 flex flex-col-reverse items-center justify-between gap-4 border-t border-white/5 pt-4 text-xs md:flex-row">
+              <div className="flex items-center gap-2 text-slate-500">
+                <HelpCircle className="h-3.5 w-3.5" />
+                <span>
+                  W razie pytań odezwij się na{' '}
+                  <a
+                    href="mailto:hello@papadata.pl"
+                    className="text-cyan-400 underline underline-offset-2"
+                  >
+                    hello@papadata.pl
+                  </a>
+                  .
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
                 <button
                   type="button"
-                  onClick={goNext}
-                  disabled={!canProceed}
-                  className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-slate-950 shadow-sm transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
+                  onClick={handlePrev}
+                  disabled={step === 1}
+                  className="inline-flex items-center gap-1 rounded-full border border-slate-700 bg-transparent px-4 py-2 text-xs font-medium text-slate-200 transition-colors disabled:cursor-not-allowed disabled:opacity-40 hover:border-slate-500 hover:bg-slate-900"
                 >
-                  {wizardCopy.next}
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowLeft className="h-3 w-3" />
+                  Wstecz
                 </button>
-              )}
-
-              {currentStep === 'summary' && (
                 <button
-                  type="button"
-                  disabled={!canProceed}
-                  onClick={activatePlatform}
-                  className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-sky-400 px-4 py-2 text-sm font-semibold text-slate-950 shadow-neon-emerald transition hover:from-emerald-400 hover:to-sky-300 disabled:cursor-not-allowed disabled:opacity-60"
+                  type="submit"
+                  className="inline-flex items-center gap-2 rounded-full bg-cyan-500 px-5 py-2 text-xs font-semibold text-white shadow-neon-cyan transition-transform hover:-translate-y-0.5 hover:bg-cyan-400"
                 >
-                  <BadgeCheck className="h-4 w-4" />
-                  {wizardCopy.activateCta}
+                  {step === 4 ? 'Uruchom konto demo' : 'Dalej'}
+                  <ArrowRight className="h-3.5 w-3.5" />
                 </button>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {policyModal && (
-        <PolicyModal isPl={isPl} type={policyModal} onClose={() => setPolicyModal(null)} />
-      )}
-    </main>
-  );
-}
-
-// Komponenty szczegółowe znajdują się poniżej.
-
-function CompanyStep({
-  company,
-  setCompany,
-  onNipBlur,
-  wizardCopy,
-  setPolicyModal,
-  isPl,
-  t,
-}: {
-  company: any;
-  setCompany: React.Dispatch<React.SetStateAction<any>>;
-  onNipBlur: () => void;
-  wizardCopy: Record<string, string | string[]>;
-  setPolicyModal: (value: 'terms' | 'privacy' | 'dpa' | null) => void;
-  isPl: boolean;
-  t: ReturnType<typeof useI18n>;
-}) {
-  return (
-    <div className="grid gap-6 md:grid-cols-[1.2fr_minmax(0,0.9fr)]">
-      <div className="space-y-4">
-        <div>
-          <h2 className="text-xl font-semibold">{wizardCopy.companyTitle as string}</h2>
-          <p className="mt-1 text-sm text-slate-300">{wizardCopy.companyLead as string}</p>
-        </div>
-
-        <div className="space-y-3 rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
-          <label className="text-sm font-medium text-slate-100">
-            {isPl ? 'NIP firmy / Company tax ID' : 'Company tax ID (NIP)'}
-          </label>
-          <input
-            value={company.nip}
-            onChange={(e) => setCompany((prev: any) => ({ ...prev, nip: e.target.value }))}
-            onBlur={onNipBlur}
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-50 placeholder:text-slate-500 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-            placeholder={isPl ? 'Wpisz NIP bez spacji i kresek' : 'Enter tax ID without spaces'}
-          />
-          {company.nipStatus !== 'idle' && (
-            <p
-              className={`text-xs ${
-                company.nipStatus === 'ok'
-                  ? 'text-emerald-300'
-                  : company.nipStatus === 'checking'
-                  ? 'text-slate-300'
-                  : 'text-amber-300'
-              }`}
-            >
-              {company.nipStatus === 'checking' && <Loader2 className="mr-1 inline h-4 w-4 animate-spin" />}
-              {company.nipMessage}
-            </p>
-          )}
-        </div>
-
-        <div className="grid gap-3 md:grid-cols-2">
-          <Field
-            label={isPl ? 'Nazwa firmy' : 'Company name'}
-            value={company.name}
-            onChange={(v: string) => setCompany((prev: any) => ({ ...prev, name: v }))}
-            placeholder={isPl ? 'np. Moja Firma sp. z o.o.' : 'e.g. My Company LLC'}
-          />
-          <Field
-            label={isPl ? 'Branża / Industry' : 'Industry'}
-            value={company.industry}
-            onChange={(v: string) => setCompany((prev: any) => ({ ...prev, industry: v }))}
-            as="select"
-            options={[
-              { value: 'ecommerce', label: isPl ? 'E-commerce (sklep internetowy)' : 'E-commerce (online store)' },
-              { value: 'omnichannel', label: 'Omnichannel' },
-              { value: 'b2b', label: 'B2B' },
-            ]}
-          />
-        </div>
-
-        <Field
-          label={isPl ? 'Adres firmy' : 'Company address'}
-          value={company.address}
-          onChange={(v: string) => setCompany((prev: any) => ({ ...prev, address: v }))}
-          placeholder={isPl ? 'ulica, kod, miasto, kraj' : 'street, postal code, city, country'}
-          as="textarea"
-        />
-
-        <div className="grid gap-3 md:grid-cols-2">
-          <Field
-            label={wizardCopy.currencyLabel as string}
-            value={company.currency}
-            onChange={(v: string) => setCompany((prev: any) => ({ ...prev, currency: v }))}
-            as="select"
-            options={[
-              { value: 'PLN', label: 'PLN' },
-              { value: 'EUR', label: 'EUR' },
-              { value: 'USD', label: 'USD' },
-            ]}
-          />
-          <Field
-            label={wizardCopy.timezoneLabel as string}
-            value={company.timezone}
-            onChange={(v: string) => setCompany((prev: any) => ({ ...prev, timezone: v }))}
-            as="select"
-            options={[
-              { value: 'Europe/Warsaw', label: 'Europe/Warsaw' },
-              { value: 'Europe/London', label: 'Europe/London' },
-              { value: 'UTC', label: 'UTC' },
-            ]}
-          />
-        </div>
-
-        <div className="grid gap-3 md:grid-cols-2">
-          <Field
-            label={wizardCopy.contactLabel as string}
-            value={company.contactEmail}
-            onChange={(v: string) => setCompany((prev: any) => ({ ...prev, contactEmail: v }))}
-            placeholder="you@example.com"
-            icon={<Mail className="h-4 w-4 text-slate-500" />}
-            helper={wizardCopy.contactHint as string}
-          />
-          <div className="space-y-3 rounded-2xl border border-slate-800 bg-slate-900/60 p-4 text-sm text-slate-200">
-            <label className="inline-flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={company.notify}
-                onChange={(e) =>
-                  setCompany((prev: any) => ({ ...prev, notify: e.target.checked }))
-                }
-                className="h-4 w-4 rounded border-slate-600 bg-slate-900 text-emerald-500 focus:ring-emerald-500"
-              />
-              <span>
-                {isPl
-                  ? 'Chcę otrzymywać powiadomienia o stanie integracji i okresie próbnym.'
-                  : 'I want to receive notifications about integration status and trial period.'}
-              </span>
-            </label>
-            <label className="inline-flex items-center gap-2 text-slate-400">
-              <input
-                type="checkbox"
-                checked={company.marketing}
-                onChange={(e) =>
-                  setCompany((prev: any) => ({ ...prev, marketing: e.target.checked }))
-                }
-                className="h-4 w-4 rounded border-slate-600 bg-slate-900 text-emerald-500 focus:ring-emerald-500"
-              />
-              <span>{isPl ? 'Zgoda marketingowa (opcjonalnie)' : 'Marketing updates (optional)'}</span>
-            </label>
-          </div>
-        </div>
-      </div>
-
-      <div className="space-y-3 rounded-2xl border border-emerald-500/40 bg-slate-900/60 p-4">
-        <div className="flex items-center gap-2">
-          <ShieldCheck className="h-5 w-5 text-emerald-300" />
-          <p className="text-sm font-semibold text-slate-50">
-            {wizardCopy.securityTitle as string}
-          </p>
-        </div>
-        <ul className="list-disc space-y-1 pl-5 text-sm text-slate-300">
-          {(wizardCopy.securityBullets as string[]).map((item) => (
-            <li key={item}>{item}</li>
-          ))}
-        </ul>
-        <div className="flex flex-wrap gap-2 text-xs text-emerald-300">
-          <button
-            type="button"
-            onClick={() => setPolicyModal('privacy')}
-            className="underline decoration-emerald-500/60 underline-offset-4 hover:text-emerald-200"
-          >
-            {t('landing.header.nav.resources.label')}
-          </button>
-          <span>•</span>
-          <button
-            type="button"
-            onClick={() => setPolicyModal('terms')}
-            className="underline decoration-emerald-500/60 underline-offset-4 hover:text-emerald-200"
-          >
-            {isPl ? 'Regulamin' : 'Terms'}
-          </button>
-          <span>•</span>
-          <button
-            type="button"
-            onClick={() => setPolicyModal('dpa')}
-            className="underline decoration-emerald-500/60 underline-offset-4 hover:text-emerald-200"
-          >
-            {isPl ? 'Polityka przetwarzania danych' : 'Data Processing Policy'}
-          </button>
-        </div>
-
-        <label className="mt-2 inline-flex items-start gap-2 rounded-xl bg-slate-950/70 p-3 text-sm text-slate-200">
-          <input
-            type="checkbox"
-            checked={company.acceptPolicies}
-            onChange={(e) =>
-              setCompany((prev: any) => ({ ...prev, acceptPolicies: e.target.checked }))
-            }
-            className="mt-0.5 h-4 w-4 rounded border-slate-600 bg-slate-900 text-emerald-500 focus:ring-emerald-500"
-          />
-          <span>{wizardCopy.acceptLabel as string}</span>
-        </label>
-      </div>
-    </div>
-  );
-}
-
-function IntegrationsStep({
-  isPl,
-  t,
-  integrationGroupLabels,
-  integrationDefinitions,
-  selectedIntegrations,
-  toggleIntegration,
-  wizardCopy,
-  prefillSources,
-}: any) {
-  const grouped = {
-    store: integrationDefinitions.filter((i: any) => i.group === 'store'),
-    marketplace: integrationDefinitions.filter((i: any) => i.group === 'marketplace'),
-    ads: integrationDefinitions.filter((i: any) => i.group === 'ads'),
-    analytics: integrationDefinitions.filter((i: any) => i.group === 'analytics'),
-    tool: integrationDefinitions.filter((i: any) => i.group === 'tool'),
-  };
-
-  const renderGroup = (title: string, items: any[]) => {
-    if (!items.length) return null;
-    return (
-      <div className="space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-          {title}
-        </p>
-        <div className="grid gap-3 md:grid-cols-2">
-          {items.map((item) => {
-            const selected = selectedIntegrations.has(item.id);
-            const disabled = item.status === 'comingSoon';
-
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => toggleIntegration(item.id)}
-                className={`relative flex h-full flex-col gap-2 rounded-2xl border p-4 text-left transition hover:border-emerald-500/60 hover:bg-slate-900 ${
-                  selected
-                    ? 'border-emerald-500/70 bg-slate-900/70 shadow-neon-emerald'
-                    : 'border-slate-800 bg-slate-950/70'
-                } ${disabled ? 'opacity-60' : ''}`}
-                disabled={disabled}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-50">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-300">
-                      {item.id.slice(0, 2).toUpperCase()}
-                    </div>
-                    <span>{t(`landing.integrations.items.${item.id}.name` as any)}</span>
-                  </div>
-                  <span
-                    className={`text-[11px] ${
-                      item.status === 'available' ? 'text-emerald-300' : 'text-amber-300'
-                    }`}
-                  >
-                    {item.status === 'available'
-                      ? isPl
-                        ? 'Dostępne'
-                        : 'Available'
-                      : isPl
-                      ? 'Wkrótce'
-                      : 'Coming soon'}
-                  </span>
-                </div>
-                <p className="text-xs text-slate-300">{item.description[isPl ? 'pl' : 'en']}</p>
-                {selected && (
-                  <span className="absolute right-3 top-3 text-emerald-300">
-                    <CheckCircle2 className="h-5 w-5" />
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-    );
-  };
-
-  return (
-    <div className="space-y-4">
-      <div className="space-y-1">
-        <h2 className="text-xl font-semibold">{wizardCopy.integrationsTitle as string}</h2>
-        <p className="text-sm text-slate-300">{wizardCopy.integrationsLead as string}</p>
-      </div>
-
-      {prefillSources.length > 0 && (
-        <div className="rounded-xl border border-emerald-500/40 bg-emerald-500/10 p-3 text-xs text-emerald-100">
-          {isPl ? 'Na podstawie konfiguracji z Cennika zaznaczyliśmy: ' : 'Pre-selected from Pricing: '}
-          {prefillSources.join(', ')}. {isPl ? 'Możesz to zmienić.' : 'You can adjust this.'}
-        </div>
-      )}
-
-      <div className="space-y-4">
-        {renderGroup(integrationGroupLabels.stores, grouped.store)}
-        {renderGroup(integrationGroupLabels.marketplace, grouped.marketplace)}
-        {renderGroup(integrationGroupLabels.ads, grouped.ads)}
-        {renderGroup(integrationGroupLabels.analytics, grouped.analytics)}
-        {renderGroup(integrationGroupLabels.tools, grouped.tool)}
-      </div>
-
-      <p className="text-xs text-slate-400">{wizardCopy.integrationsInfo as string}</p>
-    </div>
-  );
-}
-
-function KeysStep({
-  isPl,
-  t,
-  wizardCopy,
-  selectedOAuthIntegrations,
-  oauthConnections,
-  handleOauthAction,
-  selectedApiIntegrations,
-  apiConnections,
-  apiIntegrationFields,
-  handleApiChange,
-  handleApiTest,
-  keysHealth,
-}: any) {
-  const requirementNote = !keysHealth.hasStoreOk || !keysHealth.hasAdsOk;
-
-  return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-semibold">{wizardCopy.keysTitle as string}</h2>
-        <p className="text-sm text-slate-300">{wizardCopy.keysLead as string}</p>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <div className="space-y-3 rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
-          <div className="flex items-center gap-2">
-            <Globe2 className="h-4 w-4 text-emerald-300" />
-            <p className="text-sm font-semibold text-slate-100">
-              {isPl ? 'Logowanie przez dostawc? (OAuth)' : 'Login via provider (OAuth)'}
-            </p>
-          </div>
-
-          {selectedOAuthIntegrations.length === 0 && (
-            <p className="text-xs text-slate-400">
-              {isPl
-                ? 'Wybierz integracje reklamowe w poprzednim kroku, aby je podłączyć.'
-                : 'Pick ad integrations in the previous step to connect them here.'}
-            </p>
-          )}
-
-          <div className="space-y-3">
-            {selectedOAuthIntegrations.map((id: OAuthIntegrationId) => {
-              const status = oauthConnections[id];
-              const name = t(("landing.integrations.items." + id + ".name") as any);
-              const isIssue = status === 'error' || status === 'needs_reauth';
-              const connectLabel =
-                id === 'googleAds'
-                  ? isPl
-                    ? 'Zaloguj przez Google'
-                    : 'Sign in with Google'
-                  : id === 'metaAds'
-                  ? isPl
-                    ? 'Zaloguj przez Meta'
-                    : 'Sign in with Meta'
-                  : isPl
-                  ? 'Połącz konto'
-                  : 'Connect account';
-
-              return (
-                <div
-                  key={id}
-                  className={`rounded-xl border bg-slate-950/70 p-3 text-sm text-slate-200 ${
-                    isIssue ? 'border-rose-500/60' : 'border-slate-800'
-                  }`}
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2">
-                      <Cloud className={`h-4 w-4 ${isIssue ? 'text-rose-300' : 'text-emerald-300'}`} />
-                      <div>
-                        <p className="font-semibold">{name}</p>
-                        <p className="text-[11px] text-slate-400">
-                          {id === 'ga4'
-                            ? isPl
-                              ? 'Lejek, zdarzenia e-commerce'
-                              : 'Funnels, e-commerce events'
-                            : isPl
-                            ? 'Kampanie, koszty, konwersje'
-                            : 'Campaigns, costs, conversions'}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => handleOauthAction(id, 'connect')}
-                        className="rounded-lg bg-emerald-500 px-3 py-1.5 text-[11px] font-semibold text-slate-950 shadow-sm hover:bg-emerald-400"
-                      >
-                        {status === 'connecting' ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          connectLabel
-                        )}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleOauthAction(id, 'test')}
-                        className={`rounded-lg border px-3 py-1.5 text-[11px] ${
-                          isIssue
-                            ? 'border-rose-500 text-rose-200'
-                            : 'border-slate-700 text-slate-200 hover:border-emerald-500'
-                        }`}
-                      >
-                        {status === 'testing' ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : isPl ? (
-                          'Testuj połączenie'
-                        ) : (
-                          'Test connection'
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                  <p
-                    className={`mt-2 text-[11px] ${
-                      status === 'connected' || status === 'ok'
-                        ? 'text-emerald-300'
-                        : isIssue
-                        ? 'text-amber-300'
-                        : 'text-slate-300'
-                    }`}
-                  >
-                    {status === 'connected'
-                      ? isPl
-                        ? 'Połączenie – token zapisany w zaszyfrowanym magazynie.'
-                        : 'Connected ? token stored in encrypted vault.'
-                      : status === 'ok'
-                      ? isPl
-                        ? 'Połączenie działa. Możemy pobrać dane historyczne.'
-                        : 'Connection works. We can fetch historical data.'
-                      : isIssue
-                      ? isPl
-                        ? 'Wymagane ponowne logowanie. Kliknij Połącz konto lub Testuj połączenie.'
-                        : 'Re-authentication required. Click Connect or Test connection.'
-                      : ''}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="space-y-3 rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
-          <div className="flex items-center gap-2">
-            <KeyRound className="h-4 w-4 text-emerald-300" />
-            <p className="text-sm font-semibold text-slate-100">
-              {isPl ? 'Klucze API i adresy' : 'API keys and URLs'}
-            </p>
-          </div>
-
-          {selectedApiIntegrations.length === 0 && (
-            <p className="text-xs text-slate-400">
-              {isPl
-                ? 'Wybierz przynajmniej jedn? integracj? sklepow?, aby doda? klucze.'
-                : 'Pick at least one store integration to add keys.'}
-            </p>
-          )}
-
-          <div className="space-y-4">
-            {selectedApiIntegrations.map((id: ApiIntegrationId) => {
-              const name = t(("landing.integrations.items." + id + ".name") as any);
-              const conn = apiConnections[id];
-              const fields = apiIntegrationFields[id] || [];
-              const isIssue = conn.status === 'error' || conn.status === 'needs_reauth';
-
-              return (
-                <div
-                  key={id}
-                  className={`space-y-3 rounded-xl border bg-slate-950/70 p-3 text-sm text-slate-200 ${
-                    isIssue ? 'border-rose-500/60' : 'border-slate-800'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Lock className={`h-4 w-4 ${isIssue ? 'text-rose-300' : 'text-emerald-300'}`} />
-                      <div>
-                        <p className="font-semibold">{name}</p>
-                        <p className="text-[11px] text-slate-400">
-                          {isPl
-                            ? 'Klucze są szyfrowane i przechowywane w projekcie GCP.'
-                            : 'Keys are encrypted and stored in your GCP project.'}
-                        </p>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleApiTest(id, name)}
-                      className={`rounded-lg border px-3 py-1.5 text-[11px] ${
-                        isIssue
-                          ? 'border-rose-500 text-rose-200'
-                          : 'border-slate-700 text-slate-200 hover:border-emerald-500'
-                      }`}
-                    >
-                      {conn.status === 'testing' ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : isPl ? (
-                        'Testuj połączenie'
-                      ) : (
-                        'Test connection'
-                      )}
-                    </button>
-                  </div>
-
-                  <div className="grid gap-2">
-                    {fields.map((field: any) => (
-                      <div key={field.labelEn} className="space-y-1">
-                        <label className="text-xs text-slate-300">
-                          {isPl ? field.labelPl : field.labelEn}
-                        </label>
-                        <input
-                          value={(conn as any)[field.key] || ''}
-                          onChange={(e) => handleApiChange(id, field.key, e.target.value)}
-                          className={`w-full rounded-lg bg-slate-950 px-3 py-2 text-[13px] text-slate-50 placeholder:text-slate-500 focus:outline-none focus:ring-1 ${
-                            isIssue
-                              ? 'border border-rose-500 focus:border-rose-400 focus:ring-rose-400'
-                              : 'border border-slate-700 focus:border-emerald-500 focus:ring-emerald-500'
-                          }`}
-                          placeholder={field.placeholder}
-                        />
-                      </div>
-                    ))}
-                  </div>
-
-                  {conn.message && (
-                    <p
-                      className={`text-[11px] ${
-                        conn.status === 'ok' ? 'text-emerald-300' : 'text-amber-300'
-                      }`}
-                    >
-                      {conn.message}
-                    </p>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-3 text-[11px] text-slate-300">
-            <p className="font-semibold text-slate-100">
-              {isPl ? 'Jak przetwarzamy Twoje klucze' : 'How we process your keys'}
-            </p>
-            <ul className="mt-2 list-disc space-y-1 pl-4">
-              <li>{isPl ? 'Szyfrowanie (AES-256) przed zapisaniem.' : 'Encrypted (AES-256) before saving.'}</li>
-              <li>
-                {isPl
-                  ? 'Przechowywanie w Google Secret Manager w projekcie dedykowanym Twojej firmie.'
-                  : 'Stored in Google Secret Manager inside your dedicated project.'}
-              </li>
-              <li>
-                {isPl
-                  ? 'Używane wyłącznie do pobierania danych do Twojego datasetu.'
-                  : 'Used only to pull data into your dataset.'}
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      {requirementNote && (
-        <div className="rounded-xl border border-amber-500/50 bg-amber-500/10 px-4 py-3 text-xs text-amber-100">
-          {isPl
-            ? 'Aby przejść dalej, przetestuj poprawnie minimum 1 integrację sklepową oraz 1 źródło reklamowe.'
-            : 'To continue, test at least one store integration and one ad source successfully.'}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function SummaryStep({
-  isPl,
-  wizardCopy,
-  company,
-  t,
-  selectedIntegrations,
-  oauthConnections,
-  apiConnections,
-  summaryChecks,
-  setSummaryChecks,
-}: any) {
-  return (
-    <div className="space-y-4">
-      <div className="space-y-1">
-        <h2 className="text-xl font-semibold">{wizardCopy.summaryTitle as string}</h2>
-        <p className="text-sm text-slate-300">{wizardCopy.summaryLead as string}</p>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <div className="space-y-2 rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-            {isPl ? 'Dane firmy' : 'Company data'}
-          </p>
-          <SummaryRow label="NIP" value={company.nip} />
-          <SummaryRow label={isPl ? 'Nazwa' : 'Name'} value={company.name} />
-          <SummaryRow label={isPl ? 'Adres' : 'Address'} value={company.address} />
-          <SummaryRow label={isPl ? 'Waluta' : 'Currency'} value={company.currency} />
-          <SummaryRow label={isPl ? 'Strefa czasowa' : 'Time zone'} value={company.timezone} />
-          <SummaryRow label={isPl ? 'Kontakt' : 'Contact'} value={company.contactEmail} />
-        </div>
-
-        <div className="space-y-2 rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-            {isPl ? 'Wybrane integracje' : 'Selected integrations'}
-          </p>
-          {Array.from<string>(selectedIntegrations).map((id) => {
-            const name = t(`landing.integrations.items.${id}.name` as any);
-            const apiState = (apiConnections as Record<string, ApiConnection>)[id];
-            const oauthState = (oauthConnections as Record<string, ConnectionStatus>)[id];
-            const ok = apiState?.status === 'ok' || oauthState === 'connected' || oauthState === 'ok';
-            const needsReauth =
-              apiState?.status === 'needs_reauth' || oauthState === 'needs_reauth';
-            const message = ok
-              ? isPl
-                ? 'Klucze / dostęp OK'
-                : 'Keys / access OK'
-              : needsReauth
-              ? isPl
-                ? 'Wymagane ponowne logowanie – kliknij Reconnect w kroku Klucze.'
-                : 'Re-authentication required – use Reconnect in the Keys step.'
-              : isPl
-              ? 'Brak połączenia – przetestuj integrację.'
-              : 'No connection yet – please test the integration.';
-            return (
-              <div key={id} className="flex items-center justify-between rounded-lg bg-slate-950/60 px-3 py-2">
-                <div>
-                  <p className="text-sm font-semibold text-slate-100">{name}</p>
-                  <p className="text-[11px] text-slate-400">{message}</p>
-                </div>
-                {ok ? (
-                  <CheckCircle2 className="h-5 w-5 text-emerald-300" />
-                ) : (
-                  <AlertTriangle className="h-5 w-5 text-amber-300" />
-                )}
               </div>
-            );
-          })}
-
-          {selectedIntegrations.size === 0 && (
-            <p className="text-xs text-slate-400">
-              {isPl ? 'Brak integracji do podsumowania.' : 'No integrations selected.'}
-            </p>
-          )}
-        </div>
-      </div>
-
-      <div className="space-y-2 rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-          {isPl ? 'Przed startem' : 'Before launch'}
-        </p>
-        <label className="flex items-start gap-2 text-sm text-slate-200">
-          <input
-            type="checkbox"
-            checked={summaryChecks.ownership}
-            onChange={(e) => setSummaryChecks((prev: any) => ({ ...prev, ownership: e.target.checked }))}
-            className="mt-0.5 h-4 w-4 rounded border-slate-600 bg-slate-900 text-emerald-500 focus:ring-emerald-500"
-          />
-          <span>
-            {isPl
-              ? 'Potwierdzam, że mam prawo technicznie zarządzać tymi kontami (sklep, kampanie).'
-              : 'I confirm I am allowed to manage these accounts (store, campaigns).'}
-          </span>
-        </label>
-        <label className="flex items-start gap-2 text-sm text-slate-200">
-          <input
-            type="checkbox"
-            checked={summaryChecks.gcp}
-            onChange={(e) => setSummaryChecks((prev: any) => ({ ...prev, gcp: e.target.checked }))}
-            className="mt-0.5 h-4 w-4 rounded border-slate-600 bg-slate-900 text-emerald-500 focus:ring-emerald-500"
-          />
-          <span>
-            {isPl
-              ? 'Rozumiem, że PapaData utworzy osobny projekt i hurtownię danych w Google Cloud w moim imieniu.'
-              : 'I understand PapaData will create a separate Google Cloud project and warehouse for me.'}
-          </span>
-        </label>
-      </div>
-    </div>
-  );
-}
-
-function Field({
-  label,
-  value,
-  onChange,
-  placeholder,
-  as = 'input',
-  options,
-  helper,
-  icon,
-}: any) {
-  if (as === 'select') {
-    return (
-      <div className="space-y-1">
-        <label className="text-sm font-medium text-slate-100">{label}</label>
-        <select
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-50 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-        >
-          {(options || []).map((opt: any) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
-      </div>
-    );
-  }
-
-  if (as === 'textarea') {
-    return (
-      <div className="space-y-1">
-        <label className="text-sm font-medium text-slate-100">{label}</label>
-        <textarea
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          rows={3}
-          className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-50 placeholder:text-slate-500 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-          placeholder={placeholder}
-        />
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-1">
-      <label className="text-sm font-medium text-slate-100">{label}</label>
-      <div className="relative">
-        {icon && <div className="pointer-events-none absolute left-3 top-2.5">{icon}</div>}
-        <input
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className={`w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-50 placeholder:text-slate-500 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 ${
-            icon ? 'pl-9' : ''
-          }`}
-          placeholder={placeholder}
-        />
-      </div>
-      {helper && <p className="text-xs text-slate-400">{helper}</p>}
-    </div>
-  );
-}
-
-function SummaryRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center justify-between rounded-lg bg-slate-950/70 px-3 py-2 text-sm text-slate-200">
-      <span className="text-slate-400">{label}</span>
-      <span className="font-semibold text-slate-50">{value || '—'}</span>
-    </div>
-  );
-}
-
-function PolicyModal({
-  isPl,
-  type,
-  onClose,
-}: {
-  isPl: boolean;
-  type: 'terms' | 'privacy' | 'dpa';
-  onClose: () => void;
-}) {
-  const title =
-    type === 'terms'
-      ? isPl
-        ? 'Regulamin (wersja skrócona)'
-        : 'Terms of Service (summary)'
-      : type === 'privacy'
-      ? isPl
-        ? 'Polityka Prywatności (wersja skrócona)'
-        : 'Privacy Policy (summary)'
-      : isPl
-      ? 'Polityka przetwarzania danych (DPA)'
-      : 'Data Processing Policy (DPA)';
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
-      <div className="max-h-[80vh] w-full max-w-xl overflow-y-auto rounded-2xl border border-slate-800 bg-slate-950 p-6 shadow-lg">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-slate-50">{title}</h3>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-full border border-slate-800 p-2 text-slate-300 hover:border-emerald-500 hover:text-emerald-200"
-          >
-            <Circle className="h-4 w-4" />
-          </button>
-        </div>
-        <div className="mt-4 space-y-2 text-sm text-slate-300">
-          <p>
-            {isPl
-              ? 'Tu wkleimy pełną treść dokumentu. Wersja skrócona: Twoje dane są szyfrowane, separowane per klient i przetwarzane w regionie UE.'
-              : 'Full legal text will be placed here. Short version: your data is encrypted, isolated per tenant and processed in the EU region.'}
-          </p>
-          <p>
-            {isPl
-              ? 'Kliknięcie na Zamknij nie przerwie konfiguracji.'
-              : 'Closing this modal will not interrupt your configuration.'}
-          </p>
+            </div>
+          </form>
         </div>
       </div>
     </div>

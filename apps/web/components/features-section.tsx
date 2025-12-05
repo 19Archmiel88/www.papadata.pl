@@ -16,18 +16,18 @@ function FeaturesSection() {
   return (
     <section
       id="features"
-      className="border-t border-slate-800 bg-slate-950 py-16 md:py-20"
+      className="border-t border-brand-border bg-brand-dark py-16 md:py-20"
     >
       <div className="mx-auto max-w-6xl px-4">
         {/* Nagłówek sekcji */}
         <div className="mx-auto max-w-3xl text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-400">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-accent">
             {t('landing.hero.tagline')}
           </p>
-          <h2 className="mt-3 text-2xl md:text-3xl font-semibold tracking-tight text-slate-50">
+          <h2 className="mt-3 text-2xl md:text-3xl font-semibold tracking-tight text-pd-foreground">
             {t('landing.features.sectionTitle')}
           </h2>
-          <p className="mt-3 text-sm md:text-base text-slate-300">
+          <p className="mt-3 text-sm md:text-base text-pd-muted">
             {t('landing.features.sectionSubtitle')}
           </p>
         </div>
@@ -35,26 +35,26 @@ function FeaturesSection() {
         {/* 3 bloki funkcji */}
         <div className="mt-10 grid gap-8 md:grid-cols-3">
           {/* Sprzedaż */}
-          <div className="flex h-full flex-col rounded-2xl border border-slate-800 bg-slate-900/60 p-5 shadow-sm transition hover:-translate-y-1 hover:border-emerald-500/60 hover:bg-slate-900">
+          <div className="flex h-full flex-col rounded-2xl border border-brand-border bg-brand-dark/60 p-5 shadow-sm transition hover:-translate-y-1 hover:border-brand-accent/60 hover:bg-brand-card/10">
             <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-accent/10 text-brand-accent">
                 <BarChart3 className="h-4 w-4" />
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-pd-muted">
                   Sales & margin
                 </p>
-                <h3 className="text-sm md:text-base font-semibold text-slate-50">
+                <h3 className="text-sm md:text-base font-semibold text-pd-foreground">
                   {t('landing.features.salesAnalysis.title')}
                 </h3>
               </div>
             </div>
 
-            <p className="mt-3 text-xs md:text-sm text-slate-300">
+            <p className="mt-3 text-xs md:text-sm text-pd-muted">
               {t('landing.features.salesAnalysis.description')}
             </p>
 
-            <div className="mt-4 space-y-3 text-xs md:text-sm text-slate-200">
+            <div className="mt-4 space-y-3 text-xs md:text-sm text-pd-foreground">
               <FeatureTile
                 icon={<TrendingUp className="h-3.5 w-3.5" />}
                 title={t(
@@ -95,26 +95,26 @@ function FeaturesSection() {
           </div>
 
           {/* Marketing */}
-          <div className="flex h-full flex-col rounded-2xl border border-slate-800 bg-slate-900/60 p-5 shadow-sm transition hover:-translate-y-1 hover:border-emerald-500/60 hover:bg-slate-900">
+          <div className="flex h-full flex-col rounded-2xl border border-brand-border bg-brand-dark/60 p-5 shadow-sm transition hover:-translate-y-1 hover:border-brand-accent/60 hover:bg-brand-card/10">
             <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-sky-500/10 text-sky-400">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-accent/15 text-brand-accent">
                 <Target className="h-4 w-4" />
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-pd-muted">
                   Marketing
                 </p>
-                <h3 className="text-sm md:text-base font-semibold text-slate-50">
+                <h3 className="text-sm md:text-base font-semibold text-pd-foreground">
                   {t('landing.features.marketing.title')}
                 </h3>
               </div>
             </div>
 
-            <p className="mt-3 text-xs md:text-sm text-slate-300">
+            <p className="mt-3 text-xs md:text-sm text-pd-muted">
               {t('landing.features.marketing.description')}
             </p>
 
-            <div className="mt-4 space-y-3 text-xs md:text-sm text-slate-200">
+            <div className="mt-4 space-y-3 text-xs md:text-sm text-pd-foreground">
               <FeatureTile
                 icon={<BarChart3 className="h-3.5 w-3.5" />}
                 title={t(
@@ -146,26 +146,26 @@ function FeaturesSection() {
           </div>
 
           {/* Klienci */}
-          <div className="flex h-full flex-col rounded-2xl border border-slate-800 bg-slate-900/60 p-5 shadow-sm transition hover:-translate-y-1 hover:border-emerald-500/60 hover:bg-slate-900">
+          <div className="flex h-full flex-col rounded-2xl border border-brand-border bg-brand-dark/60 p-5 shadow-sm transition hover:-translate-y-1 hover:border-brand-accent/60 hover:bg-brand-card/10">
             <div className="flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/10 text-amber-400">
                 <Users className="h-4 w-4" />
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-pd-muted">
                   Customers
                 </p>
-                <h3 className="text-sm md:text-base font-semibold text-slate-50">
+                <h3 className="text-sm md:text-base font-semibold text-pd-foreground">
                   {t('landing.features.customers.title')}
                 </h3>
               </div>
             </div>
 
-            <p className="mt-3 text-xs md:text-sm text-slate-300">
+            <p className="mt-3 text-xs md:text-sm text-pd-muted">
               {t('landing.features.customers.description')}
             </p>
 
-            <div className="mt-4 space-y-3 text-xs md:text-sm text-slate-200">
+            <div className="mt-4 space-y-3 text-xs md:text-sm text-pd-foreground">
               <FeatureTile
                 icon={<Users className="h-3.5 w-3.5" />}
                 title={t(
@@ -205,13 +205,13 @@ type FeatureTileProps = {
 
 function FeatureTile({ icon, title, description }: FeatureTileProps) {
   return (
-    <div className="flex gap-2.5 rounded-xl bg-slate-950/70 p-2.5">
-      <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-slate-900 text-emerald-300">
+    <div className="flex gap-2.5 rounded-xl bg-brand-dark/70 p-2.5">
+      <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-brand-card/10 text-brand-accent">
         {icon}
       </div>
       <div>
-        <p className="text-[13px] font-medium text-slate-50">{title}</p>
-        <p className="mt-0.5 text-[11px] md:text-[12px] text-slate-300">
+        <p className="text-[13px] font-medium text-pd-foreground">{title}</p>
+        <p className="mt-0.5 text-[11px] md:text-[12px] text-pd-muted">
           {description}
         </p>
       </div>

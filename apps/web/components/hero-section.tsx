@@ -36,37 +36,37 @@ export const HeroSection: React.FC = () => {
     >
       {/* Lewy blok */}
       <div className="flex-1 space-y-5">
-        <div className="inline-flex items-center rounded-full border border-emerald-500/40 bg-slate-900/80 px-3 py-1 text-[10px] font-semibold tracking-[0.2em] uppercase text-emerald-300 shadow-neon-emerald">
+        <div className="inline-flex items-center rounded-full border border-brand-accent/40 bg-brand-dark/80 px-3 py-1 text-[10px] font-semibold tracking-[0.2em] uppercase text-brand-accent shadow-neon-cyan">
           {t('landing.hero.tagline')}
         </div>
         <div className="space-y-1">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-tight">
             {t('landing.hero.title.line1')}
           </h1>
-          <p className="text-xl sm:text-2xl text-emerald-300">
+          <p className="text-xl sm:text-2xl text-brand-accent">
             {t('landing.hero.title.line2')}
           </p>
         </div>
-        <p className="max-w-xl text-sm sm:text-base text-slate-300">
+        <p className="max-w-xl text-sm sm:text-base text-pd-muted">
           {t('landing.hero.subtitle')}
         </p>
         <div className="flex flex-col sm:flex-row gap-3 pt-2">
           <button
             type="button"
             onClick={goTrial}
-            className="inline-flex items-center justify-center rounded-full bg-emerald-500 px-5 py-2.5 text-sm font-semibold text-slate-950 shadow-neon-emerald hover:bg-emerald-400"
+            className="inline-flex items-center justify-center rounded-full bg-brand-accent px-5 py-2.5 text-sm font-semibold text-pd-bg shadow-neon-cyan hover:bg-brand-accent"
           >
             {t('landing.hero.cta.trial')}
           </button>
           <button
             type="button"
             onClick={goDemo}
-            className="inline-flex items-center justify-center rounded-full border border-cyan-500/50 bg-slate-900/80 px-5 py-2.5 text-sm font-semibold text-cyan-200 shadow-neon-cyan hover:bg-slate-800/90"
+            className="inline-flex items-center justify-center rounded-full border border-brand-secondary/50 bg-brand-dark/80 px-5 py-2.5 text-sm font-semibold text-brand-secondary shadow-neon-cyan hover:bg-brand-border/90"
           >
             {t('landing.hero.cta.demo')}
           </button>
         </div>
-        <p className="text-xs text-slate-400 max-w-md">
+        <p className="text-xs text-pd-muted max-w-md">
           {t('landing.hero.trustNote')}
         </p>
       </div>
@@ -75,29 +75,29 @@ export const HeroSection: React.FC = () => {
       <div className="flex-1 w-full max-w-md lg:max-w-lg">
         <div className="card-glass p-4 sm:p-5 shadow-neon-cyan">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-xs font-medium text-slate-300">
+            <p className="text-xs font-medium text-pd-muted">
               {t('landing.hero.panel.label')}
             </p>
-            <span className="rounded-full bg-slate-950/60 px-2 py-0.5 text-[10px] text-slate-400 border border-slate-700/80">
+            <span className="rounded-full bg-brand-dark/60 px-2 py-0.5 text-[10px] text-pd-muted border border-brand-border/80">
               Demo
             </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
-            <div className="col-span-2 card-glass p-3 border-slate-800/80">
-              <p className="text-[11px] text-slate-400 mb-1">
+            <div className="col-span-2 card-glass p-3 border-brand-border/80">
+              <p className="text-[11px] text-pd-muted mb-1">
                 {t('landing.hero.panel.kpi.title')}
               </p>
               <p className="text-lg font-semibold">
                 {t('landing.hero.panel.kpi.value')}
               </p>
-              <p className="text-[11px] text-emerald-400">
+              <p className="text-[11px] text-brand-accent">
                 {t('landing.hero.panel.kpi.delta')}
               </p>
             </div>
-            <div className="card-glass p-3 border-slate-800/80">
-              <p className="text-[11px] text-slate-400 mb-1">Conversion rate</p>
-              <p className="text-lg font-semibold text-cyan-300">3.4%</p>
+            <div className="card-glass p-3 border-brand-border/80">
+              <p className="text-[11px] text-pd-muted mb-1">Conversion rate</p>
+              <p className="text-lg font-semibold text-brand-secondary">3.4%</p>
               <p className="text-[11px] text-cyan-400">+0.6 pp WoW</p>
             </div>
           </div>
@@ -142,11 +142,11 @@ export const HeroSection: React.FC = () => {
             </ResponsiveContainer>
           </div>
 
-          <div className="card-glass border-slate-800/80 p-3 flex gap-2">
-            <div className="mt-0.5 h-7 w-7 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-400 flex items-center justify-center text-xs font-bold text-slate-950 shadow-neon-emerald">
+          <div className="card-glass border-brand-border/80 p-3 flex gap-2">
+            <div className="mt-0.5 h-7 w-7 rounded-full bg-gradient-to-br from-brand-accent to-brand-secondary flex items-center justify-center text-xs font-bold text-pd-bg shadow-neon-cyan">
               AI
             </div>
-            <p className="text-[11px] text-slate-200">
+            <p className="text-[11px] text-pd-foreground">
               {t('landing.hero.aiBubble.text')}
             </p>
           </div>

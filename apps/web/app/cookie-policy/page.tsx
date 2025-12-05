@@ -7,12 +7,12 @@ export default function CookiePolicyPage() {
   const isEn = pathname?.startsWith('/en');
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-50">
+    <main className="min-h-screen bg-brand-dark text-pd-foreground">
       <div className="mx-auto max-w-3xl px-4 py-16">
         <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">
           {isEn ? 'Cookie Policy (draft)' : 'Polityka Cookies (wersja robocza)'}
         </h1>
-        <div className="mt-6 space-y-4 text-sm md:text-base text-slate-300">
+        <div className="mt-6 space-y-4 text-sm md:text-base text-pd-muted">
           <p>
             {isEn
               ? 'PapaData uses cookies and similar technologies to improve the user experience and analyse traffic on the website.'

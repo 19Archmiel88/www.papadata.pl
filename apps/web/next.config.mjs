@@ -1,10 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    appDir: true
+  output: 'export',
+  images: {
+    // na hostingu typu Cyber_Folks nie ma serwera image optimization
+    unoptimized: true,
   },
-  reactStrictMode: true,
-  transpilePackages: ['@papadata/i18n']
+  trailingSlash: false,
 };
 
 export default nextConfig;

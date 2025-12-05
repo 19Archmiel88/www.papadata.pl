@@ -7,14 +7,14 @@ export default function TermsPage() {
   const isEn = pathname?.startsWith('/en');
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-50">
+    <main className="min-h-screen bg-brand-dark text-pd-foreground">
       <div className="mx-auto max-w-3xl px-4 py-16">
         <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">
           {isEn
             ? 'PapaData Terms of Service (draft)'
             : 'Regulamin świadczenia usług PapaData (wersja robocza)'}
         </h1>
-        <div className="mt-6 space-y-4 text-sm md:text-base text-slate-300">
+        <div className="mt-6 space-y-4 text-sm md:text-base text-pd-muted">
           <p>
             {isEn
               ? 'The full legal text of the Terms of Service will be published before the production launch of PapaData.'
@@ -26,7 +26,7 @@ export default function TermsPage() {
               : 'W razie pytań skontaktuj się z nami: '}
             <a
               href="mailto:kontakt@papadata.pl"
-              className="text-emerald-400 hover:text-emerald-300"
+              className="text-brand-accent hover:text-brand-accent"
             >
               kontakt@papadata.pl
             </a>
