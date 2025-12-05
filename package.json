@@ -1,20 +1,23 @@
 {
-  "name": "papadata-monorepo",
-  "version": "0.1.0",
+  "name": "papadata-landing-page",
   "private": true,
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "dev": "npm run dev --workspace web",
-    "build": "npm run build --workspace web",
-    "start": "npm run start --workspace web",
-    "lint": "npm run lint --workspace web",
-    "typecheck": "npm run typecheck --workspace web && npm run build --workspace i18n --if-present"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
-    "lucide-react": "^0.441.0",
-    "next": "^14.2.33"
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1",
+    "framer-motion": "^12.23.25",
+    "lucide-react": "^0.555.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "typescript": "~5.8.2",
+    "vite": "^6.2.0"
   }
 }
