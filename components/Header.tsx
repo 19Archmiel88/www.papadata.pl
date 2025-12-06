@@ -3,12 +3,22 @@ import { Menu, Globe, Moon, Sun, ChevronDown, Sparkles } from 'lucide-react';
 import { Language, Theme, Translation, IntegrationCategory } from '../types';
 
 interface Props {
+  /** Current active language */
   lang: Language;
+  /** Function to update the language */
   setLang: (l: Language) => void;
+  /** Current theme ('light' or 'dark') */
   theme: Theme;
+  /** Function to update the theme */
   setTheme: (t: Theme) => void;
+  /** Translation object containing header text */
   t: Translation['header'];
+  /** Callback to open the integrations modal, optionally with a filter */
   onOpenIntegrations: (category?: IntegrationCategory) => void;
+  /**
+   * Function to handle smart navigation.
+   * Redirects to appropriate sections or pages based on authentication status and target.
+   */
   smartNavigate: (target:
     | 'demo'
     | 'demo-ai'
@@ -22,9 +32,15 @@ interface Props {
     | 'terms'
     | 'about'
   ) => void;
+  /** Indicates if a user is logged in (optional) */
   isLoggedIn?: boolean;
 }
 
+/**
+ * The main site header (navigation bar).
+ * Includes the logo, navigation links, theme toggle, language switcher, and mobile menu.
+ * Handles sticky behavior on scroll.
+ */
 const Header: React.FC<Props> = ({
   lang,
   setLang,

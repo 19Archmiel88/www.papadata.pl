@@ -3,11 +3,16 @@ import { Check, Plus, Minus, Sparkles } from 'lucide-react';
 import { Language } from '../types';
 
 interface Props {
+  /** Current active language */
   lang: Language;
 }
 
 type Billing = 'monthly' | 'yearly';
 
+/**
+ * A pricing configurator component that allows users to estimate their subscription cost.
+ * Users can adjust the number of data sources and billing frequency (monthly/yearly).
+ */
 const PricingConfigurator: React.FC<Props> = ({ lang }) => {
   const [billing, setBilling] = useState<Billing>('monthly');
   const [sources, setSources] = useState(3);

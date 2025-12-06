@@ -40,6 +40,83 @@ export interface IntegrationHealthInfo {
   updatedAt?: string;
 }
 
+export interface IntegrationHealthEntry extends IntegrationHealthInfo {
+  id: string;
+  longName?: string;
+}
+
+export type IntegrationHealthMap = Record<string, IntegrationHealthEntry>;
+
+/**
+ * The structured response we expect from the Gemini analysis call.
+ */
+export interface AIAnalysisResult {
+  summary: string;
+  positiveTrends: string[];
+  areasForImprovement: string[];
+  strategicRecommendation: string;
+}
+
+/**
+ * Describes a single chat message exchanged with Gemini.
+ */
+export interface ChatMessage {
+  role: 'user' | 'model' | 'system';
+  text: string;
+  timestamp: Date;
+}
+
+/**
+ * Minimal snapshot of the dashboard that is passed to Gemini for analysis.
+ */
+export interface DashboardData {
+  period: string;
+  revenue: number;
+  spend: number;
+  roas: number;
+  orders: number;
+  sessions: number;
+  conversionRate: number;
+  margin: number;
+  avgOrderValue: number;
+  returnRate?: number;
+}
+
+export interface CategoryData {
+  name: string;
+  value: number;
+  color: string;
+}
+
+export interface CustomerData {
+  date: string;
+  newCustomers: number;
+  returningCustomers: number;
+}
+
+export interface ChartDataPoint {
+  date: string;
+  revenue: number;
+  spend: number;
+}
+
+export interface KPIData {
+  label: string;
+  value: number;
+  change: number;
+  prefix?: string;
+  suffix?: string;
+}
+
+export interface ProductData {
+  id: string;
+  name: string;
+  category: string;
+  sales: number;
+  revenue: number;
+  status: 'In Stock' | 'Low Stock' | 'Out of Stock';
+}
+
 export type DemoSection = 'Dashboard' | 'LiveReports' | 'Academy' | 'Support' | 'Integrations' | 'Settings';
 
 export interface DemoTranslation {

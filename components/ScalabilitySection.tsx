@@ -3,6 +3,7 @@ import { Shield, Lock, Cloud, Laptop, Tablet, Smartphone, ChevronDown } from 'lu
 import { Language } from '../types';
 
 interface Props {
+  /** Current active language */
   lang: Language;
 }
 
@@ -68,6 +69,10 @@ const getCopy = (lang: Language) => {
   };
 };
 
+/**
+ * Section detailing the platform's architecture, scalability, and security measures.
+ * Includes a FAQ list and highlights key security features like encryption and tenant isolation.
+ */
 const ScalabilitySection: React.FC<Props> = ({ lang }) => {
   const copy = getCopy(lang);
   const [openIndex, setOpenIndex] = useState<number | null>(0);

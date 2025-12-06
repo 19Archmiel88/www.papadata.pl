@@ -51,6 +51,11 @@ const planHighlights = [
   },
 ];
 
+/**
+ * A detailed pricing overview component.
+ * Allows users to select specific data sources and implementation options to calculate a custom price.
+ * Displays a summary of the monthly and one-time costs.
+ */
 const PricingOverview: React.FC = () => {
   const [selectedSources, setSelectedSources] = useState<string[]>(['shop', 'google_ads']);
   const [implementation, setImplementation] = useState<ImplementationKey>('self');

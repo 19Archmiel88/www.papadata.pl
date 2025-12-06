@@ -26,6 +26,11 @@ const securityCards = [
   },
 ];
 
+/**
+ * A section focusing on security and compliance features.
+ * Highlights encryption, data separation, GDPR compliance, and infrastructure standards.
+ * Uses hardcoded Polish text.
+ */
 const Security: React.FC = () => (
   <SectionCardGrid
     title="Bezpieczeństwo na pierwszym miejscu"

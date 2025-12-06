@@ -1,5 +1,10 @@
 import React, { useState, useMemo } from 'react';
 
+/**
+ * Section that contrasts manual reporting processes with PapaData's automated solution.
+ * Includes a simple calculator to estimate time and cost savings.
+ * Uses hardcoded Polish text.
+ */
 const ValueProposition: React.FC = () => {
   const [hours, setHours] = useState(10);
   const hourlyRate = 80; // average hourly rate in PLN for an analyst

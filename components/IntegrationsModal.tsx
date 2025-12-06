@@ -6,13 +6,22 @@ import IntegrationLogo from './IntegrationLogo';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface Props {
+  /** Controls if the modal is visible */
   isOpen: boolean;
+  /** Function to close the modal */
   onClose: () => void;
+  /** Current active language */
   lang: Language;
+  /** Translation object for the modal content */
   t: Translation['integrationsModal'];
+  /** Optional initial filter to apply when opening the modal */
   initialFilter?: IntegrationCategory | 'All';
 }
 
+/**
+ * A modal dialog displaying the full catalog of integrations.
+ * Allows searching, filtering by category, and voting on upcoming integrations.
+ */
 const IntegrationsModal: React.FC<Props> = ({ isOpen, onClose, lang, t, initialFilter = 'All' }) => {
   const [integrations, setIntegrations] = useState<IntegrationItem[]>(INITIAL_INTEGRATIONS);
   const [searchQuery, setSearchQuery] = useState('');

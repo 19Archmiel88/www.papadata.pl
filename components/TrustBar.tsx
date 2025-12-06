@@ -1,5 +1,9 @@
 import React from 'react';
 
+/**
+ * A horizontal bar displaying trust indicators and technology partners.
+ * Shows logos for Google Cloud, Vertex AI, BigQuery, and security standards.
+ */
 const TrustBar: React.FC = () => (
   <div className="bg-slate-900/50 py-8">
     <div className="container mx-auto flex max-w-5xl flex-wrap items-center justify-center gap-x-8 gap-y-4 px-4">

@@ -28,6 +28,11 @@ const features = [
   },
 ];
 
+/**
+ * Renders the Key Features section of the landing page.
+ * Displays a grid of high-level features with icons and descriptions.
+ * Uses hardcoded Polish text for now.
+ */
 const KeyFeatures: React.FC = () => (
   <section className="py-20 sm:py-32">
     <div className="container mx-auto max-w-7xl px-4">

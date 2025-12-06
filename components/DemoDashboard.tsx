@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
-import { Theme, Language, DemoSection, IntegrationHealthInfo } from '../types';
+import { Theme, Language, DemoSection, IntegrationHealthEntry, IntegrationHealthMap } from '../types';
 import { TRANSLATIONS } from '../constants';
 import Sidebar from './demo/Sidebar';
 import TopBar from './demo/TopBar';
@@ -12,12 +12,13 @@ import Support from './demo/Support';
 import Settings from './demo/Settings';
 
 interface Props {
+  /** Function to navigate to a different path */
   navigate: (path: string) => void;
+  /** Current URL path to determine active section */
   path: string;
 }
 
 type ReportView = 'sales' | 'campaigns' | 'customers' | 'technical';
-
 const DemoDashboard: React.FC<Props> = ({ navigate, path }) => {
   const [lang, setLang] = useState<Language>('PL');
   const [theme, setTheme] = useState<Theme>('dark');
@@ -28,17 +29,17 @@ const DemoDashboard: React.FC<Props> = ({ navigate, path }) => {
   const [reportView, setReportView] = useState<ReportView>('sales');
   const [aiTrigger, setAiTrigger] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const [integrationHealth, setIntegrationHealth] = useState<Record<string, IntegrationHealthInfo & { longName: string }>>({});
+  const [integrationHealth, setIntegrationHealth] = useState<IntegrationHealthMap>({});
   const [dashboardToast, setDashboardToast] = useState<string | null>(null);
 
   const t = TRANSLATIONS[lang].demo;
-  const integrationIssueEntries = Object.values(integrationHealth);
-  const connectionErrorEntry = integrationIssueEntries.find((entry) => entry.state === "error");
+  const integrationIssueEntries = Object.entries(integrationHealth) as [string, IntegrationHealthEntry][];
+  const connectionErrorEntry = integrationIssueEntries.find(([, entry]) => entry.state === "error");
   const integrationAlert =
     connectionErrorEntry
-      ? t.dashboard.alerts.connectionLost.replace("{name}", connectionErrorEntry.longName ?? connectionErrorEntry.id)
+      ? t.dashboard.alerts.connectionLost.replace("{name}", connectionErrorEntry[1].longName ?? connectionErrorEntry[0])
       : null;
-  const needsReauth = integrationIssueEntries.some((entry) => entry.state === "needs_reauth");
+  const needsReauth = integrationIssueEntries.some(([, entry]) => entry.state === "needs_reauth");
 
   useEffect(() => {
     const root = document.documentElement;
@@ -59,11 +60,8 @@ const DemoDashboard: React.FC<Props> = ({ navigate, path }) => {
     const stored = window.localStorage.getItem("papadata_integration_health");
     if (!stored) return;
     try {
-      const parsed = JSON.parse(stored) as (IntegrationHealthInfo & {
-        id: string;
-        longName: string;
-      })[];
-      const map = parsed.reduce<Record<string, IntegrationHealthInfo & { longName: string }>>((acc, entry) => {
+      const parsed = JSON.parse(stored) as IntegrationHealthEntry[];
+      const map = parsed.reduce<IntegrationHealthMap>((acc, entry) => {
         acc[entry.id] = entry;
         return acc;
       }, {});
@@ -120,7 +118,7 @@ const DemoDashboard: React.FC<Props> = ({ navigate, path }) => {
     }
   }, [path]);
 
-  const persistHealthSnapshot = (map: Record<string, IntegrationHealthInfo & { longName: string }>) => {
+  const persistHealthSnapshot = (map: IntegrationHealthMap) => {
     if (typeof window === "undefined") return;
     window.localStorage.setItem("papadata_integration_health", JSON.stringify(Object.values(map)));
   };
@@ -262,4 +260,3 @@ const DemoDashboard: React.FC<Props> = ({ navigate, path }) => {
 };
 
 export default DemoDashboard;
-

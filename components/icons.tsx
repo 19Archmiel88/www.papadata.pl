@@ -1,5 +1,9 @@
 import React from 'react';
 
+/**
+ * Renders a sparkle icon.
+ * @param className - Optional CSS class for styling.
+ */
 export const SparklesIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
     <path
@@ -10,6 +14,10 @@ export const SparklesIcon: React.FC<{ className?: string }> = ({ className }) =>
   </svg>
 );
 
+/**
+ * Renders a bar chart icon.
+ * @param className - Optional CSS class for styling.
+ */
 export const ChartBarIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
     <path
@@ -20,6 +28,10 @@ export const ChartBarIcon: React.FC<{ className?: string }> = ({ className }) =>
   </svg>
 );
 
+/**
+ * Renders a CPU chip icon.
+ * @param className - Optional CSS class for styling.
+ */
 export const CpuChipIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
     <path
@@ -31,6 +43,10 @@ export const CpuChipIcon: React.FC<{ className?: string }> = ({ className }) => 
   </svg>
 );
 
+/**
+ * Renders a closed lock icon.
+ * @param className - Optional CSS class for styling.
+ */
 export const LockClosedIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
     <path
@@ -41,30 +57,50 @@ export const LockClosedIcon: React.FC<{ className?: string }> = ({ className }) 
   </svg>
 );
 
+/**
+ * Renders a check circle icon.
+ * @param className - Optional CSS class for styling.
+ */
 export const CheckCircleIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
   </svg>
 );
 
+/**
+ * Renders a chevron down icon.
+ * @param className - Optional CSS class for styling.
+ */
 export const ChevronDownIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
     <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
   </svg>
 );
 
+/**
+ * Renders an 'X' mark icon.
+ * @param className - Optional CSS class for styling.
+ */
 export const XMarkIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
   </svg>
 );
 
+/**
+ * Renders a paper airplane icon.
+ * @param className - Optional CSS class for styling.
+ */
 export const PaperAirplaneIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12Zm0 0h7.5" />
   </svg>
 );
 
+/**
+ * Renders an arrow up icon.
+ * @param className - Optional CSS class for styling.
+ */
 export const ArrowUpIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 10.5 12 3m0 0 7.5 7.5M12 3v18" />

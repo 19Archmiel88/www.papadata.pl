@@ -4,6 +4,10 @@ import { IntegrationCategory } from '../types';
 import BrandLogo from './BrandLogo';
 
 interface Props {
+  /**
+   * Function to handle smart navigation to various sections or external links.
+   * Can scroll to anchors or navigate to different routes.
+   */
   smartNavigate: (target:
     | 'demo'
     | 'demo-ai'
@@ -17,6 +21,9 @@ interface Props {
     | 'terms'
     | 'about'
   ) => void;
+  /**
+   * Callback to open the integrations modal, optionally with a pre-selected category.
+   */
   onOpenIntegrations: (category?: IntegrationCategory) => void;
 }
 
@@ -55,6 +62,10 @@ const footerSections: { title: string; links: FooterLink[] }[] = [
   },
 ];
 
+/**
+ * Footer component for the application.
+ * Contains links to various sections, legal information, and social links.
+ */
 const Footer: React.FC<Props> = ({ smartNavigate, onOpenIntegrations }) => {
   const renderLink = (link: FooterLink, idx: number) => {
     switch (link.kind) {

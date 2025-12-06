@@ -4,7 +4,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Translation } from '../types';
 
 interface Props {
+  /** Translation object containing text for the hero section */
   t: Translation['hero'];
+  /**
+   * Function to handle smart navigation to different app sections.
+   * Redirects users based on authentication status and selected target.
+   */
   onSmartNavigate: (
     target:
       | 'demo'
@@ -21,11 +26,16 @@ interface Props {
   ) => void;
 }
 
+/** Represents the content of a single slide in the hero carousel */
 type Slide =
   | { key: string; type: 'chat'; user: string; ai: string; highlight?: string }
   | { key: string; type: 'chart'; title: string; assistant: string; trend: string }
   | { key: string; type: 'analysis'; title: string; subtitle: string; assistant: string };
 
+/**
+ * The main Hero section of the landing page.
+ * Displays a large title, call-to-action buttons, and an interactive carousel simulating the AI dashboard.
+ */
 const Hero: React.FC<Props> = ({ t, onSmartNavigate }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPlayerOpen, setIsPlayerOpen] = useState(false);

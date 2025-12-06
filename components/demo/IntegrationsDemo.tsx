@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { Search, ThumbsUp, Check } from 'lucide-react';
-import { DemoTranslation, IntegrationCategory, IntegrationHealthInfo, IntegrationItem } from '../../types';
+import { DemoTranslation, IntegrationCategory, IntegrationHealthEntry, IntegrationHealthMap, IntegrationItem } from '../../types';
 import { INITIAL_INTEGRATIONS } from '../../constants';
 import IntegrationLogo from '../IntegrationLogo';
 
 interface Props {
   t: DemoTranslation['integrations'];
-  integrationHealth?: Record<string, IntegrationHealthInfo & { longName: string }>;
+  integrationHealth?: IntegrationHealthMap;
   onReconnect?: (id: string) => void;
 }
 
@@ -16,7 +16,9 @@ const IntegrationsDemo: React.FC<Props> = ({ t, integrationHealth, onReconnect }
   const [activeCategory, setActiveCategory] = useState<IntegrationCategory | 'All'>('All');
   const [toast, setToast] = useState<string | null>(null);
 
-  const integrationStatusList = Object.values(integrationHealth || {});
+  const integrationStatusList: IntegrationHealthEntry[] = integrationHealth
+    ? Object.values(integrationHealth)
+    : [];
   const bannerMessage =
     integrationStatusList.some((entry) => entry.state === 'needs_reauth')
       ? t.status.bannerReauth

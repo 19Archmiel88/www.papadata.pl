@@ -2,6 +2,20 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Lock, Unlock } from 'lucide-react';
 import { DemoTranslation, Language } from '../../types';
 import { motion } from 'framer-motion';
+import RevenueChart from '../RevenueChart';
+import CategoryChart from '../CategoryChart';
+import CustomerChart from '../CustomerChart';
+import SalesTable from '../SalesTable';
+import KPICard from '../KPICard';
+import GeminiInsightCard from '../GeminiInsightCard';
+import {
+  getRevenueTrend,
+  getCategoryBreakdown,
+  getCustomerAcquisition,
+  getTopProducts,
+  getKpiSummary,
+  getGeminiData,
+} from './mockDashboardData';
 
 type ReportView = 'sales' | 'campaigns' | 'customers' | 'technical';
 
@@ -28,6 +42,17 @@ const LiveReports: React.FC<Props> = ({ t, initialTab = 'sales', onTabChange, la
   };
 
   const isEnglish = lang === 'EN';
+  const revenueData = getRevenueTrend(dateRange);
+  const categoryData = getCategoryBreakdown(dateRange);
+  const customerData = getCustomerAcquisition(dateRange);
+  const products = getTopProducts(dateRange);
+  const kpiSummary = getKpiSummary(dateRange, isEnglish);
+  const geminiData = getGeminiData(dateRange);
+  const categoryTitle = isEnglish ? 'Sales by Category' : 'Sprzedaż według kategorii';
+  const categorySubtitle = isEnglish ? 'Revenue share per channel' : 'Udział przychodów według kanałów';
+  const customerTitle = isEnglish ? 'Customer Acquisition' : 'Pozyskiwanie klientów';
+  const productTitle = isEnglish ? 'Top Products' : 'Najlepsze produkty';
+  const productSubtitle = isEnglish ? 'Best performing items by revenue' : 'Najlepsze produkty według przychodów';
   const multiplier = dateRange === 'today' ? 0.2 : dateRange === 'last7' ? 0.6 : 1;
   const numberFormatter = useMemo(
     () => new Intl.NumberFormat(isEnglish ? 'en-US' : 'pl-PL'),
@@ -42,7 +67,8 @@ const LiveReports: React.FC<Props> = ({ t, initialTab = 'sales', onTabChange, la
       { key: 'cr', label: isEnglish ? 'Conversion rate' : 'Współczynnik konwersji', value: 2.4, currency: false, suffix: '%', trend: 0.6 },
     ];
     return base.map((item) => {
-      const factor = item.key === 'cr' ? multiplier * 1.15 : multiplier;
+      // Conversion rate (rate metric) shouldn't be scaled by the time-range multiplier like cumulative metrics
+      const factor = item.key === 'cr' ? 1.15 : multiplier;
       const adjusted = item.value * factor;
       const displayValue = item.currency
         ? `PLN ${numberFormatter.format(Math.max(1, Math.round(adjusted)))}`
@@ -124,7 +150,7 @@ const LiveReports: React.FC<Props> = ({ t, initialTab = 'sales', onTabChange, la
         </div>
       </div>
 
-        <div className="p-6 space-y-6">
+      <div className="p-6 space-y-6">
         {integrationAlert && (
           <div className="rounded-xl border border-rose-200 bg-rose-50/70 dark:border-rose-700 dark:bg-rose-900/30 text-rose-700 dark:text-rose-100 px-4 py-3 text-sm">
             {integrationAlert}
@@ -260,6 +286,33 @@ const LiveReports: React.FC<Props> = ({ t, initialTab = 'sales', onTabChange, la
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <RevenueChart data={revenueData} />
+          <CategoryChart
+            data={categoryData}
+            title={categoryTitle}
+            subtitle={categorySubtitle}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <CustomerChart data={customerData} title={customerTitle} />
+          <GeminiInsightCard data={geminiData} />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <SalesTable
+            products={products}
+            title={productTitle}
+            subtitle={productSubtitle}
+          />
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
+            {kpiSummary.map((item) => (
+              <KPICard key={item.label} data={item} />
+            ))}
           </div>
         </div>
       </div>

@@ -6,12 +6,18 @@ interface Props {
   t: Translation;
 }
 
+type FaqItemEntry = Translation['faq']['items'][keyof Translation['faq']['items']];
+type SecurityCard = Translation['security']['cards'][keyof Translation['security']['cards']];
+
 const FaqSection: React.FC<Props> = ({ t }) => {
-  const faqItems = Object.entries(t.faq.items).map(([key, item]) => ({
-    id: key,
-    question: item.q,
-    answer: item.a,
-  }));
+  const faqItems = (Object.entries(t.faq.items) as [string, FaqItemEntry][]).map(
+    ([key, item]) => ({
+      id: key,
+      question: item.q,
+      answer: item.a,
+    }),
+  );
+  const securityCards = Object.values(t.security.cards) as SecurityCard[];
 
   const [openId, setOpenId] = useState<string | null>(faqItems[0]?.id ?? null);
 
@@ -84,7 +90,7 @@ const FaqSection: React.FC<Props> = ({ t }) => {
             </div>
             
             <ul className="mt-4 space-y-2 text-xs md:text-sm text-slate-600 dark:text-slate-400">
-                {Object.values(t.security.cards).map((card, idx) => (
+                {securityCards.map((card, idx) => (
                      <li key={idx} className="flex gap-2">
                         <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary-500 shrink-0" />
                         <span>

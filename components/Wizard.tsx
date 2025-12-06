@@ -1,4 +1,3 @@
-
 import React, { useEffect, useMemo, useState } from "react";
 import { CheckCircle, ChevronLeft, ChevronRight, KeyRound, Lock, Shield, Zap, X } from "lucide-react";
 import { IntegrationItem, Language, IntegrationHealthInfo } from "../types";
@@ -12,11 +11,22 @@ type IntegrationCard = IntegrationItem & {
 };
 
 interface Props {
+  /** Current active language */
   lang: Language;
+  /** Function to update language */
   setLang: (l: Language) => void;
+  /** Function to navigate to a different route */
   navigate: (p: string) => void;
 }
 
+/**
+ * A multi-step wizard for new user onboarding.
+ * Steps:
+ * 1. Company Details (NIP, name, etc.)
+ * 2. Select Integrations
+ * 3. Configure Keys/Auth
+ * 4. Summary & Provisioning
+ */
 const Wizard: React.FC<Props> = ({ lang, setLang, navigate }) => {
   const [step, setStep] = useState<Step>(0);
   const [showLegal, setShowLegal] = useState(false);
@@ -867,5 +877,3 @@ const Wizard: React.FC<Props> = ({ lang, setLang, navigate }) => {
 };
 
 export default Wizard;
-
-

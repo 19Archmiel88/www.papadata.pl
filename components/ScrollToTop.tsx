@@ -2,9 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { ArrowUp } from 'lucide-react';
 
 interface Props {
+  /** Tooltip text displayed on hover */
   tooltip: string;
 }
 
+/**
+ * A floating button that appears when the user scrolls down.
+ * Clicking it smooth-scrolls the page back to the top.
+ */
 const ScrollToTop: React.FC<Props> = ({ tooltip }) => {
   const [visible, setVisible] = useState(false);
 

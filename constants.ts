@@ -1,7 +1,10 @@
 
-
 import { IntegrationItem, Translation, Language, DemoTranslation } from './types';
 
+/**
+ * Initial list of integrations available in the platform.
+ * Contains both available and coming-soon integrations, with vote counts.
+ */
 export const INITIAL_INTEGRATIONS: IntegrationItem[] = [
   { id: 'google_ads', code: 'GAds', name: 'Google Ads', category: 'Marketing', status: 'Available', votes: 120 },
   { id: 'meta_ads', code: 'Meta', name: 'Meta Ads (Facebook)', category: 'Marketing', status: 'Available', votes: 150 },
@@ -620,6 +623,10 @@ const DEMO_TRANSLATION_EN: DemoTranslation = {
   },
 };
 
+/**
+ * Global translation dictionary.
+ * Contains text resources for all supported languages (PL, EN).
+ */
 export const TRANSLATIONS: Record<Language, Translation> = {
   PL: {
     header: {
@@ -1010,4 +1017,3 @@ export const TRANSLATIONS: Record<Language, Translation> = {
     demo: DEMO_TRANSLATION_EN,
   },
 };
-

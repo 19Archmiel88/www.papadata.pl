@@ -16,9 +16,14 @@ import {
 } from 'lucide-react';
 
 interface Props {
+  /** Translation object containing titles and descriptions for the features */
   t: Translation['featuresSection'];
 }
 
+/**
+ * Renders the Features section of the landing page.
+ * Displays a grid of cards highlighting key features of the platform.
+ */
 const FeaturesSection: React.FC<Props> = ({ t }) => {
   const features: SectionCardItem[] = [
     {

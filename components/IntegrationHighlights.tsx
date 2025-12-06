@@ -20,6 +20,10 @@ const integrationHighlights = [
   },
 ];
 
+/**
+ * A section highlighting key integration capabilities.
+ * Static component, but utilizes the `SectionCardGrid` for layout.
+ */
 const IntegrationHighlights: React.FC = () => (
   <SectionCardGrid
     title="Łączymy się ze wszystkim, co ważne"

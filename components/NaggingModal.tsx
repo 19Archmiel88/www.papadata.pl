@@ -4,9 +4,14 @@ import { Translation } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface Props {
+  /** Translation object for the nagging modal content */
   t: Translation['nagging'];
 }
 
+/**
+ * A modal that appears after a delay to encourage users to sign up or claim an offer.
+ * Can be dismissed to a minimized side tab and reopened.
+ */
 const NaggingModal: React.FC<Props> = ({ t }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);

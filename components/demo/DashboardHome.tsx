@@ -1,14 +1,30 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Sparkles, ArrowRight, TrendingUp, TrendingDown, Send, Loader2 } from 'lucide-react';
-import { DemoTranslation, Language, IntegrationHealthInfo } from '../../types';
+import {
+  DemoTranslation,
+  Language,
+  IntegrationHealthMap,
+} from '../../types';
 import { motion } from 'framer-motion';
+import RevenueChart from '../RevenueChart';
+import CategoryChart from '../CategoryChart';
+import CustomerChart from '../CustomerChart';
+import SalesTable from '../SalesTable';
+import KPICard from '../KPICard';
+import {
+  getRevenueTrend,
+  getCategoryBreakdown,
+  getCustomerAcquisition,
+  getTopProducts,
+  getKpiSummary,
+} from './mockDashboardData';
 
 interface Props {
   t: DemoTranslation['dashboard'];
   dateRange: 'today' | 'last7' | 'last30';
   lang?: Language;
   highlightAI?: boolean;
-  integrationHealth?: Record<string, IntegrationHealthInfo & { longName: string }>;
+  integrationHealth?: IntegrationHealthMap;
   integrationAlert?: string | null;
   needsReauth?: boolean;
 }
@@ -26,6 +42,12 @@ const DashboardHome: React.FC<Props> = ({
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState<string | null>(null);
   const [askOpen, setAskOpen] = useState(false);
+  const isEnglish = lang === 'EN';
+  const revenueData = getRevenueTrend(dateRange);
+  const categoryData = getCategoryBreakdown(dateRange);
+  const customerData = getCustomerAcquisition(dateRange);
+  const products = getTopProducts(dateRange);
+  const kpiSummary = getKpiSummary(dateRange, isEnglish);
 
   useEffect(() => {
     setAiState(highlightAI ? 'ready' : 'loading');
@@ -282,6 +304,31 @@ const DashboardHome: React.FC<Props> = ({
              </defs>
           </svg>
         </div>
+      </div>
+
+      {/* Extended Visuals */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <RevenueChart data={revenueData} />
+        <CategoryChart
+          data={categoryData}
+          title={isEnglish ? 'Sales by Category' : 'Sprzedaż według kategorii'}
+          subtitle={isEnglish ? 'Revenue share per channel' : 'Udział przychodów według kanałów'}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <CustomerChart data={customerData} title={isEnglish ? 'Customer Acquisition' : 'Pozyskiwanie klientów'} />
+        <SalesTable
+          products={products}
+          title={isEnglish ? 'Top Products' : 'Najlepsze produkty'}
+          subtitle={isEnglish ? 'Best performing items by revenue' : 'Najlepsze produkty według przychodów'}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
+        {kpiSummary.map((item) => (
+          <KPICard key={item.label} data={item} />
+        ))}
       </div>
     </div>
   );

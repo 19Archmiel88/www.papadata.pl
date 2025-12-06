@@ -6,10 +6,16 @@ import { INITIAL_INTEGRATIONS } from '../constants';
 import IntegrationLogo from './IntegrationLogo';
 
 interface Props {
+  /** Translation object for the integrations section */
   t: Translation['integrationsSection'];
+  /** Callback to open the full integrations modal */
   onOpenModal: () => void;
 }
 
+/**
+ * A section displaying a preview of popular integrations.
+ * Features a search bar to filter the displayed integrations and a button to view all.
+ */
 const IntegrationsSection: React.FC<Props> = ({ t, onOpenModal }) => {
   const [searchQuery, setSearchQuery] = useState('');
 

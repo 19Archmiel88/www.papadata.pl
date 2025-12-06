@@ -20,6 +20,11 @@ const socialCards = [
   },
 ];
 
+/**
+ * A section displaying social proof, including customer testimonials and key benefits.
+ * Uses a testimonial block and a grid of benefits.
+ * Content is currently hardcoded in Polish.
+ */
 const SocialProof: React.FC = () => (
   <>
     <SectionCardGrid

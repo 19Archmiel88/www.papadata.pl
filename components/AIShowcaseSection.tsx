@@ -2,11 +2,18 @@
 import React from 'react';
 import { Translation } from '../types';
 import { Sparkles, Play } from 'lucide-react';
+import GeminiInsightCard from './GeminiInsightCard';
+import { getGeminiData } from './demo/mockDashboardData';
 
 interface Props {
+  /** Translation object containing text for the AI showcase section */
   t: Translation['aiSection'];
 }
 
+/**
+ * A section showcasing the AI Assistant features.
+ * Displays a laptop mockup with a simulated AI interface and a floating widget.
+ */
 const AIShowcaseSection: React.FC<Props> = ({ t }) => {
   return (
     <section className="py-24 bg-slate-50 dark:bg-slate-900/30 overflow-hidden">
@@ -77,6 +84,10 @@ const AIShowcaseSection: React.FC<Props> = ({ t }) => {
                {t.widget.btn}
              </button>
           </div>
+        </div>
+
+        <div className="mt-12 grid grid-cols-1 xl:grid-cols-3 gap-6">
+          <GeminiInsightCard data={getGeminiData('last30')} />
         </div>
       </div>
     </section>
