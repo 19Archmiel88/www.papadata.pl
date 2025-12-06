@@ -42,7 +42,8 @@ const LiveReports: React.FC<Props> = ({ t, initialTab = 'sales', onTabChange, la
       { key: 'cr', label: isEnglish ? 'Conversion rate' : 'Współczynnik konwersji', value: 2.4, currency: false, suffix: '%', trend: 0.6 },
     ];
     return base.map((item) => {
-      const factor = item.key === 'cr' ? multiplier * 1.15 : multiplier;
+      // Conversion rate (rate metric) shouldn't be scaled by the time-range multiplier like cumulative metrics
+      const factor = item.key === 'cr' ? 1.15 : multiplier;
       const adjusted = item.value * factor;
       const displayValue = item.currency
         ? `PLN ${numberFormatter.format(Math.max(1, Math.round(adjusted)))}`
