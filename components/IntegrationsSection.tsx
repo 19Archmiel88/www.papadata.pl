@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Search } from 'lucide-react';
 import { Translation, IntegrationItem, IntegrationCategory } from '../types';
@@ -59,16 +58,17 @@ const IntegrationsSection: React.FC<Props> = ({ t, onOpenModal }) => {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6 mb-12">
           {displayItems.length > 0 ? (
             displayItems.map((item) => (
-              <div 
+              <button 
                 key={item.id}
-                className="group bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 hover:shadow-xl hover:border-primary-200 dark:hover:border-primary-900 transition-all duration-300 flex flex-col items-center justify-center text-center h-40 hover:-translate-y-1 hover:scale-[1.02]"
+                onClick={onOpenModal}
+                className="group bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 hover:shadow-xl hover:border-primary-200 dark:hover:border-primary-900 transition-all duration-300 flex flex-col items-center justify-center text-center h-40 hover:-translate-y-1 hover:scale-[1.02] cursor-pointer"
               >
                 <IntegrationLogo code={item.code} size="lg" className="mb-4 group-hover:scale-110 transition-transform duration-300" />
                 <h3 className="font-semibold text-slate-900 dark:text-slate-100">{item.name}</h3>
                 <p className="text-xs text-slate-500 mt-1 uppercase tracking-wide">
                   {getSubtitle(item.category)}
                 </p>
-              </div>
+              </button>
             ))
           ) : (
             <div className="col-span-full py-8 text-slate-500">

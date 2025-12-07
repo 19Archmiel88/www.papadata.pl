@@ -1,4 +1,5 @@
-
+// W pliku np. constants.ts
+export const API_URL = process.env.BACKEND_URL || 'http://localhost:8000';
 import { IntegrationItem, Translation, Language, DemoTranslation } from './types';
 
 /**

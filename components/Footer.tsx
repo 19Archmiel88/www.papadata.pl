@@ -1,29 +1,15 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ExternalLink } from 'lucide-react';
 import { IntegrationCategory } from '../types';
 import BrandLogo from './BrandLogo';
+import { checkHealth } from '../services/api';
 
 interface Props {
-  /**
-   * Function to handle smart navigation to various sections or external links.
-   * Can scroll to anchors or navigate to different routes.
-   */
   smartNavigate: (target:
-    | 'demo'
-    | 'demo-ai'
-    | 'reports-sales'
-    | 'reports-technical'
-    | 'academy'
-    | 'academy-docs'
-    | 'contact'
-    | 'pricing'
-    | 'privacy'
-    | 'terms'
-    | 'about'
+    | 'demo' | 'demo-ai' | 'reports-sales' | 'reports-technical'
+    | 'academy' | 'academy-docs' | 'contact' | 'pricing'
+    | 'privacy' | 'terms' | 'about'
   ) => void;
-  /**
-   * Callback to open the integrations modal, optionally with a pre-selected category.
-   */
   onOpenIntegrations: (category?: IntegrationCategory) => void;
 }
 
@@ -62,11 +48,15 @@ const footerSections: { title: string; links: FooterLink[] }[] = [
   },
 ];
 
-/**
- * Footer component for the application.
- * Contains links to various sections, legal information, and social links.
- */
 const Footer: React.FC<Props> = ({ smartNavigate, onOpenIntegrations }) => {
+  const [isSystemOnline, setIsSystemOnline] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    checkHealth()
+      .then(() => setIsSystemOnline(true))
+      .catch(() => setIsSystemOnline(false));
+  }, []);
+
   const renderLink = (link: FooterLink, idx: number) => {
     switch (link.kind) {
       case 'smart':
@@ -108,7 +98,11 @@ const Footer: React.FC<Props> = ({ smartNavigate, onOpenIntegrations }) => {
       <div className="max-w-7xl mx-auto px-4 py-14">
         <div className="grid gap-8 md:grid-cols-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-primary-400">PapaData</p>
+            <div className="mb-6">
+               {/* POPRAWIONE LOGO: Usunięto size="sm" i dodatkowy tekst. 
+                   Teraz BrandLogo powinno wyglądać tak jak w Headerze. */}
+               <BrandLogo />
+            </div>
             <p className="mt-4 text-sm text-slate-400">
               Inteligentna analityka dla e-commerce. Łączymy dane, automatyzujemy raporty i dajemy głos AI w Twoim zespole.
             </p>
@@ -125,11 +119,24 @@ const Footer: React.FC<Props> = ({ smartNavigate, onOpenIntegrations }) => {
         </div>
 
         <div className="mt-10 border-t border-slate-800 pt-6 text-sm text-slate-400 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-2 text-slate-300">
-            <BrandLogo size="sm" className="shadow-none" />
-            <span>PapaData — inteligentne raporty e-commerce</span>
+          <div className="flex flex-col gap-2">
+            {/* Wskaźnik statusu systemu (GCP) */}
+            <div className="flex items-center gap-2 text-xs text-slate-500">
+              <span 
+                className={`w-2 h-2 rounded-full transition-colors duration-500 ${
+                  isSystemOnline === true ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 
+                  isSystemOnline === false ? 'bg-red-500' : 
+                  'bg-slate-600 animate-pulse'
+                }`}
+              ></span>
+              {isSystemOnline === true ? 'System Online (GCP)' : 
+               isSystemOnline === false ? 'System Offline' : 
+               'Connecting...'}
+            </div>
           </div>
-          <span>&copy; {new Date().getFullYear()} PapaData. Wszystkie prawa zastrzeżone.</span>
+          
+          {/* ROK ZMIENIONY NA 2026 */}
+          <span>&copy; 2026 PapaData. Wszystkie prawa zastrzeżone.</span>
         </div>
       </div>
     </footer>
