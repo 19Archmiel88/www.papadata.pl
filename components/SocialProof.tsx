@@ -1,67 +1,86 @@
 import React from 'react';
-import { Quote, Users, TrendingUp } from 'lucide-react';
-import SectionCardGrid, { SectionCardItem } from './SectionCardGrid';
+import { Quote } from 'lucide-react';
 
 const SocialProof: React.FC = () => {
-  const items: SectionCardItem[] = [
-    {
-      id: 'metric-1',
-      icon: <TrendingUp className="w-5 h-5" />,
-      title: 'Szybsze decyzje',
-      desc: (
-        <>
-          Klienci raportują skrócenie czasu przygotowania raportów z kilku
-          godzin do kilku minut tygodniowo.
-        </>
-      ),
-    },
-    {
-      id: 'metric-2',
-      icon: <Users className="w-5 h-5" />,
-      title: 'Zespół patrzy w te same liczby',
-      desc: (
-        <>
-          Sprzedaż, marketing i zarząd korzystają z jednego modelu danych –
-          koniec z „ale u mnie w Excelu wychodzi inaczej”.
-        </>
-      ),
-    },
-  ];
+  const isPL =
+    typeof window !== 'undefined'
+      ? (document.documentElement.lang || 'pl').toLowerCase().startsWith('pl')
+      : true;
+
+  const title = isPL ? 'Co mówią klienci (soon)' : 'What clients say (soon)';
+
+  const items = isPL
+    ? [
+        {
+          role: 'Head of E-commerce',
+          company: 'Sklep modowy',
+          quote:
+            'Zastąpiliśmy 6 raportów w Excelu jednym pulpitem. Asystent AI wyłapuje rzeczy, których sami byśmy nie zauważyli.',
+        },
+        {
+          role: 'CMO',
+          company: 'D2C beauty',
+          quote:
+            'Wreszcie w jednym miejscu widzę marżę po kosztach reklam – nie tylko ROAS w panelu reklamowym.',
+        },
+        {
+          role: 'Owner',
+          company: 'Brand premium',
+          quote:
+            'Najbardziej cenię to, że rano dostaję krótkie podsumowanie: co się zmieniło i co z tym zrobić.',
+        },
+      ]
+    : [
+        {
+          role: 'Head of E-commerce',
+          company: 'Fashion brand',
+          quote:
+            'We replaced 6 spreadsheet reports with one dashboard. The AI assistant spots patterns we would simply miss.',
+        },
+        {
+          role: 'CMO',
+          company: 'D2C beauty',
+          quote:
+            'For the first time I can see margin after ad spend in one place – not just ROAS in ad panels.',
+        },
+        {
+          role: 'Owner',
+          company: 'Premium brand',
+          quote:
+            'What I value most is the daily summary: what changed and what we should do about it.',
+        },
+      ];
 
   return (
-    <section className="py-20 bg-slate-950">
-      <div className="max-w-6xl mx-auto px-4 grid gap-10 md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] items-start">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary-400 mb-2">
-            Społeczny dowód
-          </p>
-          <h2 className="text-2xl md:text-3xl font-semibold text-slate-50">
-            Narzędzie dla zespołów, które mają dość zgadywania.
-          </h2>
-
-          <figure className="mt-6 rounded-2xl border border-slate-800 bg-slate-900/80 p-6 relative overflow-hidden">
-            <div className="absolute -top-6 -left-6 w-16 h-16 rounded-full bg-primary-500/20 blur-3xl" />
-            <Quote className="w-6 h-6 text-primary-400" />
-            <blockquote className="mt-3 text-sm md:text-base text-slate-200 leading-relaxed">
-              „Dzięki PapaData wreszcie wiemy, które kampanie przynoszą realny
-              zysk. Raporty, które kiedyś powstawały raz w tygodniu, teraz mamy
-              codziennie rano – automatycznie.”
-            </blockquote>
-            <figcaption className="mt-4 text-sm text-slate-400">
-              <span className="font-semibold text-slate-100">
-                Anna Kowalska
-              </span>{' '}
-              • Head of E-commerce
-            </figcaption>
-          </figure>
+    <section className="bg-slate-950 py-16 text-slate-50">
+      <div className="mx-auto max-w-6xl px-4">
+        <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+          <div>
+            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+              {title}
+            </h2>
+            <p className="mt-3 text-sm text-slate-400">
+              {isPL
+                ? 'Wersja produkcyjna będzie zawierała case studies z konkretnymi wynikami. Poniżej placeholdery pod finalny content.'
+                : 'The production version will include detailed case studies with numbers. Below are placeholders for the final content.'}
+            </p>
+          </div>
         </div>
 
-        <div className="pt-2">
-          <SectionCardGrid
-            title="Co zyskują zespoły pracujące na jednym modelu danych"
-            items={items}
-            gridCols="grid-cols-1"
-          />
+        <div className="grid gap-4 md:grid-cols-3">
+          {items.map((item, idx) => (
+            <article
+              key={idx}
+              className="flex h-full flex-col rounded-2xl border border-slate-800 bg-slate-900/40 p-4 text-xs text-slate-200 shadow-sm shadow-black/40"
+            >
+              <Quote className="mb-3 h-4 w-4 text-primary-300" />
+              <p className="text-[11px] text-slate-200">{item.quote}</p>
+              <div className="mt-3 text-[11px] text-slate-400">
+                <p className="font-medium">{item.role}</p>
+                <p className="text-slate-500">{item.company}</p>
+              </div>
+            </article>
+          ))}
         </div>
       </div>
     </section>

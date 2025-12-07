@@ -1,6 +1,6 @@
-// W pliku np. constants.ts
-export const API_URL = process.env.BACKEND_URL || 'http://localhost:8000';
 import { IntegrationItem, Translation, Language, DemoTranslation } from './types';
+
+export const API_URL = process.env.BACKEND_URL || 'http://localhost:8000';
 
 /**
  * Initial list of integrations available in the platform.
@@ -142,8 +142,10 @@ const DEMO_TRANSLATION_PL: DemoTranslation = {
     },
     votesLabel: 'Głosy',
     toasts: {
-      connected: 'Symulacja: integracja połączona. W prawdziwym koncie dodasz klucze API w kilka kliknięć.',
-      vote: 'Dziękujemy za głos! Użyj tego przycisku, aby podpowiedzieć nam, które integracje wdrożyć jako pierwsze.',
+      connected:
+        'Symulacja: integracja połączona. W prawdziwym koncie dodasz klucze API w kilka kliknięć.',
+      vote:
+        'Dziękujemy za głos! Użyj tego przycisku, aby podpowiedzieć nam, które integracje wdrożyć jako pierwsze.',
     },
     tooltips: {
       comingSoon: 'Ta integracja jest w trakcie wdrożenia.',
@@ -206,7 +208,8 @@ const DEMO_TRANSLATION_PL: DemoTranslation = {
     },
     articleBody:
       'Krótka wersja artykułu w demie. Pełne wdrożenie pokazuje, jak łączyć dane sprzedażowe, marketingowe i logistyczne w jeden raport, aby podejmować decyzje szybciej.',
-    videoBody: 'To podgląd playera w wersji demo. W prawdziwym koncie obejrzysz pełne nagrania w jakości HD i z napisami.',
+    videoBody:
+      'To podgląd playera w wersji demo. W prawdziwym koncie obejrzysz pełne nagrania w jakości HD i z napisami.',
   },
   support: {
     title: 'Wsparcie i konsultacje',
@@ -389,10 +392,8 @@ const DEMO_TRANSLATION_EN: DemoTranslation = {
       },
     },
     alerts: {
-      connectionLost:
-        'No fresh data from {name} – refresh the connection in Integrations.',
-      reauthBanner:
-        'Some integrations require re-connecting. Click here to open settings.',
+      connectionLost: 'No fresh data from {name} – refresh the connection in Integrations.',
+      reauthBanner: 'Some integrations require re-connecting. Click here to open settings.',
       toastError: 'Connection with {name} dropped. Check Integrations.',
       toastReauth: 'Tokens expired? Refresh connections in settings.',
     },
@@ -440,7 +441,8 @@ const DEMO_TRANSLATION_EN: DemoTranslation = {
     },
     votesLabel: 'Votes',
     toasts: {
-      connected: 'Simulation: integration connected. In a real account, you will add API keys in a few clicks.',
+      connected:
+        'Simulation: integration connected. In a real account, you will add API keys in a few clicks.',
       vote: 'Thanks for voting! Use this button to tell us which integrations to prioritize.',
     },
     tooltips: {
@@ -504,7 +506,8 @@ const DEMO_TRANSLATION_EN: DemoTranslation = {
     },
     articleBody:
       'A short article preview for the demo. The full version shows how to blend sales, marketing, and logistics data into one report to make faster decisions.',
-    videoBody: 'This is a demo video preview. In your account you will watch the full recording in HD with captions.',
+    videoBody:
+      'This is a demo video preview. In your account you will watch the full recording in HD with captions.',
   },
   support: {
     title: 'Support and consultations',
@@ -650,11 +653,14 @@ export const TRANSLATIONS: Record<Language, Translation> = {
     },
     hero: {
       tag: 'AI DLA E-COMMERCE',
-      title: 'AI, które analizuje Twoje dane e-commerce.\nZobacz, skąd naprawdę bierze się Twój przychód.',
-      subtitle: 'Połącz sklep, kampanie reklamowe i analitykę w jednym miejscu. PapaData codziennie budzi się z gotowymi raportami, żebyś Ty nie musiał ich składać z Excela.',
+      title:
+        'AI, które analizuje Twoje dane e-commerce.\nZobacz, skąd naprawdę bierze się Twój przychód.',
+      subtitle:
+        'Połącz sklep, kampanie reklamowe i analitykę w jednym miejscu. PapaData codziennie budzi się z gotowymi raportami, żebyś Ty nie musiał ich składać z Excela.',
       ctaPrimary: 'Rozpocznij 14-dniowy Trial',
       ctaSecondary: 'Zobacz Demo',
-      trustText: 'Bez karty, bez zobowiązań. Pierwsze raporty zobaczysz tego samego dnia.',
+      trustText:
+        'Bez karty, bez zobowiązań. Pierwsze raporty zobaczysz tego samego dnia.',
       mock: {
         header: 'Panel klienta – przykładowe dane',
         carousel: {
@@ -662,18 +668,21 @@ export const TRANSLATIONS: Record<Language, Translation> = {
             title: 'Przychód (ostatnie 30 dni)',
             value: '124 592,00 PLN',
             trend: '+12.5% vs poprzednie 30 dni',
-            assistant: 'W tym tygodniu sprzedaż z kampanii „Brand Search" wzrosła o 32%. Meta Ads przynosi 60% nowych klientów.',
+            assistant:
+              'W tym tygodniu sprzedaż z kampanii „Brand Search" wzrosła o 32%. Meta Ads przynosi 60% nowych klientów.',
           },
           slide2: {
             title: 'Analiza trendów sprzedaży',
-            assistant: 'Widzę spadek konwersji w weekendy. Sugeruję uruchomienie kampanii remarketingowej w niedzielę wieczorem.',
+            assistant:
+              'Widzę spadek konwersji w weekendy. Sugeruję uruchomienie kampanii remarketingowej w niedzielę wieczorem.',
           },
           slide3: {
             title: 'Optymalizacja budżetu',
             subtitle: 'Budżet kampanii Brand Search zwiększony o 20%.',
-            assistant: 'Zrobione. Zwiększyłem budżet kampanii brandowej. Będę monitorował ROAS przez kolejne 24h.',
+            assistant:
+              'Zrobione. Zwiększyłem budżet kampanii brandowej. Będę monitorował ROAS przez kolejne 24h.',
           },
-        }
+        },
       },
     },
     featuresSection: {
@@ -727,7 +736,8 @@ export const TRANSLATIONS: Record<Language, Translation> = {
     },
     integrationsSection: {
       title: 'Integrujemy się z platformami, których już używasz',
-      subtitle: 'PapaData laczy dane z Twojego sklepu, kampanii reklamowych, marketplaceow i narzedzi analitycznych. Jednym kliknieciem podlaczasz zrodla, a my zajmujemy sie reszta (ETL, hurtownia, raporty).',
+      subtitle:
+        'PapaData laczy dane z Twojego sklepu, kampanii reklamowych, marketplaceow i narzedzi analitycznych. Jednym kliknieciem podlaczasz zrodla, a my zajmujemy sie reszta (ETL, hurtownia, raporty).',
       viewAllButton: 'Zobacz wszystkie integracje (30+)',
       searchPlaceholder: 'Szukaj integracji...',
       cardSubtitles: {
@@ -740,7 +750,8 @@ export const TRANSLATIONS: Record<Language, Translation> = {
     },
     integrationsModal: {
       title: 'Katalog integracji PapaData',
-      description: 'Polacz PapaData z platformami, ktorych uzywasz na co dzien. Sklepy, kampanie reklamowe, marketplacey, CRM, platnosci, logistyka i ksiegowosc - w jednym, spojnym widoku.',
+      description:
+        'Polacz PapaData z platformami, ktorych uzywasz na co dzien. Sklepy, kampanie reklamowe, marketplacey, CRM, platnosci, logistyka i ksiegowosc - w jednym, spojnym widoku.',
       statuses: 'Statusy: Dostępne • Wkrótce • Głosowanie (pomóż wybrać kolejne integracje).',
       searchPlaceholder: 'Szukaj integracji...',
       filters: {
@@ -844,11 +855,14 @@ export const TRANSLATIONS: Record<Language, Translation> = {
     },
     hero: {
       tag: 'AI FOR E-COMMERCE',
-      title: 'AI that analyzes your e-commerce data.\nSee where your revenue really comes from.',
-      subtitle: "Connect your store, ad platforms and analytics in one place. PapaData wakes up every morning with ready-to-use reports, so you don't have to build them in spreadsheets.",
+      title:
+        'AI that analyzes your e-commerce data.\nSee where your revenue really comes from.',
+      subtitle:
+        "Connect your store, ad platforms and analytics in one place. PapaData wakes up every morning with ready-to-use reports, so you don't have to build them in spreadsheets.",
       ctaPrimary: 'Start 14-day trial',
       ctaSecondary: 'See Demo',
-      trustText: 'No card required, no commitment. Your first reports are ready the same day.',
+      trustText:
+        'No card required, no commitment. Your first reports are ready the same day.',
       mock: {
         header: 'Client panel – sample data',
         carousel: {
@@ -856,18 +870,21 @@ export const TRANSLATIONS: Record<Language, Translation> = {
             title: 'Revenue (last 30 days)',
             value: '124 592,00 PLN',
             trend: '+12.5% vs previous 30 days',
-            assistant: 'This week, revenue from "Brand Search" grew by 32%. Meta Ads brings 60% of new customers.',
+            assistant:
+              'This week, revenue from "Brand Search" grew by 32%. Meta Ads brings 60% of new customers.',
           },
           slide2: {
             title: 'Sales Trend Analysis',
-            assistant: 'I see a conversion drop on weekends. I suggest launching a remarketing campaign on Sunday evenings.',
+            assistant:
+              'I see a conversion drop on weekends. I suggest launching a remarketing campaign on Sunday evenings.',
           },
           slide3: {
             title: 'Budget Optimization',
             subtitle: 'Brand Search budget increased by 20%.',
-            assistant: 'Done. I have increased the brand campaign budget. I will monitor ROAS for the next 24h.',
+            assistant:
+              'Done. I have increased the brand campaign budget. I will monitor ROAS for the next 24h.',
           },
-        }
+        },
       },
     },
     featuresSection: {
@@ -921,7 +938,8 @@ export const TRANSLATIONS: Record<Language, Translation> = {
     },
     integrationsSection: {
       title: 'We integrate with the platforms you already use',
-      subtitle: 'PapaData connects data from your store, ad platforms, marketplaces and analytics tools. You plug in the sources, and we handle the rest (ETL, warehouse, reporting).',
+      subtitle:
+        'PapaData connects data from your store, ad platforms, marketplaces and analytics tools. You plug in the sources, and we handle the rest (ETL, warehouse, reporting).',
       viewAllButton: 'View all integrations (30+)',
       searchPlaceholder: 'Search integrations...',
       cardSubtitles: {
@@ -934,7 +952,8 @@ export const TRANSLATIONS: Record<Language, Translation> = {
     },
     integrationsModal: {
       title: 'PapaData Integrations Catalog',
-      description: 'Connect PapaData with the platforms you use every day. Stores, ad platforms, marketplaces, CRM, payments, logistics and accounting – in one unified view.',
+      description:
+        'Connect PapaData with the platforms you use every day. Stores, ad platforms, marketplaces, CRM, payments, logistics and accounting – in one unified view.',
       statuses: 'Statuses: Available • Coming soon • Voting (help us choose next integrations).',
       searchPlaceholder: 'Search integrations...',
       filters: {

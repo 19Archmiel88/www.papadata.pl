@@ -1,225 +1,181 @@
-import React, { useMemo, useState } from 'react';
-import { CheckCircle, Sparkles, ShieldCheck } from 'lucide-react';
-import SectionCardGrid, { SectionCardItem } from './SectionCardGrid';
+import React, { useState } from 'react';
+import { Slider } from '@radix-ui/react-slider';
+import { Check } from 'lucide-react';
+import { TRANSLATIONS } from '../constants';
+import { Language, Translation } from '../types';
 
-const sources = [
-  { id: 'shop', name: 'Sklep (np. WooCommerce / Shopify)', price: 80 },
-  { id: 'google_ads', name: 'Google Ads', price: 80 },
-  { id: 'meta_ads', name: 'Meta Ads', price: 80 },
-  { id: 'tiktok_ads', name: 'TikTok Ads', price: 80 },
-  { id: 'allegro', name: 'Allegro', price: 80 },
-];
+interface Props {
+  tOverride?: Translation['pricing'];
+  langOverride?: Language;
+}
 
-const implementationOptions = {
-  self: {
-    name: 'Samodzielnie (Self-service)',
-    oneTimeFee: 0,
-    features: [
-      '14-dniowy darmowy trial',
-      'Pełny dostęp do AI i raportów',
-      'Samodzielna konfiguracja integracji',
-    ],
-    cta: 'Rozpocznij darmowy trial',
-  },
-  basic: {
-    name: 'Z ekspertem: Setup Basic',
-    oneTimeFee: 300,
-    features: [
-      'Prowadzone wdrożenie krok po kroku',
-      'Weryfikacja poprawności danych',
-      'Rekomendacje KPI pod Twoją branżę',
-    ],
-    cta: 'Porozmawiaj o wdrożeniu',
-  },
-} as const;
+const resolveLang = (override?: Language): Language => {
+  if (override) return override;
+  try {
+    const stored = localStorage.getItem('papadata-lang') as Language | null;
+    if (stored === 'PL' || stored === 'EN') return stored;
+  } catch {
+    // ignore
+  }
+  return 'PL';
+};
 
-type ImplementationKey = keyof typeof implementationOptions;
+const PricingOverview: React.FC<Props> = ({ tOverride, langOverride }) => {
+  const lang = resolveLang(langOverride);
+  const t = tOverride ?? TRANSLATIONS[lang].pricing;
+  const isPL = lang === 'PL';
 
-const PricingOverview: React.FC = () => {
-  const [selectedSources, setSelectedSources] = useState<string[]>([
-    'shop',
-    'google_ads',
-  ]);
-  const [implementation, setImplementation] =
-    useState<ImplementationKey>('self');
+  const [sources, setSources] = useState<number>(3);
+  const [withSupport, setWithSupport] = useState<boolean>(true);
 
-  const monthlyCost = useMemo(
-    () =>
-      selectedSources.reduce((sum, id) => {
-        const src = sources.find((s) => s.id === id);
-        return sum + (src?.price ?? 0);
-      }, 0),
-    [selectedSources]
-  );
-
-  const oneTimeCost = implementationOptions[implementation].oneTimeFee;
-  const selectedPlan = implementationOptions[implementation];
-
-  const helperItems: SectionCardItem[] = [
-    {
-      id: 'auto',
-      icon: <Sparkles className="w-5 h-5" />,
-      title: 'Automatyzacja bez kontraktu na lata',
-      desc: (
-        <>
-          Płacisz za realnie podłączone źródła danych. Nie ma limitu wierszy
-          ani dziwnych „pakietów w chmurze”.
-        </>
-      ),
-    },
-    {
-      id: 'secure',
-      icon: <ShieldCheck className="w-5 h-5" />,
-      title: 'Przejrzyste zasady',
-      desc: (
-        <>
-          Pełna informacja o miesięcznym koszcie i jednorazowej opłacie
-          wdrożeniowej. Bez ukrytych opłat za export czy dostęp do API.
-        </>
-      ),
-    },
-  ];
+  const base = 400;
+  const perSource = 150;
+  const price = base + sources * perSource;
+  const total = price + (withSupport ? 500 : 0);
 
   return (
-    <section id="pricing" className="py-20 bg-slate-950">
-      <div className="max-w-6xl mx-auto px-4 grid gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] items-start">
-        <div className="rounded-2xl border border-primary-600/60 bg-gradient-to-br from-primary-950 via-slate-950 to-slate-900 p-6 shadow-[0_24px_80px_rgba(88,28,135,0.7)]">
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary-300 mb-2">
-            Sprzedaj
-          </p>
-          <h2 className="text-2xl md:text-3xl font-semibold text-slate-50">
-            Cennik, który rośnie razem z Twoją sprzedażą.
+    <section className="bg-slate-950 py-16 text-slate-50">
+      <div className="mx-auto max-w-6xl px-4">
+        <div className="mb-8 max-w-2xl">
+          <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+            {t.title}
           </h2>
-          <p className="mt-3 text-sm md:text-base text-slate-200">
-            Każde źródło danych ma prostą, stałą cenę miesięczną. Dodajesz tylko
-            te elementy, których naprawdę używasz.
+          <p className="mt-3 text-sm text-slate-400">
+            {isPL
+              ? 'Prosty model abonamentowy – płacisz za liczbę źródeł danych i poziom wsparcia ekspertów, nie za każdy wiersz w hurtowni.'
+              : 'Simple subscription model – you pay for the number of data sources and expert support level, not for every row in the warehouse.'}
           </p>
-
-          <div className="mt-6 space-y-5 text-sm">
-            <div>
-              <h3 className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400 mb-2">
-                Krok 1: Wybierz źródła danych
-              </h3>
-              <div className="space-y-2">
-                {sources.map((source) => {
-                  const checked = selectedSources.includes(source.id);
-                  return (
-                    <label
-                      key={source.id}
-                      className="flex items-center justify-between gap-3 rounded-xl border border-slate-800 bg-slate-950/80 px-3 py-2 cursor-pointer hover:border-primary-500/70"
-                    >
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={checked}
-                          onChange={() =>
-                            setSelectedSources((prev) =>
-                              prev.includes(source.id)
-                                ? prev.filter((id) => id !== source.id)
-                                : [...prev, source.id]
-                            )
-                          }
-                          className="h-4 w-4 rounded border-slate-600 bg-slate-900 text-primary-500 focus:ring-primary-500"
-                        />
-                        <span className="text-slate-100">{source.name}</span>
-                      </div>
-                      <span className="font-mono text-xs text-slate-300">
-                        +{source.price} zł / mc
-                      </span>
-                    </label>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div>
-              <h3 className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400 mb-2">
-                Krok 2: Wybierz tryb wdrożenia
-              </h3>
-              <div className="space-y-2">
-                {(Object.keys(implementationOptions) as ImplementationKey[]).map(
-                  (key) => {
-                    const option = implementationOptions[key];
-                    const active = implementation === key;
-                    return (
-                      <label
-                        key={key}
-                        className={[
-                          'flex items-center justify-between gap-3 rounded-xl border px-3 py-2 cursor-pointer',
-                          active
-                            ? 'border-primary-500/80 bg-slate-900'
-                            : 'border-slate-800 bg-slate-950/80 hover:border-slate-700',
-                        ].join(' ')}
-                      >
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="radio"
-                            name="implementation"
-                            checked={active}
-                            onChange={() => setImplementation(key)}
-                            className="h-4 w-4 border-slate-600 bg-slate-900 text-primary-500 focus:ring-primary-500"
-                          />
-                          <span className="text-slate-100">
-                            {option.name}
-                          </span>
-                        </div>
-                        {option.oneTimeFee > 0 && (
-                          <span className="font-mono text-xs text-slate-300">
-                            +{option.oneTimeFee} zł jednorazowo
-                          </span>
-                        )}
-                      </label>
-                    );
-                  }
-                )}
-              </div>
-            </div>
-
-            <div className="mt-4 rounded-xl bg-slate-950/90 border border-slate-800 p-4">
-              <h3 className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400 mb-2">
-                Twoje podsumowanie
-              </h3>
-              <p className="text-sm text-slate-200">
-                Miesięcznie:{' '}
-                <span className="font-mono text-lg text-primary-300">
-                  {monthlyCost.toLocaleString('pl-PL')} zł netto / mc
-                </span>
-              </p>
-              {oneTimeCost > 0 && (
-                <p className="mt-1 text-sm text-slate-200">
-                  Jednorazowo:{' '}
-                  <span className="font-mono text-sm text-slate-100">
-                    {oneTimeCost.toLocaleString('pl-PL')} zł netto
-                  </span>
-                </p>
-              )}
-
-              <ul className="mt-3 space-y-1 text-xs text-slate-400">
-                {selectedPlan.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-2">
-                    <CheckCircle className="w-3.5 h-3.5 text-primary-400 mt-[2px]" />
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <button className="mt-4 inline-flex items-center justify-center rounded-full bg-primary-600 px-5 py-2 text-sm font-semibold text-white hover:bg-primary-500 transition-colors">
-                {selectedPlan.cta}
-              </button>
-
-              <p className="mt-3 text-[11px] text-slate-500">
-                Podane ceny są kwotami netto. Do faktury doliczamy 23% VAT.
-              </p>
-            </div>
-          </div>
         </div>
 
-        <div className="pt-2">
-          <SectionCardGrid
-            title="Dlaczego ten model cenowy jest uczciwy"
-            items={helperItems}
-            gridCols="grid-cols-1"
-          />
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1.3fr)]">
+          <article className="flex flex-col rounded-2xl border border-slate-800 bg-slate-900/40 p-5 text-sm text-slate-200 shadow-sm shadow-black/40">
+            <h3 className="text-base font-semibold text-slate-50">
+              {t.calculator.title}
+            </h3>
+
+            <div className="mt-5 space-y-5 text-xs">
+              <div>
+                <label className="mb-1 block text-[11px] font-medium text-slate-300">
+                  {t.calculator.sourceLabel}: <span className="font-semibold">{sources}</span>
+                </label>
+                <div className="flex items-center gap-3">
+                  <div className="flex-1">
+                    <Slider
+                      min={1}
+                      max={10}
+                      defaultValue={[sources]}
+                      onValueChange={([value]) => setSources(value)}
+                    />
+                  </div>
+                  <span className="w-10 text-right text-[11px] text-slate-400">
+                    {sources}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-950/50 px-3 py-2">
+                <div>
+                  <p className="text-[11px] font-medium text-slate-200">
+                    {t.calculator.supportLabel}
+                  </p>
+                  <p className="text-[11px] text-slate-500">
+                    {t.calculator.supportDesc}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setWithSupport((v) => !v)}
+                  className={`inline-flex items-center justify-center rounded-full border px-3 py-1 text-[11px] font-medium ${
+                    withSupport
+                      ? 'border-emerald-500 bg-emerald-500/10 text-emerald-100'
+                      : 'border-slate-600 bg-slate-900 text-slate-300'
+                  }`}
+                >
+                  {withSupport
+                    ? isPL
+                      ? 'Włączone'
+                      : 'Enabled'
+                    : isPL
+                    ? 'Wyłączone'
+                    : 'Disabled'}
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-6 rounded-2xl border border-primary-500/50 bg-primary-500/10 p-4 text-xs text-primary-50">
+              <p className="text-[11px] font-medium uppercase tracking-wide text-primary-200">
+                {t.calculator.priceLabel}
+              </p>
+              <p className="mt-2 text-2xl font-semibold text-primary-50">
+                {total.toLocaleString('pl-PL')} PLN
+                <span className="ml-1 text-xs font-normal text-primary-100/80">
+                  {t.calculator.perMonth}
+                </span>
+              </p>
+              <p className="mt-2 text-[11px] text-primary-100/80">
+                {isPL
+                  ? `Szacunek: ${sources} źródła danych (${price.toLocaleString(
+                      'pl-PL',
+                    )} PLN) + ${withSupport ? 'pakiet wdrożeniowy' : 'bez pakietu wdrożeniowego'}.`
+                  : `Estimate: ${sources} data sources (${price.toLocaleString(
+                      'pl-PL',
+                    )} PLN) + ${withSupport ? 'onboarding package' : 'no onboarding package'}.`}
+              </p>
+
+              <button
+                type="button"
+                className="mt-4 inline-flex items-center justify-center rounded-xl bg-primary-600 px-5 py-2.5 text-[13px] font-semibold text-white shadow-lg shadow-primary-500/30 hover:bg-primary-500"
+              >
+                {t.calculator.cta}
+              </button>
+            </div>
+          </article>
+
+          <article className="flex flex-col rounded-2xl border border-slate-800 bg-slate-900/40 p-5 text-xs text-slate-200 shadow-sm shadow-black/40">
+            <h3 className="text-sm font-semibold text-slate-50">
+              {isPL ? 'W abonamencie PapaData dostajesz:' : 'Your PapaData subscription includes:'}
+            </h3>
+            <ul className="mt-3 space-y-2">
+              <li className="flex items-start gap-2">
+                <Check className="mt-0.5 h-3.5 w-3.5 text-emerald-400" />
+                <span>
+                  {isPL
+                    ? 'Gotowe raporty sprzedażowe, marketingowe i marżowe.'
+                    : 'Ready-made sales, marketing and margin dashboards.'}
+                </span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="mt-0.5 h-3.5 w-3.5 text-emerald-400" />
+                <span>
+                  {isPL
+                    ? 'Asystent AI, który tłumaczy liczby na decyzje.'
+                    : 'AI assistant translating numbers into decisions.'}
+                </span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="mt-0.5 h-3.5 w-3.5 text-emerald-400" />
+                <span>
+                  {isPL
+                    ? 'Infrastrukturę w Google Cloud (hurtownia danych, ETL).'
+                    : 'Google Cloud infrastructure (warehouse, ETL layer).'}
+                </span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="mt-0.5 h-3.5 w-3.5 text-emerald-400" />
+                <span>
+                  {isPL
+                    ? 'Pełną zgodność z RODO i regionami UE.'
+                    : 'Full GDPR compliance and EU regions.'}
+                </span>
+              </li>
+            </ul>
+
+            <p className="mt-4 text-[11px] text-slate-500">
+              {isPL
+                ? 'Finalna wycena uwzględnia wolumen danych oraz indywidualne integracje. Ten kalkulator ma charakter orientacyjny.'
+                : 'Final pricing depends on data volume and custom integrations. This calculator is indicative only.'}
+            </p>
+          </article>
         </div>
       </div>
     </section>

@@ -1,102 +1,48 @@
-import React, { useState, useEffect } from 'react';
-import { X, Gift } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { X, Clock } from 'lucide-react';
 import { Translation } from '../types';
-import { motion, AnimatePresence } from 'framer-motion';
 
 interface Props {
-  /** Translation object for the nagging modal content */
   t: Translation['nagging'];
 }
 
-/**
- * A modal that appears after a delay to encourage users to sign up or claim an offer.
- * Can be dismissed to a minimized side tab and reopened.
- */
 const NaggingModal: React.FC<Props> = ({ t }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isMinimized, setIsMinimized] = useState(false);
-  const [hasAppeared, setHasAppeared] = useState(false);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    // Show after 30 seconds
-    const timer = setTimeout(() => {
-      setIsOpen(true);
-      setHasAppeared(true);
-    }, 30000);
-
+    const timer = setTimeout(() => setOpen(true), 15000);
     return () => clearTimeout(timer);
   }, []);
 
-  const handleClose = () => {
-    setIsOpen(false);
-    setIsMinimized(true);
-  };
-
-  const handleReopen = () => {
-    setIsMinimized(false);
-    setIsOpen(true);
-  };
+  if (!open) return null;
 
   return (
-    <>
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div 
-            initial={{ opacity: 0, y: 50, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 50, scale: 0.9 }}
-            className="fixed bottom-6 right-6 z-50 w-full max-w-sm"
-          >
-            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-primary-200 dark:border-primary-900 p-6 relative overflow-hidden">
-              {/* Decorative background blob */}
-              <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+    <div className="fixed bottom-4 right-4 z-40 max-w-xs rounded-2xl border border-primary-500/40 bg-slate-950/95 p-4 text-xs text-slate-100 shadow-xl shadow-primary-500/30">
+      <button
+        type="button"
+        onClick={() => setOpen(false)}
+        className="absolute right-2 top-2 rounded-full border border-slate-800 bg-slate-900/80 p-1 text-slate-400 hover:text-slate-100"
+      >
+        <X className="h-3 w-3" />
+      </button>
 
-              <button 
-                onClick={handleClose}
-                className="absolute top-3 right-3 p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
+      <div className="inline-flex items-center gap-2 rounded-full bg-primary-500/10 px-3 py-1 text-[10px] font-semibold text-primary-200">
+        <Clock className="h-3 w-3" />
+        <span>{t.sideLabel}</span>
+      </div>
 
-              <div className="flex items-start gap-4">
-                <div className="p-3 bg-primary-100 dark:bg-primary-900/50 rounded-xl shrink-0">
-                  <Gift className="w-6 h-6 text-primary-600 dark:text-primary-400" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-lg text-slate-900 dark:text-white leading-tight mb-2">
-                    {t.title}
-                  </h3>
-                  <p className="text-sm text-slate-600 dark:text-slate-300 mb-4 leading-relaxed">
-                    {t.subtitle}
-                  </p>
-                  <a 
-                    href="/wizard" 
-                    className="block w-full text-center py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-colors text-sm"
-                  >
-                    {t.button}
-                  </a>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <h3 className="mt-3 text-[13px] font-semibold text-slate-50">
+        {t.title}
+      </h3>
+      <p className="mt-2 text-[11px] text-slate-300">{t.subtitle}</p>
 
-      <AnimatePresence>
-        {isMinimized && !isOpen && (
-          <motion.button
-            initial={{ x: -100 }}
-            animate={{ x: 0 }}
-            exit={{ x: -100 }}
-            onClick={handleReopen}
-            className="fixed top-1/2 left-0 z-50 -translate-y-1/2 bg-primary-600 hover:bg-primary-700 text-white py-6 px-1.5 rounded-r-lg shadow-lg font-bold text-xs tracking-widest uppercase writing-vertical-rl transition-transform hover:pl-2"
-            style={{ writingMode: 'vertical-rl' }}
-          >
-            {t.sideLabel}
-          </motion.button>
-        )}
-      </AnimatePresence>
-    </>
+      <button
+        type="button"
+        className="mt-3 inline-flex w-full items-center justify-center rounded-xl bg-primary-600 px-4 py-2 text-[11px] font-semibold text-white hover:bg-primary-500"
+      >
+        {t.button}
+      </button>
+    </div>
   );
 };
 

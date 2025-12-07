@@ -1,50 +1,32 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ArrowUp } from 'lucide-react';
 
 interface Props {
-  /** Tooltip text displayed on hover */
   tooltip: string;
 }
 
-/**
- * A floating button that appears when the user scrolls down.
- * Clicking it smooth-scrolls the page back to the top.
- */
 const ScrollToTop: React.FC<Props> = ({ tooltip }) => {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    const toggleVisibility = () => {
-      if (window.scrollY > 300) {
-        setVisible(true);
-      } else {
-        setVisible(false);
-      }
+    const handler = () => {
+      setVisible(window.scrollY > 300);
     };
-    window.addEventListener('scroll', toggleVisibility);
-    return () => window.removeEventListener('scroll', toggleVisibility);
+    window.addEventListener('scroll', handler);
+    return () => window.removeEventListener('scroll', handler);
   }, []);
-
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth',
-    });
-  };
 
   if (!visible) return null;
 
   return (
     <button
-      onClick={scrollToTop}
+      type="button"
+      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
       title={tooltip}
-      className="fixed bottom-6 right-6 z-40 p-3 bg-slate-900 dark:bg-slate-700 hover:bg-primary-600 dark:hover:bg-primary-600 text-white rounded-full shadow-lg transition-all transform hover:scale-110 group"
+      aria-label={tooltip}
+      className="fixed bottom-4 left-4 z-40 inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-800 bg-slate-950/90 text-slate-100 shadow-lg shadow-black/40 hover:border-primary-500 hover:text-primary-100"
     >
-      <ArrowUp className="w-5 h-5" />
-      {/* Tooltip on hover */}
-      <span className="absolute right-full mr-3 top-1/2 -translate-y-1/2 px-2 py-1 bg-black/80 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-        {tooltip}
-      </span>
+      <ArrowUp className="h-4 w-4" />
     </button>
   );
 };

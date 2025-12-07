@@ -1,16 +1,15 @@
-
 export type Language = 'PL' | 'EN';
 export type Theme = 'light' | 'dark';
 
-export type IntegrationCategory = 
-  | 'Marketing' 
-  | 'Store' 
-  | 'Marketplace' 
-  | 'Analytics' 
-  | 'Tool' 
-  | 'CRM' 
-  | 'Payment' 
-  | 'Logistics' 
+export type IntegrationCategory =
+  | 'Marketing'
+  | 'Store'
+  | 'Marketplace'
+  | 'Analytics'
+  | 'Tool'
+  | 'CRM'
+  | 'Payment'
+  | 'Logistics'
   | 'Accounting';
 
 export type IntegrationStatus = 'Available' | 'ComingSoon' | 'Voting';
@@ -117,7 +116,13 @@ export interface ProductData {
   status: 'In Stock' | 'Low Stock' | 'Out of Stock';
 }
 
-export type DemoSection = 'Dashboard' | 'LiveReports' | 'Academy' | 'Support' | 'Integrations' | 'Settings';
+export type DemoSection =
+  | 'Dashboard'
+  | 'LiveReports'
+  | 'Academy'
+  | 'Support'
+  | 'Integrations'
+  | 'Settings';
 
 export interface DemoTranslation {
   sidebar: {

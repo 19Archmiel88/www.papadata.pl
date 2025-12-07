@@ -1,18 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import {
-  ArrowRight,
-  Play,
-  Sparkles,
-  BarChart2,
-  LineChart,
-  MessageSquare,
-  X,
-} from 'lucide-react';
+import { ArrowRight, Play, Sparkles, BarChart2, LineChart, MessageSquare, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Translation } from '../types';
+import { Translation, Language } from '../types';
 
 interface Props {
   t: Translation['hero'];
+  lang: Language;
   onSmartNavigate: (
     target:
       | 'demo'
@@ -52,18 +45,18 @@ type Slide =
       assistant: string;
     };
 
-const Hero: React.FC<Props> = ({ t, onSmartNavigate }) => {
+const Hero: React.FC<Props> = ({ t, lang, onSmartNavigate }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPlayerOpen, setIsPlayerOpen] = useState(false);
 
-  const isPL = t.ctaPrimary.toLowerCase().includes('rozpocznij');
+  const isPL = lang === 'PL';
   const titleLines = t.title.split('\n');
   const heroLine1 = titleLines[0] || t.title;
   const heroLine2 =
     titleLines[1] ||
     (isPL
       ? 'PapaData łączy dane ze sklepu, reklam i analityki w jednym panelu.'
-      : '');
+      : 'PapaData connects data from your store, ads and analytics in one panel.');
 
   const heroSubtitle =
     t.subtitle ||
@@ -124,26 +117,26 @@ const Hero: React.FC<Props> = ({ t, onSmartNavigate }) => {
     if (slide.type === 'chat') {
       return (
         <div className="flex h-full flex-col gap-3">
-          <div className="inline-flex items-center gap-2 rounded-full bg-slate-900/80 px-3 py-1 text-xs text-slate-200">
-            <MessageSquare className="h-3.5 w-3.5 text-primary-300" />
+          <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-800 dark:bg-slate-900/80 dark:text-slate-200">
+            <MessageSquare className="h-3.5 w-3.5 text-primary-500 dark:text-primary-300" />
             <span>{isPL ? 'Czat z AI' : 'AI Conversation'}</span>
           </div>
 
           {slide.highlight && (
-            <p className="text-xs font-medium text-primary-200">
+            <p className="text-xs font-medium text-primary-600 dark:text-primary-200">
               {slide.highlight}
             </p>
           )}
 
           <div className="space-y-2">
-            <div className="rounded-xl bg-slate-900/80 p-3 text-xs text-slate-200">
-              <span className="mb-1 block text-[11px] font-semibold text-slate-400">
+            <div className="rounded-xl bg-slate-100 p-3 text-xs text-slate-800 dark:bg-slate-900/80 dark:text-slate-200">
+              <span className="mb-1 block text-[11px] font-semibold text-slate-500 dark:text-slate-400">
                 {isPL ? 'Ty' : 'You'}
               </span>
               {slide.user}
             </div>
-            <div className="rounded-xl bg-primary-950/60 p-3 text-xs text-primary-50 ring-1 ring-primary-700/40">
-              <span className="mb-1 block text-[11px] font-semibold text-primary-200">
+            <div className="rounded-xl bg-primary-50 p-3 text-xs text-primary-900 ring-1 ring-primary-200 dark:bg-primary-950/60 dark:text-primary-50 dark:ring-primary-700/40">
+              <span className="mb-1 block text-[11px] font-semibold text-primary-700 dark:text-primary-200">
                 PapaData AI
               </span>
               {slide.ai}
@@ -157,32 +150,28 @@ const Hero: React.FC<Props> = ({ t, onSmartNavigate }) => {
       const bars = [45, 70, 55, 85, 35, 50, 65];
       return (
         <div className="flex h-full flex-col gap-3">
-          <div className="inline-flex items-center gap-2 rounded-full bg-slate-900/80 px-3 py-1 text-xs text-slate-200">
-            <BarChart2 className="h-3.5 w-3.5 text-primary-300" />
+          <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-800 dark:bg-slate-900/80 dark:text-slate-200">
+            <BarChart2 className="h-3.5 w-3.5 text-primary-500 dark:text-primary-300" />
             <span>{isPL ? 'Przykładowe wykresy' : 'Sample charts'}</span>
           </div>
 
           <div>
-            <p className="text-sm font-semibold text-slate-50">
+            <p className="text-sm font-semibold text-slate-900 dark:text-slate-50">
               {slide.title}
             </p>
-            <p className="text-[11px] text-slate-400">{slide.trend}</p>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">{slide.trend}</p>
           </div>
 
           <div className="mt-1 flex flex-1 items-end gap-1.5">
             {bars.map((h, i) => (
-              <div
-                key={i}
-                className="flex-1 rounded-full bg-slate-900/80"
-                style={{ height: `${h}%` }}
-              >
-                <div className="h-full w-full rounded-full bg-gradient-to-t from-primary-700 via-primary-500 to-primary-300" />
+              <div key={i} className="flex-1 rounded-full bg-slate-100 dark:bg-slate-900/80" style={{ height: `${h}%` }}>
+                <div className="h-full w-full rounded-full bg-gradient-to-t from-primary-300 via-primary-500 to-primary-600 dark:from-primary-700 dark:via-primary-500 dark:to-primary-300" />
               </div>
             ))}
           </div>
 
-          <div className="mt-3 rounded-xl bg-slate-900/70 p-3 text-[11px] text-slate-200">
-            <div className="mb-1 flex items-center gap-1.5 text-primary-200">
+          <div className="mt-3 rounded-xl bg-slate-100 p-3 text-[11px] text-slate-800 dark:bg-slate-900/70 dark:text-slate-200">
+            <div className="mb-1 flex items-center gap-1.5 text-primary-700 dark:text-primary-200">
               <LineChart className="h-3.5 w-3.5" />
               <span className="font-semibold">PapaData AI</span>
             </div>
@@ -194,19 +183,17 @@ const Hero: React.FC<Props> = ({ t, onSmartNavigate }) => {
 
     return (
       <div className="flex h-full flex-col gap-3">
-        <div className="inline-flex items-center gap-2 rounded-full bg-slate-900/80 px-3 py-1 text-xs text-slate-200">
-          <Sparkles className="h-3.5 w-3.5 text-primary-300" />
+        <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-800 dark:bg-slate-900/80 dark:text-slate-200">
+          <Sparkles className="h-3.5 w-3.5 text-primary-500 dark:text-primary-300" />
           <span>{isPL ? 'Analiza rentowności' : 'Profitability analysis'}</span>
         </div>
 
         <div>
-          <p className="text-sm font-semibold text-slate-50">
-            {slide.title}
-          </p>
-          <p className="text-[11px] text-slate-400">{slide.subtitle}</p>
+          <p className="text-sm font-semibold text-slate-900 dark:text-slate-50">{slide.title}</p>
+          <p className="text-[11px] text-slate-500 dark:text-slate-400">{slide.subtitle}</p>
         </div>
 
-        <ul className="mt-1 space-y-1.5 text-[11px] text-slate-300">
+        <ul className="mt-1 space-y-1.5 text-[11px] text-slate-700 dark:text-slate-300">
           <li>
             •{' '}
             {isPL
@@ -227,8 +214,8 @@ const Hero: React.FC<Props> = ({ t, onSmartNavigate }) => {
           </li>
         </ul>
 
-        <div className="mt-3 rounded-xl bg-slate-900/70 p-3 text-[11px] text-slate-200">
-          <div className="mb-1 flex items-center gap-1.5 text-primary-200">
+        <div className="mt-3 rounded-xl bg-slate-100 p-3 text-[11px] text-slate-800 dark:bg-slate-900/70 dark:text-slate-200">
+          <div className="mb-1 flex items-center gap-1.5 text-primary-700 dark:text-primary-200">
             <Sparkles className="h-3.5 w-3.5" />
             <span className="font-semibold">PapaData AI</span>
           </div>
@@ -241,7 +228,7 @@ const Hero: React.FC<Props> = ({ t, onSmartNavigate }) => {
   const current = slides[currentSlide];
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900 pb-16 pt-20 text-slate-50">
+    <section className="relative overflow-hidden bg-slate-50 pb-16 pt-20 text-slate-900 dark:bg-gradient-to-b dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 dark:text-slate-50">
       <div className="pointer-events-none absolute inset-0 opacity-40">
         <div className="mx-auto h-full max-w-6xl bg-[radial-gradient(circle_at_top,_rgba(139,92,246,0.18),_transparent_55%)]" />
       </div>
@@ -249,21 +236,21 @@ const Hero: React.FC<Props> = ({ t, onSmartNavigate }) => {
       <div className="relative mx-auto flex max-w-6xl flex-col items-center gap-10 px-4 md:flex-row md:items-start">
         {/* Lewa kolumna */}
         <div className="relative z-10 max-w-xl md:pt-4">
-          <p className="inline-flex items-center gap-2 rounded-full border border-primary-500/40 bg-primary-500/10 px-3 py-1 text-[11px] font-medium text-primary-100">
+          <p className="inline-flex items-center gap-2 rounded-full border border-primary-300 bg-primary-50 px-3 py-1 text-[11px] font-medium text-primary-700 dark:border-primary-500/40 dark:bg-primary-500/10 dark:text-primary-100">
             <Sparkles className="h-3 w-3" />
             <span>{t.tag}</span>
           </p>
 
-          <h1 className="mt-5 text-balance text-3xl font-semibold tracking-tight text-slate-50 sm:text-4xl lg:text-5xl">
+          <h1 className="mt-5 text-balance text-3xl font-semibold tracking-tight text-slate-900 dark:text-slate-50 sm:text-4xl lg:text-5xl">
             <span className="block">{heroLine1}</span>
             {heroLine2 && (
-              <span className="mt-1 block text-transparent bg-clip-text bg-gradient-to-r from-primary-300 via-primary-400 to-indigo-300">
+              <span className="mt-1 block bg-gradient-to-r from-primary-500 via-primary-600 to-indigo-500 bg-clip-text text-transparent dark:from-primary-300 dark:via-primary-400 dark:to-indigo-300">
                 {heroLine2}
               </span>
             )}
           </h1>
 
-          <p className="mt-4 text-sm leading-relaxed text-slate-300 sm:text-base">
+          <p className="mt-4 text-sm leading-relaxed text-slate-700 dark:text-slate-300 sm:text-base">
             {heroSubtitle}
           </p>
 
@@ -280,14 +267,14 @@ const Hero: React.FC<Props> = ({ t, onSmartNavigate }) => {
             <button
               type="button"
               onClick={() => setIsPlayerOpen(true)}
-              className="inline-flex items-center justify-center rounded-xl border border-slate-700 bg-slate-900/60 px-5 py-3 text-sm font-medium text-slate-100 hover:border-slate-500 hover:bg-slate-900"
+              className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-medium text-slate-900 hover:border-slate-400 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-100 dark:hover:border-slate-500 dark:hover:bg-slate-900"
             >
               <Play className="mr-2 h-4 w-4" />
               {t.ctaSecondary}
             </button>
           </div>
 
-          <p className="mt-5 text-xs text-slate-400">{t.trustText}</p>
+          <p className="mt-5 text-xs text-slate-500 dark:text-slate-400">{t.trustText}</p>
         </div>
 
         {/* Prawa kolumna – panel AI */}
@@ -297,24 +284,24 @@ const Hero: React.FC<Props> = ({ t, onSmartNavigate }) => {
           transition={{ duration: 0.6 }}
           className="relative z-10 w-full max-w-md"
         >
-          <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-3 shadow-2xl shadow-black/60 backdrop-blur">
+          <div className="rounded-2xl border border-slate-200 bg-white/90 p-3 shadow-2xl shadow-black/10 backdrop-blur dark:border-slate-800 dark:bg-slate-950/70 dark:shadow-black/60">
             {/* Fake window header */}
-            <div className="flex items-center justify-between rounded-xl bg-slate-900/90 px-3 py-2">
+            <div className="flex items-center justify-between rounded-xl bg-slate-100 px-3 py-2 dark:bg-slate-900/90">
               <div className="flex items-center gap-1.5">
                 <span className="h-2 w-2 rounded-full bg-rose-500" />
                 <span className="h-2 w-2 rounded-full bg-amber-400" />
                 <span className="h-2 w-2 rounded-full bg-emerald-500" />
               </div>
-              <p className="text-[11px] font-medium text-slate-300">
+              <p className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
                 {t.mock.header}
               </p>
-              <span className="text-[10px] text-slate-500">
+              <span className="text-[10px] text-slate-500 dark:text-slate-500">
                 {isPL ? 'Live sandbox' : 'Live sandbox'}
               </span>
             </div>
 
             {/* Zawartość */}
-            <div className="mt-3 grid gap-3 rounded-xl bg-gradient-to-b from-slate-950/80 to-slate-950/40 p-4">
+            <div className="mt-3 grid gap-3 rounded-xl bg-slate-50 p-4 dark:bg-gradient-to-b dark:from-slate-950/80 dark:to-slate-950/40">
               {renderSlide(current)}
 
               {/* Indykatory karuzeli */}
@@ -327,17 +314,15 @@ const Hero: React.FC<Props> = ({ t, onSmartNavigate }) => {
                       onClick={() => setCurrentSlide(i)}
                       className={`h-2.5 rounded-full transition-all ${
                         currentSlide === i
-                          ? 'w-9 bg-primary-400 shadow-[0_0_0_3px_rgba(139,92,246,0.35)]'
-                          : 'w-4 bg-slate-700 hover:bg-slate-500'
+                          ? 'w-9 bg-primary-500 shadow-[0_0_0_3px_rgba(139,92,246,0.25)] dark:bg-primary-400 dark:shadow-[0_0_0_3px_rgba(139,92,246,0.35)]'
+                          : 'w-4 bg-slate-300 hover:bg-slate-400 dark:bg-slate-700 dark:hover:bg-slate-500'
                       }`}
                       aria-label={`Slide ${i + 1}`}
                     />
                   ))}
                 </div>
-                <span className="text-[10px] text-slate-500">
-                  {isPL
-                    ? 'Auto-rotacja co ~5s'
-                    : 'Auto-rotation every ~5s'}
+                <span className="text-[10px] text-slate-500 dark:text-slate-500">
+                  {isPL ? 'Auto-rotacja co ~5s' : 'Auto-rotation every ~5s'}
                 </span>
               </div>
             </div>

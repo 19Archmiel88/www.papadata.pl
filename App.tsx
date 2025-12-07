@@ -3,19 +3,19 @@ import { Language, Theme, IntegrationCategory } from './types';
 import { TRANSLATIONS } from './constants';
 import Header from './components/Header';
 import Hero from './components/Hero';
-import IntegrationsSection from './components/IntegrationsSection'; // Ta ładna sekcja z wyszukiwarką
+import IntegrationsSection from './components/IntegrationsSection';
 import IntegrationsModal from './components/IntegrationsModal';
 import NaggingModal from './components/NaggingModal';
 import ScrollToTop from './components/ScrollToTop';
 import DemoDashboard from './components/DemoDashboard';
 import Footer from './components/Footer';
 import ScalabilitySection from './components/ScalabilitySection';
-import KeyFeatures from './components/KeyFeatures'; // Konkretne kafelki z funkcjami
+import KeyFeatures from './components/KeyFeatures';
 import Security from './components/Security';
-import ValueProposition from './components/ValueProposition'; // "Dlaczego my?"
+import ValueProposition from './components/ValueProposition';
 import PricingOverview from './components/PricingOverview';
-import SocialProof from './components/SocialProof'; // Opinie klientów
-import TrustBar from './components/TrustBar'; // Loga firm (Google Cloud itp.)
+import SocialProof from './components/SocialProof';
+import TrustBar from './components/TrustBar';
 import Wizard from './components/Wizard';
 
 const App: React.FC = () => {
@@ -40,6 +40,7 @@ const App: React.FC = () => {
       return 'PL';
     }
   });
+
   const [theme, setTheme] = useState<Theme>(() => {
     try {
       return (localStorage.getItem('papadata-theme') as Theme) || 'dark';
@@ -47,6 +48,7 @@ const App: React.FC = () => {
       return 'dark';
     }
   });
+
   const [isIntegrationsModalOpen, setIsIntegrationsModalOpen] = useState(false);
   const [modalCategoryFilter, setModalCategoryFilter] = useState<IntegrationCategory | 'All'>('All');
 
@@ -60,32 +62,52 @@ const App: React.FC = () => {
     try {
       window.history.pushState({}, '', path);
     } catch (e) {
-      console.warn("History pushState blocked, using in-memory navigation:", e);
+      console.warn('History pushState blocked, using in-memory navigation:', e);
     }
     setCurrentPath(getCurrentLocation());
     window.scrollTo(0, 0);
   };
 
   type SmartTarget =
-    | 'demo' | 'demo-ai' | 'reports-sales' | 'reports-technical'
-    | 'academy' | 'academy-docs' | 'contact' | 'pricing'
-    | 'privacy' | 'terms' | 'about';
+    | 'demo'
+    | 'demo-ai'
+    | 'reports-sales'
+    | 'reports-technical'
+    | 'academy'
+    | 'academy-docs'
+    | 'contact'
+    | 'pricing'
+    | 'privacy'
+    | 'terms'
+    | 'about';
 
   const resolveSmartPath = (target: SmartTarget) => {
     const logged = isLoggedIn;
     switch (target) {
-      case 'demo': return logged ? '/dashboard' : '/demo/dashboard?tour=1';
-      case 'demo-ai': return logged ? '/dashboard?trigger=ai' : '/demo/dashboard?trigger=ai';
-      case 'reports-sales': return logged ? '/reports/sales' : '/demo/reports?view=sales';
-      case 'reports-technical': return logged ? '/reports/technical' : '/demo/reports?view=technical';
-      case 'academy': return logged ? '/academy' : '/demo/academy';
-      case 'academy-docs': return logged ? '/academy/docs' : '/demo/academy?view=docs';
-      case 'contact': return logged ? '/support/new-ticket' : '/demo/contact';
-      case 'pricing': return logged ? '/settings/subscription' : '#pricing';
-      case 'privacy': return logged ? '/settings/legal' : '/privacy-policy';
-      case 'terms': return logged ? '/settings/legal' : '/terms';
-      case 'about': return logged ? '/' : '#about';
-      default: return '/';
+      case 'demo':
+        return logged ? '/dashboard' : '/demo/dashboard?tour=1';
+      case 'demo-ai':
+        return logged ? '/dashboard?trigger=ai' : '/demo/dashboard?trigger=ai';
+      case 'reports-sales':
+        return logged ? '/reports/sales' : '/demo/reports?view=sales';
+      case 'reports-technical':
+        return logged ? '/reports/technical' : '/demo/reports?view=technical';
+      case 'academy':
+        return logged ? '/academy' : '/demo/academy';
+      case 'academy-docs':
+        return logged ? '/academy/docs' : '/demo/academy?view=docs';
+      case 'contact':
+        return logged ? '/support/new-ticket' : '/demo/contact';
+      case 'pricing':
+        return logged ? '/settings/subscription' : '#pricing';
+      case 'privacy':
+        return logged ? '/settings/legal' : '/privacy-policy';
+      case 'terms':
+        return logged ? '/settings/legal' : '/terms';
+      case 'about':
+        return logged ? '/' : '#about';
+      default:
+        return '/';
     }
   };
 
@@ -105,8 +127,24 @@ const App: React.FC = () => {
 
   // Global Link Hijacking
   useEffect(() => {
-    const normalizeText = (value: string) => value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-    const wizardTokens = ['trial', 'konto', 'zarejestruj', 'zaloguj', 'odblokuj', 'zaloz', 'rejestr', 'activate', 'sign up', 'signup', 'create account', 'aktywuj'];
+    const normalizeText = (value: string) =>
+      value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+    const wizardTokens = [
+      'trial',
+      'konto',
+      'zarejestruj',
+      'zaloguj',
+      'odblokuj',
+      'zaloz',
+      'rejestr',
+      'activate',
+      'sign up',
+      'signup',
+      'create account',
+      'aktywuj',
+    ];
+
     const handleClick = (e: MouseEvent) => {
       const clickable = (e.target as HTMLElement).closest('a,button');
       if (!clickable) return;
@@ -121,6 +159,7 @@ const App: React.FC = () => {
         navigate(target);
         return;
       }
+
       if (clickable.tagName.toLowerCase() === 'a') {
         const href = clickable.getAttribute('href');
         if (href && href.startsWith('/') && !href.startsWith('http')) {
@@ -129,6 +168,7 @@ const App: React.FC = () => {
         }
       }
     };
+
     document.addEventListener('click', handleClick);
     return () => document.removeEventListener('click', handleClick);
   }, []);
@@ -150,83 +190,84 @@ const App: React.FC = () => {
     } catch {}
   }, [theme]);
 
-  // Render Logic
-if (
-  currentPath.startsWith('/demo') ||
-  currentPath.startsWith('/dashboard') ||
-  currentPath.startsWith('/reports') ||
-  currentPath.startsWith('/academy') ||
-  currentPath.startsWith('/support') ||
-  currentPath.startsWith('/integrations') || // <--- DODANE
-  currentPath.startsWith('/settings') ||
-  currentPath.startsWith('/app')
-) {
-  return <DemoDashboard navigate={navigate} path={currentPath} />;
-}
+  // DEMO / APP ROUTES
+  if (
+    currentPath.startsWith('/demo') ||
+    currentPath.startsWith('/dashboard') ||
+    currentPath.startsWith('/reports') ||
+    currentPath.startsWith('/academy') ||
+    currentPath.startsWith('/support') ||
+    currentPath.startsWith('/integrations') ||
+    currentPath.startsWith('/settings') ||
+    currentPath.startsWith('/app')
+  ) {
+    return <DemoDashboard navigate={navigate} path={currentPath} />;
+  }
 
-
+  // ONBOARDING WIZARD
   if (currentPath === '/wizard') {
     return <Wizard lang={lang} setLang={setLang} navigate={navigate} />;
   }
 
+  // LANDING PAGE
   const t = TRANSLATIONS[lang];
+
   const handleOpenIntegrations = (category: IntegrationCategory | 'All' = 'All') => {
     setModalCategoryFilter(category);
     setIsIntegrationsModalOpen(true);
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 selection:bg-primary-500/30 selection:text-primary-200 font-sans relative">
+    <div className="min-h-screen bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100 selection:bg-primary-500/30 selection:text-primary-200 font-sans relative">
       {/* Skip link for accessibility */}
       <a
         href="#main"
-        className="sr-only focus:not-sr-only absolute top-0 left-0 p-4 bg-primary-600 text-white z-50 rounded"
+        className="sr-only focus:not-sr-only absolute top-0 left-0 z-50 rounded bg-primary-600 p-4 text-white"
       >
         {lang === 'PL' ? 'Przejdź do treści' : 'Skip to content'}
       </a>
 
       {/* STICKY HEADER */}
       <Header
-        lang={lang} setLang={setLang}
-        theme={theme} setTheme={setTheme}
+        lang={lang}
+        setLang={setLang}
+        theme={theme}
+        setTheme={setTheme}
         t={t.header}
         onOpenIntegrations={handleOpenIntegrations}
         smartNavigate={smartNavigate}
         isLoggedIn={isLoggedIn}
       />
 
-      {/* CLEANED UP MAIN CONTENT */}
+      {/* MAIN CONTENT */}
       <main id="main">
-        {/* 1. HERO - Pierwsze wrażenie */}
-        <Hero t={t.hero} onSmartNavigate={smartNavigate} />
+        {/* 1. HERO */}
+        <Hero t={t.hero} lang={lang} onSmartNavigate={smartNavigate} />
 
-        {/* 2. TRUST BAR - Budowanie wiarygodności od razu */}
+        {/* 2. TRUST BAR */}
         <TrustBar />
 
-        {/* 3. VALUE PROP - Dlaczego my? */}
+        {/* 3. VALUE PROP */}
         <ValueProposition />
 
-        {/* 4. KEY FEATURES - Konkrety */}
+        {/* 4. KEY FEATURES */}
         <div id="features" />
         <KeyFeatures />
 
-        {/* 5. INTEGRATIONS - To co najważniejsze dla platformy danych */}
+        {/* 5. INTEGRATIONS */}
         <div id="integrations" />
-        <IntegrationsSection
-          t={t.integrationsSection}
-          onOpenModal={() => handleOpenIntegrations('All')}
-        />
+        <IntegrationsSection t={t.integrationsSection} onOpenModal={() => handleOpenIntegrations('All')} />
 
-        {/* 6. SOCIAL PROOF - Opinie */}
+        {/* 6. SOCIAL PROOF */}
         <SocialProof />
 
-        {/* 7. SECURITY & SCALE - Zbijanie obiekcji technicznych */}
+        {/* 7. SECURITY & SCALE */}
         <div className="bg-slate-50 dark:bg-slate-900/30">
           <Security />
           <ScalabilitySection lang={lang} />
         </div>
 
-        {/* 8. PRICING - Cena na końcu */}
+        {/* 8. PRICING */}
         <div id="pricing" />
         <PricingOverview />
       </main>

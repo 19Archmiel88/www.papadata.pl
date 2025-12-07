@@ -1,72 +1,133 @@
 import React from 'react';
-import { PlugZap, Workflow, LineChart, Bot } from 'lucide-react';
-import SectionCardGrid, { SectionCardItem } from './SectionCardGrid';
+import { BarChart2, Users, ShoppingBag, Target, Repeat, LineChart } from 'lucide-react';
+import { TRANSLATIONS } from '../constants';
+import { Language, Translation } from '../types';
 
-const items: SectionCardItem[] = [
-  {
-    id: 'step-1',
-    icon: <PlugZap className="w-5 h-5" />,
-    title: 'Krok 1: Podłącz źródła danych',
-    desc: (
-      <>
-        Integracje ze sklepami (WooCommerce, Shopify, IdoSell), reklamą
-        (Google Ads, Meta, TikTok) i marketplace’ami. Bez kodu – tylko klucze
-        API / OAuth.
-      </>
-    ),
-  },
-  {
-    id: 'step-2',
-    icon: <Workflow className="w-5 h-5" />,
-    title: 'Krok 2: Jeden model danych w Google Cloud',
-    desc: (
-      <>
-        Dane lądują w izolowanej hurtowni BigQuery w regionie europe-central2.
-        Gotowe widoki dla sprzedaży, marży, kampanii i klientów.
-      </>
-    ),
-  },
-  {
-    id: 'step-3',
-    icon: <LineChart className="w-5 h-5" />,
-    title: 'Krok 3: Dashboard + raporty + AI',
-    desc: (
-      <>
-        Dashboard dla zarządu, raporty operacyjne dla zespołu i asystent AI,
-        który odpowiada na pytania wprost z Twoich danych.
-      </>
-    ),
-  },
-  {
-    id: 'step-4',
-    icon: <Bot className="w-5 h-5" />,
-    title: 'Alerty zamiast odgrzewania raportów',
-    desc: (
-      <>
-        Gdy marża spada albo ROAS kampanii leci w dół – dostajesz alert.
-        Zamiast co tydzień grzebać w Excelu.
-      </>
-    ),
-    colSpan: 'md:col-span-2',
-  },
-];
+interface Props {
+  t?: Translation['featuresSection'];
+  lang?: Language;
+}
 
-const KeyFeatures: React.FC = () => {
+const resolveLang = (override?: Language): Language => {
+  if (override) return override;
+  try {
+    const stored = localStorage.getItem('papadata-lang') as Language | null;
+    if (stored === 'PL' || stored === 'EN') return stored;
+  } catch {
+    // ignore
+  }
+  return 'PL';
+};
+
+const KeyFeatures: React.FC<Props> = ({ t, lang }) => {
+  const effectiveLang = resolveLang(lang);
+  const dict = t ?? TRANSLATIONS[effectiveLang].featuresSection;
+
+  const cards = [
+    {
+      key: 'sales',
+      icon: LineChart,
+      title: dict.cards.sales.title,
+      desc: dict.cards.sales.desc,
+    },
+    {
+      key: 'period',
+      icon: BarChart2,
+      title: dict.cards.period.title,
+      desc: dict.cards.period.desc,
+    },
+    {
+      key: 'products',
+      icon: ShoppingBag,
+      title: dict.cards.products.title,
+      desc: dict.cards.products.desc,
+    },
+    {
+      key: 'conversion',
+      icon: Target,
+      title: dict.cards.conversion.title,
+      desc: dict.cards.conversion.desc,
+    },
+    {
+      key: 'marketing',
+      icon: BarChart2,
+      title: dict.cards.marketing.title,
+      desc: dict.cards.marketing.desc,
+    },
+    {
+      key: 'customers',
+      icon: Users,
+      title: dict.cards.customers.title,
+      desc: dict.cards.customers.desc,
+    },
+    {
+      key: 'discounts',
+      icon: Repeat,
+      title: dict.cards.discounts.title,
+      desc: dict.cards.discounts.desc,
+    },
+    {
+      key: 'funnel',
+      icon: Target,
+      title: dict.cards.funnel.title,
+      desc: dict.cards.funnel.desc,
+    },
+    {
+      key: 'trends',
+      icon: LineChart,
+      title: dict.cards.trends.title,
+      desc: dict.cards.trends.desc,
+    },
+  ];
+
+  const exportCard = {
+    key: 'export',
+    icon: BarChart2,
+    title: dict.cards.export.title,
+    desc: dict.cards.export.desc,
+  };
+
   return (
-    <SectionCardGrid
-      title="Jak działa PapaData – od integracji do decyzji"
-      description={
-        <>
-          Cała platforma sprowadza się do prostego łańcucha:{' '}
-          <span className="text-slate-200">
-            Źródła danych → Hurtownia → Modele → Dashboard &amp; AI
-          </span>
-          . Reszta to wygoda i bezpieczeństwo.
-        </>
-      }
-      items={items}
-      gridCols="grid-cols-1 md:grid-cols-2"
-    />
+    <section className="bg-slate-950 py-16 text-slate-50">
+      <div className="mx-auto max-w-6xl px-4">
+        <div className="mb-8 max-w-2xl">
+          <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+            {dict.title}
+          </h2>
+          <p className="mt-3 text-sm text-slate-400">
+            {/* Delikatny opis – nie z tłumaczeń, żeby nie komplikować */}
+            {effectiveLang === 'PL'
+              ? 'Najważniejsze raporty e-commerce w jednym panelu – bez przerzucania się między Google Ads, GA4 i Excelem.'
+              : 'Your key e-commerce dashboards in one panel – no more jumping between Google Ads, GA4 and spreadsheets.'}
+          </p>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {cards.map(({ key, icon: Icon, title, desc }) => (
+            <article
+              key={key}
+              className="group flex flex-col rounded-2xl border border-slate-800 bg-slate-900/40 p-4 shadow-sm shadow-black/40 transition hover:-translate-y-0.5 hover:border-primary-500/60 hover:bg-slate-900/70 hover:shadow-primary-500/20"
+            >
+              <div className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-primary-500/10 text-primary-300 ring-1 ring-primary-500/30">
+                <Icon className="h-4 w-4" />
+              </div>
+              <h3 className="text-sm font-semibold text-slate-50">{title}</h3>
+              <p className="mt-2 text-xs text-slate-400">{desc}</p>
+            </article>
+          ))}
+
+          <article className="group flex flex-col rounded-2xl border border-dashed border-slate-700 bg-slate-900/30 p-4 shadow-sm shadow-black/40 transition hover:-translate-y-0.5 hover:border-primary-500/60 hover:bg-slate-900/70 hover:shadow-primary-500/20">
+            <div className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 text-primary-300 ring-1 ring-primary-500/30">
+              <exportCard.icon className="h-4 w-4" />
+            </div>
+            <h3 className="text-sm font-semibold text-slate-50">
+              {exportCard.title}
+            </h3>
+            <p className="mt-2 text-xs text-slate-400">{exportCard.desc}</p>
+          </article>
+        </div>
+      </div>
+    </section>
   );
 };
 

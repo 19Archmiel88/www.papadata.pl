@@ -1,105 +1,90 @@
-import React, { useMemo, useState } from 'react';
+import React from 'react';
+import { ShieldCheck, Cpu, Database, Sparkles } from 'lucide-react';
 
 const ValueProposition: React.FC = () => {
-  const [hoursPerWeek, setHoursPerWeek] = useState(10); // ile godzin tygodniowo na raporty
-  const hourlyRate = 80; // PLN
-  const yearlyHours = useMemo(() => hoursPerWeek * 52, [hoursPerWeek]);
-  const yearlySavings = useMemo(
-    () => yearlyHours * hourlyRate,
-    [yearlyHours, hourlyRate]
-  );
+  const isPL =
+    typeof window !== 'undefined'
+      ? (document.documentElement.lang || 'pl').toLowerCase().startsWith('pl')
+      : true;
+
+  const title = isPL ? 'Dlaczego PapaData?' : 'Why PapaData?';
+
+  const cards = isPL
+    ? [
+        {
+          icon: Cpu,
+          title: 'Asystent AI zamiast ręcznej analizy',
+          desc: 'Zamiast łączyć raporty z kilku źródeł – pytasz AI i dostajesz gotową interpretację danych.',
+        },
+        {
+          icon: Database,
+          title: 'Własna hurtownia danych na Google Cloud',
+          desc: 'Dane marketingowe, sprzedażowe i logistyczne w jednym miejscu – gotowe do dalszej analizy.',
+        },
+        {
+          icon: ShieldCheck,
+          title: 'Bezpieczeństwo klasy enterprise',
+          desc: 'Izolacja per klient, szyfrowanie i regiony UE – projektowane jak w dużych korporacjach.',
+        },
+        {
+          icon: Sparkles,
+          title: 'Raporty gotowe zanim otworzysz laptopa',
+          desc: 'Codziennie rano widzisz podsumowanie – wzrosty, spadki, alerty i rekomendacje.',
+        },
+      ]
+    : [
+        {
+          icon: Cpu,
+          title: 'AI assistant instead of manual analysis',
+          desc: 'Instead of stitching reports from multiple tools – you ask AI and get ready-made insights.',
+        },
+        {
+          icon: Database,
+          title: 'Your own data warehouse on Google Cloud',
+          desc: 'Marketing, sales and logistics data in one place – ready for deeper analysis.',
+        },
+        {
+          icon: ShieldCheck,
+          title: 'Enterprise-grade security',
+          desc: 'Per-tenant isolation, encryption and EU regions – designed like a corporate stack.',
+        },
+        {
+          icon: Sparkles,
+          title: 'Reports ready before your first coffee',
+          desc: 'Every morning you get a summary – growth, declines, alerts and recommendations.',
+        },
+      ];
 
   return (
-    <section id="about" className="py-20 bg-slate-950">
-      <div className="max-w-6xl mx-auto px-4 grid gap-10 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] items-start">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary-400 mb-2">
-            Udowodnij wartość
-          </p>
-          <h2 className="text-2xl md:text-3xl font-semibold text-slate-50">
-            Z chaosu arkuszy do jednego, spokojnego pulpitu prawdy.
+    <section
+      id="about"
+      className="bg-slate-950/95 py-16 text-slate-50"
+    >
+      <div className="mx-auto max-w-6xl px-4">
+        <div className="mb-8 max-w-2xl">
+          <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+            {title}
           </h2>
-          <p className="mt-3 text-sm md:text-base text-slate-400">
-            PapaData zastępuje ręczne klejenie raportów z wielu źródeł jednym
-            uporządkowanym modelem danych. Zamiast „Policzymy to jutro” masz
-            „Widzimy to teraz”.
+          <p className="mt-3 text-sm text-slate-400">
+            {isPL
+              ? 'Łączymy wygodę narzędzia low-code z możliwościami hurtowni danych. Dla e-commerce, które chcą widzieć całość – a nie tylko ROAS w jednym panelu.'
+              : 'We combine the comfort of a low-code tool with the power of a data warehouse. For e-commerce brands that want the full picture – not just ROAS in a single panel.'}
           </p>
-
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
-            <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                Bez PapaData
-              </p>
-              <ul className="mt-3 space-y-2 text-sm text-slate-400">
-                <li>• Ręczne pobieranie danych z wielu platform</li>
-                <li>• Raporty z jednodniowym (albo tygodniowym) opóźnieniem</li>
-                <li>• Konfliktujące wersje „tego samego” KPI</li>
-                <li>• Brak czasu na analizę, tylko na kopiowanie</li>
-              </ul>
-            </div>
-
-            <div className="rounded-2xl border border-primary-500/40 bg-gradient-to-br from-primary-950/80 via-slate-950 to-slate-900 p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary-300">
-                Z PapaData
-              </p>
-              <ul className="mt-3 space-y-2 text-sm text-slate-200">
-                <li>• Automatyczne zaciąganie danych do hurtowni BigQuery</li>
-                <li>• Jeden zestandaryzowany model dla sklepu, reklam i marży</li>
-                <li>• AI, które odpowiada na pytania wprost z Twoich danych</li>
-                <li>• Gotowe raporty dzienne, tygodniowe i kampanijne</li>
-              </ul>
-            </div>
-          </div>
         </div>
 
-        {/* Mini kalkulator ROI – bez przesady, tylko highlight */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
-            Szacunek oszczędności
-          </p>
-          <h3 className="mt-3 text-lg font-semibold text-slate-50">
-            Ile godzin tygodniowo schodzi na raporty?
-          </h3>
-          <p className="mt-1 text-sm text-slate-400">
-            Prosty szacunek, żeby pokazać skalę. Zero ukrytej magii.
-          </p>
-
-          <div className="mt-4">
-            <div className="flex items-center justify-between text-xs text-slate-400">
-              <span>Godziny tygodniowo</span>
-              <span className="font-mono text-slate-200">{hoursPerWeek} h</span>
-            </div>
-            <input
-              type="range"
-              min={2}
-              max={40}
-              step={2}
-              value={hoursPerWeek}
-              onChange={(e) => setHoursPerWeek(Number(e.target.value) || 0)}
-              className="mt-2 w-full cursor-pointer accent-primary-500"
-            />
-          </div>
-
-          <div className="mt-5 grid grid-cols-2 gap-4 text-sm">
-            <div className="rounded-xl bg-slate-950/80 border border-slate-800 p-3">
-              <p className="text-xs text-slate-400">Odzyskany czas rocznie</p>
-              <p className="mt-1 text-xl font-semibold text-slate-50 font-mono">
-                {yearlyHours.toLocaleString('pl-PL')} h
-              </p>
-            </div>
-            <div className="rounded-xl bg-slate-950/80 border border-primary-600/60 p-3">
-              <p className="text-xs text-slate-400">Potencjalna oszczędność</p>
-              <p className="mt-1 text-xl font-semibold text-primary-300 font-mono">
-                {yearlySavings.toLocaleString('pl-PL')} zł
-              </p>
-            </div>
-          </div>
-
-          <p className="mt-4 text-xs text-slate-500">
-            Rzeczywisty efekt zależy od liczby źródeł danych i sposobu pracy
-            Twojego zespołu. Ten blok ma tylko pokazać skalę, nie obiecywać
-            cudów.
-          </p>
+        <div className="grid gap-4 md:grid-cols-2">
+          {cards.map(({ icon: Icon, title, desc }) => (
+            <article
+              key={title}
+              className="flex flex-col rounded-2xl border border-slate-800 bg-slate-900/40 p-4 shadow-sm shadow-black/40"
+            >
+              <div className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-primary-500/10 text-primary-300 ring-1 ring-primary-500/30">
+                <Icon className="h-4 w-4" />
+              </div>
+              <h3 className="text-sm font-semibold text-slate-50">{title}</h3>
+              <p className="mt-2 text-xs text-slate-400">{desc}</p>
+            </article>
+          ))}
         </div>
       </div>
     </section>

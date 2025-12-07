@@ -1,5 +1,4 @@
-// components/DemoDashboard.tsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { X } from 'lucide-react';
 import {
   Theme,
@@ -29,101 +28,120 @@ interface Props {
 type ReportView = 'sales' | 'campaigns' | 'customers' | 'technical';
 
 const DemoDashboard: React.FC<Props> = ({ navigate, path }) => {
+  // --- Stan Aplikacji ---
   const [lang, setLang] = useState<Language>('PL');
   const [theme, setTheme] = useState<Theme>('dark');
   const [activeSection, setActiveSection] = useState<DemoSection>('Dashboard');
+  
+  // --- Stan UI ---
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [alwaysExpanded, setAlwaysExpanded] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [dashboardToast, setDashboardToast] = useState<string | null>(null);
+
+  // --- Stan Danych ---
   const [dateRange, setDateRange] = useState<'today' | 'last7' | 'last30'>('last30');
   const [reportView, setReportView] = useState<ReportView>('sales');
   const [aiTrigger, setAiTrigger] = useState(false);
-  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [integrationHealth, setIntegrationHealth] = useState<IntegrationHealthMap>({});
-  const [dashboardToast, setDashboardToast] = useState<string | null>(null);
 
   const isDemo = path.startsWith('/demo');
-
   const t: DemoTranslation = TRANSLATIONS[lang].demo;
 
-  const integrationIssueEntries = Object.entries(integrationHealth) as [
-    string,
-    IntegrationHealthEntry
-  ][];
-  const connectionErrorEntry = integrationIssueEntries.find(
-    ([, entry]) => entry.state === 'error'
-  );
-  const integrationAlert = connectionErrorEntry
-    ? t.dashboard.alerts.connectionLost.replace(
-        '{name}',
-        connectionErrorEntry[1].longName ?? connectionErrorEntry[0]
-      )
-    : null;
-  const needsReauth = integrationIssueEntries.some(
-    ([, entry]) => entry.state === 'needs_reauth'
-  );
+// Obliczenia pochodne dla integracji
+  const { integrationAlert, needsReauth } = useMemo(() => {
+    // POPRAWKA: Dodajemy rzutowanie typu (as ...), aby TS wiedział, co jest w środku
+    const entries = Object.entries(integrationHealth) as [string, IntegrationHealthEntry][];
+    
+    const errorEntry = entries.find(([, entry]) => entry.state === 'error');
+    const reauth = entries.some(([, entry]) => entry.state === 'needs_reauth');
 
-  // Synchronizacja trybu ciemnego z <html>
+    let alert = null;
+    if (errorEntry) {
+      alert = t.dashboard.alerts.connectionLost.replace(
+        '{name}',
+        // Teraz TS wie, że errorEntry[1] ma pole longName
+        errorEntry[1].longName ?? errorEntry[0]
+      );
+    }
+    return { integrationAlert: alert, needsReauth: reauth };
+  }, [integrationHealth, t.dashboard.alerts.connectionLost]);
+  // --- Efekty (Logic) ---
+
+  // 1. Synchronizacja trybu ciemnego z HTML
   useEffect(() => {
     const root = document.documentElement;
     if (theme === 'dark') root.classList.add('dark');
     else root.classList.remove('dark');
   }, [theme]);
 
-  // Sidebar przypięty = zawsze rozwinięty
+  // 2. Obsługa Sidebara (Always Expanded)
   useEffect(() => {
-    if (alwaysExpanded) {
+    // Ustawiamy expanded tylko jeśli wymuszenie jest włączone, a sidebar jest zwinięty
+    if (alwaysExpanded && !sidebarExpanded) {
       setSidebarExpanded(true);
     }
-  }, [alwaysExpanded]);
+  }, [alwaysExpanded, sidebarExpanded]);
 
-  // Wczytanie stanu integracji z localStorage
+  // 3. Wczytanie stanu integracji z localStorage
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const stored = window.localStorage.getItem('papadata_integration_health');
     if (!stored) return;
 
     try {
-      const parsed = JSON.parse(stored) as IntegrationHealthEntry[];
-      const map = parsed.reduce((acc, entry) => {
-        acc[entry.id] = entry;
-        return acc;
-      }, {} as IntegrationHealthMap);
+      const parsed = JSON.parse(stored);
+      
+      // Walidacja czy to na pewno tablica, żeby uniknąć crasha
+      if (Array.isArray(parsed)) {
+        const map = parsed.reduce((acc, entry: IntegrationHealthEntry) => {
+          if (entry && entry.id) acc[entry.id] = entry;
+          return acc;
+        }, {} as IntegrationHealthMap);
 
-      setIntegrationHealth(map);
+        setIntegrationHealth(map);
 
-      const errorEntry = parsed.find((entry) => entry.state === 'error');
-      const reauthEntry = parsed.find((entry) => entry.state === 'needs_reauth');
+        const errorEntry = parsed.find((entry) => entry.state === 'error');
+        const reauthEntry = parsed.find((entry) => entry.state === 'needs_reauth');
 
-      if (errorEntry) {
-        setDashboardToast(
-          t.dashboard.alerts.toastError.replace(
-            '{name}',
-            errorEntry.longName ?? 'integracja'
-          )
-        );
-      } else if (reauthEntry) {
-        setDashboardToast(t.dashboard.alerts.toastReauth);
+        if (errorEntry) {
+          setDashboardToast(
+            t.dashboard.alerts.toastError.replace(
+              '{name}',
+              errorEntry.longName ?? 'integracja'
+            )
+          );
+        } else if (reauthEntry) {
+          setDashboardToast(t.dashboard.alerts.toastReauth);
+        }
       }
-    } catch {
-      // ignorujemy błąd parsowania
+    } catch (e) {
+      console.warn('Failed to parse integration health from localStorage', e);
     }
-  }, [t.dashboard.alerts.toastError, t.dashboard.alerts.toastReauth]);
+  }, []); // Pusty dependency array - tylko przy montowaniu
 
-  // Auto-zamykanie toastów
+  // 4. Auto-zamykanie toastów
   useEffect(() => {
     if (!dashboardToast) return;
     const timer = setTimeout(() => setDashboardToast(null), 4500);
     return () => clearTimeout(timer);
   }, [dashboardToast]);
 
-  // Parsowanie URL -> ustawienie sekcji / widoku raportów / trigger AI
+  // 5. Parsowanie URL (Routing) - oparte o prop 'path', nie window.location
   useEffect(() => {
     try {
-      const url = new URL(window.location.href);
-      const pathname = url.pathname;
-      const viewParam = (url.searchParams.get('view') || 'sales').toLowerCase() as ReportView;
-      const trigger = url.searchParams.get('trigger');
+      // Tworzymy obiekt URL bazując na aktualnym origin i przekazanym path
+      // Dzięki temu 'path' może być względny (np. /demo/reports)
+      const mockBase = window.location.origin;
+      const urlObj = new URL(path, mockBase);
+      
+      const pathname = urlObj.pathname;
+      const searchParams = urlObj.searchParams;
 
+      const viewParam = (searchParams.get('view') || 'sales').toLowerCase() as ReportView;
+      const trigger = searchParams.get('trigger');
+
+      // Logika routingu
       if (pathname.includes('/reports')) {
         setActiveSection('LiveReports');
         setReportView(viewParam);
@@ -141,13 +159,16 @@ const DemoDashboard: React.FC<Props> = ({ navigate, path }) => {
 
       setAiTrigger(trigger === 'ai');
 
-      if (pathname.includes('/demo/dashboard') && url.searchParams.get('tour')) {
+      // Obsługa query params dla Demo Tour
+      if (pathname.includes('/demo/dashboard') && searchParams.get('tour')) {
         setSidebarExpanded(true);
       }
-    } catch {
-      // nic
+    } catch (e) {
+      console.error('URL parsing error:', e);
     }
   }, [path]);
+
+  // --- Handlery ---
 
   const persistHealthSnapshot = (map: IntegrationHealthMap) => {
     if (typeof window === 'undefined') return;
@@ -185,32 +206,21 @@ const DemoDashboard: React.FC<Props> = ({ navigate, path }) => {
 
   const goToSection = (section: DemoSection) => {
     setActiveSection(section);
-
     const base = isDemo ? '/demo' : '';
 
-    switch (section) {
-      case 'Dashboard':
-        navigate(`${base}/dashboard`);
-        break;
-      case 'LiveReports':
-        navigate(`${base}/reports`);
-        break;
-      case 'Academy':
-        navigate(`${base}/academy`);
-        break;
-      case 'Support':
-        navigate(`${base}/support`);
-        break;
-      case 'Integrations':
-        navigate(`${base}/integrations`);
-        break;
-      case 'Settings':
-        navigate(`${base}/settings`);
-        break;
-      default:
-        navigate(`${base}/dashboard`);
-    }
+    const routes: Record<DemoSection, string> = {
+      Dashboard: `${base}/dashboard`,
+      LiveReports: `${base}/reports`,
+      Academy: `${base}/academy`,
+      Support: `${base}/support`,
+      Integrations: `${base}/integrations`,
+      Settings: `${base}/settings`,
+    };
+
+    navigate(routes[section] || `${base}/dashboard`);
   };
+
+  // --- Render ---
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
