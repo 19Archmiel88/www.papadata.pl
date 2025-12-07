@@ -7,8 +7,9 @@ const BASE_URL = process.env.BACKEND_URL;
  */
 async function apiRequest(endpoint: string, options: RequestInit = {}) {
   if (!BASE_URL) {
-    console.error("⚠️ Brak BACKEND_URL. Sprawdź plik .env.local");
-    return null;
+    const errorMsg = "⚠️ Brak BACKEND_URL. Sprawdź plik .env.local";
+    console.error(errorMsg);
+    throw new Error(errorMsg);
   }
 
   // Normalizacja adresu (żeby nie było podwójnych slashy //)
