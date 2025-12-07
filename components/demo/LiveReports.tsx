@@ -1,21 +1,29 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Lock, Unlock } from 'lucide-react';
-import { DemoTranslation, Language } from '../../types';
-import { motion } from 'framer-motion';
-import RevenueChart from '../RevenueChart';
-import CategoryChart from '../CategoryChart';
-import CustomerChart from '../CustomerChart';
-import SalesTable from '../SalesTable';
-import KPICard from '../KPICard';
-import GeminiInsightCard from '../GeminiInsightCard';
 import {
-  getRevenueTrend,
-  getCategoryBreakdown,
-  getCustomerAcquisition,
-  getTopProducts,
-  getKpiSummary,
-  getGeminiData,
-} from './mockDashboardData';
+  BarChart2,
+  Target,
+  Users,
+  ServerCog,
+  AlertTriangle,
+  Activity,
+  Rocket,
+  X,
+} from 'lucide-react';
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  Tooltip,
+  XAxis,
+  YAxis,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+} from 'recharts';
+import { DemoTranslation, Language } from '../../types';
 
 type ReportView = 'sales' | 'campaigns' | 'customers' | 'technical';
 
@@ -28,9 +36,36 @@ interface Props {
   integrationAlert?: string | null;
 }
 
-const LiveReports: React.FC<Props> = ({ t, initialTab = 'sales', onTabChange, lang, dateRange, integrationAlert }) => {
-  const [unlocked, setUnlocked] = useState(false);
+const LiveReports: React.FC<Props> = ({
+  t,
+  initialTab = 'sales',
+  onTabChange,
+  lang,
+  dateRange,
+  integrationAlert,
+}) => {
   const [activeTab, setActiveTab] = useState<ReportView>(initialTab);
+  const [showGateModal, setShowGateModal] = useState(false);
+
+  useEffect(() => {
+    try {
+      const ack = window.localStorage.getItem('papadata_reports_gate_ack');
+      if (!ack) {
+        setShowGateModal(true);
+      }
+    } catch {
+      setShowGateModal(true);
+    }
+  }, []);
+
+  const handleCloseModal = () => {
+    setShowGateModal(false);
+    try {
+      window.localStorage.setItem('papadata_reports_gate_ack', '1');
+    } catch {
+      // ignore
+    }
+  };
 
   useEffect(() => {
     setActiveTab(initialTab);
@@ -41,281 +76,1008 @@ const LiveReports: React.FC<Props> = ({ t, initialTab = 'sales', onTabChange, la
     onTabChange?.(tab);
   };
 
-  const isEnglish = lang === 'EN';
-  const revenueData = getRevenueTrend(dateRange);
-  const categoryData = getCategoryBreakdown(dateRange);
-  const customerData = getCustomerAcquisition(dateRange);
-  const products = getTopProducts(dateRange);
-  const kpiSummary = getKpiSummary(dateRange, isEnglish);
-  const geminiData = getGeminiData(dateRange);
-  const categoryTitle = isEnglish ? 'Sales by Category' : 'Sprzedaż według kategorii';
-  const categorySubtitle = isEnglish ? 'Revenue share per channel' : 'Udział przychodów według kanałów';
-  const customerTitle = isEnglish ? 'Customer Acquisition' : 'Pozyskiwanie klientów';
-  const productTitle = isEnglish ? 'Top Products' : 'Najlepsze produkty';
-  const productSubtitle = isEnglish ? 'Best performing items by revenue' : 'Najlepsze produkty według przychodów';
-  const multiplier = dateRange === 'today' ? 0.2 : dateRange === 'last7' ? 0.6 : 1;
-  const numberFormatter = useMemo(
-    () => new Intl.NumberFormat(isEnglish ? 'en-US' : 'pl-PL'),
-    [isEnglish],
-  );
-
-  const stats = useMemo(() => {
-    const base = [
-      { key: 'revenue', label: isEnglish ? 'Revenue' : 'Przychód', value: 124592, currency: true, trend: 12.5 },
-      { key: 'spend', label: isEnglish ? 'Marketing spend' : 'Wydatki marketingowe', value: 24320, currency: true, trend: -3.4 },
-      { key: 'orders', label: isEnglish ? 'Orders' : 'Zamówienia', value: 510, currency: false, trend: 8.2 },
-      { key: 'cr', label: isEnglish ? 'Conversion rate' : 'Współczynnik konwersji', value: 2.4, currency: false, suffix: '%', trend: 0.6 },
+  const salesSeries = useMemo(() => {
+    if (dateRange === 'today') {
+      return [
+        { label: '08:00', revenue: 1200, margin: 260, orders: 12 },
+        { label: '10:00', revenue: 2100, margin: 430, orders: 21 },
+        { label: '12:00', revenue: 3100, margin: 620, orders: 28 },
+        { label: '14:00', revenue: 2800, margin: 540, orders: 26 },
+        { label: '16:00', revenue: 3600, margin: 710, orders: 31 },
+        { label: '18:00', revenue: 3900, margin: 780, orders: 33 },
+      ];
+    }
+    if (dateRange === 'last7') {
+      return [
+        { label: 'Pn', revenue: 8200, margin: 1700, orders: 88 },
+        { label: 'Wt', revenue: 9100, margin: 1900, orders: 96 },
+        { label: 'Śr', revenue: 7600, margin: 1500, orders: 81 },
+        { label: 'Cz', revenue: 10200, margin: 2200, orders: 104 },
+        { label: 'Pt', revenue: 13100, margin: 2800, orders: 132 },
+        { label: 'Sb', revenue: 15100, margin: 3200, orders: 146 },
+        { label: 'Nd', revenue: 9700, margin: 2100, orders: 101 },
+      ];
+    }
+    return [
+      { label: 'Tydz 1', revenue: 51200, margin: 10900, orders: 520 },
+      { label: 'Tydz 2', revenue: 54800, margin: 11800, orders: 548 },
+      { label: 'Tydz 3', revenue: 60100, margin: 12800, orders: 602 },
+      { label: 'Tydz 4', revenue: 58700, margin: 12300, orders: 589 },
     ];
-    return base.map((item) => {
-      // Conversion rate (rate metric) shouldn't be scaled by the time-range multiplier like cumulative metrics
-      const factor = item.key === 'cr' ? 1.15 : multiplier;
-      const adjusted = item.value * factor;
-      const displayValue = item.currency
-        ? `PLN ${numberFormatter.format(Math.max(1, Math.round(adjusted)))}`
-        : item.suffix
-          ? `${adjusted.toFixed(2)}${item.suffix}`
-          : numberFormatter.format(Math.max(1, Math.round(adjusted)));
-      const trendVal = Number((item.trend * (0.7 + multiplier / 1.5)).toFixed(1));
-      return { ...item, displayValue, trendVal, positive: item.trend >= 0 };
-    });
-  }, [isEnglish, multiplier, numberFormatter]);
-
-  const columns = useMemo(() => {
-    const presets: Record<'today' | 'last7' | 'last30', number[]> = {
-      today: [30, 24, 28, 22, 34, 32, 30, 36, 28, 34, 32, 38],
-      last7: [44, 46, 48, 52, 50, 56, 60, 58, 62, 64, 66, 68],
-      last30: [58, 64, 62, 70, 72, 74, 78, 80, 76, 82, 84, 86],
-    };
-    return presets[dateRange];
   }, [dateRange]);
 
-  if (!unlocked) {
-    return (
-      <div className="relative w-full h-[calc(100vh-80px)] overflow-hidden">
-        <div className="absolute inset-0 bg-slate-100 dark:bg-slate-900 p-6 blur-md opacity-50 pointer-events-none select-none">
-          <div className="grid grid-cols-4 gap-4 mb-4">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-32 bg-slate-300 dark:bg-slate-800 rounded-xl" />
-            ))}
+  const campaignsData = [
+    {
+      name: 'Brand Search',
+      channel: 'Google Ads',
+      spend: 4200,
+      revenue: 27200,
+      roas: 6.5,
+    },
+    {
+      name: 'Prospecting',
+      channel: 'Meta Ads',
+      spend: 6100,
+      revenue: 21400,
+      roas: 3.5,
+    },
+    {
+      name: 'Remarketing',
+      channel: 'Meta Ads',
+      spend: 3300,
+      revenue: 19800,
+      roas: 6.0,
+    },
+    {
+      name: 'Performance Max',
+      channel: 'Google Ads',
+      spend: 7800,
+      revenue: 30400,
+      roas: 3.9,
+    },
+  ];
+
+  const customersData = [
+    {
+      segment: lang === 'PL' ? 'Nowi klienci 30 dni' : 'New 30 days',
+      orders: 420,
+      revenue: 58000,
+      ltv: 320,
+      trend: '+18%',
+    },
+    {
+      segment: lang === 'PL' ? 'Stali klienci' : 'Returning',
+      orders: 610,
+      revenue: 78200,
+      ltv: 540,
+      trend: '+9%',
+    },
+    {
+      segment: lang === 'PL' ? 'Do odzyskania' : 'Win-back',
+      orders: 96,
+      revenue: 8200,
+      ltv: 220,
+      trend: '-4%',
+    },
+  ];
+
+  const technicalChecks = [
+    {
+      key: 'ga4',
+      label:
+        lang === 'PL'
+          ? 'Spójność transakcji GA4 vs sklep'
+          : 'GA4 vs store transactions consistency',
+      status: 'ok' as const,
+      detail:
+        lang === 'PL'
+          ? 'Odchylenie 3,2% – w granicach akceptowalnych różnic atrybucji.'
+          : '3.2% deviation – within acceptable attribution differences.',
+    },
+    {
+      key: 'costs',
+      label:
+        lang === 'PL'
+          ? 'Koszty kampanii vs panel reklamowy'
+          : 'Ad costs vs ad platform',
+      status: 'ok' as const,
+      detail:
+        lang === 'PL'
+          ? 'Różnice < 1% – dane kosztowe kompletne za okres bieżący.'
+          : 'Diff < 1% – cost data complete for current period.',
+    },
+    {
+      key: 'catalog',
+      label:
+        lang === 'PL'
+          ? 'Spójność katalogu produktów'
+          : 'Product catalog consistency',
+      status: 'warn' as const,
+      detail:
+        lang === 'PL'
+          ? '12 SKU bez przypisanej kategorii marży.'
+          : '12 SKUs without margin category assigned.',
+    },
+    {
+      key: 'feed',
+      label:
+        lang === 'PL'
+          ? 'Aktualność feedu produktowego'
+          : 'Product feed freshness',
+      status: 'ok' as const,
+      detail:
+        lang === 'PL'
+          ? 'Ostatnia pełna aktualizacja 2 godz. temu.'
+          : 'Last full refresh 2 hours ago.',
+    },
+  ];
+
+  const tabDefinitions: {
+    id: ReportView;
+    label: string;
+    icon: React.ReactNode;
+  }[] = useMemo(
+    () => [
+      {
+        id: 'sales',
+        icon: <BarChart2 className="w-4 h-4" />,
+        label:
+          (t as any)?.tabs?.sales?.label ??
+          (lang === 'PL' ? 'Sprzedaż' : 'Sales'),
+      },
+      {
+        id: 'campaigns',
+        icon: <Target className="w-4 h-4" />,
+        label:
+          (t as any)?.tabs?.campaigns?.label ??
+          (lang === 'PL' ? 'Kampanie' : 'Campaigns'),
+      },
+      {
+        id: 'customers',
+        icon: <Users className="w-4 h-4" />,
+        label:
+          (t as any)?.tabs?.customers?.label ??
+          (lang === 'PL' ? 'Klienci' : 'Customers'),
+      },
+      {
+        id: 'technical',
+        icon: <ServerCog className="w-4 h-4" />,
+        label:
+          (t as any)?.tabs?.technical?.label ??
+          (lang === 'PL' ? 'Techniczne' : 'Technical'),
+      },
+    ],
+    [t, lang],
+  );
+
+  const channelPieColors = ['#6366f1', '#22c55e', '#38bdf8', '#f97316'];
+
+  const campaignsByChannel = (() => {
+    const map: Record<
+      string,
+      { channel: string; spend: number; revenue: number }
+    > = {};
+    campaignsData.forEach((c) => {
+      if (!map[c.channel]) {
+        map[c.channel] = { channel: c.channel, spend: 0, revenue: 0 };
+      }
+      map[c.channel].spend += c.spend;
+      map[c.channel].revenue += c.revenue;
+    });
+    return Object.values(map);
+  })();
+
+  const campaignsPieData = campaignsByChannel.map((c) => ({
+    name: c.channel,
+    value: c.spend,
+  }));
+
+  const customersPieData = customersData.map((c) => ({
+    name: c.segment,
+    value: c.revenue,
+  }));
+  const customersPieColors = ['#22c55e', '#38bdf8', '#f97316'];
+
+  const renderSalesView = () => (
+    <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] gap-4">
+      <div className="rounded-2xl border border-slate-800 bg-slate-950/90 p-4 shadow-[0_18px_60px_rgba(15,23,42,0.9)] space-y-4">
+        <div className="flex items-center justify-between gap-2">
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
+              {lang === 'PL' ? 'Raport sprzedaży' : 'Sales report'}
+            </p>
+            <h2 className="text-sm font-semibold text-slate-100">
+              {lang === 'PL'
+                ? 'Przychód, marża i wolumen w czasie'
+                : 'Revenue, margin and volume over time'}
+            </h2>
           </div>
-          <div className="h-96 bg-slate-300 dark:bg-slate-800 rounded-xl mb-4" />
-          <div className="grid grid-cols-2 gap-4">
-            <div className="h-64 bg-slate-300 dark:bg-slate-800 rounded-xl" />
-            <div className="h-64 bg-slate-300 dark:bg-slate-800 rounded-xl" />
+          <div className="flex items-center gap-2 text-[11px] text-slate-500">
+            <span className="inline-flex items-center gap-1">
+              <span className="inline-block w-2 h-2 rounded-full bg-sky-400" />
+              {lang === 'PL' ? 'Przychód' : 'Revenue'}
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <span className="inline-block w-2 h-2 rounded-full bg-emerald-400" />
+              {lang === 'PL' ? 'Marża' : 'Margin'}
+            </span>
           </div>
         </div>
 
-        <div className="absolute inset-0 flex items-center justify-center p-4">
-          <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200 dark:border-slate-700 p-8 rounded-2xl max-w-lg text-center shadow-2xl">
-            <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Lock className="w-8 h-8 text-primary-600 dark:text-primary-400" />
-            </div>
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">{t.gated.title}</h2>
-            <p className="text-slate-600 dark:text-slate-300 mb-8 leading-relaxed">{t.gated.text}</p>
+        <div className="h-60">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={salesSeries}>
+              <defs>
+                <linearGradient id="revGradientR" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#38bdf8" stopOpacity={0.6} />
+                  <stop offset="95%" stopColor="#0f172a" stopOpacity={0} />
+                </linearGradient>
+                <linearGradient id="marginGradientR" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#22c55e" stopOpacity={0.7} />
+                  <stop offset="95%" stopColor="#0f172a" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid
+                stroke="#1e293b"
+                strokeDasharray="3 3"
+                vertical={false}
+              />
+              <XAxis
+                dataKey="label"
+                tick={{ fontSize: 11, fill: '#64748b' }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis
+                tick={{ fontSize: 11, fill: '#64748b' }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: '#020617',
+                  borderRadius: 12,
+                  border: '1px solid #1e293b',
+                  fontSize: 12,
+                }}
+                formatter={(value, name) => {
+                  if (name === 'revenue') {
+                    return [
+                      `${(value as number).toLocaleString('pl-PL')} zł`,
+                      lang === 'PL' ? 'Przychód' : 'Revenue',
+                    ];
+                  }
+                  if (name === 'margin') {
+                    return [
+                      `${(value as number).toLocaleString('pl-PL')} zł`,
+                      lang === 'PL' ? 'Marża' : 'Margin',
+                    ];
+                  }
+                  return [String(value), lang === 'PL' ? 'Zamówienia' : 'Orders'];
+                }}
+              />
+              <Area
+                type="monotone"
+                dataKey="revenue"
+                stroke="#38bdf8"
+                strokeWidth={2}
+                fill="url(#revGradientR)"
+              />
+              <Area
+                type="monotone"
+                dataKey="margin"
+                stroke="#22c55e"
+                strokeWidth={2}
+                fill="url(#marginGradientR)"
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
 
-            <div className="flex flex-col gap-3">
-              <a
-                href="/wizard"
-                className="w-full py-3 px-4 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl transition-colors shadow-lg shadow-primary-500/25"
+        {/* Dodatkowy wykres słupkowy dla zamówień */}
+        <div className="h-32 border-t border-slate-800 pt-3">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[11px] text-slate-400">
+              {lang === 'PL' ? 'Wolumen zamówień' : 'Order volume'}
+            </p>
+          </div>
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={salesSeries}>
+              <CartesianGrid
+                stroke="#1e293b"
+                strokeDasharray="3 3"
+                vertical={false}
+              />
+              <XAxis
+                dataKey="label"
+                tick={{ fontSize: 10, fill: '#64748b' }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis
+                tick={{ fontSize: 10, fill: '#64748b' }}
+                axisLine={false}
+                tickLine={false}
+                hide
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: '#020617',
+                  borderRadius: 12,
+                  border: '1px solid #1e293b',
+                  fontSize: 11,
+                }}
+              />
+              <Bar
+                dataKey="orders"
+                radius={[4, 4, 0, 0]}
+                fill="#818cf8"
+                name={lang === 'PL' ? 'Zamówienia' : 'Orders'}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-slate-800 bg-slate-950/90 p-4 shadow-[0_18px_60px_rgba(15,23,42,0.9)] flex flex-col gap-4">
+        <div className="flex items-center justify-between gap-2">
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
+              {lang === 'PL' ? 'Szybkie wnioski' : 'Quick insights'}
+            </p>
+            <h2 className="text-sm font-semibold text-slate-100">
+              {lang === 'PL'
+                ? 'Co dzieje się ze sprzedażą?'
+                : 'What is happening with sales?'}
+            </h2>
+          </div>
+        </div>
+
+        <ul className="space-y-2 text-xs text-slate-300">
+          <li className="flex items-start gap-2">
+            <Activity className="w-3 h-3 text-emerald-400 mt-[2px]" />
+            <span>
+              {lang === 'PL'
+                ? 'Wzrost przychodu +18% przy wyższej marży sugeruje lepszy miks produktowy, nie tylko większy ruch.'
+                : 'Revenue +18% with higher margin suggests better product mix, not only more traffic.'}
+            </span>
+          </li>
+          <li className="flex items-start gap-2">
+            <Activity className="w-3 h-3 text-sky-400 mt-[2px]" />
+            <span>
+              {lang === 'PL'
+                ? 'Piki sprzedaży w godzinach 12–18 wskazują najlepsze okno na kampanie z ograniczonym budżetem.'
+                : 'Sales peaks between 12–18 suggest best window for budget-limited campaigns.'}
+            </span>
+          </li>
+          <li className="flex items-start gap-2">
+            <AlertTriangle className="w-3 h-3 text-amber-300 mt-[2px]" />
+            <span>
+              {lang === 'PL'
+                ? 'Lekki spadek marży przy rosnącym wolumenie warto zestawić z kampaniami z rabatami.'
+                : 'Slight margin drop with rising volume should be checked vs discount campaigns.'}
+            </span>
+          </li>
+        </ul>
+
+        {/* Mini wykres kołowy – udział kanałów w sprzedaży (zagregowany z kampanii) */}
+        <div className="mt-3 pt-3 border-t border-slate-800">
+          <p className="text-[11px] text-slate-400 mb-2">
+            {lang === 'PL'
+              ? 'Udział kanałów w przychodzie kampanii'
+              : 'Channel share in campaign revenue'}
+          </p>
+          <div className="flex items-center gap-3">
+            <div className="h-28 w-32">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={campaignsPieData}
+                    dataKey="value"
+                    nameKey="name"
+                    innerRadius={26}
+                    outerRadius={40}
+                    paddingAngle={2}
+                  >
+                    {campaignsPieData.map((_, index) => (
+                      <Cell
+                        key={index}
+                        fill={channelPieColors[index % channelPieColors.length]}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#020617',
+                      borderRadius: 12,
+                      border: '1px solid #1e293b',
+                      fontSize: 11,
+                    }}
+                    formatter={(value) => [
+                      `${(value as number).toLocaleString('pl-PL')} zł`,
+                      lang === 'PL' ? 'Koszt' : 'Cost',
+                    ]}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="flex-1 space-y-1 text-[11px] text-slate-400">
+              {campaignsPieData.map((c, index) => (
+                <div key={c.name} className="flex items-center gap-2">
+                  <span
+                    className="inline-block w-2 h-2 rounded-full"
+                    style={{ backgroundColor: channelPieColors[index] }}
+                  />
+                  <span className="truncate">{c.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderCampaignsView = () => (
+    <div className="space-y-4">
+      <div className="rounded-2xl border border-slate-800 bg-slate-950/90 p-4 shadow-[0_18px_60px_rgba(15,23,42,0.9)]">
+        <div className="flex items-center justify-between gap-2 mb-4">
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
+              {lang === 'PL' ? 'Raport kampanii' : 'Campaign report'}
+            </p>
+            <h2 className="text-sm font-semibold text-slate-100">
+              {lang === 'PL'
+                ? 'Przychód i ROAS według kampanii'
+                : 'Revenue & ROAS by campaign'}
+            </h2>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs border-separate border-spacing-y-1">
+            <thead>
+              <tr className="text-slate-400">
+                <th className="text-left font-medium py-1.5 px-2">
+                  {lang === 'PL' ? 'Kampania' : 'Campaign'}
+                </th>
+                <th className="text-left font-medium py-1.5 px-2">
+                  {lang === 'PL' ? 'Kanał' : 'Channel'}
+                </th>
+                <th className="text-right font-medium py-1.5 px-2">
+                  {lang === 'PL' ? 'Koszt' : 'Cost'}
+                </th>
+                <th className="text-right font-medium py-1.5 px-2">
+                  {lang === 'PL' ? 'Przychód' : 'Revenue'}
+                </th>
+                <th className="text-right font-medium py-1.5 px-2">ROAS</th>
+                <th className="text-right font-medium py-1.5 px-2">
+                  {lang === 'PL' ? 'Sugestia' : 'Suggestion'}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {campaignsData.map((row) => {
+                const roasColor =
+                  row.roas >= 5
+                    ? 'text-emerald-300'
+                    : row.roas >= 3.5
+                    ? 'text-sky-300'
+                    : 'text-amber-300';
+                const suggestion =
+                  lang === 'PL'
+                    ? row.roas >= 5
+                      ? 'Można rozważyć zwiększenie budżetu.'
+                      : row.roas >= 3.5
+                      ? 'Obserwuj – potencjał po dopracowaniu kreacji.'
+                      : 'Weryfikacja kreacji i grup docelowych.'
+                    : row.roas >= 5
+                    ? 'Consider increasing budget.'
+                    : row.roas >= 3.5
+                    ? 'Monitor – potential after creative optimisation.'
+                    : 'Review creatives and audiences.';
+
+                return (
+                  <tr
+                    key={row.name}
+                    className="bg-slate-900/80 hover:bg-slate-900 text-slate-100"
+                  >
+                    <td className="py-1.5 px-2">{row.name}</td>
+                    <td className="py-1.5 px-2 text-slate-400">
+                      {row.channel}
+                    </td>
+                    <td className="py-1.5 px-2 text-right">
+                      {row.spend.toLocaleString('pl-PL')} zł
+                    </td>
+                    <td className="py-1.5 px-2 text-right">
+                      {row.revenue.toLocaleString('pl-PL')} zł
+                    </td>
+                    <td className={`py-1.5 px-2 text-right ${roasColor}`}>
+                      {row.roas.toFixed(1)}x
+                    </td>
+                    <td className="py-1.5 px-2 text-right text-slate-300">
+                      {suggestion}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Dodatkowe wykresy: słupkowy + kołowy */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="rounded-2xl border border-slate-800 bg-slate-950/90 p-4 shadow-[0_18px_60px_rgba(15,23,42,0.9)]">
+          <p className="text-xs uppercase tracking-[0.2em] text-slate-500 mb-1">
+            {lang === 'PL' ? 'Wydatki i przychód' : 'Spend & revenue'}
+          </p>
+          <h3 className="text-sm font-semibold text-slate-100 mb-2">
+            {lang === 'PL'
+              ? 'Porównanie wydatku i przychodu kampanii'
+              : 'Campaign spend vs revenue'}
+          </h3>
+          <div className="h-40">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={campaignsData}>
+                <CartesianGrid
+                  stroke="#1e293b"
+                  strokeDasharray="3 3"
+                  vertical={false}
+                />
+                <XAxis
+                  dataKey="name"
+                  tick={{ fontSize: 10, fill: '#64748b' }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  tick={{ fontSize: 10, fill: '#64748b' }}
+                  axisLine={false}
+                  tickLine={false}
+                  hide
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#020617',
+                    borderRadius: 12,
+                    border: '1px solid #1e293b',
+                    fontSize: 11,
+                  }}
+                  formatter={(value, name) => {
+                    return [
+                      `${(value as number).toLocaleString('pl-PL')} zł`,
+                      name === 'spend'
+                        ? lang === 'PL'
+                          ? 'Koszt'
+                          : 'Cost'
+                        : lang === 'PL'
+                        ? 'Przychód'
+                        : 'Revenue',
+                    ];
+                  }}
+                />
+                <Bar
+                  dataKey="spend"
+                  radius={[4, 4, 0, 0]}
+                  fill="#94a3b8"
+                  name={lang === 'PL' ? 'Koszt' : 'Cost'}
+                />
+                <Bar
+                  dataKey="revenue"
+                  radius={[4, 4, 0, 0]}
+                  fill="#6366f1"
+                  name={lang === 'PL' ? 'Przychód' : 'Revenue'}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-slate-800 bg-slate-950/90 p-4 shadow-[0_18px_60px_rgba(15,23,42,0.9)]">
+          <p className="text-xs uppercase tracking-[0.2em] text-slate-500 mb-1">
+            {lang === 'PL' ? 'Kanały kampanii' : 'Campaign channels'}
+          </p>
+          <h3 className="text-sm font-semibold text-slate-100 mb-2">
+            {lang === 'PL'
+              ? 'Udział kanałów w wydatku'
+              : 'Channel share in spend'}
+          </h3>
+
+          <div className="flex items-center gap-3">
+            <div className="h-32 w-36">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={campaignsPieData}
+                    dataKey="value"
+                    nameKey="name"
+                    innerRadius={28}
+                    outerRadius={45}
+                    paddingAngle={2}
+                  >
+                    {campaignsPieData.map((_, index) => (
+                      <Cell
+                        key={index}
+                        fill={channelPieColors[index % channelPieColors.length]}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#020617',
+                      borderRadius: 12,
+                      border: '1px solid #1e293b',
+                      fontSize: 11,
+                    }}
+                    formatter={(value) => [
+                      `${(value as number).toLocaleString('pl-PL')} zł`,
+                      lang === 'PL' ? 'Koszt' : 'Cost',
+                    ]}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="flex-1 space-y-1 text-[11px] text-slate-400">
+              {campaignsPieData.map((c, index) => (
+                <div key={c.name} className="flex items-center gap-2">
+                  <span
+                    className="inline-block w-2 h-2 rounded-full"
+                    style={{ backgroundColor: channelPieColors[index] }}
+                  />
+                  <span className="truncate">{c.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderCustomersView = () => (
+    <div className="rounded-2xl border border-slate-800 bg-slate-950/90 p-4 shadow-[0_18px_60px_rgba(15,23,42,0.9)]">
+      <div className="flex items-center justify-between gap-2 mb-4">
+        <div>
+          <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
+            {lang === 'PL' ? 'Raport klientów' : 'Customer report'}
+          </p>
+          <h2 className="text-sm font-semibold text-slate-100">
+            {lang === 'PL'
+              ? 'Segmenty i LTV klienta'
+              : 'Segments and customer LTV'}
+          </h2>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-4">
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs border-separate border-spacing-y-1">
+            <thead>
+              <tr className="text-slate-400">
+                <th className="text-left font-medium py-1.5 px-2">
+                  {lang === 'PL' ? 'Segment' : 'Segment'}
+                </th>
+                <th className="text-right font-medium py-1.5 px-2">
+                  {lang === 'PL' ? 'Zamówienia' : 'Orders'}
+                </th>
+                <th className="text-right font-medium py-1.5 px-2">
+                  {lang === 'PL' ? 'Przychód' : 'Revenue'}
+                </th>
+                <th className="text-right font-medium py-1.5 px-2">LTV</th>
+                <th className="text-right font-medium py-1.5 px-2">
+                  {lang === 'PL' ? 'Trend' : 'Trend'}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {customersData.map((row) => {
+                const negative = row.trend.startsWith('-');
+                const trendColor = negative
+                  ? 'text-rose-300'
+                  : 'text-emerald-300';
+                return (
+                  <tr
+                    key={row.segment}
+                    className="bg-slate-900/80 hover:bg-slate-900 text-slate-100"
+                  >
+                    <td className="py-1.5 px-2">{row.segment}</td>
+                    <td className="py-1.5 px-2 text-right">{row.orders}</td>
+                    <td className="py-1.5 px-2 text-right">
+                      {row.revenue.toLocaleString('pl-PL')} zł
+                    </td>
+                    <td className="py-1.5 px-2 text-right">
+                      {row.ltv.toLocaleString('pl-PL')} zł
+                    </td>
+                    <td className={`py-1.5 px-2 text-right ${trendColor}`}>
+                      {row.trend}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Wykres kołowy dla segmentów */}
+        <div className="flex flex-col gap-2">
+          <div className="h-32 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={customersPieData}
+                  dataKey="value"
+                  nameKey="name"
+                  innerRadius={28}
+                  outerRadius={45}
+                  paddingAngle={2}
+                >
+                  {customersPieData.map((_, index) => (
+                    <Cell
+                      key={index}
+                      fill={
+                        customersPieColors[index % customersPieColors.length]
+                      }
+                    />
+                  ))}
+                </Pie>
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#020617',
+                    borderRadius: 12,
+                    border: '1px solid #1e293b',
+                    fontSize: 11,
+                  }}
+                  formatter={(value) => [
+                    `${(value as number).toLocaleString('pl-PL')} zł`,
+                    lang === 'PL' ? 'Przychód' : 'Revenue',
+                  ]}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="space-y-1 text-[11px] text-slate-400">
+            {customersPieData.map((c, index) => (
+              <div key={c.name} className="flex items-center gap-2">
+                <span
+                  className="inline-block w-2 h-2 rounded-full"
+                  style={{ backgroundColor: customersPieColors[index] }}
+                />
+                <span className="truncate">{c.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-4 text-xs text-slate-300 space-y-2">
+        <p className="text-slate-200">
+          {lang === 'PL'
+            ? 'Co możesz zrobić z tym raportem?'
+            : 'What can you do with this report?'}
+        </p>
+        <ul className="space-y-1.5">
+          <li>
+            •{' '}
+            {lang === 'PL'
+              ? 'Zdefiniować progi LTV, przy których opłaca się inwestować w retencję.'
+              : 'Define LTV thresholds at which retention is profitable.'}
+          </li>
+          <li>
+            •{' '}
+            {lang === 'PL'
+              ? 'Wyłapać segment „do odzyskania” przed jego całkowitym wypaleniem.'
+              : 'Catch win-back segments before they fully churn.'}
+          </li>
+          <li>
+            •{' '}
+            {lang === 'PL'
+              ? 'Porównać jakość klientów między kanałami pozyskania.'
+              : 'Compare customer quality between acquisition channels.'}
+          </li>
+        </ul>
+      </div>
+    </div>
+  );
+
+  const renderTechnicalView = () => (
+    <div className="rounded-2xl border border-slate-800 bg-slate-950/90 p-4 shadow-[0_18px_60px_rgba(15,23,42,0.9)]">
+      <div className="flex items-center justify-between gap-2 mb-4">
+        <div>
+          <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
+            {lang === 'PL' ? 'Raport techniczny' : 'Technical report'}
+          </p>
+          <h2 className="text-sm font-semibold text-slate-100">
+            {lang === 'PL'
+              ? 'Zdrowie danych i integracji'
+              : 'Data & integration health'}
+          </h2>
+        </div>
+      </div>
+
+      <ul className="space-y-2 text-xs">
+        {technicalChecks.map((check) => {
+          const colorClasses =
+            check.status === 'ok'
+              ? 'border-emerald-700/60 bg-emerald-900/10 text-emerald-200'
+              : 'border-amber-700/60 bg-amber-900/10 text-amber-200';
+          const label =
+            check.status === 'ok'
+              ? lang === 'PL'
+                ? 'OK'
+                : 'OK'
+              : lang === 'PL'
+              ? 'Do przeglądu'
+              : 'Review';
+
+          return (
+            <li
+              key={check.key}
+              className="rounded-xl border border-slate-800 bg-slate-950/80 px-3 py-2 flex items-start justify-between gap-3"
+            >
+              <div className="flex-1">
+                <p className="text-slate-100 mb-0.5">{check.label}</p>
+                <p className="text-[11px] text-slate-400">{check.detail}</p>
+              </div>
+              <span
+                className={`inline-flex items-center gap-1 px-2 py-1 rounded-full border text-[10px] ${colorClasses}`}
               >
-                {t.gated.btnUnlock}
-              </a>
+                {check.status !== 'ok' && (
+                  <AlertTriangle className="w-3 h-3" />
+                )}
+                {label}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+
+      {integrationAlert && (
+        <p className="mt-3 text-[11px] text-amber-300 flex items-start gap-2">
+          <AlertTriangle className="w-3 h-3 mt-[2px]" />
+          <span>{integrationAlert}</span>
+        </p>
+      )}
+    </div>
+  );
+
+  return (
+    <div className="space-y-4">
+      {/* Pasek nagłówka sekcji */}
+      <section className="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary-400">
+            {lang === 'PL' ? 'Raporty live' : 'Live reports'}
+          </p>
+          <h1 className="mt-1 text-lg md:text-xl font-semibold text-slate-50">
+            {(t as any)?.title ??
+              (lang === 'PL'
+                ? 'Raporty sprzedaży, kampanii i klientów w jednym miejscu'
+                : 'Sales, campaign and customer reports in one place')}
+          </h1>
+          <p className="mt-1 text-xs text-slate-400 max-w-xl">
+            {(t as any)?.subtitle ??
+              (lang === 'PL'
+                ? 'Widoki, które w wersji produkcyjnej aktualizują się automatycznie z Twojej hurtowni danych po 14 dniach współpracy.'
+                : 'Views that, in production, update automatically from your warehouse after the first 14 days of cooperation.')}
+          </p>
+        </div>
+      </section>
+
+      {/* Alert z integracji (jeśli jest) */}
+      {integrationAlert && (
+        <div className="rounded-xl border border-amber-700/60 bg-amber-950/40 px-3 py-2 text-xs text-amber-100 flex items-start gap-2">
+          <AlertTriangle className="w-3 h-3 mt-[2px]" />
+          <span>{integrationAlert}</span>
+        </div>
+      )}
+
+      {/* Zakładki */}
+      <section className="border-b border-slate-800">
+        <div className="max-w-full overflow-x-auto">
+          <div className="inline-flex min-w-full flex-wrap gap-2 text-xs">
+            {tabDefinitions.map((tab) => {
+              const active = tab.id === activeTab;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => changeTab(tab.id)}
+                  className={[
+                    'inline-flex items-center gap-2 px-3 py-2 rounded-t-lg border-b-2 transition-colors',
+                    active
+                      ? 'border-primary-500 text-slate-50 bg-slate-900'
+                      : 'border-transparent text-slate-400 hover:text-slate-100 hover:bg-slate-900/60',
+                  ].join(' ')}
+                >
+                  <span className="text-primary-300">{tab.icon}</span>
+                  <span className="font-medium">{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Widok aktywnej zakładki */}
+      <section>
+        {activeTab === 'sales' && renderSalesView()}
+        {activeTab === 'campaigns' && renderCampaignsView()}
+        {activeTab === 'customers' && renderCustomersView()}
+        {activeTab === 'technical' && renderTechnicalView()}
+      </section>
+
+      {/* Modal: informacja o 14 dniach i przedłużeniu współpracy */}
+      {showGateModal && (
+        <div
+          className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
+          onClick={handleCloseModal}
+        >
+          <div
+            className="w-full max-w-md rounded-2xl bg-slate-950 border border-slate-800 shadow-xl shadow-black/60 p-6 relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="absolute top-3 right-3 text-slate-500 hover:text-slate-200"
+              onClick={handleCloseModal}
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div className="flex items-center gap-3 mb-3">
+              <div className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 border border-slate-700 text-primary-300">
+                <Rocket className="w-4 h-4" />
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.2em] text-primary-300">
+                  {lang === 'PL' ? 'Pełne raporty' : 'Full reports'}
+                </p>
+                <h2 className="text-sm font-semibold text-slate-50">
+                  {lang === 'PL'
+                    ? 'Ten ekran pokazuje widok po 14 dniach współpracy'
+                    : 'This screen shows the view after the first 14 days'}
+                </h2>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-300 mb-3">
+              {lang === 'PL'
+                ? 'W wersji produkcyjnej raporty live wypełniają się Twoimi realnymi danymi po podłączeniu sklepu, kampanii i hurtowni BigQuery. Po przedłużeniu współpracy widoki stają się stałym „centrum dowodzenia” e-commerce.'
+                : 'In production, live reports are populated with your real data after connecting the store, campaigns and BigQuery warehouse. After extending cooperation, these views become the stable “command center” of your e-commerce.'}
+            </p>
+
+            <div className="rounded-xl border border-slate-800 bg-slate-900/80 px-3 py-2 text-[11px] text-slate-400 flex items-start gap-2 mb-4">
+              <Activity className="w-3 h-3 text-emerald-300 mt-[2px]" />
+              <span>
+                {lang === 'PL'
+                  ? 'To demo działa na danych przykładowych – traktuj je jako podgląd układu i poziomu szczegółowości, a nie prognozę wyników.'
+                  : 'This demo uses sample data – treat it as a preview of layout and detail level, not a forecast of your results.'}
+              </span>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3">
               <button
-                onClick={() => setUnlocked(true)}
-                className="w-full py-3 px-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium rounded-xl transition-colors"
+                type="button"
+                onClick={handleCloseModal}
+                className="flex-1 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-500 text-white text-sm font-semibold shadow-lg shadow-primary-500/30"
               >
-                {t.gated.btnDemo}
+                {lang === 'PL'
+                  ? 'Rozumiem – pokaż demo raportów'
+                  : 'Got it – show demo reports'}
+              </button>
+              <button
+                type="button"
+                className="flex-1 py-2.5 rounded-xl border border-slate-600 text-slate-100 text-sm font-semibold hover:bg-slate-900"
+              >
+                {lang === 'PL'
+                  ? 'Porozmawiajmy o pełnej wersji'
+                  : "Let's talk about full version"}
               </button>
             </div>
           </div>
         </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex flex-col h-full">
-      <div className="bg-amber-100 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-800/50 px-6 py-2 flex items-center justify-between">
-        <span className="text-sm font-medium text-amber-800 dark:text-amber-400 flex items-center gap-2">
-          <Unlock className="w-4 h-4" /> {t.sandbox.info}
-        </span>
-        <div className="flex items-center gap-3">
-          <span className="hidden md:inline text-xs text-amber-700 dark:text-amber-300">{t.sandbox.highlight}</span>
-          <a
-            href="/wizard"
-            className="px-3 py-1 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded transition-colors"
-          >
-            {t.sandbox.btnCreate}
-          </a>
-        </div>
-      </div>
-
-      <div className="p-6 space-y-6">
-        {integrationAlert && (
-          <div className="rounded-xl border border-rose-200 bg-rose-50/70 dark:border-rose-700 dark:bg-rose-900/30 text-rose-700 dark:text-rose-100 px-4 py-3 text-sm">
-            {integrationAlert}
-          </div>
-        )}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {stats.map((stat) => (
-            <div
-              key={stat.key}
-              className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4 shadow-sm"
-            >
-              <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">
-                {stat.label}
-              </p>
-              <div className="mt-2 flex items-center justify-between gap-2">
-                <span className="text-xl font-semibold text-slate-900 dark:text-white">{stat.displayValue}</span>
-                <span
-                  className={`text-xs font-semibold flex items-center gap-1 ${
-                    stat.trendVal >= 0 ? 'text-emerald-500' : 'text-rose-500'
-                  }`}
-                >
-                  <span>
-                    {stat.trendVal >= 0 ? '+' : ''}
-                    {stat.trendVal}%
-                  </span>
-                </span>
-              </div>
-              <div className="mt-3 h-1.5 bg-slate-100 dark:bg-slate-900 rounded-full overflow-hidden">
-                <div
-                  className={`${stat.trendVal >= 0 ? 'bg-emerald-400' : 'bg-rose-400'} h-full rounded-full`}
-                  style={{ width: `${Math.min(100, 45 + Math.abs(stat.trendVal) * 2)}%` }}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="flex gap-4 border-b border-slate-200 dark:border-slate-800 pb-2">
-          {([
-            ['sales', t.sandbox.tabs.sales],
-            ['campaigns', t.sandbox.tabs.campaigns],
-            ['customers', t.sandbox.tabs.customers],
-            ['technical', t.sandbox.tabs.technical],
-          ] as [ReportView, string][]).map(([key, label]) => (
-            <button
-              key={key}
-              onClick={() => changeTab(key)}
-              className={`pb-3 px-2 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === key
-                  ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                  : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-              }`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-
-        <div className="grid grid-cols-12 gap-6">
-          <div className="col-span-12 lg:col-span-8 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 h-96 p-4">
-            <div className="flex justify-between mb-4 items-center">
-              <div>
-                <p className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                  {activeTab === 'sales'
-                    ? isEnglish
-                      ? 'Sales & spend trend'
-                      : 'Trend sprzedaży i wydatków'
-                    : isEnglish
-                      ? 'Engagement trend'
-                      : 'Trend zaangażowania'}
-                </p>
-                <p className="text-[11px] text-slate-500">{t.gated.title}</p>
-              </div>
-              <span className="px-2 py-1 text-[11px] rounded-full bg-slate-100 dark:bg-slate-900 text-slate-500">
-                {dateRange === 'today'
-                  ? isEnglish ? 'Today' : 'Dziś'
-                  : dateRange === 'last7'
-                    ? isEnglish ? 'Last 7 days' : 'Ostatnie 7 dni'
-                    : isEnglish ? 'Last 30 days' : 'Ostatnie 30 dni'}
-              </span>
-            </div>
-            <div className="h-full flex items-end justify-between px-2 pb-8 gap-2">
-              {columns.map((height, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ height: 0 }}
-                  animate={{ height: `${height}%` }}
-                  transition={{ duration: 0.6, delay: i * 0.02 }}
-                  className="w-full rounded-t bg-gradient-to-t from-primary-500/40 via-primary-400/60 to-primary-300/80"
-                />
-              ))}
-            </div>
-          </div>
-
-          <div className="col-span-12 lg:col-span-4 space-y-6">
-            <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 h-44 p-4">
-              <p className="text-sm font-semibold text-slate-900 dark:text-white mb-2">
-                {isEnglish ? 'Filters (demo)' : 'Filtry (demo)'}
-              </p>
-              <div className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
-                <div className="flex items-center justify-between">
-                  <span>{isEnglish ? 'Channel' : 'Kanał'}</span>
-                  <span className="px-2 py-1 rounded bg-slate-100 dark:bg-slate-900">
-                    {isEnglish ? 'Google Ads' : 'Google Ads'}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span>{isEnglish ? 'Campaign type' : 'Typ kampanii'}</span>
-                  <span className="px-2 py-1 rounded bg-slate-100 dark:bg-slate-900">
-                    {isEnglish ? 'Brand / Prospecting' : 'Brand / Prospecting'}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span>{isEnglish ? 'Country' : 'Kraj'}</span>
-                  <span className="px-2 py-1 rounded bg-slate-100 dark:bg-slate-900">PL / DE</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 h-44 p-4">
-              <p className="text-sm font-semibold text-slate-900 dark:text-white mb-2">
-                {isEnglish ? 'Performance pulse' : 'Puls wyników'}
-              </p>
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-full border-[6px] border-emerald-400 relative flex items-center justify-center">
-                  <span className="text-sm font-bold text-emerald-600">92</span>
-                </div>
-                <div className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
-                  <p>{isEnglish ? 'Demo quality score for this view.' : 'Demo wynik jakości dla tego widoku.'}</p>
-                  <p className="text-emerald-500 font-semibold">
-                    {isEnglish ? 'Stable +1.2% vs previous period' : 'Stabilny +1,2% vs poprzedni okres'}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <RevenueChart data={revenueData} />
-          <CategoryChart
-            data={categoryData}
-            title={categoryTitle}
-            subtitle={categorySubtitle}
-          />
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <CustomerChart data={customerData} title={customerTitle} />
-          <GeminiInsightCard data={geminiData} />
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <SalesTable
-            products={products}
-            title={productTitle}
-            subtitle={productSubtitle}
-          />
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
-            {kpiSummary.map((item) => (
-              <KPICard key={item.label} data={item} />
-            ))}
-          </div>
-        </div>
-      </div>
+      )}
     </div>
   );
 };

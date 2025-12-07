@@ -1,43 +1,69 @@
 import React from 'react';
-import { ShieldCheck, Shield, Server } from 'lucide-react';
-import { LockClosedIcon } from './icons';
-import SectionCardGrid from './SectionCardGrid';
+import { ShieldCheck, Lock, Server, Network } from 'lucide-react';
+import SectionCardGrid, { SectionCardItem } from './SectionCardGrid';
 
-const securityCards = [
+const items: SectionCardItem[] = [
   {
-    title: 'Szyfrowanie AES-256',
-    desc: 'Dane w tranzycie i spoczynku są szyfrowane na poziomie bankowym, chroniąc każdy punkt integracji.',
-    icon: <ShieldCheck className="w-6 h-6" />,
+    id: 'enc',
+    icon: <Lock className="w-5 h-5" />,
+    title: 'Szyfrowanie end-to-end',
+    desc: (
+      <>
+        Klucze API i tokeny szyfrujemy (AES-256) i przechowujemy w Google
+        Secret Manager. Dostęp tylko dla procesów ETL.
+      </>
+    ),
   },
   {
-    title: 'Separacja danych klientów',
-    desc: 'Oddzielne instancje hurtowni i projektów gwarantują izolację i brak przecieku między kontami.',
-    icon: <Shield className="w-6 h-6" />,
+    id: 'tenant',
+    icon: <Network className="w-5 h-5" />,
+    title: 'Izolacja tenantów',
+    desc: (
+      <>
+        Osobne projekty i hurtownie per klient. Żaden inny sklep ani agencja
+        nie zobaczy Twoich danych – ani przypadkiem, ani celowo.
+      </>
+    ),
   },
   {
+    id: 'region',
+    icon: <Server className="w-5 h-5" />,
+    title: 'Region europe-central2 na sztywno',
+    desc: (
+      <>
+        Dane i przetwarzanie tylko w UE. Region europe-central2 (Warszawa)
+        jako domyślne i jedyne środowisko.
+      </>
+    ),
+  },
+  {
+    id: 'compliance',
+    icon: <ShieldCheck className="w-5 h-5" />,
     title: 'Zgodność z RODO',
-    desc: 'Pełna zgodność z europejskimi wymaganiami prawnymi, audytowana infrastruktura i operacje z zachowaniem DPA.',
-    icon: <LockClosedIcon className="w-6 h-6" />,
-  },
-  {
-    title: 'Infrastruktura Google Cloud',
-    desc: 'ISO 27001, regularne audyty i bezpieczne strefy chmurowe (Europe Central 2) dla każdego klienta.',
-    icon: <Server className="w-6 h-6" />,
+    desc: (
+      <>
+        Pracujemy jako procesor danych. Możemy podpisać DPA, a logi dostępu
+        pozwalają przeprowadzić audyt, gdy tylko jest potrzebny.
+      </>
+    ),
+    colSpan: 'md:col-span-2',
   },
 ];
 
-/**
- * A section focusing on security and compliance features.
- * Highlights encryption, data separation, GDPR compliance, and infrastructure standards.
- * Uses hardcoded Polish text.
- */
-const Security: React.FC = () => (
-  <SectionCardGrid
-    title="Bezpieczeństwo na pierwszym miejscu"
-    description="Twoje dane biznesowe to najcenniejszy zasób. Traktujemy ich ochronę z najwyższą powagą."
-    items={securityCards}
-    gridCols="grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
-  />
-);
+const Security: React.FC = () => {
+  return (
+    <SectionCardGrid
+      title="Bezpieczeństwo na poziomie hurtowni, nie excela"
+      description={
+        <>
+          Zamiast arkuszy z danymi klientów na dyskach pracowników, wszystko
+          ląduje w kontrolowanej, szyfrowanej infrastrukturze Google Cloud.
+        </>
+      }
+      items={items}
+      gridCols="grid-cols-1 md:grid-cols-2"
+    />
+  );
+};
 
 export default Security;

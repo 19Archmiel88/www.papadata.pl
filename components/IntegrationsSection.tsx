@@ -1,88 +1,133 @@
-import React, { useState } from 'react';
-import { Search } from 'lucide-react';
-import { Translation, IntegrationItem, IntegrationCategory } from '../types';
+import React, { useMemo, useState } from 'react';
+import { Search, Grid2X2, ArrowRight } from 'lucide-react';
+import {
+  Translation,
+  IntegrationItem,
+  IntegrationCategory,
+} from '../types';
 import { INITIAL_INTEGRATIONS } from '../constants';
 import IntegrationLogo from './IntegrationLogo';
 
 interface Props {
-  /** Translation object for the integrations section */
   t: Translation['integrationsSection'];
-  /** Callback to open the full integrations modal */
   onOpenModal: () => void;
 }
 
-/**
- * A section displaying a preview of popular integrations.
- * Features a search bar to filter the displayed integrations and a button to view all.
- */
+const previewOrder = [
+  'woocommerce',
+  'shopify',
+  'idosell',
+  'allegro',
+  'ga4',
+  'google_ads',
+  'meta_ads',
+  'tiktok_ads',
+  'baselinker',
+];
+
 const IntegrationsSection: React.FC<Props> = ({ t, onOpenModal }) => {
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Select top 8-10 items for the preview
-  const previewItems = [
-    'woocommerce', 'shopify', 'allegro', 'ga4', 
-    'google_ads', 'meta_ads', 'tiktok_ads', 'idosell', 'skyshop', 'baselinker'
-  ];
+  const filtered: IntegrationItem[] = useMemo(() => {
+    const base = INITIAL_INTEGRATIONS.filter((item) =>
+      previewOrder.includes(item.id)
+    );
+    if (!searchQuery.trim()) return base;
 
-  const displayItems = searchQuery 
-    ? INITIAL_INTEGRATIONS.filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()))
-    : INITIAL_INTEGRATIONS.filter(item => previewItems.includes(item.id));
+    const q = searchQuery.toLowerCase();
+    return INITIAL_INTEGRATIONS.filter(
+      (item) =>
+        item.name.toLowerCase().includes(q) ||
+        item.category.toLowerCase().includes(q)
+    );
+  }, [searchQuery]);
 
-  const getSubtitle = (category: IntegrationCategory) => {
-    return (t.cardSubtitles as any)[category.toLowerCase()] || category;
+  const subtitleByCategory = (category: IntegrationCategory): string => {
+    const map = (t.cardSubtitles as any) ?? {};
+    return map[category.toLowerCase()] ?? category;
   };
 
   return (
-    <section id="integrations" className="py-20 bg-slate-50 dark:bg-slate-900/50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        
-        <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-6">
-          {t.title}
-        </h2>
-        <p className="max-w-3xl mx-auto text-lg text-slate-600 dark:text-slate-300 mb-10">
-          {t.subtitle}
-        </p>
-
-        {/* Search Bar */}
-        <div className="max-w-md mx-auto mb-12 relative">
-           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-           <input 
-             type="text"
-             placeholder={t.searchPlaceholder}
-             value={searchQuery}
-             onChange={(e) => setSearchQuery(e.target.value)}
-             className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full shadow-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white transition-all"
-           />
+    <section id="integrations" className="py-20 bg-slate-950">
+      <div className="max-w-6xl mx-auto px-4">
+        <div className="flex flex-col md:flex-row md:items-end gap-6">
+          <div className="flex-1">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary-400 mb-2">
+              Pokaż jak to działa
+            </p>
+            <h2 className="text-2xl md:text-3xl font-semibold text-slate-50">
+              {t.title}
+            </h2>
+            <p className="mt-3 text-sm md:text-base text-slate-400">
+              {t.subtitle}
+            </p>
+          </div>
+          <div className="flex flex-col gap-3 w-full md:w-auto md:min-w-[260px]">
+            <button
+              type="button"
+              onClick={onOpenModal}
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-slate-700 bg-slate-900 px-4 py-2 text-xs font-medium text-slate-100 hover:border-primary-500 hover:bg-slate-900/80 transition-colors"
+            >
+              <Grid2X2 className="w-4 h-4 text-primary-400" />
+              <span>{t.viewAllButton}</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+            <p className="text-[11px] text-slate-500 leading-snug">
+              Minimum <span className="text-slate-200">jeden sklep</span> +
+              dowolne źródła reklamowe. Resztę możesz dołączyć w trakcie
+              współpracy.
+            </p>
+          </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6 mb-12">
-          {displayItems.length > 0 ? (
-            displayItems.map((item) => (
-              <button 
-                key={item.id}
-                onClick={onOpenModal}
-                className="group bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 hover:shadow-xl hover:border-primary-200 dark:hover:border-primary-900 transition-all duration-300 flex flex-col items-center justify-center text-center h-40 hover:-translate-y-1 hover:scale-[1.02] cursor-pointer"
-              >
-                <IntegrationLogo code={item.code} size="lg" className="mb-4 group-hover:scale-110 transition-transform duration-300" />
-                <h3 className="font-semibold text-slate-900 dark:text-slate-100">{item.name}</h3>
-                <p className="text-xs text-slate-500 mt-1 uppercase tracking-wide">
-                  {getSubtitle(item.category)}
+        {/* Wyszukiwarka */}
+        <div className="mt-6 relative">
+          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+            <Search className="w-4 h-4 text-slate-500" />
+          </div>
+          <input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={t.searchPlaceholder ?? 'Szukaj integracji...'}
+            className="w-full pl-10 pr-4 py-2.5 rounded-full border border-slate-800 bg-slate-950 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500/70"
+          />
+        </div>
+
+        {/* Lista integracji */}
+        <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filtered.map((item) => (
+            <div
+              key={item.id}
+              className="group flex items-center gap-4 rounded-2xl border border-slate-800 bg-slate-900/70 px-4 py-3 hover:border-primary-500/80 hover:bg-slate-900 transition-colors"
+            >
+              <IntegrationLogo
+                code={item.code}
+                size="sm"
+                className="shrink-0"
+              />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-sm font-semibold text-slate-50 truncate">
+                    {item.name}
+                  </p>
+                  <span className="text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                    {item.category}
+                  </span>
+                </div>
+                <p className="mt-1 text-xs text-slate-400 truncate">
+                  {subtitleByCategory(item.category)}
                 </p>
-              </button>
-            ))
-          ) : (
-            <div className="col-span-full py-8 text-slate-500">
-               No integrations found matching "{searchQuery}"
+              </div>
+            </div>
+          ))}
+
+          {filtered.length === 0 && (
+            <div className="col-span-full rounded-2xl border border-slate-800 bg-slate-900/60 px-4 py-6 text-sm text-slate-400">
+              {t.noResultsLabel ??
+                `Brak integracji dla frazy „${searchQuery}”. Spróbuj innego zapisu lub otwórz pełny katalog.`}
             </div>
           )}
         </div>
-
-        <button 
-          onClick={onOpenModal}
-          className="inline-flex items-center justify-center px-8 py-3 text-base font-semibold text-white bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 dark:hover:bg-slate-600 rounded-xl transition-colors shadow-lg"
-        >
-          {t.viewAllButton}
-        </button>
       </div>
     </section>
   );

@@ -1,7 +1,14 @@
 import React from 'react';
-import { LayoutDashboard, BarChart2, GraduationCap, Headphones, Puzzle, Settings, LogOut } from 'lucide-react';
+import {
+  LayoutDashboard,
+  BarChart2,
+  GraduationCap,
+  Headphones,
+  Puzzle,
+  Settings,
+  LogOut,
+} from 'lucide-react';
 import { DemoSection, DemoTranslation } from '../../types';
-import { motion } from 'framer-motion';
 import BrandLogo from '../BrandLogo';
 
 interface Props {
@@ -23,7 +30,25 @@ const Sidebar: React.FC<Props> = ({
   t,
   onLogout,
 }) => {
-  
+  const menuItems: {
+    id: DemoSection;
+    icon: React.ReactNode;
+    label: string;
+    tooltip?: string;
+  }[] = [
+    { id: 'Dashboard', icon: <LayoutDashboard className="w-4 h-4" />, label: t.dashboard },
+    { id: 'LiveReports', icon: <BarChart2 className="w-4 h-4" />, label: t.reports },
+    { id: 'Academy', icon: <GraduationCap className="w-4 h-4" />, label: t.academy },
+    {
+      id: 'Support',
+      icon: <Headphones className="w-4 h-4" />,
+      label: t.support,
+      tooltip: t.supportTooltip,
+    },
+    { id: 'Integrations', icon: <Puzzle className="w-4 h-4" />, label: t.integrations },
+    { id: 'Settings', icon: <Settings className="w-4 h-4" />, label: t.settings },
+  ];
+
   const handleMouseEnter = () => {
     if (!alwaysExpanded) setIsExpanded(true);
   };
@@ -32,80 +57,88 @@ const Sidebar: React.FC<Props> = ({
     if (!alwaysExpanded) setIsExpanded(false);
   };
 
-  const menuItems: { id: DemoSection; icon: React.ReactNode; label: string; tooltip?: string }[] = [
-    { id: 'Dashboard', icon: <LayoutDashboard className="w-5 h-5" />, label: t.dashboard },
-    { id: 'LiveReports', icon: <BarChart2 className="w-5 h-5" />, label: t.reports },
-    { id: 'Academy', icon: <GraduationCap className="w-5 h-5" />, label: t.academy },
-    { id: 'Support', icon: <Headphones className="w-5 h-5" />, label: t.support, tooltip: t.supportTooltip },
-    { id: 'Integrations', icon: <Puzzle className="w-5 h-5" />, label: t.integrations },
-    { id: 'Settings', icon: <Settings className="w-5 h-5" />, label: t.settings },
-  ];
-
   return (
-    <motion.div
-      initial={false}
-      animate={{ width: isExpanded || alwaysExpanded ? 240 : 64 }}
+    <aside
+      className={`relative flex flex-col border-r border-slate-900/80 bg-slate-950/95 transition-[width] duration-200 ${
+        isExpanded ? 'w-64' : 'w-20'
+      }`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      className="fixed left-0 top-0 bottom-0 z-50 flex flex-col bg-slate-900/90 backdrop-blur-xl border-r border-slate-800 transition-all duration-300"
     >
-      {/* Logo Area */}
-      <div className="h-16 flex items-center px-4 overflow-hidden border-b border-slate-800 gap-3">
-        <BrandLogo size="sm" className="shadow-lg" />
-        <motion.span
-          animate={{ opacity: isExpanded || alwaysExpanded ? 1 : 0, x: isExpanded || alwaysExpanded ? 0 : -10 }}
-          className="font-bold text-xl text-white whitespace-nowrap"
-        >
-          PapaData
-        </motion.span>
+      {/* Górny blok – logo */}
+      <div className="h-16 flex items-center justify-center border-b border-slate-900/80 px-3">
+        {isExpanded ? (
+          <BrandLogo className="scale-[0.95]" />
+        ) : (
+          <BrandLogo size="sm" />
+        )}
       </div>
 
-      {/* Menu Items */}
-      <nav className="flex-1 py-6 flex flex-col gap-2 overflow-hidden">
-        {menuItems.map((item) => (
-          <button
-            key={item.id}
-            onClick={() => setActiveSection(item.id)}
-            title={item.tooltip || item.label}
-            className={`
-              relative flex items-center px-4 py-3 mx-2 rounded-lg transition-colors group
-              ${activeSection === item.id 
-                ? 'bg-primary-600/20 text-primary-400' 
-                : 'text-slate-400 hover:bg-slate-800 hover:text-white'}
-            `}
-          >
-            <div className="shrink-0">{item.icon}</div>
-            <motion.span 
-              animate={{ opacity: isExpanded || alwaysExpanded ? 1 : 0, x: isExpanded || alwaysExpanded ? 0 : -10 }}
-              className="ml-3 font-medium text-sm whitespace-nowrap overflow-hidden"
+      {/* Menu sekcji */}
+      <nav className="flex-1 py-4 space-y-1">
+        {menuItems.map((item) => {
+          const active = activeSection === item.id;
+          return (
+            <button
+              key={item.id}
+              type="button"
+              title={item.tooltip || item.label}
+              onClick={() => setActiveSection(item.id)}
+              className={`relative w-full flex items-center ${
+                isExpanded ? 'px-4' : 'px-2'
+              } py-2.5 group`}
             >
-              {item.label}
-            </motion.span>
-            
-            {/* Active Indicator */}
-            {activeSection === item.id && (
-              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary-500 rounded-r-full" />
-            )}
-          </button>
-        ))}
+              {/* Ikona + label w kapsułce */}
+              <div
+                className={`flex items-center gap-3 w-full rounded-lg px-2 py-2 transition-colors ${
+                  active
+                    ? 'bg-slate-900 text-primary-200'
+                    : 'text-slate-400 hover:bg-slate-900/60 hover:text-slate-100'
+                }`}
+              >
+                <span
+                  className={`inline-flex items-center justify-center rounded-md ${
+                    active ? 'bg-primary-600/20 text-primary-300' : 'bg-slate-900/40'
+                  } w-8 h-8`}
+                >
+                  {item.icon}
+                </span>
+                {isExpanded && (
+                  <span className="text-sm font-medium truncate">{item.label}</span>
+                )}
+              </div>
+
+              {/* Pionowy znacznik aktywnej sekcji */}
+              {active && (
+                <span className="absolute inset-y-1 right-0 w-1 rounded-l-full bg-primary-500" />
+              )}
+            </button>
+          );
+        })}
       </nav>
 
-      {/* Logout */}
-      <div className="p-4 border-t border-slate-800">
-        <button 
+      {/* Dolny blok – plan / logout */}
+      <div className="border-t border-slate-900/80 px-3 py-3 space-y-3">
+        {isExpanded && (
+          <div className="rounded-xl border border-slate-800 bg-slate-950/80 px-3 py-2">
+            <p className="text-[11px] text-slate-400 leading-snug">
+              PapaData Intelligence
+              <br />
+              <span className="text-slate-300 font-medium">Demo / Client workspace</span>
+            </p>
+          </div>
+        )}
+
+        <button
+          type="button"
           onClick={onLogout}
-          className="flex items-center w-full px-2 py-2 text-slate-400 hover:text-red-400 transition-colors rounded-lg hover:bg-red-500/10"
+          className="w-full flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-slate-400 hover:text-rose-200 hover:bg-rose-900/20 transition-colors"
         >
-          <LogOut className="w-5 h-5 shrink-0" />
-          <motion.span 
-             animate={{ opacity: isExpanded || alwaysExpanded ? 1 : 0 }}
-             className="ml-3 font-medium text-sm whitespace-nowrap overflow-hidden"
-          >
-            {t.logout}
-          </motion.span>
+          <LogOut className="w-4 h-4" />
+          {isExpanded && <span>{t.logout}</span>}
         </button>
       </div>
-    </motion.div>
+    </aside>
   );
 };
 

@@ -1,335 +1,711 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { Sparkles, ArrowRight, TrendingUp, TrendingDown, Send, Loader2 } from 'lucide-react';
+import React, { useMemo } from 'react';
+import {
+  ArrowUpRight,
+  ArrowDownRight,
+  AlertTriangle,
+  Activity,
+  ShoppingBag,
+  PiggyBank,
+  Sparkles,
+  PlugZap,
+} from 'lucide-react';
 import {
   DemoTranslation,
   Language,
   IntegrationHealthMap,
+  IntegrationHealthInfo,
 } from '../../types';
-import { motion } from 'framer-motion';
-import RevenueChart from '../RevenueChart';
-import CategoryChart from '../CategoryChart';
-import CustomerChart from '../CustomerChart';
-import SalesTable from '../SalesTable';
-import KPICard from '../KPICard';
 import {
-  getRevenueTrend,
-  getCategoryBreakdown,
-  getCustomerAcquisition,
-  getTopProducts,
-  getKpiSummary,
-} from './mockDashboardData';
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+} from 'recharts';
 
 interface Props {
   t: DemoTranslation['dashboard'];
   dateRange: 'today' | 'last7' | 'last30';
-  lang?: Language;
+  lang: Language;
   highlightAI?: boolean;
-  integrationHealth?: IntegrationHealthMap;
-  integrationAlert?: string | null;
-  needsReauth?: boolean;
+  integrationHealth: IntegrationHealthMap;
+  integrationAlert: string | null;
+  needsReauth: boolean;
 }
+
+/**
+ * Rozszerzony typ lokalny – dodajemy opcjonalne longName,
+ * bo w localStorage możemy mieć longName razem ze statusem.
+ */
+type IntegrationHealthItem = IntegrationHealthInfo & {
+  longName?: string;
+};
+
+/**
+ * Karta KPI z trendem (↑ / ↓) – używana w górnym rzędzie.
+ */
+const KpiCard: React.FC<{
+  label: string;
+  value: string;
+  deltaLabel: string;
+  positive?: boolean;
+}> = ({ label, value, deltaLabel, positive = true }) => {
+  const Icon = positive ? ArrowUpRight : ArrowDownRight;
+  const color = positive ? 'text-emerald-400' : 'text-rose-400';
+
+  return (
+    <div className="rounded-2xl border border-slate-800 bg-slate-950/90 p-4 shadow-[0_18px_60px_rgba(15,23,42,0.8)]">
+      <p className="text-xs font-medium text-slate-400">{label}</p>
+      <div className="mt-2 flex items-baseline justify-between gap-2">
+        <span className="text-xl md:text-2xl font-semibold text-slate-50">
+          {value}
+        </span>
+        <span className={`inline-flex items-center gap-1 text-[11px] ${color}`}>
+          <Icon className="w-3 h-3" />
+          {deltaLabel}
+        </span>
+      </div>
+    </div>
+  );
+};
+
+/**
+ * Dane przykładowe pod wykresy – różne „gęstości” pod zakres dat.
+ */
+const getRevenueSeries = (range: 'today' | 'last7' | 'last30') => {
+  if (range === 'today') {
+    return [
+      { label: '08:00', revenue: 1200, margin: 260, orders: 12, aov: 100 },
+      { label: '10:00', revenue: 2100, margin: 430, orders: 21, aov: 100 },
+      { label: '12:00', revenue: 3100, margin: 620, orders: 28, aov: 111 },
+      { label: '14:00', revenue: 2800, margin: 540, orders: 26, aov: 108 },
+      { label: '16:00', revenue: 3600, margin: 710, orders: 31, aov: 116 },
+      { label: '18:00', revenue: 3900, margin: 780, orders: 33, aov: 118 },
+    ];
+  }
+  if (range === 'last7') {
+    return [
+      { label: 'Pn', revenue: 8200, margin: 1700, orders: 88, aov: 93 },
+      { label: 'Wt', revenue: 9100, margin: 1900, orders: 96, aov: 95 },
+      { label: 'Śr', revenue: 7600, margin: 1500, orders: 81, aov: 94 },
+      { label: 'Cz', revenue: 10200, margin: 2200, orders: 104, aov: 98 },
+      { label: 'Pt', revenue: 13100, margin: 2800, orders: 132, aov: 99 },
+      { label: 'Sb', revenue: 15100, margin: 3200, orders: 146, aov: 103 },
+      { label: 'Nd', revenue: 9700, margin: 2100, orders: 101, aov: 96 },
+    ];
+  }
+  return [
+    { label: 'Tydz 1', revenue: 51200, margin: 10900, orders: 520, aov: 98 },
+    { label: 'Tydz 2', revenue: 54800, margin: 11800, orders: 548, aov: 100 },
+    { label: 'Tydz 3', revenue: 60100, margin: 12800, orders: 602, aov: 100 },
+    { label: 'Tydz 4', revenue: 58700, margin: 12300, orders: 589, aov: 99 },
+  ];
+};
+
+const channelData = [
+  { name: 'Google Ads', revenue: 42000, roas: 4.1 },
+  { name: 'Meta Ads', revenue: 28000, roas: 3.4 },
+  { name: 'TikTok Ads', revenue: 14000, roas: 2.9 },
+  { name: 'Allegro', revenue: 35000, roas: 5.2 },
+];
+
+const channelPieColors = ['#6366f1', '#22c55e', '#38bdf8', '#f97316'];
 
 const DashboardHome: React.FC<Props> = ({
   t,
   dateRange,
+  lang,
   highlightAI,
-  lang = 'PL',
+  integrationHealth,
   integrationAlert,
   needsReauth,
 }) => {
-  const [aiState, setAiState] = useState<'loading' | 'ready'>(highlightAI ? 'ready' : 'loading');
-  const [multiplier, setMultiplier] = useState(1);
-  const [question, setQuestion] = useState('');
-  const [answer, setAnswer] = useState<string | null>(null);
-  const [askOpen, setAskOpen] = useState(false);
-  const isEnglish = lang === 'EN';
-  const revenueData = getRevenueTrend(dateRange);
-  const categoryData = getCategoryBreakdown(dateRange);
-  const customerData = getCustomerAcquisition(dateRange);
-  const products = getTopProducts(dateRange);
-  const kpiSummary = getKpiSummary(dateRange, isEnglish);
+  const series = useMemo(() => getRevenueSeries(dateRange), [dateRange]);
 
-  useEffect(() => {
-    setAiState(highlightAI ? 'ready' : 'loading');
-    if (!highlightAI) {
-      const timer = setTimeout(() => setAiState('ready'), 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [highlightAI]);
+  // BEZPOŚREDNIE rzutowanie values z mapy na konkretny typ
+  const integrationEntries = useMemo(
+    () =>
+      Object.entries(integrationHealth || {}) as [
+        string,
+        IntegrationHealthItem,
+      ][],
+    [integrationHealth],
+  );
 
-  useEffect(() => {
-    if (!highlightAI) {
-      setAiState('loading');
-      const timer = setTimeout(() => setAiState('ready'), 1200);
-      return () => clearTimeout(timer);
-    }
-  }, [dateRange, highlightAI]);
+  const healthyCount = integrationEntries.filter(
+    ([, v]) => v.state === 'healthy',
+  ).length;
+  const errorCount = integrationEntries.filter(
+    ([, v]) => v.state === 'error',
+  ).length;
+  const reauthCount = integrationEntries.filter(
+    ([, v]) => v.state === 'needs_reauth',
+  ).length;
 
-  useEffect(() => {
-    // Adjust numbers based on date range
-    if (dateRange === 'today') setMultiplier(0.05);
-    else if (dateRange === 'last7') setMultiplier(0.25);
-    else setMultiplier(1);
-  }, [dateRange]);
+  const kpiLabels =
+    lang === 'PL'
+      ? {
+        revenue: 'Przychód brutto',
+        orders: 'Liczba zamówień',
+        margin: 'Marża netto',
+        roas: 'Średni ROAS kampanii',
+      }
+      : {
+        revenue: 'Gross revenue',
+        orders: 'Number of orders',
+        margin: 'Net margin',
+        roas: 'Average campaign ROAS',
+      };
 
-  const locale = lang === 'EN' ? 'en-US' : 'pl-PL';
-  const rangeLabel =
-    lang === 'EN'
-      ? dateRange === 'today'
-        ? 'the last 24 hours'
-        : dateRange === 'last7'
-          ? 'the last 7 days'
-          : 'the last 30 days'
-      : dateRange === 'today'
-        ? 'ostatnich 24 godzin'
-        : dateRange === 'last7'
-          ? 'ostatnich 7 dni'
-          : 'ostatnich 30 dni';
-  const aiStatusText = lang === 'EN' ? `Analyzing data from ${rangeLabel}...` : `Analizuję dane z ${rangeLabel}...`;
+  const orderMetricsLabel =
+    lang === 'PL'
+      ? { orders: 'Zamówienia', aov: 'Średnia wartość koszyka' }
+      : { orders: 'Orders', aov: 'Average order value' };
 
-  const kpis = [
-    { label: t.kpi.revenue, value: 124592.0, format: 'PLN', trend: 12.5, isGood: true },
-    { label: t.kpi.spend, value: 24320.0, format: 'PLN', trend: -4.2, isGood: true },
-    { label: t.kpi.roas, value: 5.12, format: '', trend: 8.4, isGood: true },
-    { label: t.kpi.aov, value: 245.5, format: 'PLN', trend: -1.2, isGood: false },
-    { label: t.kpi.margin, value: 42.0, format: '%', trend: 0.5, isGood: true },
-  ];
-
-  const insights = useMemo(() => [t.ai.insight1, t.ai.insight2], [t.ai.insight1, t.ai.insight2]);
-  const [activeInsight, setActiveInsight] = useState(0);
-
-  useEffect(() => {
-    const timer = setInterval(() => setActiveInsight((prev) => (prev + 1) % insights.length), 7000);
-    return () => clearInterval(timer);
-  }, [insights.length]);
-
-  const formatVal = (val: number, format: string) => {
-    const adjusted = val * multiplier;
-    if (format === 'PLN') {
-      return `${adjusted.toLocaleString(locale, { maximumFractionDigits: 0 })} PLN`;
-    }
-    if (format === '%') return `${adjusted.toFixed(1)}%`;
-    return adjusted.toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-  };
-
-  const handleAsk = () => {
-    if (!question.trim()) return;
-    const prepared = highlightAI ? t.ai.insight2 : `${t.ai.answerHint} ${insights[(activeInsight + 1) % insights.length]}`;
-    setAnswer(prepared);
-    setQuestion('');
-  };
-
-  const settingsLabel = lang === 'PL' ? 'Przejdź do ustawień' : 'Go to settings';
+  const channelPieData = channelData.map((c) => ({
+    name: c.name,
+    value: c.revenue,
+  }));
 
   return (
-    <div className="p-6 space-y-6 max-w-[1600px] mx-auto">
-      {needsReauth && (
-        <div className="rounded-2xl border border-amber-300 bg-amber-50/80 dark:bg-amber-900/30 text-amber-900 dark:text-amber-100 px-4 py-3 flex flex-col gap-2 md:flex-row md:items-center md:justify-between text-sm">
-          <span>{t.alerts.reauthBanner}</span>
-          <a
-            href="/settings"
-            className="font-semibold text-primary-600 hover:text-primary-500 transition-colors"
-          >
-            {settingsLabel}
-          </a>
-        </div>
-      )}
+    <div className="space-y-6">
+      {/* Górny rząd KPI */}
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <KpiCard
+          label={kpiLabels.revenue}
+          value={lang === 'PL' ? '148 200 zł' : '148,200 PLN'}
+          deltaLabel={lang === 'PL' ? '+18% vs poprzedni okres' : '+18% vs prev.'}
+          positive
+        />
+        <KpiCard
+          label={kpiLabels.orders}
+          value="1 243"
+          deltaLabel={lang === 'PL' ? '+9% liczby zamówień' : '+9% orders'}
+          positive
+        />
+        <KpiCard
+          label={kpiLabels.margin}
+          value={lang === 'PL' ? '32 900 zł' : '32,900 PLN'}
+          deltaLabel={lang === 'PL' ? '+3,2 p.p. marży' : '+3.2 p.p. margin'}
+          positive
+        />
+        <KpiCard
+          label={kpiLabels.roas}
+          value="4.3x"
+          deltaLabel={lang === 'PL' ? '-0,4 p.p. vs cel' : '-0.4 vs target'}
+          positive={false}
+        />
+      </section>
 
-      {/* AI Assistant */}
-      <div className="rounded-2xl bg-gradient-to-r from-slate-900 to-indigo-950 p-1 border border-indigo-500/30 shadow-[0_0_20px_rgba(99,102,241,0.15)] overflow-hidden relative">
-        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10"></div>
-        <div className="bg-slate-900/90 rounded-xl p-6 relative z-10">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-indigo-500/20 rounded-lg">
-              <Sparkles className="w-5 h-5 text-indigo-400" />
-            </div>
+      {/* Środkowy rząd: trend + kanały */}
+      <section className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] gap-4">
+        {/* Wykres przychodu/marży + słupki zamówienia/AOV */}
+        <div className="rounded-2xl border border-slate-800 bg-slate-950/90 p-4 shadow-[0_18px_60px_rgba(15,23,42,0.8)] space-y-4">
+          <div className="flex items-center justify-between gap-2">
             <div>
-              <h2 className="text-white font-bold">{t.ai.title}</h2>
-              <p className="text-slate-400 text-xs">{t.ai.subtitle}</p>
+              <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
+                {lang === 'PL' ? 'Trend sprzedaży' : 'Sales trend'}
+              </p>
+              <h2 className="text-sm font-semibold text-slate-100">
+                {lang === 'PL'
+                  ? 'Przychód, marża i wolumen w wybranym okresie'
+                  : 'Revenue, margin and volume in the selected range'}
+              </h2>
             </div>
-          </div>
-          {integrationAlert && (
-            <div className="mb-4 rounded-lg border border-rose-600 bg-rose-900/70 px-4 py-2 text-xs text-rose-100">
-              {integrationAlert}
-            </div>
-          )}
-
-          <div className="min-h-[100px] flex items-center">
-            {aiState === 'loading' ? (
-               <div className="flex items-center gap-3 text-indigo-300">
-                 <Loader2 className="w-5 h-5 animate-spin" />
-                 <div>
-                   <div className="text-sm font-mono">{aiStatusText}</div>
-                   <div className="mt-2 w-36 h-1.5 bg-indigo-500/20 rounded-full overflow-hidden">
-                     <div className="h-full w-1/2 bg-indigo-400 animate-[pulse_1.2s_ease-in-out_infinite]" />
-                   </div>
-                 </div>
-               </div>
-            ) : (
-              <motion.div 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="w-full"
-              >
-                <div className="p-4 bg-slate-800/50 rounded-lg border-l-4 border-indigo-500 mb-3 min-h-[96px]">
-                  <p className="text-slate-200 text-sm leading-relaxed">{insights[activeInsight]}</p>
-                </div>
-                <div className="flex flex-wrap gap-3 mt-4 items-center">
-                  <button className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg transition-colors flex items-center gap-2">
-                    {t.ai.btnDetails} <ArrowRight className="w-3 h-3" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setAskOpen((prev) => !prev)}
-                    className="px-4 py-2 border border-indigo-500/40 text-indigo-100 text-xs font-bold rounded-lg transition-colors hover:bg-indigo-500/10"
-                  >
-                    {t.ai.btnAsk}
-                  </button>
-                </div>
-                {askOpen && (
-                  <div className="flex flex-wrap items-center gap-2 bg-slate-800/60 rounded-lg px-3 py-2 mt-3 w-full">
-                    <input
-                      value={question}
-                      onChange={(e) => setQuestion(e.target.value)}
-                      placeholder={t.ai.promptPlaceholder}
-                      className="flex-1 bg-transparent outline-none text-xs text-slate-100 placeholder:text-slate-500"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleAsk}
-                      className="px-3 py-1 bg-white/10 hover:bg-white/20 rounded-md text-white text-xs flex items-center gap-1"
-                    >
-                      <Send className="w-3 h-3" /> OK
-                    </button>
-                  </div>
-                )}
-                {answer && (
-                  <div className="mt-3 text-xs text-indigo-100 bg-white/5 border border-white/10 rounded-lg p-3">
-                    {answer}
-                  </div>
-                )}
-                <p className="text-[11px] text-slate-500 mt-2">{t.ai.answerHint}</p>
-              </motion.div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* KPI Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-        {kpis.map((kpi, idx) => (
-          <div key={idx} className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">{kpi.label}</p>
-            <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-2xl font-bold text-slate-900 dark:text-white">
-                {formatVal(kpi.value, kpi.format)}
+            <div className="flex items-center gap-2 text-[11px] text-slate-500">
+              <span className="inline-flex items-center gap-1">
+                <span className="inline-block w-2 h-2 rounded-full bg-sky-400" />
+                {lang === 'PL' ? 'Przychód' : 'Revenue'}
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <span className="inline-block w-2 h-2 rounded-full bg-emerald-400" />
+                {lang === 'PL' ? 'Marża' : 'Margin'}
               </span>
             </div>
-            {(() => {
-              const trendValue = Number((kpi.trend * (0.7 + multiplier)).toFixed(1));
-              const positive = trendValue >= 0;
+          </div>
+
+          <div className="h-56">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={series}>
+                <defs>
+                  <linearGradient id="revGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#38bdf8" stopOpacity={0.6} />
+                    <stop offset="95%" stopColor="#0f172a" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="marginGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#22c55e" stopOpacity={0.7} />
+                    <stop offset="95%" stopColor="#0f172a" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid
+                  stroke="#1e293b"
+                  strokeDasharray="3 3"
+                  vertical={false}
+                />
+                <XAxis
+                  dataKey="label"
+                  tick={{ fontSize: 11, fill: '#64748b' }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  tick={{ fontSize: 11, fill: '#64748b' }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#020617',
+                    borderRadius: 12,
+                    border: '1px solid #1e293b',
+                    fontSize: 12,
+                  }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="revenue"
+                  stroke="#38bdf8"
+                  strokeWidth={2}
+                  fill="url(#revGradient)"
+                  name={lang === 'PL' ? 'Przychód' : 'Revenue'}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="margin"
+                  stroke="#22c55e"
+                  strokeWidth={2}
+                  fill="url(#marginGradient)"
+                  name={lang === 'PL' ? 'Marża' : 'Margin'}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Dodatkowy mini-wykres słupkowy: zamówienia + AOV */}
+          <div className="h-32 border-t border-slate-800 pt-3">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-[11px] text-slate-400">
+                {lang === 'PL'
+                  ? 'Wolumen zamówień i średnia wartość koszyka'
+                  : 'Order volume and average order value'}
+              </p>
+              <div className="flex items-center gap-2 text-[10px] text-slate-500">
+                <span className="inline-flex items-center gap-1">
+                  <span className="inline-block w-2 h-2 rounded-full bg-slate-400" />
+                  {orderMetricsLabel.orders}
+                </span>
+                <span className="inline-flex items-center gap-1">
+                  <span className="inline-block w-2 h-2 rounded-full bg-indigo-400" />
+                  {orderMetricsLabel.aov}
+                </span>
+              </div>
+            </div>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={series}>
+                <CartesianGrid
+                  stroke="#1e293b"
+                  strokeDasharray="3 3"
+                  vertical={false}
+                />
+                <XAxis
+                  dataKey="label"
+                  tick={{ fontSize: 10, fill: '#64748b' }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  tick={{ fontSize: 10, fill: '#64748b' }}
+                  axisLine={false}
+                  tickLine={false}
+                  hide
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#020617',
+                    borderRadius: 12,
+                    border: '1px solid #1e293b',
+                    fontSize: 11,
+                  }}
+                  formatter={(value, name) => {
+                    if (name === 'orders') {
+                      return [String(value), orderMetricsLabel.orders];
+                    }
+                    return [
+                      `${(value as number).toLocaleString('pl-PL')} zł`,
+                      orderMetricsLabel.aov,
+                    ];
+                  }}
+                />
+                <Bar
+                  dataKey="orders"
+                  radius={[4, 4, 0, 0]}
+                  fill="#94a3b8"
+                  name={orderMetricsLabel.orders}
+                />
+                <Bar
+                  dataKey="aov"
+                  radius={[4, 4, 0, 0]}
+                  fill="#818cf8"
+                  name={orderMetricsLabel.aov}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Kanały performance + wykres kołowy udziałów */}
+        <div className="rounded-2xl border border-slate-800 bg-slate-950/90 p-4 shadow-[0_18px_60px_rgba(15,23,42,0.8)] flex flex-col gap-4">
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
+                {lang === 'PL' ? 'Kanały' : 'Channels'}
+              </p>
+              <h2 className="text-sm font-semibold text-slate-100">
+                {lang === 'PL'
+                  ? 'Przychód i udział kanałów'
+                  : 'Revenue and channel share'}
+              </h2>
+            </div>
+          </div>
+
+          {/* Słupki – przychód per kanał */}
+          <div className="h-40">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={channelData} layout="vertical" barSize={14}>
+                <CartesianGrid
+                  stroke="#1e293b"
+                  horizontal={false}
+                  strokeDasharray="3 3"
+                />
+                <XAxis
+                  type="number"
+                  tick={{ fontSize: 10, fill: '#64748b' }}
+                  axisLine={false}
+                  tickLine={false}
+                  hide
+                />
+                <YAxis
+                  type="category"
+                  dataKey="name"
+                  tick={{ fontSize: 11, fill: '#cbd5f5' }}
+                  axisLine={false}
+                  tickLine={false}
+                  width={90}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#020617',
+                    borderRadius: 12,
+                    border: '1px solid #1e293b',
+                    fontSize: 12,
+                  }}
+                  formatter={(value, name) => {
+                    if (name === 'revenue') {
+                      return [
+                        `${(value as number).toLocaleString('pl-PL')} zł`,
+                        lang === 'PL' ? 'Przychód' : 'Revenue',
+                      ];
+                    }
+                    return [`${value}x`, 'ROAS'];
+                  }}
+                />
+                <Bar
+                  dataKey="revenue"
+                  radius={[8, 8, 8, 8]}
+                  fill="#6366f1"
+                  name={lang === 'PL' ? 'Przychód' : 'Revenue'}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Wykres kołowy – udział kanałów w przychodzie */}
+          <div className="flex items-center gap-3">
+            <div className="h-28 w-32">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={channelPieData}
+                    dataKey="value"
+                    nameKey="name"
+                    innerRadius={26}
+                    outerRadius={40}
+                    paddingAngle={2}
+                  >
+                    {channelPieData.map((_, index) => (
+                      <Cell
+                        key={index}
+                        fill={channelPieColors[index % channelPieColors.length]}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#020617',
+                      borderRadius: 12,
+                      border: '1px solid #1e293b',
+                      fontSize: 11,
+                    }}
+                    formatter={(value) => [
+                      `${(value as number).toLocaleString('pl-PL')} zł`,
+                      lang === 'PL' ? 'Przychód' : 'Revenue',
+                    ]}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="flex-1 space-y-1 text-[11px] text-slate-400">
+              {channelPieData.map((c, index) => (
+                <div key={c.name} className="flex items-center gap-2">
+                  <span
+                    className="inline-block w-2 h-2 rounded-full"
+                    style={{ backgroundColor: channelPieColors[index] }}
+                  />
+                  <span className="truncate">{c.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <ul className="mt-1 space-y-1 text-[11px] text-slate-400">
+            <li className="flex items-center gap-2">
+              <ShoppingBag className="w-3 h-3 text-slate-500" />
+              {lang === 'PL'
+                ? 'Kanały liczone po atrybucji opartej o dane sklepu, nie tylko kliknięcia.'
+                : 'Channels counted with store-based attribution, not just ad clicks.'}
+            </li>
+            <li className="flex items-center gap-2">
+              <PiggyBank className="w-3 h-3 text-slate-500" />
+              {lang === 'PL'
+                ? 'ROAS liczony po marży netto, jeśli dostępne są koszty produktu.'
+                : 'ROAS based on net margin when product costs are available.'}
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      {/* Dolny rząd: AI + stan integracji / alerty */}
+      <section className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-4">
+        {/* Asystent AI */}
+        <div
+          className={[
+            'rounded-2xl border bg-gradient-to-br from-slate-950 via-slate-950 to-slate-900 p-4',
+            'shadow-[0_18px_60px_rgba(15,23,42,0.9)] relative overflow-hidden',
+            highlightAI
+              ? 'border-primary-500/80 ring-1 ring-primary-500/50'
+              : 'border-slate-800',
+          ].join(' ')}
+        >
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(129,140,248,0.18),_transparent_60%)] pointer-events-none" />
+          <div className="relative">
+            <div className="flex items-center justify-between gap-2 mb-3">
+              <div className="flex items-center gap-2">
+                <div className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-slate-900 border border-slate-700 text-primary-300">
+                  <Sparkles className="w-4 h-4" />
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-[0.2em] text-primary-300">
+                    AI
+                  </p>
+                  <h2 className="text-sm font-semibold text-slate-50">
+                    {lang === 'PL'
+                      ? 'Zadaj pytanie o swoje dane'
+                      : 'Ask a question about your data'}
+                  </h2>
+                </div>
+              </div>
+              {highlightAI && (
+                <span className="text-[10px] px-2 py-1 rounded-full bg-primary-500/15 text-primary-200 border border-primary-500/40">
+                  {lang === 'PL' ? 'Nowość' : 'New'}
+                </span>
+              )}
+            </div>
+
+            <p className="text-xs text-slate-400 mb-3">
+              {lang === 'PL'
+                ? 'To jest demo. W realnej wersji asystent pracuje na Twojej hurtowni BigQuery i zna sprzedaż, kampanie, marżę oraz klientów.'
+                : 'This is a demo. In the real workspace, the assistant works on your BigQuery warehouse and knows your sales, campaigns, margin and customers.'}
+            </p>
+
+            <div className="rounded-xl border border-slate-800 bg-slate-950/80 px-3 py-2 mb-3 flex items-center gap-2 text-xs text-slate-400">
+              <Activity className="w-3 h-3 text-emerald-400" />
+              <span>
+                {lang === 'PL'
+                  ? 'Demo odpowiada na przykładowe pytania – bez wysyłania Twoich danych do zewnętrznych systemów.'
+                  : 'Demo responds to sample questions – without sending your data to external systems.'}
+              </span>
+            </div>
+
+            <div className="flex flex-wrap gap-2 mb-3">
+              {(lang === 'PL'
+                ? [
+                  'Które kampanie przynoszą najwyższą marżę?',
+                  'Jak zmienił się ROAS tydzień do tygodnia?',
+                  'Które produkty mają najwięcej zwrotów?',
+                ]
+                : [
+                  'Which campaigns bring the highest margin?',
+                  'How did ROAS change week over week?',
+                  'Which products have the most returns?',
+                ]
+              ).map((q) => (
+                <button
+                  key={q}
+                  type="button"
+                  className="text-[11px] px-3 py-1.5 rounded-full bg-slate-900 border border-slate-700 text-slate-200 hover:border-primary-500/70 hover:text-primary-100 transition-colors"
+                >
+                  {q}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-2 mt-2">
+              <input
+                type="text"
+                disabled
+                className="flex-1 rounded-full border border-slate-800 bg-slate-950/80 px-3 py-2 text-xs text-slate-400 placeholder:text-slate-500 outline-none cursor-not-allowed"
+                placeholder={
+                  lang === 'PL'
+                    ? 'W wersji produkcyjnej wpiszesz tu pytanie, np. „Jaki był zysk netto z kampanii brandowych w ostatnich 30 dniach?”'
+                    : 'In production you will ask here, e.g. “What was net profit from brand campaigns in the last 30 days?”'
+                }
+              />
+              <button
+                type="button"
+                className="px-3 py-2 rounded-full bg-slate-900 border border-slate-700 text-[11px] text-slate-300 cursor-not-allowed"
+              >
+                {lang === 'PL' ? 'Tryb demo' : 'Demo mode'}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Stan integracji / ostrzeżenia */}
+        <div className="rounded-2xl border border-slate-800 bg-slate-950/90 p-4 shadow-[0_18px_60px_rgba(15,23,42,0.8)]">
+          <div className="flex items-center justify-between gap-2 mb-3">
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
+                {lang === 'PL' ? 'Stan integracji' : 'Integration status'}
+              </p>
+              <h2 className="text-sm font-semibold text-slate-100">
+                {lang === 'PL'
+                  ? 'Źródła danych podłączone do PapaData'
+                  : 'Data sources connected to PapaData'}
+              </h2>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-2 text-center text-[11px] mb-4">
+            <div className="rounded-xl border border-slate-800 bg-slate-950/80 px-2 py-2">
+              <p className="text-slate-400">
+                {lang === 'PL' ? 'Zdrowe' : 'Healthy'}
+              </p>
+              <p className="mt-1 text-lg font-semibold text-emerald-400">
+                {healthyCount}
+              </p>
+            </div>
+            <div className="rounded-xl border border-slate-800 bg-slate-950/80 px-2 py-2">
+              <p className="text-slate-400">
+                {lang === 'PL' ? 'Do ponownego logowania' : 'Needs reauth'}
+              </p>
+              <p className="mt-1 text-lg font-semibold text-amber-300">
+                {reauthCount}
+              </p>
+            </div>
+            <div className="rounded-xl border border-slate-800 bg-slate-950/80 px-2 py-2">
+              <p className="text-slate-400">
+                {lang === 'PL' ? 'Błędy' : 'Errors'}
+              </p>
+              <p className="mt-1 text-lg font-semibold text-rose-400">
+                {errorCount}
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-2 max-h-32 overflow-y-auto pr-1">
+            {integrationEntries.length === 0 && (
+              <p className="text-xs text-slate-500">
+                {lang === 'PL'
+                  ? 'Po przejściu onboardingu zobaczysz tu listę realnych integracji sklepu, reklam i marketplace’ów.'
+                  : 'After onboarding you will see a list of real store, ads and marketplace integrations here.'}
+              </p>
+            )}
+
+            {integrationEntries.map(([integrationId, info]) => {
+              const colorClasses =
+                info.state === 'healthy'
+                  ? 'text-emerald-300 border-emerald-700/60 bg-emerald-900/10'
+                  : info.state === 'needs_reauth'
+                    ? 'text-amber-200 border-amber-700/60 bg-amber-900/10'
+                    : 'text-rose-200 border-rose-700/60 bg-rose-900/10';
+
+              const label =
+                info.state === 'healthy'
+                  ? lang === 'PL'
+                    ? 'Połączono'
+                    : 'Connected'
+                  : info.state === 'needs_reauth'
+                    ? lang === 'PL'
+                      ? 'Wymaga odświeżenia'
+                      : 'Needs refresh'
+                    : lang === 'PL'
+                      ? 'Błąd połączenia'
+                      : 'Connection error';
+
               return (
-                <div className={`mt-2 flex items-center text-xs font-medium ${positive ? 'text-green-500' : 'text-red-500'}`}>
-                  {positive ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
-                  <span>{positive ? '+' : ''}{trendValue}%</span>
-                  <span className="ml-1 text-slate-400 font-normal">{t.kpi.trend}</span>
+                <div
+                  key={integrationId}
+                  className="rounded-xl border border-slate-800 bg-slate-950/80 px-3 py-2 text-xs flex items-center justify-between gap-3"
+                >
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-slate-100 truncate">
+                      {info.longName ?? integrationId}
+                    </span>
+                    {info.message && (
+                      <span className="text-[11px] text-slate-500 truncate">
+                        {info.message}
+                      </span>
+                    )}
+                  </div>
+                  <span
+                    className={`inline-flex items-center gap-1 px-2 py-1 rounded-full border text-[10px] ${colorClasses}`}
+                  >
+                    {info.state !== 'healthy' && (
+                      <AlertTriangle className="w-3 h-3" />
+                    )}
+                    {label}
+                  </span>
                 </div>
               );
-            })()}
+            })}
           </div>
-        ))}
-      </div>
 
-      {/* Chart Section */}
-      <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm min-h-[400px]">
-        <div className="flex flex-wrap items-center justify-between mb-8 gap-4">
-          <div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white">{t.chart.title}</h3>
-            <p className="text-sm text-slate-500">{t.chart.subtitle}</p>
-          </div>
-          <div className="flex items-center gap-4">
-            <select className="bg-slate-100 dark:bg-slate-900 border-none rounded-lg text-sm px-3 py-2 text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-primary-500 outline-none">
-              <option>{t.chart.metrics.revenue}</option>
-              <option>{t.chart.metrics.orders}</option>
-            </select>
-            <span className="text-slate-400">vs</span>
-            <select className="bg-slate-100 dark:bg-slate-900 border-none rounded-lg text-sm px-3 py-2 text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-primary-500 outline-none">
-              <option>{t.chart.metrics.spend}</option>
-              <option>{t.chart.metrics.sessions}</option>
-            </select>
-          </div>
+          {integrationAlert && (
+            <p className="mt-3 text-[11px] text-amber-300 flex items-start gap-2">
+              <AlertTriangle className="w-3 h-3 mt-[2px]" />
+              <span>{integrationAlert}</span>
+            </p>
+          )}
+
+          {!integrationAlert && needsReauth && (
+            <p className="mt-3 text-[11px] text-amber-300 flex items-start gap-2">
+              <PlugZap className="w-3 h-3 mt-[2px]" />
+              <span>
+                {lang === 'PL'
+                  ? 'Część integracji wymaga ponownego logowania. Wejdź w zakładkę „Integracje”, aby odświeżyć tokeny.'
+                  : 'Some integrations require re-authentication. Go to the “Integrations” tab to refresh tokens.'}
+              </span>
+            </p>
+          )}
         </div>
-        
-        {/* Mock SVG Chart */}
-        <div className="w-full h-[300px] relative">
-          <svg className="w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 50">
-             {/* Grid lines */}
-             <line x1="0" y1="0" x2="100" y2="0" stroke="currentColor" strokeOpacity="0.1" className="text-slate-500" strokeWidth="0.1" />
-             <line x1="0" y1="12.5" x2="100" y2="12.5" stroke="currentColor" strokeOpacity="0.1" className="text-slate-500" strokeWidth="0.1" />
-             <line x1="0" y1="25" x2="100" y2="25" stroke="currentColor" strokeOpacity="0.1" className="text-slate-500" strokeWidth="0.1" />
-             <line x1="0" y1="37.5" x2="100" y2="37.5" stroke="currentColor" strokeOpacity="0.1" className="text-slate-500" strokeWidth="0.1" />
-             <line x1="0" y1="50" x2="100" y2="50" stroke="currentColor" strokeOpacity="0.1" className="text-slate-500" strokeWidth="0.1" />
-
-             <g style={{ transform: `scaleY(${dateRange === 'today' ? 0.65 : dateRange === 'last7' ? 0.85 : 1})`, transformOrigin: 'bottom left' }}>
-               {/* Line 1 (Revenue) - Purple */}
-               <path 
-                  d="M0,45 C10,40 20,48 30,35 C40,25 50,30 60,20 C70,15 80,25 90,10 L100,5" 
-                  fill="none" 
-                  stroke="#8b5cf6" 
-                  strokeWidth="0.5" 
-                  strokeLinecap="round"
-               />
-               <path 
-                  d="M0,45 C10,40 20,48 30,35 C40,25 50,30 60,20 C70,15 80,25 90,10 L100,5 L100,50 L0,50 Z" 
-                  fill="url(#grad1)" 
-                  opacity="0.2"
-               />
-
-               {/* Line 2 (Spend) - Blue/Cyan */}
-               <path 
-                  d="M0,48 C15,46 30,45 45,40 C60,38 75,35 90,30 L100,28" 
-                  fill="none" 
-                  stroke="#06b6d4" 
-                  strokeWidth="0.5" 
-                  strokeLinecap="round"
-                  strokeDasharray="1 0.5"
-               />
-             </g>
-
-             <defs>
-               <linearGradient id="grad1" x1="0%" y1="0%" x2="0%" y2="100%">
-                 <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.5" />
-                 <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0" />
-               </linearGradient>
-             </defs>
-          </svg>
-        </div>
-      </div>
-
-      {/* Extended Visuals */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <RevenueChart data={revenueData} />
-        <CategoryChart
-          data={categoryData}
-          title={isEnglish ? 'Sales by Category' : 'Sprzedaż według kategorii'}
-          subtitle={isEnglish ? 'Revenue share per channel' : 'Udział przychodów według kanałów'}
-        />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <CustomerChart data={customerData} title={isEnglish ? 'Customer Acquisition' : 'Pozyskiwanie klientów'} />
-        <SalesTable
-          products={products}
-          title={isEnglish ? 'Top Products' : 'Najlepsze produkty'}
-          subtitle={isEnglish ? 'Best performing items by revenue' : 'Najlepsze produkty według przychodów'}
-        />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
-        {kpiSummary.map((item) => (
-          <KPICard key={item.label} data={item} />
-        ))}
-      </div>
+      </section>
     </div>
   );
 };

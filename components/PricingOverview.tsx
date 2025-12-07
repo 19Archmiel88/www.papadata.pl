@@ -1,76 +1,53 @@
-import React, { useState, useMemo } from 'react';
-import { CheckCircleIcon } from './icons';
-import SectionCardGrid from './SectionCardGrid';
-import { Sparkles, Link, ShieldCheck } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { CheckCircle, Sparkles, ShieldCheck } from 'lucide-react';
+import SectionCardGrid, { SectionCardItem } from './SectionCardGrid';
 
 const sources = [
-  { id: 'shop', name: 'Sklep', price: 80 },
+  { id: 'shop', name: 'Sklep (np. WooCommerce / Shopify)', price: 80 },
   { id: 'google_ads', name: 'Google Ads', price: 80 },
   { id: 'meta_ads', name: 'Meta Ads', price: 80 },
+  { id: 'tiktok_ads', name: 'TikTok Ads', price: 80 },
   { id: 'allegro', name: 'Allegro', price: 80 },
 ];
 
 const implementationOptions = {
   self: {
-    name: 'Samodzielnie',
+    name: 'Samodzielnie (Self-service)',
     oneTimeFee: 0,
-    features: ['14-dniowy darmowy trial', 'Pełny dostęp do funkcji AI', 'Samodzielna konfiguracja'],
+    features: [
+      '14-dniowy darmowy trial',
+      'Pełny dostęp do AI i raportów',
+      'Samodzielna konfiguracja integracji',
+    ],
     cta: 'Rozpocznij darmowy trial',
   },
   basic: {
     name: 'Z ekspertem: Setup Basic',
     oneTimeFee: 300,
-    features: ['Gwarancja poprawnej konfiguracji', 'Analiza poprawności danych', 'Płatność z góry (brak trialu)'],
-    cta: 'Zamów wdrożenie',
+    features: [
+      'Prowadzone wdrożenie krok po kroku',
+      'Weryfikacja poprawności danych',
+      'Rekomendacje KPI pod Twoją branżę',
+    ],
+    cta: 'Porozmawiaj o wdrożeniu',
   },
-  audit: {
-    name: 'Z ekspertem: Audyt & Strategia',
-    oneTimeFee: 900,
-    features: ['Wszystko z Setup Basic', 'Dogłębny audyt analityczny', 'Spersonalizowana strategia wdrożenia'],
-    cta: 'Zamów wdrożenie',
-  },
-};
+} as const;
 
 type ImplementationKey = keyof typeof implementationOptions;
 
-const planHighlights = [
-  {
-    title: 'Pełna automatyzacja',
-    desc: 'Łączymy dane z kampanii reklamowych, sklepu i hurtowni w jednym miejscu bez skryptów.',
-    icon: <Sparkles className="w-6 h-6" />,
-  },
-  {
-    title: 'Bezpieczne połączenia',
-    desc: 'Tokeny i klucze są szyfrowane w Google Secret Manager i odświeżane w tle.',
-    icon: <ShieldCheck className="w-6 h-6" />,
-  },
-  {
-    title: 'Elastyczne integracje',
-    desc: 'Dodajesz tylko to, czego potrzebujesz. Resztę kosztów pokazujemy w czasie rzeczywistym.',
-    icon: <Link className="w-6 h-6" />,
-  },
-];
-
-/**
- * A detailed pricing overview component.
- * Allows users to select specific data sources and implementation options to calculate a custom price.
- * Displays a summary of the monthly and one-time costs.
- */
 const PricingOverview: React.FC = () => {
-  const [selectedSources, setSelectedSources] = useState<string[]>(['shop', 'google_ads']);
-  const [implementation, setImplementation] = useState<ImplementationKey>('self');
-
-  const handleSourceChange = (sourceId: string) => {
-    setSelectedSources((prev) =>
-      prev.includes(sourceId) ? prev.filter((id) => id !== sourceId) : [...prev, sourceId]
-    );
-  };
+  const [selectedSources, setSelectedSources] = useState<string[]>([
+    'shop',
+    'google_ads',
+  ]);
+  const [implementation, setImplementation] =
+    useState<ImplementationKey>('self');
 
   const monthlyCost = useMemo(
     () =>
-      selectedSources.reduce((total, id) => {
-        const source = sources.find((s) => s.id === id);
-        return total + (source ? source.price : 0);
+      selectedSources.reduce((sum, id) => {
+        const src = sources.find((s) => s.id === id);
+        return sum + (src?.price ?? 0);
       }, 0),
     [selectedSources]
   );
@@ -78,114 +55,171 @@ const PricingOverview: React.FC = () => {
   const oneTimeCost = implementationOptions[implementation].oneTimeFee;
   const selectedPlan = implementationOptions[implementation];
 
+  const helperItems: SectionCardItem[] = [
+    {
+      id: 'auto',
+      icon: <Sparkles className="w-5 h-5" />,
+      title: 'Automatyzacja bez kontraktu na lata',
+      desc: (
+        <>
+          Płacisz za realnie podłączone źródła danych. Nie ma limitu wierszy
+          ani dziwnych „pakietów w chmurze”.
+        </>
+      ),
+    },
+    {
+      id: 'secure',
+      icon: <ShieldCheck className="w-5 h-5" />,
+      title: 'Przejrzyste zasady',
+      desc: (
+        <>
+          Pełna informacja o miesięcznym koszcie i jednorazowej opłacie
+          wdrożeniowej. Bez ukrytych opłat za export czy dostęp do API.
+        </>
+      ),
+    },
+  ];
+
   return (
-    <section className="bg-slate-800 py-20 sm:py-32">
-      <div className="container mx-auto max-w-7xl px-4">
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Skonfiguruj swój plan</h2>
-          <p className="mt-4 text-lg text-slate-300">Żadnych ukrytych opłat. Płacisz tylko za to, czego potrzebujesz.</p>
-        </div>
+    <section id="pricing" className="py-20 bg-slate-950">
+      <div className="max-w-6xl mx-auto px-4 grid gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] items-start">
+        <div className="rounded-2xl border border-primary-600/60 bg-gradient-to-br from-primary-950 via-slate-950 to-slate-900 p-6 shadow-[0_24px_80px_rgba(88,28,135,0.7)]">
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary-300 mb-2">
+            Sprzedaj
+          </p>
+          <h2 className="text-2xl md:text-3xl font-semibold text-slate-50">
+            Cennik, który rośnie razem z Twoją sprzedażą.
+          </h2>
+          <p className="mt-3 text-sm md:text-base text-slate-200">
+            Każde źródło danych ma prostą, stałą cenę miesięczną. Dodajesz tylko
+            te elementy, których naprawdę używasz.
+          </p>
 
-        <SectionCardGrid
-          title="Dlaczego klienci wybierają Papadata"
-          description="Te elementy pojawiają się w każdym wdrożeniu."
-          items={planHighlights}
-          gridCols="grid-cols-1 md:grid-cols-3"
-        />
-
-        <div className="mt-12 grid grid-cols-1 gap-12 lg:grid-cols-2">
-          <div>
-            <div className="rounded-xl bg-slate-900/50 p-8">
-              <h3 className="text-xl font-semibold">Krok 1: Wybierz źródła danych</h3>
-              <div className="mt-6 grid grid-cols-2 gap-4">
-                {sources.map((source) => (
-                  <label
-                    key={source.id}
-                    className={`flex cursor-pointer items-center gap-3 rounded-lg p-4 ring-1 ${
-                      selectedSources.includes(source.id) ? 'bg-primary-900/50 ring-primary-500' : 'bg-slate-800 ring-slate-700'
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedSources.includes(source.id)}
-                      onChange={() => handleSourceChange(source.id)}
-                      className="h-5 w-5 rounded border-slate-600 bg-slate-700 text-primary-600 focus:ring-primary-600"
-                    />
-                    <div>
-                      <span className="font-medium text-white">{source.name}</span>
-                      <p className="text-sm text-slate-400">+{source.price} zł netto/mc</p>
-                    </div>
-                  </label>
-                ))}
-              </div>
-
-              <h3 className="mt-10 text-xl font-semibold">Krok 2: Wybierz tryb wdrożenia</h3>
-              <div className="mt-6 space-y-4">
-                {(Object.keys(implementationOptions) as ImplementationKey[]).map((key) => (
-                  <label
-                    key={key}
-                    className={`flex cursor-pointer flex-col rounded-lg p-4 ring-1 ${
-                      implementation === key ? 'bg-primary-900/50 ring-primary-500' : 'bg-slate-800 ring-slate-700'
-                    }`}
-                  >
-                    <div className="flex items-center">
-                      <input
-                        type="radio"
-                        name="implementation"
-                        checked={implementation === key}
-                        onChange={() => setImplementation(key)}
-                        className="h-5 w-5 border-slate-600 bg-slate-700 text-primary-600 focus:ring-primary-600"
-                      />
-                      <div className="ml-3">
-                        <span className="font-medium text-white">{implementationOptions[key].name}</span>
-                        {implementationOptions[key].oneTimeFee > 0 && (
-                          <p className="text-sm text-slate-400">
-                            +{implementationOptions[key].oneTimeFee} zł netto (jednorazowo)
-                          </p>
-                        )}
+          <div className="mt-6 space-y-5 text-sm">
+            <div>
+              <h3 className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400 mb-2">
+                Krok 1: Wybierz źródła danych
+              </h3>
+              <div className="space-y-2">
+                {sources.map((source) => {
+                  const checked = selectedSources.includes(source.id);
+                  return (
+                    <label
+                      key={source.id}
+                      className="flex items-center justify-between gap-3 rounded-xl border border-slate-800 bg-slate-950/80 px-3 py-2 cursor-pointer hover:border-primary-500/70"
+                    >
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() =>
+                            setSelectedSources((prev) =>
+                              prev.includes(source.id)
+                                ? prev.filter((id) => id !== source.id)
+                                : [...prev, source.id]
+                            )
+                          }
+                          className="h-4 w-4 rounded border-slate-600 bg-slate-900 text-primary-500 focus:ring-primary-500"
+                        />
+                        <span className="text-slate-100">{source.name}</span>
                       </div>
-                    </div>
-                  </label>
-                ))}
+                      <span className="font-mono text-xs text-slate-300">
+                        +{source.price} zł / mc
+                      </span>
+                    </label>
+                  );
+                })}
               </div>
             </div>
-          </div>
 
-          <div className="flex items-center">
-            <div className="w-full rounded-2xl bg-slate-900 p-8 shadow-2xl ring-2 ring-primary-500">
-              <h3 className="text-2xl font-semibold text-center text-primary-400">Twoje podsumowanie</h3>
-              <div className="mt-8 flex items-end justify-center gap-4">
-                <div>
-                  <span className="text-5xl font-bold tracking-tight">{monthlyCost}</span>
-                  <span className="text-lg font-medium text-slate-400"> zł netto/mc</span>
-                </div>
-                {oneTimeCost > 0 && (
-                  <div className="flex items-baseline">
-                    <span className="text-slate-400">+</span>
-                    <span className="text-3xl font-bold">{oneTimeCost}</span>
-                    <span className="text-base font-medium text-slate-400"> zł netto na start</span>
-                  </div>
+            <div>
+              <h3 className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400 mb-2">
+                Krok 2: Wybierz tryb wdrożenia
+              </h3>
+              <div className="space-y-2">
+                {(Object.keys(implementationOptions) as ImplementationKey[]).map(
+                  (key) => {
+                    const option = implementationOptions[key];
+                    const active = implementation === key;
+                    return (
+                      <label
+                        key={key}
+                        className={[
+                          'flex items-center justify-between gap-3 rounded-xl border px-3 py-2 cursor-pointer',
+                          active
+                            ? 'border-primary-500/80 bg-slate-900'
+                            : 'border-slate-800 bg-slate-950/80 hover:border-slate-700',
+                        ].join(' ')}
+                      >
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="radio"
+                            name="implementation"
+                            checked={active}
+                            onChange={() => setImplementation(key)}
+                            className="h-4 w-4 border-slate-600 bg-slate-900 text-primary-500 focus:ring-primary-500"
+                          />
+                          <span className="text-slate-100">
+                            {option.name}
+                          </span>
+                        </div>
+                        {option.oneTimeFee > 0 && (
+                          <span className="font-mono text-xs text-slate-300">
+                            +{option.oneTimeFee} zł jednorazowo
+                          </span>
+                        )}
+                      </label>
+                    );
+                  }
                 )}
               </div>
+            </div>
 
-              <ul className="mt-8 space-y-3 text-sm leading-6 text-slate-300">
+            <div className="mt-4 rounded-xl bg-slate-950/90 border border-slate-800 p-4">
+              <h3 className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400 mb-2">
+                Twoje podsumowanie
+              </h3>
+              <p className="text-sm text-slate-200">
+                Miesięcznie:{' '}
+                <span className="font-mono text-lg text-primary-300">
+                  {monthlyCost.toLocaleString('pl-PL')} zł netto / mc
+                </span>
+              </p>
+              {oneTimeCost > 0 && (
+                <p className="mt-1 text-sm text-slate-200">
+                  Jednorazowo:{' '}
+                  <span className="font-mono text-sm text-slate-100">
+                    {oneTimeCost.toLocaleString('pl-PL')} zł netto
+                  </span>
+                </p>
+              )}
+
+              <ul className="mt-3 space-y-1 text-xs text-slate-400">
                 {selectedPlan.features.map((feature) => (
-                  <li key={feature} className="flex gap-x-3">
-                    <CheckCircleIcon className="h-6 w-5 flex-none text-primary-500" />
-                    {feature}
+                  <li key={feature} className="flex items-start gap-2">
+                    <CheckCircle className="w-3.5 h-3.5 text-primary-400 mt-[2px]" />
+                    <span>{feature}</span>
                   </li>
                 ))}
               </ul>
 
-              <a
-                href="#"
-                className="mt-10 block w-full rounded-md bg-primary-600 px-3 py-3 text-center text-lg font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
-              >
+              <button className="mt-4 inline-flex items-center justify-center rounded-full bg-primary-600 px-5 py-2 text-sm font-semibold text-white hover:bg-primary-500 transition-colors">
                 {selectedPlan.cta}
-              </a>
-              <p className="mt-6 text-xs text-center text-slate-500">Podane ceny są cenami netto. Należy doliczyć 23% VAT.</p>
+              </button>
+
+              <p className="mt-3 text-[11px] text-slate-500">
+                Podane ceny są kwotami netto. Do faktury doliczamy 23% VAT.
+              </p>
             </div>
           </div>
+        </div>
+
+        <div className="pt-2">
+          <SectionCardGrid
+            title="Dlaczego ten model cenowy jest uczciwy"
+            items={helperItems}
+            gridCols="grid-cols-1"
+          />
         </div>
       </div>
     </section>

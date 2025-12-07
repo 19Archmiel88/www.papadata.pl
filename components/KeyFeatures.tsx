@@ -1,61 +1,73 @@
 import React from 'react';
-import { SparklesIcon, ChartBarIcon, CpuChipIcon, LockClosedIcon } from './icons';
+import { PlugZap, Workflow, LineChart, Bot } from 'lucide-react';
+import SectionCardGrid, { SectionCardItem } from './SectionCardGrid';
 
-const features = [
+const items: SectionCardItem[] = [
   {
-    name: 'AI Analyst',
-    description: 'Twój osobisty analityk 24/7. Zadawaj pytania w języku naturalnym i otrzymuj natychmiastowe, trafne odpowiedzi.',
-    icon: <SparklesIcon className="h-8 w-8" />,
-    className: 'md:col-span-2',
+    id: 'step-1',
+    icon: <PlugZap className="w-5 h-5" />,
+    title: 'Krok 1: Podłącz źródła danych',
+    desc: (
+      <>
+        Integracje ze sklepami (WooCommerce, Shopify, IdoSell), reklamą
+        (Google Ads, Meta, TikTok) i marketplace’ami. Bez kodu – tylko klucze
+        API / OAuth.
+      </>
+    ),
   },
   {
-    name: 'Integracje API',
-    description: 'Wszystkie platformy w jednym miejscu. Połącz dane ze sklepu, reklam i marketplace, bez pisania kodu.',
-    icon: <ChartBarIcon className="h-8 w-8" />,
-    className: '',
+    id: 'step-2',
+    icon: <Workflow className="w-5 h-5" />,
+    title: 'Krok 2: Jeden model danych w Google Cloud',
+    desc: (
+      <>
+        Dane lądują w izolowanej hurtowni BigQuery w regionie europe-central2.
+        Gotowe widoki dla sprzedaży, marży, kampanii i klientów.
+      </>
+    ),
   },
   {
-    name: 'Własność danych (no vendor lock-in)',
-    description: 'Twoje dane są Twoje. Możesz je wyeksportować do własnego BigQuery w każdej chwili.',
-    icon: <CpuChipIcon className="h-8 w-8" />,
-    className: '',
+    id: 'step-3',
+    icon: <LineChart className="w-5 h-5" />,
+    title: 'Krok 3: Dashboard + raporty + AI',
+    desc: (
+      <>
+        Dashboard dla zarządu, raporty operacyjne dla zespołu i asystent AI,
+        który odpowiada na pytania wprost z Twoich danych.
+      </>
+    ),
   },
   {
-    name: 'Bezpieczeństwo',
-    description: 'Zgodność z RODO i serwery w UE. Gwarantujemy najwyższy standard ochrony Twoich danych.',
-    icon: <LockClosedIcon className="h-8 w-8" />,
-    className: 'md:col-span-2',
+    id: 'step-4',
+    icon: <Bot className="w-5 h-5" />,
+    title: 'Alerty zamiast odgrzewania raportów',
+    desc: (
+      <>
+        Gdy marża spada albo ROAS kampanii leci w dół – dostajesz alert.
+        Zamiast co tydzień grzebać w Excelu.
+      </>
+    ),
+    colSpan: 'md:col-span-2',
   },
 ];
 
-/**
- * Renders the Key Features section of the landing page.
- * Displays a grid of high-level features with icons and descriptions.
- * Uses hardcoded Polish text for now.
- */
-const KeyFeatures: React.FC = () => (
-  <section className="py-20 sm:py-32">
-    <div className="container mx-auto max-w-7xl px-4">
-      <div className="mx-auto max-w-2xl text-center">
-        <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Wszystko, czego potrzebujesz do wzrostu</h2>
-        <p className="mt-4 text-lg text-slate-300">
-          Skup się na strategii, a nie na zbieraniu danych. PapaData dostarcza narzędzia, które napędzają mądre decyzje.
-        </p>
-      </div>
-      <div className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-3">
-        {features.map((feature, index) => (
-          <div
-            key={index}
-            className={`rounded-2xl bg-slate-800/50 p-8 ring-1 ring-white/10 transition-all duration-300 hover:bg-slate-800 hover:ring-primary-400/50 ${feature.className}`}
-          >
-            <div className="text-primary-400">{feature.icon}</div>
-            <h3 className="mt-4 text-xl font-semibold">{feature.name}</h3>
-            <p className="mt-2 text-slate-400">{feature.description}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  </section>
-);
+const KeyFeatures: React.FC = () => {
+  return (
+    <SectionCardGrid
+      title="Jak działa PapaData – od integracji do decyzji"
+      description={
+        <>
+          Cała platforma sprowadza się do prostego łańcucha:{' '}
+          <span className="text-slate-200">
+            Źródła danych → Hurtownia → Modele → Dashboard &amp; AI
+          </span>
+          . Reszta to wygoda i bezpieczeństwo.
+        </>
+      }
+      items={items}
+      gridCols="grid-cols-1 md:grid-cols-2"
+    />
+  );
+};
 
 export default KeyFeatures;

@@ -1,76 +1,75 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-/** Represents an individual card item within the grid */
 export interface SectionCardItem {
-  /** Optional ID for the card element */
   id?: string;
-  /** Icon displayed at the top of the card */
   icon: React.ReactNode;
-  /** Title of the card */
   title: React.ReactNode;
-  /** Description text for the card */
   desc: React.ReactNode;
-  /** Optional column span class (e.g. 'md:col-span-2') */
   colSpan?: string;
 }
 
 interface Props {
-  /** Main section title */
   title: string;
-  /** Optional section description below the title */
   description?: React.ReactNode;
-  /** List of card items to display */
   items: SectionCardItem[];
-  /** Grid columns configuration class. Defaults to 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' */
   gridCols?: string;
 }
 
-/**
- * A reusable component to display a grid of feature cards.
- * Includes a decorative background and hover effects.
- */
-const SectionCardGrid: React.FC<Props> = ({ title, description, items, gridCols = 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3', }) => {
+const SectionCardGrid: React.FC<Props> = ({
+  title,
+  description,
+  items,
+  gridCols = 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
+}) => {
   return (
-    <section className="py-20 md:py-24 bg-white dark:bg-slate-950 relative overflow-hidden">
-      <div className="absolute inset-0 mx-auto max-w-4xl">
-        <div className="absolute top-1/2 left-1/2 w-[520px] h-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary-500/10 blur-[140px]" />
-      </div>
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white">{title}</h2>
-          {description && <p className="mt-3 text-slate-600 dark:text-slate-400">{description}</p>}
-        </div>
+    <section className="py-16">
+      <div className="max-w-6xl mx-auto px-4">
+        <header className="max-w-3xl">
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary-400 mb-2">
+            PapaData • Intelligence
+          </p>
+          <h2 className="text-2xl md:text-3xl font-semibold text-slate-50">
+            {title}
+          </h2>
+          {description && (
+            <p className="mt-3 text-sm md:text-base text-slate-400">
+              {description}
+            </p>
+          )}
+        </header>
 
-        <div className={`grid gap-6 auto-rows-fr ${gridCols}`}>
+        <div className={`mt-8 grid gap-6 ${gridCols}`}>
           {items.map((item, idx) => (
-            <motion.div
-              key={item.title.toString() + idx}
-              id={item.id}
-              initial={{ opacity: 0, y: 20 }}
+            <motion.article
+              key={item.id ?? idx}
+              initial={{ opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: idx * 0.05 }}
-              className={`
-                ${item.colSpan || ''}
-                group relative p-6 rounded-2xl
-                bg-white/50 dark:bg-slate-900/40 backdrop-blur-md
-                border border-slate-200 dark:border-slate-800
-                hover:border-primary-500/50 dark:hover:border-primary-500/50
-                hover:shadow-2xl hover:shadow-primary-500/10
-                transition-all duration-300
-                flex flex-col justify-between overflow-hidden
-              `}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.35, delay: idx * 0.04 }}
+              className={[
+                'group relative overflow-hidden rounded-2xl border',
+                'border-slate-800 bg-slate-900/70',
+                'backdrop-blur-sm shadow-[0_24px_80px_rgba(15,23,42,0.9)]',
+                'hover:border-primary-500/80 hover:shadow-[0_24px_80px_rgba(88,28,135,0.75)]',
+                'transition-all duration-300',
+                item.colSpan ?? '',
+              ].join(' ')}
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-primary-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-              <div className="mb-4 p-3 w-fit rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 group-hover:bg-primary-500 group-hover:text-white transition-colors duration-300">
-                {item.icon}
+              <div className="absolute inset-0 bg-gradient-to-br from-primary-500/10 via-slate-900/0 to-indigo-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+              <div className="relative p-6 flex flex-col h-full">
+                <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-700 bg-slate-950 text-primary-300">
+                  {item.icon}
+                </div>
+                <h3 className="text-base font-semibold text-slate-50">
+                  {item.title}
+                </h3>
+                <p className="mt-2 text-sm text-slate-400 leading-relaxed">
+                  {item.desc}
+                </p>
               </div>
-              <div>
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">{item.title}</h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">{item.desc}</p>
-              </div>
-            </motion.div>
+            </motion.article>
           ))}
         </div>
       </div>

@@ -1,57 +1,71 @@
 import React from 'react';
-import SectionCardGrid from './SectionCardGrid';
-import { Sparkles, Users } from 'lucide-react';
+import { Quote, Users, TrendingUp } from 'lucide-react';
+import SectionCardGrid, { SectionCardItem } from './SectionCardGrid';
 
-const socialCards = [
-  {
-    title: 'Liderzy e-commerce',
-    desc: 'Marki, które dzięki Papadata podejmują decyzje szybciej i z większą pewnością dzięki raportom w czasie rzeczywistym.',
-    icon: <Users className="w-6 h-6" />,
-  },
-  {
-    title: 'AI podpowiada działania',
-    desc: 'Asystent analizuje dane z kampanii, produktów i klientów, a potem sugeruje konkretne kroki.',
-    icon: <Sparkles className="w-6 h-6" />,
-  },
-  {
-    title: 'Integracje bez przerwy',
-    desc: 'Dane z platform reklamowych, analitycznych i marketplace’ów trafiają prosto do hurtowni – bez ręcznej pracy.',
-    icon: <Sparkles className="w-6 h-6" />,
-  },
-];
+const SocialProof: React.FC = () => {
+  const items: SectionCardItem[] = [
+    {
+      id: 'metric-1',
+      icon: <TrendingUp className="w-5 h-5" />,
+      title: 'Szybsze decyzje',
+      desc: (
+        <>
+          Klienci raportują skrócenie czasu przygotowania raportów z kilku
+          godzin do kilku minut tygodniowo.
+        </>
+      ),
+    },
+    {
+      id: 'metric-2',
+      icon: <Users className="w-5 h-5" />,
+      title: 'Zespół patrzy w te same liczby',
+      desc: (
+        <>
+          Sprzedaż, marketing i zarząd korzystają z jednego modelu danych –
+          koniec z „ale u mnie w Excelu wychodzi inaczej”.
+        </>
+      ),
+    },
+  ];
 
-/**
- * A section displaying social proof, including customer testimonials and key benefits.
- * Uses a testimonial block and a grid of benefits.
- * Content is currently hardcoded in Polish.
- */
-const SocialProof: React.FC = () => (
-  <>
-    <SectionCardGrid
-      title="Wspieramy decyzje liderów e-commerce"
-      description="Klienci Papadata wyróżniają się jakością danych, szybkością analiz i pewnością decyzji."
-      items={socialCards}
-    />
+  return (
+    <section className="py-20 bg-slate-950">
+      <div className="max-w-6xl mx-auto px-4 grid gap-10 md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] items-start">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary-400 mb-2">
+            Społeczny dowód
+          </p>
+          <h2 className="text-2xl md:text-3xl font-semibold text-slate-50">
+            Narzędzie dla zespołów, które mają dość zgadywania.
+          </h2>
 
-    <section className="py-16 bg-slate-900 text-white">
-      <div className="max-w-4xl mx-auto px-4 text-center space-y-6">
-        <blockquote className="text-2xl font-semibold leading-relaxed">
-          “Dzięki Papadata wreszcie wiemy, które kampanie przynoszą realny zysk. Oszczędziliśmy dziesiątki godzin na ręcznym tworzeniu raportów.”
-        </blockquote>
-        <figcaption className="flex flex-col items-center space-y-3">
-          <img
-            className="h-16 w-16 rounded-full"
-            src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-            alt="CEO of ExampleCorp"
+          <figure className="mt-6 rounded-2xl border border-slate-800 bg-slate-900/80 p-6 relative overflow-hidden">
+            <div className="absolute -top-6 -left-6 w-16 h-16 rounded-full bg-primary-500/20 blur-3xl" />
+            <Quote className="w-6 h-6 text-primary-400" />
+            <blockquote className="mt-3 text-sm md:text-base text-slate-200 leading-relaxed">
+              „Dzięki PapaData wreszcie wiemy, które kampanie przynoszą realny
+              zysk. Raporty, które kiedyś powstawały raz w tygodniu, teraz mamy
+              codziennie rano – automatycznie.”
+            </blockquote>
+            <figcaption className="mt-4 text-sm text-slate-400">
+              <span className="font-semibold text-slate-100">
+                Anna Kowalska
+              </span>{' '}
+              • Head of E-commerce
+            </figcaption>
+          </figure>
+        </div>
+
+        <div className="pt-2">
+          <SectionCardGrid
+            title="Co zyskują zespoły pracujące na jednym modelu danych"
+            items={items}
+            gridCols="grid-cols-1"
           />
-          <div>
-            <div className="font-semibold">Anna Kowalska</div>
-            <div className="text-sm text-slate-300">CEO w ExampleCorp</div>
-          </div>
-        </figcaption>
+        </div>
       </div>
     </section>
-  </>
-);
+  );
+};
 
 export default SocialProof;

@@ -1,105 +1,105 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 
-/**
- * Section that contrasts manual reporting processes with PapaData's automated solution.
- * Includes a simple calculator to estimate time and cost savings.
- * Uses hardcoded Polish text.
- */
 const ValueProposition: React.FC = () => {
-  const [hours, setHours] = useState(10);
-  const hourlyRate = 80; // average hourly rate in PLN for an analyst
-
-  const savedHoursYearly = useMemo(() => hours * 52, [hours]);
-  const savedMoneyYearly = useMemo(() => savedHoursYearly * hourlyRate, [savedHoursYearly, hourlyRate]);
+  const [hoursPerWeek, setHoursPerWeek] = useState(10); // ile godzin tygodniowo na raporty
+  const hourlyRate = 80; // PLN
+  const yearlyHours = useMemo(() => hoursPerWeek * 52, [hoursPerWeek]);
+  const yearlySavings = useMemo(
+    () => yearlyHours * hourlyRate,
+    [yearlyHours, hourlyRate]
+  );
 
   return (
-    <section className="bg-slate-800 py-20 sm:py-32">
-      <div className="container mx-auto max-w-7xl px-4">
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Odzyskaj czas i pieniądze</h2>
-          <p className="mt-4 text-lg text-slate-300">
-            Porównaj stary, chaotyczny świat Excela z nową erą analityki w czasie rzeczywistym z PapaData.
+    <section id="about" className="py-20 bg-slate-950">
+      <div className="max-w-6xl mx-auto px-4 grid gap-10 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] items-start">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary-400 mb-2">
+            Udowodnij wartość
           </p>
-        </div>
+          <h2 className="text-2xl md:text-3xl font-semibold text-slate-50">
+            Z chaosu arkuszy do jednego, spokojnego pulpitu prawdy.
+          </h2>
+          <p className="mt-3 text-sm md:text-base text-slate-400">
+            PapaData zastępuje ręczne klejenie raportów z wielu źródeł jednym
+            uporządkowanym modelem danych. Zamiast „Policzymy to jutro” masz
+            „Widzimy to teraz”.
+          </p>
 
-        <div className="mt-16 grid grid-cols-1 gap-8 md:grid-cols-2">
-          <div className="rounded-xl bg-slate-900/50 p-8 ring-1 ring-red-500/50">
-            <h3 className="text-xl font-semibold text-red-400">Stary świat (Excel, chaos)</h3>
-            <ul className="mt-6 space-y-4 text-slate-300">
-              {[
-                'Ręczne pobieranie danych z wielu źródeł',
-                'Opóźnienia w raportowaniu (dane z wczoraj)',
-                'Ryzyko błędów ludzkich i pomyłek w formułach',
-              ].map((item) => (
-                <li key={item} className="flex gap-x-3">
-                  <svg className="mt-1 h-5 w-5 flex-none text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                Bez PapaData
+              </p>
+              <ul className="mt-3 space-y-2 text-sm text-slate-400">
+                <li>• Ręczne pobieranie danych z wielu platform</li>
+                <li>• Raporty z jednodniowym (albo tygodniowym) opóźnieniem</li>
+                <li>• Konfliktujące wersje „tego samego” KPI</li>
+                <li>• Brak czasu na analizę, tylko na kopiowanie</li>
+              </ul>
+            </div>
 
-          <div className="rounded-xl bg-slate-900/50 p-8 ring-1 ring-primary-500/50">
-            <h3 className="text-xl font-semibold text-primary-400">PapaData (Realtime, AI)</h3>
-            <ul className="mt-6 space-y-4 text-slate-300">
-              {[
-                'Automatyczne integracje API z kluczowymi platformami',
-                'Dashboardy i analizy w czasie rzeczywistym (<200ms)',
-                'Wsparcie AI do natychmiastowego znajdowania odpowiedzi',
-              ].map((item) => (
-                <li key={item} className="flex gap-x-3">
-                  <svg className="mt-1 h-5 w-5 flex-none text-primary-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        <div className="mt-20 rounded-2xl bg-slate-900 p-8">
-          <h3 className="text-2xl font-bold text-center">Kalkulator oszczędności</h3>
-          <div className="mx-auto max-w-xl mt-6">
-            <label htmlFor="hours-slider" className="block text-center text-slate-300">
-              Ile godzin tygodniowo tracisz na Excela? <span className="font-bold text-primary-400">{hours} godz.</span>
-            </label>
-            <input
-              id="hours-slider"
-              type="range"
-              min="1"
-              max="40"
-              value={hours}
-              onChange={(e) => setHours(parseInt(e.target.value, 10))}
-              className="mt-2 h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-700 accent-primary-500"
-            />
-
-            <div className="mt-8 text-center bg-slate-800 p-6 rounded-lg">
-              <p className="text-lg text-slate-300">Z PapaData możesz odzyskać rocznie:</p>
-              <div className="mt-4 flex flex-col md:flex-row justify-center items-center gap-8">
-                <div className="text-center">
-                  <p className="text-4xl font-bold text-primary-400">{savedHoursYearly}</p>
-                  <p className="text-slate-400">godzin</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-4xl font-bold text-primary-400">
-                    ~{new Intl.NumberFormat('pl-PL').format(savedMoneyYearly)}
-                  </p>
-                  <p className="text-slate-400">PLN oszczędności</p>
-                </div>
-              </div>
+            <div className="rounded-2xl border border-primary-500/40 bg-gradient-to-br from-primary-950/80 via-slate-950 to-slate-900 p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary-300">
+                Z PapaData
+              </p>
+              <ul className="mt-3 space-y-2 text-sm text-slate-200">
+                <li>• Automatyczne zaciąganie danych do hurtowni BigQuery</li>
+                <li>• Jeden zestandaryzowany model dla sklepu, reklam i marży</li>
+                <li>• AI, które odpowiada na pytania wprost z Twoich danych</li>
+                <li>• Gotowe raporty dzienne, tygodniowe i kampanijne</li>
+              </ul>
             </div>
           </div>
+        </div>
+
+        {/* Mini kalkulator ROI – bez przesady, tylko highlight */}
+        <div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-5">
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
+            Szacunek oszczędności
+          </p>
+          <h3 className="mt-3 text-lg font-semibold text-slate-50">
+            Ile godzin tygodniowo schodzi na raporty?
+          </h3>
+          <p className="mt-1 text-sm text-slate-400">
+            Prosty szacunek, żeby pokazać skalę. Zero ukrytej magii.
+          </p>
+
+          <div className="mt-4">
+            <div className="flex items-center justify-between text-xs text-slate-400">
+              <span>Godziny tygodniowo</span>
+              <span className="font-mono text-slate-200">{hoursPerWeek} h</span>
+            </div>
+            <input
+              type="range"
+              min={2}
+              max={40}
+              step={2}
+              value={hoursPerWeek}
+              onChange={(e) => setHoursPerWeek(Number(e.target.value) || 0)}
+              className="mt-2 w-full cursor-pointer accent-primary-500"
+            />
+          </div>
+
+          <div className="mt-5 grid grid-cols-2 gap-4 text-sm">
+            <div className="rounded-xl bg-slate-950/80 border border-slate-800 p-3">
+              <p className="text-xs text-slate-400">Odzyskany czas rocznie</p>
+              <p className="mt-1 text-xl font-semibold text-slate-50 font-mono">
+                {yearlyHours.toLocaleString('pl-PL')} h
+              </p>
+            </div>
+            <div className="rounded-xl bg-slate-950/80 border border-primary-600/60 p-3">
+              <p className="text-xs text-slate-400">Potencjalna oszczędność</p>
+              <p className="mt-1 text-xl font-semibold text-primary-300 font-mono">
+                {yearlySavings.toLocaleString('pl-PL')} zł
+              </p>
+            </div>
+          </div>
+
+          <p className="mt-4 text-xs text-slate-500">
+            Rzeczywisty efekt zależy od liczby źródeł danych i sposobu pracy
+            Twojego zespołu. Ten blok ma tylko pokazać skalę, nie obiecywać
+            cudów.
+          </p>
         </div>
       </div>
     </section>

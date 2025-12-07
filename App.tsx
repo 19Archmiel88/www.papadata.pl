@@ -22,7 +22,7 @@ const App: React.FC = () => {
   // Routing State
   const getCurrentLocation = () => window.location.pathname + window.location.search;
   const [currentPath, setCurrentPath] = useState(getCurrentLocation());
-  
+
   // Auth State
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
     try {
@@ -129,9 +129,19 @@ const App: React.FC = () => {
   }, [theme]);
 
   // Render Logic
-  if (currentPath.startsWith('/demo') || currentPath.startsWith('/dashboard') || currentPath.startsWith('/reports') || currentPath.startsWith('/academy') || currentPath.startsWith('/support') || currentPath.startsWith('/settings') || currentPath.startsWith('/app')) {
-    return <DemoDashboard navigate={navigate} path={currentPath} />;
-  }
+if (
+  currentPath.startsWith('/demo') ||
+  currentPath.startsWith('/dashboard') ||
+  currentPath.startsWith('/reports') ||
+  currentPath.startsWith('/academy') ||
+  currentPath.startsWith('/support') ||
+  currentPath.startsWith('/integrations') || // <--- DODANE
+  currentPath.startsWith('/settings') ||
+  currentPath.startsWith('/app')
+) {
+  return <DemoDashboard navigate={navigate} path={currentPath} />;
+}
+
 
   if (currentPath === '/wizard') {
     return <Wizard lang={lang} setLang={setLang} navigate={navigate} />;
@@ -145,9 +155,9 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 selection:bg-primary-500/30 selection:text-primary-200 font-sans">
-      
+
       {/* STICKY HEADER */}
-      <Header 
+      <Header
         lang={lang} setLang={setLang}
         theme={theme} setTheme={setTheme}
         t={t.header}
@@ -183,8 +193,8 @@ const App: React.FC = () => {
 
         {/* 7. SECURITY & SCALE - Zbijanie obiekcji technicznych */}
         <div className="bg-slate-50 dark:bg-slate-900/30">
-           <Security />
-           <ScalabilitySection lang={lang} />
+          <Security />
+          <ScalabilitySection lang={lang} />
         </div>
 
         {/* 8. PRICING - Cena na końcu */}
@@ -196,7 +206,7 @@ const App: React.FC = () => {
       <Footer smartNavigate={smartNavigate} onOpenIntegrations={handleOpenIntegrations} />
 
       {/* MODALS */}
-      <IntegrationsModal 
+      <IntegrationsModal
         isOpen={isIntegrationsModalOpen}
         onClose={() => setIsIntegrationsModalOpen(false)}
         lang={lang}
@@ -205,7 +215,7 @@ const App: React.FC = () => {
         isLoggedIn={isLoggedIn}
         navigate={navigate}
       />
-      
+
       <NaggingModal t={t.nagging} />
       <ScrollToTop tooltip={t.scrollToTop} />
     </div>

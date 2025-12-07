@@ -1,55 +1,55 @@
 import React from 'react';
+import { ShieldCheck, Database, Brain, Cloud } from 'lucide-react';
 
-/**
- * A horizontal bar displaying trust indicators and technology partners.
- * Shows logos for Google Cloud, Vertex AI, BigQuery, and security standards.
- */
-const TrustBar: React.FC = () => (
-  <div className="bg-slate-900/50 py-8">
-    <div className="container mx-auto flex max-w-5xl flex-wrap items-center justify-center gap-x-8 gap-y-4 px-4">
-      <div className="flex items-center gap-2 text-slate-400">
-        <span className="font-semibold">Partner technologiczny:</span>
-        <img
-          src="https://www.vectorlogo.zone/logos/google_cloud/google_cloud-icon.svg"
-          alt="Google Cloud"
-          className="h-8"
-        />
-        <span className="text-sm">Google Cloud</span>
+const TrustBar: React.FC = () => {
+  const items = [
+    {
+      label: 'Infra',
+      title: 'Google Cloud • europe-central2',
+      icon: <Cloud className="w-4 h-4" />,
+    },
+    {
+      label: 'Hurtownia',
+      title: 'BigQuery jako pojedyncze źródło prawdy',
+      icon: <Database className="w-4 h-4" />,
+    },
+    {
+      label: 'AI',
+      title: 'Analizy oparte o modele Gemini',
+      icon: <Brain className="w-4 h-4" />,
+    },
+    {
+      label: 'Bezpieczeństwo',
+      title: 'Szyfrowanie + izolacja tenantów',
+      icon: <ShieldCheck className="w-4 h-4" />,
+    },
+  ];
+
+  return (
+    <section className="border-y border-slate-800/70 bg-slate-950/80 backdrop-blur-sm">
+      <div className="max-w-6xl mx-auto px-4 py-4 flex flex-wrap items-center gap-4 md:gap-6">
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
+          ZAUFANA ARCHITEKTURA
+        </p>
+        <div className="flex-1 flex flex-wrap gap-x-6 gap-y-2 text-xs md:text-sm">
+          {items.map((item) => (
+            <div
+              key={item.title}
+              className="flex items-center gap-2 text-slate-300"
+            >
+              <span className="inline-flex items-center justify-center rounded-full border border-slate-700 bg-slate-900 px-2 py-1 text-[10px] uppercase tracking-[0.2em] text-slate-400">
+                {item.label}
+              </span>
+              <span className="inline-flex items-center gap-1 text-slate-300">
+                <span className="text-primary-400">{item.icon}</span>
+                {item.title}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
-      <div className="flex items-center gap-2 text-slate-400">
-        <span className="font-semibold">AI powered by:</span>
-        <img
-          src="https://www.vectorlogo.zone/logos/google_vertex_ai/google_vertex_ai-icon.svg"
-          alt="Vertex AI"
-          className="h-8"
-        />
-        <span className="text-sm">Vertex AI</span>
-      </div>
-      <div className="flex items-center gap-2 text-slate-400">
-        <span className="font-semibold">Data warehouse:</span>
-        <img
-          src="https://www.vectorlogo.zone/logos/google_bigquery/google_bigquery-icon.svg"
-          alt="BigQuery"
-          className="h-8"
-        />
-        <span className="text-sm">BigQuery</span>
-      </div>
-      <div className="flex items-center gap-2 text-slate-400">
-        <span className="font-semibold">Bezpieczeństwo:</span>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke="currentColor"
-          className="w-7 h-7 text-green-400"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-        </svg>
-        <span className="text-sm">ISO 27001</span>
-      </div>
-    </div>
-  </div>
-);
+    </section>
+  );
+};
 
 export default TrustBar;
