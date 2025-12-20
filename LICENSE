@@ -1,0 +1,52 @@
+
+---
+
+# 2) `/docs/index.md`
+
+```markdown
+# Dokumentacja PapaData Intelligence
+
+Ten katalog zawiera dokumentację produktu i repo w podziale na role: produkt/UX/engineering/operations/compliance/legal.
+
+## Szybka nawigacja
+
+### Produkt
+- Wizja: `product/vision.md`
+- Zakres i non-goals: `product/scope-and-nongoals.md`
+- Persony i use cases: `product/personas-and-usecases.md`
+- Roadmapa: `product/roadmap.md`
+
+### UX
+- IA i ekrany: `ux/information-architecture.md`
+- Design system: `ux/design-system.md`
+- Dostępność: `ux/accessibility.md`
+- Treści i i18n: `ux/content-i18n.md`
+
+### Engineering
+- Setup dev: `engineering/setup.md`
+- Architektura: `engineering/architecture.md`
+- Model danych (docelowy): `engineering/data-model.md`
+- Integracja AI: `engineering/ai-integration.md`
+- Testy: `engineering/testing.md`
+- Bezpieczeństwo: `engineering/security.md`
+- Observability: `engineering/observability.md`
+- Deploy: `engineering/deploy.md`
+
+### Operations
+- Runbook: `operations/runbook.md`
+- Incydenty: `operations/incident-response.md`
+- SLA: `operations/sla.md`
+- Backup i retencja: `operations/backups-and-retention.md`
+
+### Compliance
+- Przegląd: `compliance/compliance-overview.md`
+- Prywatność i dane: `compliance/privacy-and-data.md`
+- Dostępność/EAA: `compliance/accessibility-eaa.md`
+
+### Legal (szablony do uzupełnienia danymi firmy)
+- ToS: `legal/terms-of-service.md`
+- Privacy: `legal/privacy-policy.md`
+- DPA: `legal/dpa.md`
+- AI Disclaimer: `legal/ai-disclaimer.md`
+- Cookies: `legal/cookies-policy.md`
+- Accessibility Statement: `legal/accessibility-statement.md`
