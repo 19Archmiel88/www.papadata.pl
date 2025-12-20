@@ -1,32 +1,46 @@
-# Design System
+# UX — Design System (MVP)
 
-## Zasady
-- Jeden system tokenów: tło/surface/tekst/border/radius/spacing + gradient + glow
-- Dark i Light to osobne zestawy (bez “inwersji na siłę”)
-- Glow wyłącznie na akcentach (CTA, active states, kluczowe highlighty)
+Ten dokument definiuje minimalne zasady wyglądu dla demo. Implementacja ma używać tokenów w CSS (theme.css) jako jedynego źródła prawdy.
 
-## Branding
-- Gradient brand: #4E26E2 → #4285F4 (135°)
-- Dark mode: neon/AI, głębokie tła, glow miękki (radius ~48–72px)
-- Font: Inter (Google Sans-style)
-- Ikony: liniowe, spójna grubość stroke
+## Themes
+- Dwa tryby: Dark i Light
+- Brak automatycznej “inwersji”: tokeny są definiowane jawnie dla każdego trybu
 
-## Komponenty (minimum)
-- Buttons: primary (gradient + glow), secondary (border), tertiary (text)
-- Inputs: focus ring (glow w dark), states (error/success)
-- Cards: surface + subtle border, hover
-- Tables: sticky header, row hover, sort
-- Modals/Drawers: blur/backdrop, focus trap
-- Charts: spójne style siatki/tooltip/legend, nieprzesadzone
+## Brand (MVP)
+- Gradient primary: `#4E26E2 -> #4285F4` (np. 135deg)
+- Dark background: `#0D0E10`
+- Glow (tylko dark): miękki, duży promień (48–72px), niski alpha
+
+## Typography
+- Font: Inter
+- Base: 16px
+- Kontrast: tekst na tle musi spełniać wymagania WCAG (patrz accessibility.md)
+
+## Layout & Spacing
+- Sekcje landing: czytelne przerwy, jednolity rytm
+- Komponenty: prosty grid, bez “losowych” odstępów
+
+## Tokeny (minimum)
+W `src/styles/theme.css` powinny istnieć przynajmniej:
+- `--bg`, `--surface`, `--text`, `--muted`, `--border`
+- `--primary-1`, `--primary-2` (końce gradientu)
+- `--radius-sm`, `--radius-md`, `--radius-lg`
+- `--shadow-1` (light) oraz `--glow-1` (dark)
+
+## Komponenty (MVP)
+- Button: primary (gradient), secondary (border), tertiary (text)
+- Modal: overlay + panel + focus outline
+- Cards: surface + border, opcjonalnie akcent (gradient top border)
 
 ## Motion
-- micro-interactions 120–320ms, easing expo/quint
-- reduced motion: respektować preferencje systemowe
+- Preferuj krótkie przejścia (120–240ms)
+- Szanuj `prefers-reduced-motion` (patrz accessibility.md)
 
-## Dostępność wizualna
-- kontrast, focus, hit areas
-- teksty i tooltipy KPI muszą być czytelne
+## Performance UX
+- Bundle split: landing i dashboard (w demo można przygotować lazy loading route-level)
+- Lazy-loading: ciężkie komponenty (np. wykresy, player)
+- Mobile fallback: Vertex Player na małych ekranach może pokazywać statyczne preview lub uproszczony tryb
 
-## Źródło prawdy
-- Tokens: CSS variables / Tailwind config
-- Komponenty: shadcn/ui (jeśli używasz) + własne wrappery
+## Zakaz
+- Brak zewnętrznych bibliotek UI w MVP (projekt ma pokazać strukturę i logikę)
+- Brak hard-coded kolorów w komponentach poza wyjątkami opisanymi w tokenach

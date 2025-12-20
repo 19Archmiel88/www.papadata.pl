@@ -1,20 +1,22 @@
-# SLA (szablon)
-
-> Uzupełnij danymi firmy i ofertą planów.
+# Operations — SLA (Template)
 
 ## Dostępność
-- Cel: [UPTIME_TARGET]% miesięcznie
+- Starter: [PLACEHOLDER] (np. best effort)
+- Scale: [PLACEHOLDER] (np. 99.5%)
+- Enterprise: [PLACEHOLDER] (np. 99.9%)
 
-## Wsparcie
-- Kanały: [EMAIL], [FORM], [CHAT]
-- Czasy reakcji wg planu:
-  - Starter: [X]h
-  - Pro: [X]h
-  - Enterprise: [X]h
+## Czas reakcji (Support)
+- Starter: [PLACEHOLDER]
+- Scale: [PLACEHOLDER]
+- Enterprise: [PLACEHOLDER]
 
 ## Okna serwisowe
-- [DZIEŃ], [GODZINY], strefa: Europe/Warsaw
+- [PLACEHOLDER] (np. niedziele 02:00–04:00 CET)
 
-## Wyłączenia
+## Wyłączenia (typowe)
 - siła wyższa
-- awarie dostawców infrastruktury
+- awarie dostawców (cloud, płatności) poza kontrolą
+- działania klienta (np. błędna konfiguracja)
+
+## Kredyty SLA (Template)
+- [PLACEHOLDER] (np. 5% za każde 1pp poniżej SLA, max 50%)

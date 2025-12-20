@@ -1,16 +1,18 @@
-# Dostępność i EAA
+# Compliance — Accessibility (EAA)
 
-## Cel
-Pełna zgodność z WCAG 2.1 AA w kluczowych flow.
+## Wymaganie
+- Dostosowanie do European Accessibility Act (EAA) od 28.06.2025:
+  - zgodność z WCAG 2.1 AA
+  - deklaracja dostępności
+  - mechanizmy zgłaszania problemów
 
-## Wymagania
-- keyboard navigation
-- focus management
-- kontrast
-- czytelne formularze i walidacje
-- modale/drawery: focus trap
-- wykresy: dostępne tooltipy i opisy
+## Zakres (MVP)
+- Nawigacja klawiaturą
+- Focus management (modale/drawer)
+- Kontrast
+- Tekst alternatywny
+- prefers-reduced-motion
 
-## Dokumenty
-- Accessibility Statement (link w stopce)
-- proces zgłaszania barier + SLA reakcji
+## Deklaracja dostępności
+- Link w stopce do `docs/legal/accessibility-statement.md`
+- Kontakt: [tech@papadata.pl]

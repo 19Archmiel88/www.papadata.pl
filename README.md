@@ -1,3 +1,20 @@
+# PapaData Intelligence
+
+Demo/POC platformy **Data / AI / Analytics** dla e-commerce: landing page + interaktywny dashboard demo. Projekt jest **Vite SPA (React + TypeScript)**, działa na **mock danych** (brak persystencji, brak realnych integracji).
+
+## Quick start
+
+Wymagania:
+- Node.js 18+
+
+Uruchomienie:
+```bash
+npm install
+npm run dev
+npm run build
+npm run preview
+
+
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.

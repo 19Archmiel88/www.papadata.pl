@@ -1,19 +1,19 @@
-# Polityka cookies – [COMPANY_NAME]
+# Polityka cookies — Template
 
-## 1. Czym są cookies
-Krótka definicja.
+## 1. Cel cookies
+- Niezbędne (działanie serwisu)
+- Analityczne (UX i pomiar)
+- Marketingowe (jeśli używane)
 
-## 2. Kategorie
-- niezbędne
-- analityczne (opcjonalnie)
-- marketingowe (opcjonalnie)
+## 2. Consent Mode v2 (jeśli dotyczy)
+- ad_storage
+- analytics_storage
+- ad_user_data
+- ad_personalization
 
-## 3. Zgody
-- możliwość odrzucenia/akceptacji/wyboru
-- zmiana zgód w ustawieniach
+## 3. Zarządzanie zgodami
+- Banner: Odrzuć wszystkie / Akceptuj wybrane / Akceptuj wszystkie
+- Panel ustawień: możliwość wycofania zgody
 
-## 4. Lista cookies
-- tabela: nazwa, cel, czas życia, dostawca
-
-## 5. Kontakt
-[CONTACT_EMAIL]
+## 4. Okres przechowywania
+- [PLACEHOLDER]

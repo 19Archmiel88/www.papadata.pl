@@ -1,17 +1,22 @@
-# Bezpieczeństwo (baseline)
+# Engineering — Security (MVP)
 
-## Dane i PII
-- w demo: brak prawdziwych danych
-- w produkcji: klasyfikacja danych i polityka minimalizacji
+## Dane wrażliwe i PII
+- Nie wprowadzaj do promptów:
+  - haseł, kluczy API, tokenów
+  - danych szczególnych (RODO)
+- W demo: nie loguj danych użytkownika w konsoli
 
-## Sekrety
-- frontend nie przechowuje sekretów poza env runtime/build
-- klucze i tokeny: w produkcji przez bezpieczne mechanizmy (np. Secret Manager)
+## Klucze i sekrety
+- Klucze API tylko w `.env.local` (nie commitować)
+- Repo powinno zawierać przykład `.env.example` bez sekretów
 
-## AI
-- filtr PII przed wysłaniem do AI (docelowo)
-- logowanie: bez payloadów z danymi wrażliwymi
+## CSP / headers (future)
+- Dla hostingu produkcyjnego rozważ:
+  - Content-Security-Policy
+  - HSTS
+  - X-Content-Type-Options
+  - Referrer-Policy
 
-## Headers/CSP (deploy)
-- CSP dopasowane do źródeł assetów
-- secure headers (X-Content-Type-Options, Referrer-Policy itd.)
+## RBAC/SSO (future)
+- MVP nie implementuje auth
+- W roadmap: role, uprawnienia, SSO

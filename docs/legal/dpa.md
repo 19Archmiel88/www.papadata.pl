@@ -1,33 +1,25 @@
-# Umowa powierzenia przetwarzania danych (DPA) – [COMPANY_NAME]
+# Umowa powierzenia przetwarzania danych (DPA) — Template
 
-**Ostatnia aktualizacja:** [YYYY-MM-DD]
+## 1. Strony
+- Administrator: Klient
+- Procesor: [Dostawca]
 
-## 1. Strony i definicje
-- Administrator (Klient)
-- Procesor ([COMPANY_NAME])
+## 2. Zakres danych
+- Zamówienia, historia zakupów, identyfikatory techniczne (IP/cookie id) — zależnie od integracji
 
-## 2. Przedmiot i czas trwania
-- zakres przetwarzania w ramach Usługi
+## 3. Cel i czas
+- Wyłącznie świadczenie usług analitycznych
+- Na czas aktywnej subskrypcji
 
-## 3. Kategorie danych i osób
-- określić zależnie od integracji
+## 4. Środki bezpieczeństwa
+- TLS 1.2+
+- Szyfrowanie at-rest
+- RBAC (future)
+- poufność personelu
 
-## 4. Obowiązki procesora
-- poufność
-- środki bezpieczeństwa
-- subprocesorzy
-- pomoc w realizacji praw
+## 5. Podwykonawcy
+- Zgoda ogólna + informowanie o zmianach (np. 14 dni)
+- Lista: [PLACEHOLDER]
 
-## 5. Subprocesorzy
-- lista / mechanizm aktualizacji
-
-## 6. Incydenty
-- czas powiadomienia
-- procedura
-
-## 7. Audyt
-- warunki audytu i raporty
-
-## 8. Zakończenie
-- zwrot/usunięcie danych
-- retencja
+## 6. Usuwanie danych
+- Do [PLACEHOLDER] dni po zakończeniu, chyba że prawo wymaga dłużej

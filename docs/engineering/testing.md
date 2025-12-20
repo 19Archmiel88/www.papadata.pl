@@ -1,18 +1,31 @@
-# Testy
+# Engineering — Testing & Contracts
 
-## Poziomy
-- Unit: utils, kalkulatory (np. ROI), formatowanie KPI
-- Integration: komponenty widoków z mockami
-- Contract: JSON/OpenAPI schemas → mock generator
-- E2E (docelowo): krytyczne ścieżki (landing → demo → dashboard)
+## Kontrakty danych (demo)
+- Dane mock powinny mieć spójne typy TS
+- Preferowane:
+  - JSON Schema / OpenAPI -> generowanie typów TS (future)
+  - wspólny pakiet typów (future)
 
-## Stany wymagane do testów UI
-- loading / empty / error / offline
-- brak klucza AI
-- safety block
-- timeout / retry
+## Mockowanie
+- Poziomy:
+  - dev: statyczne `MOCK_*` + generator
+  - integration: MSW/Mirage (opcjonalnie)
+  - edge cases: faker/dynamic data (opcjonalnie)
 
-## CI (docelowo)
-- lint + typecheck
-- testy unit/integration
-- contract gates
+## Edge cases
+- loading states
+- empty states
+- error states
+- offline states
+- AI safety block
+- AI timeout
+- brak klucza API
+
+## Pact / consumer-provider (future)
+- Gate w CI: zgodność konsumenta z kontraktem
+- Broker (opcjonalnie)
+
+## Quality gate (MVP)
+- brak błędów w konsoli
+- brak hard-coded stringów w UI
+- podstawowe testy manualne dla kluczowych flow (landing → dashboard, modale, drawer)

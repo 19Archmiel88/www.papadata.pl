@@ -1,16 +1,29 @@
 # Security Policy
 
 ## Zgłaszanie podatności
-Wyślij zgłoszenie na: [SECURITY_EMAIL]
+Jeśli znalazłeś podatność bezpieczeństwa, nie publikuj jej publicznie.
+
+Wyślij zgłoszenie na:
+- security@[PLACEHOLDER_DOMAIN]
+
+W tytule maila: `[SECURITY] PapaData Intelligence`
+
+## Co dołączyć w zgłoszeniu
+- Opis problemu i potencjalny wpływ
+- Kroki reprodukcji
+- Środowisko (OS/przeglądarka/node)
+- Propozycja naprawy (jeśli masz)
 
 ## Zakres
-- frontend aplikacji
-- integracja AI
-- obsługa danych i eksportów (docelowo)
+- Kod i konfiguracja repozytorium
+- Mechanizmy integracji AI (prompting/streaming) i obsługa błędów
+- Zależności (supply chain)
 
-## Czego nie robić
-- nie publikuj szczegółów podatności publicznie przed fixem
+## SLA odpowiedzi (docelowe)
+- Potwierdzenie otrzymania: do 48h
+- Wstępna ocena: do 5 dni roboczych
+- Fix: wg priorytetu i złożoności
 
-## Response
-- potwierdzenie zgłoszenia: [X] dni
-- plan fixu: zależnie od krytyczności
+## Zasady
+- Brak kluczy API w repo
+- Nie logujemy wrażliwych danych ani promptów zawierających PII

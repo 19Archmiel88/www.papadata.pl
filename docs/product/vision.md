@@ -1,41 +1,44 @@
-# Wizja produktu
+# PapaData Intelligence — Vision
 
-## Cel
-PapaData Intelligence ma skrócić dystans między danymi a decyzją: od rozproszonych źródeł (sklep/ads/analityka) do jednego, spójnego modelu metryk i rekomendacji zasilanych AI.
+## Cel produktu
 
-## Problem
-Zespoły e-commerce i agencje:
-- raportują ręcznie z wielu narzędzi,
-- mają niespójne definicje KPI,
-- tracą czas na “czyszczenie danych” zamiast decyzji,
-- nie mają kontekstu do interpretacji zmian (co się stało i dlaczego).
+PapaData Intelligence to demo/POC platformy analitycznej nowej generacji dla e-commerce, która:
+- scala rozproszone dane (sklep, reklamy, analityka) w jeden spójny obraz,
+- pokazuje wyniki w dashboardzie (KPI, wykresy, raporty),
+- wspiera analizę przez kontekstowego asystenta AI (Gemini/Vertex).
 
-## Proponowane rozwiązanie
-1) Ustandaryzowany ingestion + model danych (fakty/wymiary) w hurtowni.  
-2) Katalog metryk (jedna prawda o KPI).  
-3) Dashboardy “executive-ready”.  
-4) Asystent AI, który:
-   - tłumaczy KPI na język biznesu,
-   - wykrywa anomalie,
-   - sugeruje “następne kroki”,
-   - odpowiada na pytania “co i dlaczego”.
+Projekt w repo to **Vite SPA (React + TypeScript)** z **mockami**. Celem jest dostarczenie kompletnego demo UX/IA + architektury frontendu i warstwy AI, bez backendu produkcyjnego.
 
-## Wartość dla biznesu
-- mniej czasu na raportowanie,
-- szybsze decyzje (czas reakcji na spadki/wzrosty),
-- lepsza kontrola CAC/LTV/ROAS/marży,
-- transparentność: definicje metryk + audyt.
+## Zakres funkcjonalny (Demo)
 
-## Definicja sukcesu (MVP)
-- onboarding klienta do pierwszego dashboardu: < 60 minut (docelowo),
-- spójne KPI: ROAS, CAC, LTV, marża, przychód, refundy,
-- AI: 3 kluczowe use cases działające stabilnie:
-  - “Podsumuj ostatnie 30 dni i powiedz co się zmieniło”
-  - “Wyjaśnij spadek ROAS”
-  - “Zaproponuj optymalizacje budżetu” (z zastrzeżeniami)
+### Landing page (marketing + demo UX)
+Landing prezentuje możliwości platformy poprzez:
+- hero z “Vertex Player” (symulacja AI Chat / Data Pipeline / Exec View),
+- przegląd funkcji,
+- wizualizację pipeline’u danych,
+- katalog integracji (statusy live/beta/soon),
+- ROI calculator,
+- pricing + trial/demo flow,
+- sekcje zaufania i bezpieczeństwa,
+- FAQ, final CTA i stopkę z linkami prawnymi.
 
-## Zasady produktu
-- “Jedna prawda o metrykach” > mnogość raportów
-- “Explainability” > czarne skrzynki
-- “EU-first data” (jeśli dotyczy strategii)
-- “Bezpieczeństwo i compliance jako feature”
+### Dashboard (widok demo)
+Dashboard działa jako “produkt” w trybie demo:
+- layout: sidebar + topbar,
+- widoki: Overview, Analytics, Reports, Customers, Products, Integrations, Support, Settings,
+- mocki i walidacje formularzy (bez persystencji),
+- AI Assistant Drawer (UI + integracja strumieniowania, cancel, safety handling).
+
+## Status i ograniczenia
+
+- Status: Demo/POC
+- Brak persystencji: odświeżenie strony resetuje stan
+- Brak realnych integracji i ingestion: integracje to UI + stan lokalny
+- Brak auth/RBAC w MVP: tylko placeholdery i przyszła roadmapa
+- AI działa wyłącznie po podaniu klucza (np. `GEMINI_API_KEY` w `.env.local`); bez klucza UI ma tryb “AI unavailable”
+
+## Kryteria jakości (Demo)
+- Spójna architektura projektu (routing, layouty, komponenty, mocki)
+- Dostępność (minimum WCAG: focus, aria, klawiatura)
+- Jasne stany UI: loading / empty / error / offline
+- Brak “hard-coded” tekstów w komponentach (wszystko przez i18n)

@@ -1,59 +1,114 @@
-# Information Architecture (IA) i ekrany
+# UX — Information Architecture
 
-## Global
-- Header (landing): logo, nav, language, theme, CTA
-- Footer: linki prawne + status
-- Cookie banner: zarządzanie zgodami (jeśli dotyczy)
+## Warstwa globalna
 
-## Landing – sekcje
-1) Hero
-- H1 + podtytuł
-- CTA: trial / demo
-- “Vertex Player” z tabami: AI Chat / Data Pipeline / Exec View
+- Motywy: dark/light
+- Dostępność: WCAG (minimum: focus, klawiatura, aria dla komponentów interaktywnych)
+- Responsive: Desktop / Tablet / Mobile
+- Globalne elementy:
+  - Header (landing) lub Topbar (dashboard)
+  - Footer (na wszystkich podstronach, także w dashboard)
+  - Stałe linki do dokumentów prawnych (ToS/Privacy/Cookies/DPA/AI Disclaimer/Accessibility)
+  - Cookie banner + panel ustawień cookies (Consent Mode v2)
 
-2) Pipeline
-- 4 kroki od źródeł do AI
-- krótkie opisy “co i po co”
+## Landing page (kolejność sekcji)
 
-3) Integrations catalog
-- filtry: E-commerce / Marketing / Data
-- statusy: Live/Beta/Soon
-- modal: opis integracji + wymagania + uprawnienia
+1. **Header**
+   - Logo
+   - Mega-menu funkcji (Features)
+   - Linki: Pricing / Integrations / Resources (placeholder)
+   - CTA: Log in / See Demo
+   - Toggler języka (PL/EN)
+   - Toggler motywu (dark/light)
+   - Mobile menu
 
-4) ROI Calculator
-- parametry wejściowe
-- wynik: oszczędność czasu/kosztu
-- zastrzeżenie: symulacja
+2. **Hero + Vertex Player**
+   - Claim + podtytuł
+   - CTA: trial / demo
+   - Trust marker (np. “Google Cloud Partner” — demo copy)
+   - “Vertex Player” z tabami:
+     - AI Chat
+     - Data Pipeline
+     - Exec View
+   - Na mobile: skalowalny player lub fallback statyczny
 
-5) Social proof + FAQ + Pricing + CTA
+3. **Features**
+   - 6 kart (np. centralizacja, AI guardian, realtime KPI, security, onboarding itd.)
+   - Krótkie opisy i ikony
 
-## Dashboard – sekcje
-- Sidebar:
-  - Overview
-  - Analytics
-  - Reports
-  - Customers
-  - Products
-  - Integrations
-  - Support
-  - Settings
+4. **Pipeline**
+   - 4 kroki: źródła danych → PapaData Pipeline → BigQuery → Papa AI Agent
 
+5. **Integrations**
+   - Filtry kategorii
+   - Karty integracji (statusy live/beta/soon)
+   - Modal katalogu integracji (3 taby)
+   - “Request integration” CTA
+
+6. **Social Proof**
+   - 3 karty opinii
+   - Badge “Verified customer”
+   - Adnotacja Omnibus: “Opinie są zweryfikowane …”
+
+7. **ROI Calculator**
+   - Slidery/wejścia: analitycy, godziny/tydzień, stawka godzinowa
+   - Wyniki: tradycyjny koszt vs PapaData + oszczędność
+   - Disclaimer: wyniki symulacyjne
+
+8. **Security**
+   - 6 kafelków Q&A dot. bezpieczeństwa
+
+9. **Pricing**
+   - Toggle: miesięcznie/rocznie
+   - 3 plany + wyróżnienie planu rekomendowanego
+   - Modal Enterprise (formularz zapytania)
+   - Omnibus: jeśli promocje -> najniższa cena z 30 dni
+
+10. **FAQ**
+   - Akordeon
+
+11. **Final CTA**
+   - Karta gradientowa z podwójnym CTA
+
+12. **Footer**
+   - Brand/short description + social
+   - Kolumny: Product / Resources / Company
+   - Status systemu
+   - Linki prawne
+   - Modale treści (opcjonalne w demo)
+   - Deklaracja dostępności
+
+## Dashboard (demo)
+
+### Wejście
+- Z landing: przycisk “See Demo” / “Start Trial” prowadzi do dashboard (w demo: bez auth)
+
+### Layout
+- Sidebar + Topbar
 - Topbar:
-  - date range
-  - AI Assistant
-  - notifications
-  - user menu
+  - badge “Demo mode”
+  - zakres dat (placeholder)
+  - przycisk AI Assistant
+  - powiadomienia (placeholder)
+  - avatar/menu (placeholder)
 
-## Standard stanów UI
-Każdy widok powinien mieć:
-- loading
-- empty
-- error (recoverable)
-- offline (jeśli dotyczy)
-- “no access” (RBAC)
+### Widoki
+- **Overview**: KPI + area/pie
+- **Analytics**: insight AI + bar/line
+- **Reports**: karty pobrania / download
+- **Customers / Products**: tabele
+- **Integrations**: siatka z toggle Connected/Disconnected (stan lokalny)
+- **Support**: tickety + kontakt
+- **Settings**: profile/company/notifications/team/billing
+- **AI Assistant Drawer**: kontekstowy chat
 
-## UX zasady AI Drawer
-- streaming odpowiedzi
-- cancel
-- jasne komunikaty safety
-- cytowanie “na podstawie danych w systemie” vs “ogólna sugestia”
+### Walidacje/mocki
+- Dane: `generateData` / `MOCK_*` (tablice statyczne + losowe generowanie)
+- Formularze: HTML `required`, sukces symuluje timeout
+- AI: createChatSession; bez klucza API brak odpowiedzi i czytelny komunikat
+
+### Braki do uzupełnienia w implementacji
+- puste stany (empty)
+- error states
+- offline states
+- kontrola uprawnień (RBAC) — future

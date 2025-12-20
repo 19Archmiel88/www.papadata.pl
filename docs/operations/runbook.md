@@ -1,20 +1,33 @@
-# Runbook (operacje)
+# Operations — Runbook (MVP)
 
 ## Cel
-Zasady utrzymania aplikacji oraz szybkie kroki diagnostyczne.
+Runbook opisuje operacje i podstawowe procedury utrzymania (na start: dla demo, docelowo dla produkcji).
 
-## Najczęstsze problemy
-1) AI nie odpowiada
-- sprawdź `GEMINI_API_KEY`
-- sprawdź błędy w UI (timeout/safety)
-- sprawdź limity i rate limit
+## Środowiska
+- local: dev na Vite
+- staging: [PLACEHOLDER]
+- prod: [PLACEHOLDER]
 
-2) Dashboard nie ładuje danych
-- w demo: sprawdź generator/mock
-- w produkcji: sprawdź ingestion i freshness
+## Standardowe komendy
+- instalacja: `npm install`
+- dev: `npm run dev`
+- build: `npm run build`
+- preview: `npm run preview`
 
-## Checklist release
-- build przechodzi
-- typecheck ok
-- smoke test: landing + dashboard + AI drawer
-- weryfikacja linków legal/stopki
+## Konfiguracja
+- Sekrety: `.env.local` (nie commitować)
+- Klucze:
+  - `GEMINI_API_KEY` (opcjonalnie; bez niego AI jest disabled)
+
+## Checklist po deploy
+- Landing `/` działa i ma sekcje
+- Dashboard `/dashboard/overview` działa
+- Linki prawne z footer działają
+- Cookie banner działa
+- AI drawer:
+  - bez klucza: komunikat “AI unavailable”
+  - cancel działa (jeśli implementowane)
+
+## Known issues (demo)
+- Brak persystencji: refresh resetuje
+- Integracje: tylko UI, brak realnych API

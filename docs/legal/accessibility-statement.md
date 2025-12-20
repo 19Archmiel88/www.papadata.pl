@@ -1,18 +1,17 @@
-# Deklaracja dostępności – [PRODUCT_NAME]
+# Deklaracja dostępności — Template
 
-**Ostatnia aktualizacja:** [YYYY-MM-DD]  
-**Podmiot:** [COMPANY_NAME]  
-**Kontakt:** [ACCESSIBILITY_EMAIL]
+## Status zgodności
+Serwis jest częściowo zgodny z WCAG 2.1 AA. Pracujemy nad poprawą dostępności.
 
-## 1. Status zgodności
-[PRODUCT_NAME] dąży do zgodności z WCAG 2.1 AA.
+## Zgłaszanie problemów
+Jeśli zauważysz problem z dostępnością, skontaktuj się:
+- e-mail: accessibility@[PLACEHOLDER]
 
-## 2. Treści niedostępne (jeśli dotyczy)
-- [lista]
+## Zakres
+- Nawigacja klawiaturą
+- Focus management (modale/drawer)
+- Kontrast i czytelność
+- prefers-reduced-motion
 
-## 3. Kontakt i zgłaszanie problemów
-- email: [ACCESSIBILITY_EMAIL]
-- opis procesu i czas odpowiedzi: [SLA]
-
-## 4. Procedura odwoławcza
-- [jeśli wymagane lokalnie]
+## Data publikacji
+[PLACEHOLDER_DATE]

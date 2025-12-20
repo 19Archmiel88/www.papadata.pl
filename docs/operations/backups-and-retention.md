@@ -1,12 +1,23 @@
-# Backup i retencja (docelowo)
+# Operations — Backups & Retention (Template)
 
-## Backup
-- zakres: konfiguracje, dane klienta, metadane, logi audytu
-- częstotliwość: [X]
-- test odtwarzania: [X]
+## Cel
+Określić zasady kopii zapasowych i retencji danych dla produkcji (dla demo: brak persystencji = brak backupów).
 
-## Retencja
-- logi: [X] dni
-- dane surowe: [X] dni
-- dane przetworzone: [X] dni
-- usunięcie na żądanie: procedura i SLA
+## Zakres (produkcyjnie)
+- konfiguracje integracji
+- raporty i ustawienia dashboardu
+- logi audytowe (jeśli wdrożone)
+
+## Retencja (Template)
+- Dane konta i rozliczeń: zgodnie z przepisami (min. [PLACEHOLDER])
+- Dane operacyjne: [PLACEHOLDER]
+- Dane z integracji: zgodnie z DPA, usunięcie do [PLACEHOLDER] dni
+
+## Backupy (Template)
+- Częstotliwość: [PLACEHOLDER]
+- RPO/RTO: [PLACEHOLDER]
+- Test restore: [PLACEHOLDER] (np. raz na kwartał)
+
+## Usuwanie danych (Data Act / GDPR)
+- eksport danych (CSV/JSON)
+- procedura usunięcia: [PLACEHOLDER]

@@ -1,23 +1,33 @@
-# Incident Response
+# Operations — Incident Response
 
 ## Definicja incydentu
-- niedostępność aplikacji
-- błąd uniemożliwiający podstawowe flow
-- masowe time-outy AI
-- potencjalny wyciek danych lub PII
+Każde zdarzenie, które:
+- powoduje niedostępność usługi,
+- ujawnia dane wrażliwe,
+- generuje błędne zachowanie AI w sposób ryzykowny,
+- lub znacząco degraduje UX (np. blokada kluczowych flow).
 
 ## Role
-- Incident Commander
-- Engineering
-- Comms/Support
+- Incident Commander: [PLACEHOLDER]
+- Engineering: [PLACEHOLDER]
+- Security/Legal: [PLACEHOLDER]
 
-## Proces
-1) Triage (5–15 min)
-2) Mitigacja (rollback/feature flag)
-3) Komunikacja (status page / mail)
-4) Postmortem (co, dlaczego, jak zapobiec)
+## Kanały
+- Status page: [PLACEHOLDER]
+- Support: support@[PLACEHOLDER_DOMAIN]
+- Security: security@[PLACEHOLDER_DOMAIN]
 
-## Postmortem
-- timeline
-- root cause
-- action items
+## Procedura (skrót)
+1. Triage: co nie działa, jaki wpływ, jaka skala
+2. Mitigation: rollback / wyłączenie funkcji (feature flag) / komunikat w UI
+3. Communication:
+   - status page update
+   - komunikat do klientów (jeśli dotyczy)
+4. Root cause analysis (RCA) do 5 dni roboczych
+5. Action items i prewencja
+
+## AI-specific
+- Jeśli AI daje niepożądane wyniki:
+  - wyłącz AI drawer w UI (fallback)
+  - sprawdź safety mapping i prompt registry
+  - wstrzymaj rollout zmian promptów

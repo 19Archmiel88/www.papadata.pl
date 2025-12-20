@@ -1,18 +1,35 @@
 # Contributing
 
+Dziękujemy za wkład. Repo to demo/POC, ale trzymamy standardy jak dla produkcji.
+
+## Zasady ogólne
+- Dokumentacja w `docs/` jest kontraktem. Jeśli czegoś brakuje — opisz założenia i ryzyko.
+- Brak sekretów w repo. Używaj `.env.local` / `.env.example`.
+- Zero hard-coded tekstów UI — wszystko przez i18n.
+- UI musi mieć minimalne stany: loading/empty/error/offline.
+- Dostępność: focus/klawiatura/aria dla elementów interaktywnych.
+
 ## Workflow
-- branch: `feature/<name>` lub `fix/<name>`
-- PR wymagany do merge
-- opis zmian + screenshoty UI (jeśli dotyczy)
+1. Fork / branch z `main`:
+   - `feat/...`, `fix/...`, `chore/...`, `docs/...`
+2. Commity:
+   - Preferowany styl: Conventional Commits (feat/fix/chore/docs/refactor/test).
+3. PR:
+   - Opis: co, dlaczego, jak przetestować
+   - Link do sekcji dokumentacji, której dotyczy zmiana (jeśli dotyczy)
 
-## Standardy
-- TypeScript strict
-- lint/typecheck przed PR
-- nie wrzucamy sekretów do repo
-- mocki i dane demo nie mogą zawierać PII
+## Standardy kodu
+- TypeScript strict (docelowo)
+- Unikaj “sprzęgania” komponentów (czyste propsy, minimalne zależności)
+- Brak ciężkich zależności bez uzasadnienia
 
-## Commit messages
-- konwencja: feat/fix/chore/docs
+## Testowanie (minimum)
+- `npm run dev` i przeklikanie:
+  - `/` (landing)
+  - `/dashboard/overview`
+  - modale/drawer (ESC, focus)
+- Brak błędów w konsoli
 
-## Review
-- checklist: UX states, a11y basics, performance, brak regresji
+## Bezpieczeństwo
+- Wrażliwe dane i PII nie mogą trafiać do logów ani promptów AI.
+- Zgłoszenia podatności: patrz `SECURITY.md`.

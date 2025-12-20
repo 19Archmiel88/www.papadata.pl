@@ -1,20 +1,16 @@
-# AI Disclaimer – [PRODUCT_NAME]
+# Nota prawna AI (“Papa Guardian”) — Template
 
-## 1. Zakres
-Moduł AI w [PRODUCT_NAME] generuje podsumowania i sugestie na podstawie:
-- danych dostępnych w systemie (jeśli skonfigurowane),
-- oraz ogólnych wzorców analitycznych.
+## 1. Niedeterminizm
+Odpowiedzi generowane przez AI mogą być niepełne lub nieprawdziwe. Wymagają weryfikacji człowieka.
 
-## 2. Ograniczenia
-- AI może popełniać błędy, halucynować lub nie uwzględniać pełnego kontekstu
-- AI nie zastępuje konsultacji specjalisty (prawnego/finansowego)
+## 2. Brak porad profesjonalnych
+AI nie świadczy porad prawnych/finansowych/podatkowych. Decyzje wymagają dodatkowej weryfikacji.
 
-## 3. Odpowiedzialność
-Decyzje biznesowe podejmowane są na odpowiedzialność Użytkownika/Klienta.
+## 3. Zakaz danych wrażliwych
+Nie wprowadzaj haseł, kluczy API ani danych szczególnych.
 
-## 4. Bezpieczeństwo i niedozwolone użycie
-- zakaz wprowadzania danych wrażliwych i PII, jeśli nie jest to konieczne
-- zakaz użyć naruszających prawo i regulaminy
+## 4. Moderacja i safety
+Odpowiedzi mogą zostać zablokowane przez filtry bezpieczeństwa. Próby omijania filtrów są zabronione.
 
-## 5. Oznaczenia
-W UI treści generowane przez AI są oznaczone jako “Wygenerowane przez AI”.
+## 5. Prawa do treści
+[PLACEHOLDER] (w zależności od regulaminu)

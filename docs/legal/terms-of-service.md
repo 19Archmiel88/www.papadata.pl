@@ -1,56 +1,48 @@
-# Regulamin świadczenia usług (ToS) – [COMPANY_NAME]
+# Regulamin świadczenia usług (ToS) — Template (B2B)
 
-**Ostatnia aktualizacja:** [YYYY-MM-DD]  
-**Domena:** [DOMAIN]  
-**Kontakt:** [CONTACT_EMAIL]
+> Dokument jest szablonem do uzupełnienia. Skonsultuj wersję produkcyjną z prawnikiem.
 
-## 1. Definicje
-- “Usługa” – platforma [PRODUCT_NAME] dostępna pod [DOMAIN]
-- “Użytkownik” – osoba korzystająca z Usługi
-- “Klient” – podmiot zawierający umowę (B2B lub B2C – określić)
-- “Dane” – dane wprowadzone/importowane do Usługi
+## 1. Dane operatora
+- Operator: [PEŁNA NAZWA FIRMY]
+- Adres: [ULICA, MIASTO]
+- KRS/NIP/REGON: [PLACEHOLDER]
+- Kontakt: support@[PLACEHOLDER], legal@[PLACEHOLDER]
 
-## 2. Zakres Usługi
-Usługa umożliwia:
-- prezentację danych analitycznych,
-- generowanie raportów,
-- wsparcie interpretacji danych przez moduł AI (jeśli aktywny).
+## 2. Definicje
+- Usługa: PapaData Intelligence
+- Klient: podmiot B2B
+- Konto: dostęp do panelu
+- AI: moduł oparty o Gemini/Vertex (probabilistyczny)
 
-## 3. Konto i dostęp
-- warunki rejestracji
-- odpowiedzialność za dane logowania
-- role i uprawnienia (docelowo RBAC)
+## 3. Zakres usługi
+- Dostarczanie funkcji analitycznych, raportów i rekomendacji
+- Dashboard i integracje w zależności od planu
 
-## 4. Płatności i okres rozliczeniowy
-- plany
-- trial
-- fakturowanie
-- zwroty (jeśli dotyczy)
+## 4. Warunki korzystania (AUP)
+- Zakaz: treści nielegalne, malware, spam, próby omijania filtrów bezpieczeństwa
+- Zakaz: reverse engineering, trenowanie konkurencyjnych modeli na podstawie usługi
 
-## 5. Dane i bezpieczeństwo
-- zasady przetwarzania danych
-- DPA jako załącznik / odrębny dokument
+## 5. AI i odpowiedzialność
+- AI jest probabilistyczne; możliwe błędy/halucynacje
+- Rekomendacje są pomocnicze; decyzje biznesowe wymagają weryfikacji
+- Odpowiedzi AI muszą być oznaczone w UI
 
-## 6. AI i ograniczenia
-- AI generuje treści wspierające analizę
-- AI może popełniać błędy
-- Użytkownik odpowiada za decyzje biznesowe
-- zasady niedozwolonego użycia (abuse)
+## 6. Płatności i faktury
+- Plany: Starter / Scale / Enterprise
+- Rozliczenia cykliczne: [Stripe/PayU/inna]
+- Faktury: e-mail; KSeF (od 2026) — gotowość zgodnie z przepisami
 
-## 7. Odpowiedzialność
-- ograniczenia odpowiedzialności
-- wyłączenia
+## 7. SLA
+- [PLACEHOLDER] (np. 99.9% dla Enterprise)
+- Zasady rekompensat: [PLACEHOLDER]
 
-## 8. SLA i wsparcie
-- kanały kontaktu
-- czasy reakcji (wg planu)
+## 8. Data Act — interoperacyjność i migracja
+- Eksport danych (CSV/JSON) bez opłat
+- Procedura migracji: [PLACEHOLDER]
 
-## 9. Rozwiązanie umowy
-- warunki wypowiedzenia
-- skutki usunięcia konta i danych
-- retencja
+## 9. Reklamacje i kontakt
+- support@[PLACEHOLDER]
+- czasy reakcji: [PLACEHOLDER]
 
-## 10. Postanowienia końcowe
-- prawo właściwe
-- sąd właściwy
-- zmiany regulaminu
+## 10. Prawo właściwe
+- Prawo polskie

@@ -1,43 +1,31 @@
-# Polityka prywatności – [COMPANY_NAME]
+# Polityka prywatności — Template
 
-**Ostatnia aktualizacja:** [YYYY-MM-DD]  
-**Administrator:** [COMPANY_NAME], [ADDRESS]  
-**Kontakt:** [CONTACT_EMAIL]
+> Dokument jest szablonem do uzupełnienia.
 
-## 1. Jakie dane przetwarzamy
-- dane konta (email, imię, nazwisko – jeśli dotyczy)
-- dane rozliczeniowe (jeśli dotyczy)
-- dane techniczne (logi, IP – jeśli dotyczy)
-- dane importowane do systemu (zależnie od integracji)
+## 1. Administrator danych
+- [PEŁNA NAZWA FIRMY], [ADRES]
+- Kontakt: privacy@[PLACEHOLDER]
 
-## 2. Cele i podstawy prawne
-- świadczenie usługi
-- bezpieczeństwo
-- rozliczenia
-- marketing (tylko za zgodą, jeśli dotyczy)
+## 2. Zakres danych
+- Dane konta: imię, nazwisko, e-mail, firma
+- Dane techniczne: logi, identyfikatory sesji (minimalnie)
+- Dane z integracji: zgodnie z DPA (jeśli dotyczy)
 
-## 3. Odbiorcy danych
-- dostawcy hostingu/infrastruktury
-- dostawcy narzędzi analitycznych (opcjonalnie)
-- procesorzy w ramach DPA
+## 3. Cele i podstawy prawne
+- Realizacja umowy
+- Księgowość
+- Bezpieczeństwo i analityka UX
 
-## 4. Transfer danych poza EOG
-- opisać, czy występuje
-- SCC / mechanizmy transferowe
+## 4. Odbiorcy danych / podwykonawcy
+- Hosting: [GCP/AWS/etc.]
+- Płatności: [Stripe/PayU/etc.]
+- AI: [Vertex AI/Gemini] — bez trenowania na danych klienta (jeśli dotyczy planu)
 
 ## 5. Retencja
-- okresy przechowywania wg kategorii danych
+- [PLACEHOLDER] (np. 30 dni po zakończeniu subskrypcji dla danych integracji)
 
-## 6. Prawa osoby
-- dostęp, sprostowanie, usunięcie, ograniczenie, przenoszenie, sprzeciw
-- kontakt do realizacji praw
+## 6. Prawa osób
+- Dostęp, sprostowanie, usunięcie, ograniczenie, sprzeciw
 
-## 7. Cookies i zgody
-- opis kategorii cookies
-- CMP/consent mode (jeśli dotyczy)
-
-## 8. Bezpieczeństwo
-- środki techniczne i organizacyjne (high-level)
-
-## 9. Zmiany polityki
-- jak informujemy o zmianach
+## 7. Cookies
+- Szczegóły w `cookies-policy.md`

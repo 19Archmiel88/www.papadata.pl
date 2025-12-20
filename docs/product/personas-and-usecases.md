@@ -1,32 +1,44 @@
-# Persony i use cases
+# Product — Personas & Use cases
 
-## Persony
-1) CEO / Owner e-commerce
-- chce wiedzieć “czy rośniemy i dlaczego”
-- potrzebuje krótkich executive wniosków
+## Persona 1: Owner / CEO (B2B e-commerce)
+### Cele
+- Rozumieć “co napędza zysk” (przychód vs marża vs koszty)
+- Zobaczyć trendy i anomalie bez grzebania w arkuszach
+### Use cases (demo)
+- Wejście w Overview: KPI i trend 30 dni
+- Szybkie pytanie do AI: “Dlaczego spadł ROAS?” / “Co rośnie?”
+- Eksport danych (Data Act) — przycisk i opis (admin)
 
-2) CMO / Head of Growth
-- ROAS, CAC, LTV, budżety, kanały
-- “co optymalizować w tym tygodniu”
+## Persona 2: CMO / Performance Marketer
+### Cele
+- Spójny obraz kampanii (Meta/Google/GA4) i wpływu na sprzedaż
+- Rekomendacje budżetu i wykrywanie anomalii
+### Use cases (demo)
+- Analytics: insighty AI + wykresy kampanii
+- Raport miesięczny: Reports (download cards)
+- Integrations: widok “Connected/Disconnected” (stan lokalny)
 
-3) Performance Specialist / Agency
-- raportowanie klientom
-- porównywanie okresów, segmentacja kampanii
-- szybkie wykrywanie problemów (tracking, spadki)
+## Persona 3: Analityk / Ops
+### Cele
+- Mniej ręcznej roboty w raportowaniu
+- Jednolity model danych i gotowe widoki
+### Use cases (demo)
+- Przegląd źródeł danych w integracjach
+- ROI calculator na landing (uzasadnienie wartości)
+- Sprawdzenie bezpieczeństwa i zgodności (sekcja Security + legal)
 
-4) Data/Analytics (w firmie lub agencyjnie)
-- spójność modelu danych
-- definicje metryk, lineage
-- kontrola jakości i kontraktów
+## Persona 4: Product/Engineering (wewnętrznie)
+### Cele
+- Spójna architektura frontendu i warstwy AI
+- Przewidywalne stany UI i testowalność
+### Use cases (demo)
+- Konsystentne i18n + theme tokens
+- AI streaming + abort + safety mapping
+- Kontrakty mock danych
 
-## Top use cases (MVP)
-- Podsumowanie 7/30 dni: przychód, marża, koszty ads, ROAS
-- Diagnostyka spadku: “co się zmieniło w kanale/kampanii/produkcie”
-- Monitoring: alerty anomalii (przychód, ROAS, refundy)
-- Raport dla klienta: 1 klik “Executive PDF/Share” (docelowo)
-
-## Krytyczne wymagania UX
-- czytelne definicje KPI (tooltip + źródło)
-- porównania okresów (MoM/WoW) w jednym miejscu
-- szybkie “drilldown” do przyczyny
-- AI nie może udawać pewności, gdy nie ma danych (zasada: jawność)
+## Kluczowe scenariusze end-to-end (demo)
+1. Landing → See Demo → Dashboard Overview
+2. Dashboard → AI Drawer → wysłanie promptu (tryb mock/no key)
+3. Integrations → toggle status (stan lokalny) → informacja o braku realnych API
+4. Footer → linki prawne → strony legal
+5. Cookie banner → odmowa / akceptacja / konfiguracja
