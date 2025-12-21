@@ -5,11 +5,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import {
-  AuthCredentials,
-  AuthSignupPayload,
-  AuthState,
-} from '../types/auth';
+import type { AuthCredentials, AuthSignupPayload, AuthState } from '../types/auth';
 
 const STORAGE_KEY = 'pd_auth';
 
