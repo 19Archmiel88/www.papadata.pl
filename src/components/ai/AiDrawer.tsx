@@ -47,7 +47,7 @@ const AiDrawer = ({ isOpen, onClose }: AiDrawerProps) => {
       onClose={onClose}
       title={t('ai.title')}
       variant="drawer"
-      initialFocusRef={inputRef}
+      initialFocusRef={inputRef as unknown as React.RefObject<HTMLElement>}
     >
       <div className="ai-drawer" id="ai-drawer">
         <div className="ai-meta">

@@ -37,7 +37,7 @@ const CookieSettingsModal = ({
       isOpen={isOpen}
       onClose={onClose}
       title={t('compliance.cookies.settingsTitle')}
-      initialFocusRef={analyticsRef}
+      initialFocusRef={analyticsRef as unknown as React.RefObject<HTMLElement>}
     >
       <form className="cookie-settings" onSubmit={handleSubmit}>
         <div className="cookie-settings-grid">
