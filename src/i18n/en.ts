@@ -35,6 +35,8 @@ export const en = {
     'auth.login.email': 'Work email',
     'auth.login.emailPlaceholder': 'name@company.com',
     'auth.login.password': 'Password',
+    'auth.password.show': 'Show password',
+    'auth.password.hide': 'Hide password',
     'auth.login.passwordPlaceholder': 'Min. 8 characters',
     'auth.login.loading': 'Signing in...',
     'auth.login.submit': 'Log in',

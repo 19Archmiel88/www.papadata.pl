@@ -35,6 +35,8 @@ export const pl = {
     'auth.login.email': 'Email służbowy',
     'auth.login.emailPlaceholder': 'name@company.com',
     'auth.login.password': 'Hasło',
+    'auth.password.show': 'Pokaż hasło',
+    'auth.password.hide': 'Ukryj hasło',
     'auth.login.passwordPlaceholder': 'Min. 8 znaków',
     'auth.login.loading': 'Logowanie...',
     'auth.login.submit': 'Zaloguj się',
