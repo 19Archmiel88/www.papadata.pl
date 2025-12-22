@@ -82,7 +82,11 @@ const LoginPage = () => {
               minLength={8}
             />
           </label>
-          {error && <p className="form-error">{error}</p>}
+          {error && (
+            <p className="form-error" role="alert">
+              {error}
+            </p>
+          )}
           <button type="submit" className="btn-primary" disabled={isSubmitting}>
             {isSubmitting ? t('auth.login.loading') : t('auth.login.submit')}
           </button>

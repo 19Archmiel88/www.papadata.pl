@@ -144,6 +144,7 @@ const SignupPage = () => {
                 className={`auth-step ${isActive ? 'auth-step--active' : ''} ${
                   isComplete ? 'auth-step--completed' : ''
                 }`}
+                aria-current={isActive ? 'step' : undefined}
               >
                 {t(`auth.wizard.steps.${key}`)}
               </span>
@@ -283,7 +284,11 @@ const SignupPage = () => {
               </label>
             </div>
           )}
-          {error && <p className="form-error">{error}</p>}
+          {error && (
+            <p className="form-error" role="alert">
+              {error}
+            </p>
+          )}
           <div className="auth-actions">
             {step > 1 && (
               <button type="button" className="btn-tertiary" onClick={handleBack}>
