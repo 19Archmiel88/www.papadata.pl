@@ -42,6 +42,7 @@ const buildPayload = (messages: ChatMessage[], systemPrompt?: string) => {
   };
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const parsePayload = (payload: any) => {
   const candidate = payload?.candidates?.[0];
   const parts = candidate?.content?.parts ?? [];
@@ -55,6 +56,7 @@ const parsePayload = (payload: any) => {
 };
 
 const simulateStreaming = async (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   payload: any,
   onChunk: (chunk: string) => void,
   signal?: AbortSignal,

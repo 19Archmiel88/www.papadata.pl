@@ -43,6 +43,7 @@ const persistConsent = (value: ConsentState) => {
   }
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const ConsentContext = createContext<ConsentContextValue | null>(null);
 
 export const ConsentProvider = ({ children }: { children: ReactNode }) => {
