@@ -25,7 +25,8 @@ const CookieSettingsModal = ({
     if (!isOpen) return;
     setAnalytics(preferences.analytics);
     setMarketing(preferences.marketing);
-  }, [isOpen, preferences.analytics, preferences.marketing]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();

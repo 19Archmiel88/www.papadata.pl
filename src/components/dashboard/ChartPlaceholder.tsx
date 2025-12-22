@@ -53,7 +53,33 @@ const ChartPlaceholder = ({
 
   const total = segments.reduce((sum, segment) => sum + segment.value, 0);
   const circumference = 2 * Math.PI * 18;
-  let offset = 0;
+
+  // Calculate cumulative offsets
+  const donutSegments = segments.reduce<{
+    accumulatedOffset: number;
+    items: (ChartSegment & { style: { strokeDasharray: string; strokeDashoffset: number } })[];
+  }>(
+    (acc, segment) => {
+      const fraction = total ? segment.value / total : 0;
+      const length = fraction * circumference;
+      const dashArray = `${length} ${circumference - length}`;
+      const currentOffset = acc.accumulatedOffset;
+
+      const item = {
+        ...segment,
+        style: {
+          strokeDasharray: dashArray,
+          strokeDashoffset: -currentOffset,
+        },
+      };
+
+      return {
+        accumulatedOffset: acc.accumulatedOffset + length,
+        items: [...acc.items, item],
+      };
+    },
+    { accumulatedOffset: 0, items: [] }
+  ).items;
 
   return (
     <div className="chart-card">
@@ -108,16 +134,11 @@ const ChartPlaceholder = ({
               stroke="var(--border)"
               strokeWidth="6"
             />
-            {segments.map((segment, index) => {
-              const fraction = total ? segment.value / total : 0;
-              const length = fraction * circumference;
-              const dashArray = `${length} ${circumference - length}`;
+            {donutSegments.map((segment, index) => {
               const style: CSSProperties = {
                 stroke: CHART_COLORS[index % CHART_COLORS.length],
-                strokeDasharray: dashArray,
-                strokeDashoffset: -offset,
+                ...segment.style,
               };
-              offset += length;
               return (
                 <circle
                   key={segment.id}

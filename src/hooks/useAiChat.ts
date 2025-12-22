@@ -113,7 +113,7 @@ export const useAiChat = () => {
         setMessages((prev) => prev.filter((message) => message.id !== assistantId));
         setError('blocked');
       }
-    } catch (err) {
+    } catch {
       if (controller.signal.aborted) {
         if (cancelReasonRef.current === 'timeout') {
           setError('timeout');
@@ -136,7 +136,7 @@ export const useAiChat = () => {
       abortRef.current = null;
       cancelReasonRef.current = null;
     }
-  }, [hasApiKey, input, status]);
+  }, [hasApiKey, input, status, apiKey]);
 
   const cancel = useCallback(() => {
     if (!abortRef.current) return;
