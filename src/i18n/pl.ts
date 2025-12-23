@@ -511,6 +511,8 @@ export const pl = {
     'dashboard.support.form.message': 'Wiadomość',
     'dashboard.support.form.messagePlaceholder': 'Dodaj szczegóły i linki',
     'dashboard.support.form.cta': 'Wyślij zgłoszenie',
+    'dashboard.support.form.sending': 'Wysyłanie...',
+    'dashboard.support.form.success': 'Wysłano zgłoszenie!',
     'dashboard.support.tickets.title': 'Ostatnie zgłoszenia',
     'dashboard.support.tickets.subtitle': 'Najnowsze aktualizacje od zespołu.',
     'dashboard.support.tickets.priorityLabel': 'Priorytet',

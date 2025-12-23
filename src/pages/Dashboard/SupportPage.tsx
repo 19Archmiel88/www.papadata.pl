@@ -1,4 +1,4 @@
-import type { FormEvent } from 'react';
+import { type FormEvent, useState } from 'react';
 import { States } from '../../components/common/States';
 import { tickets } from '../../data/mocks/tickets';
 import { useT } from '../../hooks/useT';
@@ -6,6 +6,8 @@ import DashboardLayout from '../../layouts/DashboardLayout';
 
 const SupportPage = () => {
   const { t } = useT();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const statusTone: Record<string, string> = {
     'dashboard.support.tickets.status.open': 'positive',
@@ -15,6 +17,17 @@ const SupportPage = () => {
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setIsSubmitting(true);
+
+    // Simulate network request
+    setTimeout(() => {
+      setIsSubmitting(false);
+      setIsSuccess(true);
+      (event.target as HTMLFormElement).reset();
+
+      // Reset success message after 3 seconds
+      setTimeout(() => setIsSuccess(false), 3000);
+    }, 1500);
   };
 
   return (
@@ -80,8 +93,17 @@ const SupportPage = () => {
                   />
                 </div>
               </div>
-              <button type="submit" className="btn-primary">
-                {t('dashboard.support.form.cta')}
+              <button
+                type="submit"
+                className="btn-primary"
+                disabled={isSubmitting || isSuccess}
+                aria-disabled={isSubmitting || isSuccess}
+              >
+                {isSubmitting
+                  ? t('dashboard.support.form.sending')
+                  : isSuccess
+                    ? t('dashboard.support.form.success')
+                    : t('dashboard.support.form.cta')}
               </button>
             </form>
             <div className="support-panel">

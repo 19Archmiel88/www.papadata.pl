@@ -508,6 +508,8 @@ export const en = {
     'dashboard.support.form.message': 'Message',
     'dashboard.support.form.messagePlaceholder': 'Add details and links',
     'dashboard.support.form.cta': 'Send ticket',
+    'dashboard.support.form.sending': 'Sending...',
+    'dashboard.support.form.success': 'Ticket Sent!',
     'dashboard.support.tickets.title': 'Recent tickets',
     'dashboard.support.tickets.subtitle': 'Latest updates from your team.',
     'dashboard.support.tickets.priorityLabel': 'Priority',
