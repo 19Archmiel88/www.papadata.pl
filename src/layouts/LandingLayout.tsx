@@ -1,10 +1,11 @@
-import type { ReactNode } from 'react';
+import { Suspense, type ReactNode } from 'react';
 import { Outlet } from 'react-router-dom';
 import Header from '../components/nav/Header';
 import Footer from '../components/nav/Footer';
 import FixedHud from '../components/hud/FixedHud';
 import SwarmBackground from '../components/bg/SwarmBackground';
 import InitLoader from '../components/common/InitLoader';
+import { SuspenseFallback } from '../components/common/SuspenseFallback';
 import '../styles/landing.css';
 import '../styles/hivemind.css';
 
@@ -20,7 +21,9 @@ const LandingLayout = ({ children }: LandingLayoutProps) => {
       <FixedHud />
       <div className="hivemind-content">
         <Header />
-        {children ?? <Outlet />}
+        <Suspense fallback={<SuspenseFallback />}>
+          {children ?? <Outlet />}
+        </Suspense>
         <Footer />
       </div>
     </div>
