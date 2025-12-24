@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { useT } from '../../hooks/useT';
 import type { AiMessageRole } from '../../hooks/useAiChat';
 
@@ -6,7 +7,8 @@ type AiMessageProps = {
   content: string;
 };
 
-const AiMessage = ({ role, content }: AiMessageProps) => {
+// Bolt: Wrapped in memo to prevent re-renders when parent input state changes
+const AiMessage = memo(({ role, content }: AiMessageProps) => {
   const { t } = useT();
 
   return (
@@ -17,6 +19,8 @@ const AiMessage = ({ role, content }: AiMessageProps) => {
       <p className="ai-message-text">{content}</p>
     </div>
   );
-};
+});
+
+AiMessage.displayName = 'AiMessage';
 
 export default AiMessage;
