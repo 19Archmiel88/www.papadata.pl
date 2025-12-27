@@ -25,32 +25,32 @@ const STATE_CONFIG: Record<StateKind, { titleKey: string; descriptionKey: string
   },
 };
 
-export const StateCard = ({ kind }: { kind: StateKind }) => {
+export const StateCard = ({ kind, role }: { kind: StateKind; role?: string }) => {
   const { t } = useT();
   const { titleKey, descriptionKey } = STATE_CONFIG[kind];
 
   return (
-    <div className="state-card" role="listitem">
+    <div className="state-card" role={role}>
       <h3 className="state-title">{t(titleKey)}</h3>
       <p className="state-description">{t(descriptionKey)}</p>
     </div>
   );
 };
 
-export const LoadingState = () => <StateCard kind="loading" />;
-export const EmptyState = () => <StateCard kind="empty" />;
-export const ErrorState = () => <StateCard kind="error" />;
-export const OfflineState = () => <StateCard kind="offline" />;
-export const NoAccessState = () => <StateCard kind="noAccess" />;
+export const LoadingState = ({ role }: { role?: string }) => <StateCard kind="loading" role={role} />;
+export const EmptyState = ({ role }: { role?: string }) => <StateCard kind="empty" role={role} />;
+export const ErrorState = ({ role }: { role?: string }) => <StateCard kind="error" role={role} />;
+export const OfflineState = ({ role }: { role?: string }) => <StateCard kind="offline" role={role} />;
+export const NoAccessState = ({ role }: { role?: string }) => <StateCard kind="noAccess" role={role} />;
 
 export const States = () => {
   return (
     <div className="states-grid" role="list">
-      <LoadingState />
-      <EmptyState />
-      <ErrorState />
-      <OfflineState />
-      <NoAccessState />
+      <LoadingState role="listitem" />
+      <EmptyState role="listitem" />
+      <ErrorState role="listitem" />
+      <OfflineState role="listitem" />
+      <NoAccessState role="listitem" />
     </div>
   );
 };
