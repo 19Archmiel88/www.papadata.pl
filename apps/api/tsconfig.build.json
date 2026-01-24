@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "@nestjs/common": ["../../node_modules/@nestjs/common"],
+      "@papadata/shared": ["../../libs/shared/dist"],
+      "@papadata/shared/*": ["../../libs/shared/dist/*"]
+    }
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "test",
+    "**/*.spec.ts"
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "name": "papadata-monorepo",
+  "private": true,
+  "workspaces": [
+    "apps/web",
+    "apps/api",
+    "libs/*"
+  ],
+  "scripts": {
+    "dev": "pnpm --filter @papadata/web dev",
+    "build": "pnpm --filter @papadata/web build",
+    "preview": "pnpm --filter @papadata/web preview",
+    "api:dev": "pnpm --filter @papadata/api start:dev",
+    "api:build": "pnpm --filter @papadata/shared build && pnpm --filter @papadata/api build",
+    "build:shared": "pnpm --filter @papadata/shared build",
+    "build:api": "pnpm --filter @papadata/api build",
+    "build:web": "pnpm --filter @papadata/web build",
+    "clean": "node tools/clean.mjs",
+    "audit:encoding": "node scripts/audit-encoding.js",
+    "fix:encoding": "node scripts/fix-encoding.js --write",
+    "prepare": "node scripts/setup-husky.cjs",
+    "lint:api": "pnpm --filter @papadata/api lint",
+    "lint:web": "pnpm --filter @papadata/web lint",
+    "lint": "pnpm run lint:api && pnpm run lint:web",
+    "test:api:e2e": "pnpm --filter @papadata/api test:e2e",
+    "test:web:unit": "pnpm --filter @papadata/web test:unit",
+    "test:smoke": "node tools/run-web-smoke.mjs",
+    "runtime-smoke": "node tools/runtime-smoke.mjs",
+    "diagnose:windows": "node tools/diagnose-windows-eperm.mjs",
+    "verify:common": "node tools/ensure-npm-ci.mjs && pnpm run build:shared && pnpm run build:api && pnpm run build:web && pnpm run lint && pnpm run test:api:e2e && pnpm run test:smoke && pnpm run runtime-smoke",
+    "verify:local": "pnpm run clean && pnpm run verify:common",
+    "verify:ci": "pnpm run clean && pnpm run verify:common"
+  },
+  "devDependencies": {
+    "eslint": "8.57.1",
+    "eslint-plugin-prettier": "^5.2.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.10"
+  },
+  "lint-staged": {
+    "apps/api/**/*.{ts,tsx}": [
+      "pnpm --filter @papadata/api run lint:fix"
+    ],
+    "apps/web/**/*.{ts,tsx}": [
+      "pnpm --filter @papadata/web run lint:fix"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "engines": {
+    "node": ">=18.18 <23",
+    "pnpm": ">=9"
+  },
+  "license": "UNLICENSED",
+  "packageManager": "pnpm@9.15.4+sha512.b2dc20e2fc72b3e18848459b37359a32064663e5627a51e4c74b2c29dd8e8e0491483c3abb40789cfd578bf362fb6ba8261b05f0387d76792ed6e23ea3b1b6a0"
+}

@@ -1,0 +1,5 @@
+{
+  "name": "PapaData Intelligence UI",
+  "description": "AI recommendation engine for e-commerce data intelligence with real-time ETL pipeline visualization.",
+  "requestFramePermissions": []
+}

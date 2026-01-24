@@ -1,0 +1,71 @@
+﻿# dependencies
+node_modules/
+.pnp.*
+.yarn/
+
+# pnpm / npm / yarn locks (w repo ma zostać jeden pnpm-lock.yaml po instalacji)
+**/package-lock.json
+**/yarn.lock
+**/npm-shrinkwrap.json
+
+# build outputs
+dist/
+build/
+out/
+coverage/
+.nyc_output/
+
+# Next/Vite common
+.next/
+.vite/
+.vite-cache/
+.cache/
+.eslintcache
+
+# logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# env
+.env
+.env.*
+!.env.example
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Playwright / test artifacts
+test-results/
+playwright-report/
+blob-report/
+
+# root-level accidental data folder
+data/
+
+
+# audit backups (never commit)
+docs/audits/backup/
+
+
+# lock policy (one lockfile in repo root)
+apps/*/pnpm-lock.yaml
+**/package-lock.json
+**/yarn.lock
+**/npm-shrinkwrap.json
+
+# audit/backup artifacts
+docs/audits/backup/
+
+# husky internal
+.husky/_/
+
+# local reports
+CLEAN_AUDIT.txt
+PROJECT_INVENTORY.txt
+dump_repo.ps1

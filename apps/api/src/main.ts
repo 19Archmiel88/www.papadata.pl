@@ -1,0 +1,104 @@
+import "reflect-metadata";
+import { existsSync } from "fs";
+import { config as loadEnv } from "dotenv";
+import { resolve } from "path";
+import { NestFactory } from "@nestjs/core";
+import {
+  FastifyAdapter,
+  type NestFastifyApplication,
+} from "@nestjs/platform-fastify";
+import { AppModule } from "./app.module";
+import { initObservability } from "./common/observability.provider";
+import { PinoLoggerService } from "./common/pino-logger.service";
+import {
+  getApiConfig,
+  resetApiConfig,
+  validateApiConfig,
+} from "./common/config";
+
+async function bootstrap(): Promise<void> {
+  const envCandidates = [
+    resolve(process.cwd(), ".env.local"),
+    resolve(process.cwd(), "apps", "api", ".env.local"),
+  ];
+  const envPath = envCandidates.find((candidate) => existsSync(candidate));
+  if (envPath) {
+    loadEnv({ path: envPath, override: true });
+    resetApiConfig();
+  }
+
+  const logger = new PinoLoggerService("Bootstrap");
+  const issues = validateApiConfig();
+  issues.forEach((issue) => logger.warn(issue));
+  const observability = initObservability();
+  if (observability) {
+    logger.log(
+      `Observability enabled provider=${observability.provider} env=${observability.environment}`,
+    );
+  }
+
+  const adapter = new FastifyAdapter() as any;
+  const app = (await NestFactory.create(AppModule, adapter, {
+    logger,
+  })) as NestFastifyApplication;
+  app.useLogger(logger);
+
+  const fastify = app.getHttpAdapter().getInstance();
+
+  const rawBodyModule = await import("fastify-raw-body");
+  const rawBodyPlugin =
+    (rawBodyModule as { default?: unknown }).default ?? rawBodyModule;
+  await fastify.register(rawBodyPlugin as any, {
+    field: "rawBody",
+    global: false,
+    encoding: "utf8",
+    runFirst: true,
+    routes: ["/api/billing/webhook"],
+  });
+
+  await fastify.register(import("@fastify/helmet"), {
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: [
+          "'self'",
+          "'unsafe-inline'",
+          "https://www.googletagmanager.com",
+        ],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com"],
+        imgSrc: ["'self'", "data:", "https:"],
+        connectSrc: [
+          "'self'",
+          "https://www.google-analytics.com",
+          "https://region1.google-analytics.com",
+        ],
+        frameSrc: ["'none'"],
+        objectSrc: ["'none'"],
+        upgradeInsecureRequests: [],
+      },
+    },
+    crossOriginEmbedderPolicy: false,
+    crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
+  });
+
+  await fastify.register(import("@fastify/cors"), {
+    origin: getApiConfig().corsAllowedOrigins,
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Request-ID"],
+  });
+
+  app.setGlobalPrefix("api");
+
+  const port = getApiConfig().port;
+  await app.listen(port, "0.0.0.0");
+}
+
+void bootstrap().catch((error) => {
+  const logger = new PinoLoggerService("Bootstrap");
+  logger.error({ err: error }, "Bootstrap failed");
+  // eslint-disable-next-line no-console
+  console.error(error);
+  process.exit(1);
+});

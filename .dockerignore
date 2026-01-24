@@ -1,0 +1,39 @@
+# dependencies
+node_modules
+**/node_modules
+
+# build outputs
+dist
+**/dist
+build
+**/build
+coverage
+**/coverage
+.next
+out
+
+# caches
+.cache
+**/.cache
+.vite
+**/.vite
+.turbo
+**/.turbo
+
+# logs
+*.log
+
+# VCS / IDE
+.git
+.vscode
+.idea
+
+# OS
+.DS_Store
+Thumbs.db
+
+# env / secrets (do not send to docker build context)
+.env
+.env.*
+!.env.example
+!.env.sample
