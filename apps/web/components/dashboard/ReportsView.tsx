@@ -84,12 +84,17 @@ export const ReportsView: React.FC = () => {
 
   const reports = t.dashboard.reports_v2 ?? emptyReports;
 
-  const exportFormats = reports.export_formats;
-  const exportHistory = reports.export_history;
-  const diffItems = reports.diff.items;
-  const listItems: ReportListItem[] = reports.list.items;
-  const generateFields: GenerateField[] = reports.generate.fields;
-  const generateSections = reports.generate.sections;
+  const lastReport = reports.last_report ?? emptyReports.last_report;
+  const reportList = reports.list ?? emptyReports.list;
+  const listActions = reportList.actions ?? emptyReports.list.actions;
+  const generate = reports.generate ?? emptyReports.generate;
+  const diff = reports.diff ?? emptyReports.diff;
+  const exportFormats = reports.export_formats ?? emptyReports.export_formats;
+  const exportHistory = reports.export_history ?? emptyReports.export_history;
+  const diffItems = diff.items ?? [];
+  const listItems: ReportListItem[] = reportList.items ?? [];
+  const generateFields: GenerateField[] = generate.fields ?? [];
+  const generateSections = generate.sections ?? [];
 
   const handleExplain = (context: string) => {
     setContextLabel?.(context);
@@ -167,12 +172,12 @@ export const ReportsView: React.FC = () => {
               variant="primary"
               className="!px-4 !py-2 !text-xs rounded-full"
               onClick={() =>
-                handleAction(reports.generate.cta, reports.title)
+                handleAction(generate.cta, reports.title)
               }
               disabled={isDemo}
               title={isDemo ? demoTooltip : undefined}
             >
-              {reports.generate.cta}
+              {generate.cta}
             </InteractiveButton>
             <button
               type="button"
@@ -200,16 +205,16 @@ export const ReportsView: React.FC = () => {
           <div className="flex items-start justify-between gap-4">
             <div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                {reports.last_report.title}
+                {lastReport.title}
               </h3>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                {reports.last_report.desc}
+                {lastReport.desc}
               </p>
             </div>
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={() => handleExplain(reports.last_report.title)}
+                onClick={() => handleExplain(lastReport.title)}
                 className="text-xs font-black uppercase tracking-widest text-brand-start hover:underline"
               >
                 {t.dashboard.context_menu.explain_ai}
@@ -219,11 +224,11 @@ export const ReportsView: React.FC = () => {
                 onClick={(event) =>
                   openMenu(
                     event,
-                    buildMenuItems(reports.last_report.title),
-                    reports.last_report.title
+                    buildMenuItems(lastReport.title),
+                    lastReport.title
                   )
                 }
-                aria-label={`${t.dashboard.context_menu.label}: ${reports.last_report.title}`}
+                aria-label={`${t.dashboard.context_menu.label}: ${lastReport.title}`}
                 className="p-2 rounded-full border border-black/10 dark:border-white/10 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -240,19 +245,19 @@ export const ReportsView: React.FC = () => {
 
           <div className="mt-4 rounded-2xl border border-black/10 dark:border-white/10 bg-white/70 dark:bg-white/5 p-5">
             <div className="text-sm font-semibold text-gray-900 dark:text-white">
-              {reports.last_report.name}
+              {lastReport.name}
             </div>
             <div className="mt-2 text-xs text-gray-500">
-              {reports.last_report.range_label}:{' '}
-              {reports.last_report.range_value}
+              {lastReport.range_label}:{' '}
+              {lastReport.range_value}
             </div>
             <div className="text-xs text-gray-500">
-              {reports.last_report.date_label}:{' '}
-              {reports.last_report.date_value}
+              {lastReport.date_label}:{' '}
+              {lastReport.date_value}
             </div>
             <div className="text-xs text-gray-500">
-              {reports.last_report.language_label}:{' '}
-              {reports.last_report.language_value}
+              {lastReport.language_label}:{' '}
+              {lastReport.language_value}
             </div>
 
             <div className="mt-4 flex flex-wrap gap-2">
@@ -261,14 +266,14 @@ export const ReportsView: React.FC = () => {
                 className="!px-3 !py-2 !text-xs rounded-full"
                 onClick={() =>
                   handleAction(
-                    reports.last_report.cta_preview,
-                    reports.last_report.name
+                    lastReport.cta_preview,
+                    lastReport.name
                   )
                 }
                 disabled={isDemo}
                 title={isDemo ? demoTooltip : undefined}
               >
-                {reports.last_report.cta_preview}
+                {lastReport.cta_preview}
               </InteractiveButton>
 
               {exportFormats.map((format: string) => (
@@ -276,7 +281,7 @@ export const ReportsView: React.FC = () => {
                   key={format}
                   variant="secondary"
                   className="!px-3 !py-2 !text-xs rounded-full"
-                  onClick={() => handleAction(format, reports.last_report.name)}
+                  onClick={() => handleAction(format, lastReport.name)}
                   disabled={isDemo}
                   title={isDemo ? demoTooltip : undefined}
                 >
@@ -289,21 +294,21 @@ export const ReportsView: React.FC = () => {
                 className="!px-3 !py-2 !text-xs rounded-full"
                 onClick={() =>
                   handleAction(
-                    reports.last_report.cta_resend,
-                    reports.last_report.name
+                    lastReport.cta_resend,
+                    lastReport.name
                   )
                 }
                 disabled={isDemo}
                 title={isDemo ? demoTooltip : undefined}
               >
-                {reports.last_report.cta_resend}
+                {lastReport.cta_resend}
               </InteractiveButton>
             </div>
           </div>
 
           <div className="mt-6">
             <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
-              {reports.diff.title}
+              {diff.title}
             </h4>
             {diffItems.length === 0 ? (
               <div className="mt-3 text-xs text-gray-500">
@@ -325,12 +330,12 @@ export const ReportsView: React.FC = () => {
         <div className="rounded-3xl border border-black/10 dark:border-white/10 bg-white/90 dark:bg-[#0b0b0f] p-6 shadow-xl">
           <div className="flex items-start justify-between gap-4">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-              {reports.list.title}
+              {reportList.title}
             </h3>
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={() => handleExplain(reports.list.title)}
+                onClick={() => handleExplain(reportList.title)}
                 className="text-xs font-black uppercase tracking-widest text-brand-start hover:underline"
               >
                 {t.dashboard.context_menu.explain_ai}
@@ -338,9 +343,9 @@ export const ReportsView: React.FC = () => {
               <button
                 type="button"
                 onClick={(event) =>
-                  openMenu(event, buildMenuItems(reports.list.title), reports.list.title)
+                  openMenu(event, buildMenuItems(reportList.title), reportList.title)
                 }
-                aria-label={`${t.dashboard.context_menu.label}: ${reports.list.title}`}
+                aria-label={`${t.dashboard.context_menu.label}: ${reportList.title}`}
                 className="p-2 rounded-full border border-black/10 dark:border-white/10 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -358,13 +363,13 @@ export const ReportsView: React.FC = () => {
           <div className="mt-4 space-y-3">
             {listItems.length === 0 ? (
               <WidgetEmptyState
-                title={reports.list.empty_title || 'Brak raportów'}
+                title={reportList.empty_title || 'Brak raportów'}
                 desc={
-                  reports.list.empty_desc ||
+                  reportList.empty_desc ||
                   'Nie masz jeszcze żadnych raportów. Wygeneruj pierwszy raport zarządczy.'
                 }
-                actionLabel={reports.generate.cta}
-                onAction={() => handleAction(reports.generate.cta, reports.generate.title)}
+                actionLabel={generate.cta}
+                onAction={() => handleAction(generate.cta, generate.title)}
               />
             ) : (
               listItems.map((report) => (
@@ -387,32 +392,32 @@ export const ReportsView: React.FC = () => {
                       type="button"
                       className="text-xs text-brand-start hover:underline"
                       onClick={() =>
-                        handleAction(reports.list.actions.preview, report.name)
+                        handleAction(listActions.preview, report.name)
                       }
                       disabled={isDemo}
                       title={isDemo ? demoTooltip : undefined}
                     >
-                      {reports.list.actions.preview}
+                      {listActions.preview}
                     </button>
                     <button
                       type="button"
                       className="text-xs text-gray-500 hover:text-gray-900 dark:hover:text-white"
                       onClick={() =>
-                        handleAction(reports.list.actions.download, report.name)
+                        handleAction(listActions.download, report.name)
                       }
                       disabled={isDemo}
                       title={isDemo ? demoTooltip : undefined}
                     >
-                      {reports.list.actions.download}
+                      {listActions.download}
                     </button>
                     <button
                       type="button"
                       className="text-xs text-gray-500 hover:text-gray-900 dark:hover:text-white"
-                      onClick={() => handleAction(reports.list.actions.open, report.name)}
+                      onClick={() => handleAction(listActions.open, report.name)}
                       disabled={isDemo}
                       title={isDemo ? demoTooltip : undefined}
                     >
-                      {reports.list.actions.open}
+                      {listActions.open}
                     </button>
                   </div>
                 </div>
@@ -460,17 +465,17 @@ export const ReportsView: React.FC = () => {
         <div className="flex items-start justify-between gap-4">
           <div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-              {reports.generate.title}
+              {generate.title}
             </h3>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              {reports.generate.desc}
+              {generate.desc}
             </p>
           </div>
 
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => handleExplain(reports.generate.title)}
+              onClick={() => handleExplain(generate.title)}
               className="text-xs font-black uppercase tracking-widest text-brand-start hover:underline"
             >
               {t.dashboard.context_menu.explain_ai}
@@ -480,11 +485,11 @@ export const ReportsView: React.FC = () => {
               onClick={(event) =>
                 openMenu(
                   event,
-                  buildMenuItems(reports.generate.title),
-                  reports.generate.title
+                  buildMenuItems(generate.title),
+                  generate.title
                 )
               }
-              aria-label={`${t.dashboard.context_menu.label}: ${reports.generate.title}`}
+              aria-label={`${t.dashboard.context_menu.label}: ${generate.title}`}
               className="p-2 rounded-full border border-black/10 dark:border-white/10 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -532,11 +537,11 @@ export const ReportsView: React.FC = () => {
           <InteractiveButton
             variant="primary"
             className="!px-5 !py-2 !text-xs rounded-full"
-            onClick={() => handleAction(reports.generate.cta, reports.generate.title)}
+            onClick={() => handleAction(generate.cta, generate.title)}
             disabled={isDemo}
             title={isDemo ? demoTooltip : undefined}
           >
-            {reports.generate.cta}
+            {generate.cta}
           </InteractiveButton>
         </div>
 

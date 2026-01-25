@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import {
+  BadRequestException,
+  Injectable,
+  ServiceUnavailableException,
+} from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { randomUUID } from "crypto";
 import type {
@@ -29,6 +33,14 @@ const getExpiresInSeconds = () => {
   return Number.isFinite(raw) && raw > 0 ? raw : 3600;
 };
 
+const ensureDemoMode = () => {
+  if (getApiConfig().appMode !== "demo") {
+    throw new ServiceUnavailableException(
+      "Authentication stubs are available only in demo mode",
+    );
+  }
+};
+
 const resolveRoles = (email: string): string[] => {
   const { auth, appMode } = getApiConfig();
   const normalizedEmail = email.toLowerCase();
@@ -50,6 +62,7 @@ export class AuthService {
   constructor(private readonly jwtService: JwtService) {}
 
   requestMagicLink(payload: AuthMagicLinkRequest): AuthMagicLinkResponse {
+    ensureDemoMode();
     const email = payload?.email?.trim().toLowerCase() ?? "";
     if (!isValidEmail(email)) {
       throw new BadRequestException("Invalid email address");
@@ -61,6 +74,7 @@ export class AuthService {
   }
 
   login(payload: AuthLoginRequest): AuthLoginResponse {
+    ensureDemoMode();
     const email = payload?.email?.trim().toLowerCase() ?? "";
     if (!isValidEmail(email)) {
       throw new BadRequestException("Invalid email address");
@@ -69,6 +83,7 @@ export class AuthService {
   }
 
   register(payload: AuthRegisterRequest): AuthRegisterResponse {
+    ensureDemoMode();
     const email = payload?.email?.trim().toLowerCase() ?? "";
     const password = payload?.password ?? "";
     const nip = payload?.nip?.trim() ?? "";

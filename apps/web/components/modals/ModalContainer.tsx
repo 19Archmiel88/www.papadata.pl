@@ -84,7 +84,8 @@ const ModalShell: React.FC<ModalShellProps> = ({
   }, [isOpen]);
 
   const sizeClass = sizeClassMap[size] ?? sizeClassMap.lg;
-  const contentOffsetClass = modalKey === 'auth' ? 'md:-translate-y-10' : '';
+  const contentOffsetClass = '';
+  const scrollbarClass = modalKey === 'auth' ? 'no-scrollbar' : '';
 
   const onBackdropPointerDown: React.PointerEventHandler<HTMLDivElement> = (e) => {
     if (disableOverlayClose) return;
@@ -106,7 +107,7 @@ const ModalShell: React.FC<ModalShellProps> = ({
         <Portal>
           <div
             key={modalKey ?? 'modal'}
-            className="fixed inset-0 z-[10000] flex items-center justify-center p-4 md:p-8"
+            className="fixed inset-0 z-[10000] flex items-center justify-center p-4 md:p-0"
             onPointerDown={onBackdropPointerDown}
           >
             <motion.div
@@ -128,7 +129,7 @@ const ModalShell: React.FC<ModalShellProps> = ({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.96, y: 20 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className={`relative z-10 w-full ${sizeClass} max-h-[92vh] overflow-auto outline-none mx-auto ${contentOffsetClass}`}
+              className={`relative z-10 w-full ${sizeClass} max-h-[92vh] overflow-auto outline-none mx-auto ${contentOffsetClass} ${scrollbarClass}`}
             >
               <span id={titleId} className="sr-only">
                 {title ?? 'Dialog'}

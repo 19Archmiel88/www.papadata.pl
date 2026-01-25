@@ -145,3 +145,24 @@ export const formatCurrency = (
     maximumFractionDigits,
   }).format(value);
 };
+
+export const formatCompactCurrency = (
+  value: number,
+  locale: string,
+  maximumFractionDigits = 1,
+  fallback: string = '—',
+) => {
+  // Requirement: currency always PLN
+  if (!Number.isFinite(value)) return fallback;
+  const abs = Math.abs(value);
+  if (abs < 10000) {
+    return formatCurrency(value, locale, 0, fallback);
+  }
+  return getNumberFormatter(locale, {
+    style: 'currency',
+    currency: 'PLN',
+    notation: 'compact',
+    compactDisplay: 'short',
+    maximumFractionDigits,
+  }).format(value);
+};

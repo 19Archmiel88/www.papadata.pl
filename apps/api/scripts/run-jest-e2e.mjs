@@ -3,6 +3,10 @@ import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 
+if (!process.env.APP_MODE) {
+  process.env.APP_MODE = 'demo';
+}
+
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const appRoot = resolve(scriptDir, '..');
 const jestCli = resolve(appRoot, 'node_modules', 'jest', 'bin', 'jest.js');

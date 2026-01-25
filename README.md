@@ -42,3 +42,7 @@ pnpm run dev
 ```
 
 More details: `docs/runbooks/local-verify.md`.
+
+## Notes
+- Web build in the monorepo: use `pnpm --filter @papadata/web build`. `pnpm -C apps/web build` requires a prior `pnpm -w install` (or `pnpm -C apps/web install`) so Vite is available.
+- Production promotion: `pnpm run promote:prod` triggers `cloudbuild/prod.yaml` via `gcloud builds submit`. Requires `gcloud` auth with permission to run Cloud Build in `papadata-platform-prod` and either `GOOGLE_CLOUD_PROJECT`/`GCP_PROJECT_ID` set to `papadata-platform-prod` or `CONFIRM_PROD=1`.

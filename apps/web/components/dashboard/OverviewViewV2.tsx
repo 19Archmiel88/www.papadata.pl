@@ -10,7 +10,12 @@ import {
 } from './DashboardPrimitives';
 import { clamp } from './DashboardPrimitives.constants';
 import { useContextMenu } from './DashboardPrimitives.hooks';
-import { formatCurrency, formatPercentValue, formatRatio } from '../../utils/formatters';
+import {
+  formatCompactCurrency,
+  formatCurrency,
+  formatPercentValue,
+  formatRatio,
+} from '../../utils/formatters';
 import type { DashboardOverviewV2, DashboardOverviewV2Alert } from '../../types';
 
 type SortDir = 'asc' | 'desc';
@@ -62,7 +67,7 @@ const KpiCard: React.FC<{
   isStale?: boolean;
   staleLabel?: string;
 }> = ({ label, value, delta, isPos, def, onExplain, explainLabel, isStale, staleLabel }) => (
-  <div className="dashboard-surface dashboard-card dashboard-card--compact space-y-3 group transition-all hover:border-brand-start/40">
+  <div className="dashboard-surface dashboard-card dashboard-card--compact space-y-3 group transition-all hover:border-brand-start/40 overflow-hidden">
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-2">
         <span className="text-xs font-black text-gray-500 uppercase tracking-widest">
@@ -94,7 +99,7 @@ const KpiCard: React.FC<{
       </button>
     </div>
 
-    <div className="text-3xl font-black text-gray-900 dark:text-white tracking-tighter">
+    <div className="text-[clamp(1.25rem,2.6vw,2.05rem)] leading-none font-black text-gray-900 dark:text-white tracking-tighter tabular-nums whitespace-nowrap">
       {value}
     </div>
 
@@ -162,6 +167,10 @@ export const OverviewViewV2: React.FC = () => {
   );
 
   const formatCurrencyValue = useMemo(() => (value: number) => formatCurrency(value, locale), [locale]);
+  const formatCurrencyCompactValue = useMemo(
+    () => (value: number) => formatCompactCurrency(value, locale),
+    [locale],
+  );
   const formatPercentValueLocal = useMemo(
     () => (value: number) => formatPercentValue(value, locale, 1),
     [locale]
@@ -523,7 +532,7 @@ export const OverviewViewV2: React.FC = () => {
       <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-7 gap-5">
         <KpiCard
           label={t.dashboard.overview_v2?.kpis?.labels?.revenue ?? 'Revenue'}
-          value={formatCurrencyValue(totals.revenue)}
+          value={formatCurrencyCompactValue(totals.revenue)}
           delta="6.4%"
           isPos={true}
           def={t.dashboard.overview_v2?.kpis?.defs?.revenue ?? ''}
@@ -534,7 +543,7 @@ export const OverviewViewV2: React.FC = () => {
         />
         <KpiCard
           label={t.dashboard.overview_v2?.kpis?.labels?.spend ?? 'Spend'}
-          value={formatCurrencyValue(totals.spend)}
+          value={formatCurrencyCompactValue(totals.spend)}
           delta="4.2%"
           isPos={false}
           def={t.dashboard.overview_v2?.kpis?.defs?.spend ?? ''}
@@ -545,7 +554,7 @@ export const OverviewViewV2: React.FC = () => {
         />
         <KpiCard
           label={t.dashboard.overview_v2?.kpis?.labels?.profit ?? 'Profit'}
-          value={formatCurrencyValue(totals.revenue * 0.34)}
+          value={formatCurrencyCompactValue(totals.revenue * 0.34)}
           delta="12.1%"
           isPos={true}
           def={t.dashboard.overview_v2?.kpis?.defs?.profit ?? ''}

@@ -16,13 +16,16 @@ const createId = (): string => {
 export const LandingChatWidget: React.FC<{
   lang: string;
   onStartTrial: () => void;
-}> = ({ lang, onStartTrial }) => {
+  onOpenChange?: (open: boolean) => void;
+  onPanelResize?: (width: number) => void;
+}> = ({ lang, onStartTrial, onOpenChange, onPanelResize }) => {
   const { activeModal } = useModal();
 
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const panelRef = useRef<HTMLDivElement | null>(null);
 
   const isDisabled = Boolean(activeModal);
 
@@ -62,6 +65,33 @@ export const LandingChatWidget: React.FC<{
   }, [copy.hello, isOpen]);
 
   useEffect(() => {
+    onOpenChange?.(isOpen);
+  }, [isOpen, onOpenChange]);
+
+  useEffect(() => {
+    if (!onPanelResize) return;
+    if (!isOpen) {
+      onPanelResize(0);
+      return;
+    }
+    const panel = panelRef.current;
+    if (!panel) return;
+
+    const update = () => {
+      onPanelResize(Math.ceil(panel.getBoundingClientRect().width));
+    };
+    update();
+
+    if (typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver((entries) => {
+      const width = entries[0]?.contentRect?.width ?? 0;
+      onPanelResize(Math.ceil(width));
+    });
+    ro.observe(panel);
+    return () => ro.disconnect();
+  }, [isOpen, onPanelResize]);
+
+  useEffect(() => {
     if (!isOpen) return;
     if (!scrollRef.current) return;
     scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -84,6 +114,7 @@ export const LandingChatWidget: React.FC<{
       <AnimatePresence>
         {isOpen && (
           <motion.div
+            ref={panelRef}
             initial={{ opacity: 0, y: 12, scale: 0.985 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 12, scale: 0.985 }}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { InteractiveButton } from '../InteractiveButton';
 import type { ContextMenuState } from './DashboardPrimitives.types';
 
@@ -23,8 +24,19 @@ export const ContextMenu: React.FC<{
       }
     };
 
+    const handleViewportChange = () => {
+      onClose();
+    };
+
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('resize', handleViewportChange);
+    window.addEventListener('scroll', handleViewportChange, true);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('resize', handleViewportChange);
+      window.removeEventListener('scroll', handleViewportChange, true);
+    };
   }, [menu, onClose]);
 
   if (!menu || !menu.items) return null;
@@ -41,10 +53,17 @@ export const ContextMenu: React.FC<{
   const MENU_H = Math.min(320, 64 + menu.items.length * 44);
   const pad = 8;
 
-  const left = Math.min(window.innerWidth - MENU_W - pad, Math.max(pad, menu.x));
-  const top = Math.min(window.innerHeight - MENU_H - pad, Math.max(pad, menu.y));
+  const anchor = menu.anchorRect;
+  const preferredLeft = anchor ? anchor.right - MENU_W : menu.x;
+  const preferredTop = anchor ? anchor.bottom + 8 : menu.y;
+  const left = Math.min(window.innerWidth - MENU_W - pad, Math.max(pad, preferredLeft));
+  const top = Math.min(window.innerHeight - MENU_H - pad, Math.max(pad, preferredTop));
 
-  return (
+  const portal = typeof document !== 'undefined' ? document.body : null;
+
+  if (!portal) return null;
+
+  return createPortal(
     <>
       <div
         className="fixed inset-0 z-[5000]"
@@ -104,7 +123,8 @@ export const ContextMenu: React.FC<{
           );
         })}
       </div>
-    </>
+    </>,
+    portal,
   );
 };
 

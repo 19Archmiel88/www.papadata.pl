@@ -2,6 +2,7 @@ import {
   CanActivate,
   ExecutionContext,
   Injectable,
+  ServiceUnavailableException,
   UnauthorizedException,
 } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
@@ -46,8 +47,18 @@ export class AppAuthGuard implements CanActivate {
       return true;
     }
 
-    if (getAppMode() === "demo") {
+    const mode = getAppMode();
+    if (mode === "demo") {
       return true;
+    }
+
+    const authConfig = getApiConfig().auth;
+    const hasJwt = Boolean(authConfig.jwtSecret);
+    const hasFirebase = Boolean(authConfig.firebaseProjectId);
+    if (!hasJwt && !hasFirebase) {
+      throw new ServiceUnavailableException(
+        "Authentication is not configured outside demo mode",
+      );
     }
 
     const request = context.switchToHttp().getRequest();
@@ -59,7 +70,7 @@ export class AppAuthGuard implements CanActivate {
     }
 
     let jwtError: unknown;
-    if (getApiConfig().auth.jwtSecret) {
+    if (hasJwt) {
       try {
         const jwtResult = this.jwtAuthGuard.canActivate(context);
         if (await resolveGuard(jwtResult)) {
@@ -70,7 +81,7 @@ export class AppAuthGuard implements CanActivate {
       }
     }
 
-    if (getApiConfig().auth.firebaseProjectId) {
+    if (hasFirebase) {
       try {
         const firebaseResult = this.firebaseAuthGuard.canActivate(context);
         if (await resolveGuard(firebaseResult)) {

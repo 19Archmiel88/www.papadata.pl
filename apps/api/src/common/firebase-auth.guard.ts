@@ -2,6 +2,7 @@ import {
   CanActivate,
   ExecutionContext,
   Injectable,
+  ServiceUnavailableException,
   UnauthorizedException,
 } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
@@ -60,11 +61,10 @@ export class FirebaseAuthGuard implements CanActivate {
     }
 
     if (!initFirebase()) {
-      this.logger.warn("Firebase not configured, allowing request in dev mode");
-      if (getApiConfig().nodeEnv !== "production") {
-        return true;
-      }
-      throw new UnauthorizedException("Authentication service unavailable");
+      this.logger.warn("Firebase not configured; refusing non-demo request");
+      throw new ServiceUnavailableException(
+        "Authentication service unavailable",
+      );
     }
 
     const request = context.switchToHttp().getRequest<RequestWithUser>();

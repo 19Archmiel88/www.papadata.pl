@@ -25,6 +25,10 @@ export class DbService implements OnModuleDestroy {
       }
     ).database;
     if (!url) {
+      if (getApiConfig().appMode !== "demo") {
+        this.logger.error("DATABASE_URL missing; refusing to start in prod.");
+        throw new Error("DATABASE_URL is required outside demo mode");
+      }
       this.pool = null;
       this.logger.warn("DATABASE_URL missing; DB features disabled.");
       return;

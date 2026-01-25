@@ -7,6 +7,7 @@ import {
   Query,
   Req,
   BadRequestException,
+  ServiceUnavailableException,
 } from "@nestjs/common";
 import type {
   BillingCheckoutSessionRequest,
@@ -22,6 +23,7 @@ import { BillingService } from "./billing.service";
 import { BillingWebhookService } from "./billing-webhook.service";
 import { getApiConfig } from "../../common/config";
 import { Public } from "../../common/decorators/current-user.decorator";
+import { getAppMode } from "../../common/app-mode";
 
 const normalizeOrigins = (): string[] =>
   getApiConfig()
@@ -120,7 +122,16 @@ export class BillingController {
     @Req() req: RequestWithUser,
     @Query("tenantId") tenantId?: string,
   ): Promise<BillingStatusResponse> {
-    const resolvedTenantId = tenantId ?? req.user?.tenantId ?? req.user?.uid;
+    const mode = getAppMode();
+    const resolvedTenantId = req.user?.tenantId ?? req.user?.uid;
+    const requestedTenantId = tenantId?.trim();
+    if (requestedTenantId && requestedTenantId !== resolvedTenantId) {
+      throw new BadRequestException(
+        mode === "demo"
+          ? "Tenant mismatch"
+          : "Tenant override is not allowed outside demo mode",
+      );
+    }
     return this.billingService.getStatus({ tenantId: resolvedTenantId });
   }
 
@@ -129,6 +140,11 @@ export class BillingController {
     @Body() payload: BillingCheckoutSessionRequest,
     @Req() req: FastifyRequest,
   ): Promise<BillingCheckoutSessionResponse> {
+    if (getAppMode() !== "demo") {
+      throw new ServiceUnavailableException(
+        "Stripe checkout is available only in demo mode",
+      );
+    }
     return this.billingService.createCheckoutSession({
       tenantId: payload?.tenantId,
       planId: payload?.planId,
@@ -151,6 +167,11 @@ export class BillingController {
   @Get("checkout-stub")
   @Header("Content-Type", "text/html; charset=utf-8")
   checkoutStub(): string {
+    if (getAppMode() !== "demo") {
+      throw new ServiceUnavailableException(
+        "Checkout stub is available only in demo mode",
+      );
+    }
     return [
       "<!doctype html>",
       '<html lang="pl">',

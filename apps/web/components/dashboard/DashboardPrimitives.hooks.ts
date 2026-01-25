@@ -68,11 +68,24 @@ export const useWidgetLoading = (deps: React.DependencyList, minDelay = 300) => 
 export const useContextMenu = () => {
   const [menu, setMenu] = useState<ContextMenuState>(null);
 
-  const openMenu = useCallback((e: React.MouseEvent, items: ContextMenuItem[], label: string) => {
+  const openMenu = useCallback(
+    (e: React.MouseEvent<HTMLElement>, items: ContextMenuItem[], label: string) => {
     e.preventDefault();
+    const target = e.currentTarget as HTMLElement | null;
+    const rect = target?.getBoundingClientRect?.();
     setMenu({
       x: e.clientX,
       y: e.clientY,
+      anchorRect: rect
+        ? {
+            left: rect.left,
+            right: rect.right,
+            top: rect.top,
+            bottom: rect.bottom,
+            width: rect.width,
+            height: rect.height,
+          }
+        : undefined,
       items: (items || []).filter(Boolean),
       label,
     });

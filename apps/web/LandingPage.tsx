@@ -106,6 +106,7 @@ export const LandingPage: React.FC = () => {
 
   const [hasCookieResolution, setHasCookieResolution] = useState(false);
   const [showPromoTeaser, setShowPromoTeaser] = useState(false);
+  const [chatPanelWidth, setChatPanelWidth] = useState(0);
   const promoSnoozeKey = 'pd_promo_snooze_until';
   const promoCooldownMs = 1000 * 60 * 60 * 24 * 7;
 
@@ -141,6 +142,7 @@ export const LandingPage: React.FC = () => {
 
   useEffect(() => {
     setCssVar('--pd-floating-offset', '0px');
+    setCssVar('--pd-chat-panel-offset', '0px');
 
     if (!dockRef.current || typeof ResizeObserver === 'undefined') return;
 
@@ -155,8 +157,21 @@ export const LandingPage: React.FC = () => {
     return () => {
       ro.disconnect();
       setCssVar('--pd-floating-offset', '0px');
+      setCssVar('--pd-chat-panel-offset', '0px');
     };
   }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (chatPanelWidth <= 0) {
+      setCssVar('--pd-chat-panel-offset', '0px');
+      return;
+    }
+    const gap = 12;
+    const maxShift = Math.max(0, window.innerWidth - 90);
+    const resolved = Math.min(chatPanelWidth + gap, maxShift);
+    setCssVar('--pd-chat-panel-offset', `${Math.round(resolved)}px`);
+  }, [chatPanelWidth]);
 
   // CTA z promo – zgodnie z zasadą: NIE idziemy do demo, tylko do auth.
   const handleSelectPlan = useCallback((plan: 'starter' | 'professional') => {
@@ -413,7 +428,11 @@ export const LandingPage: React.FC = () => {
 
         {/* Dock: prawy dół – czat Papa AI */}
         <aside ref={dockRef} className="fixed bottom-6 right-6 z-[1900] flex flex-col items-end gap-3" role="complementary" aria-label="Chat">
-          <LandingChatWidget lang={lang} onStartTrial={() => openModal('auth', { isRegistered: false })} />
+          <LandingChatWidget
+            lang={lang}
+            onStartTrial={() => openModal('auth', { isRegistered: false })}
+            onPanelResize={setChatPanelWidth}
+          />
         </aside>
       </div>
     </MainLayout>

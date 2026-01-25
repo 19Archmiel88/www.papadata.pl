@@ -8,6 +8,7 @@ import Stripe from "stripe";
 import { EntitlementsService } from "../../common/entitlements.service";
 import { resolveStripeCustomerId } from "../../common/billing.utils";
 import { getApiConfig } from "../../common/config";
+import { getAppMode } from "../../common/app-mode";
 
 const createStripeClient = () => {
   const apiKey = getApiConfig().stripe.secretKey;
@@ -29,9 +30,17 @@ const canManageSubscription = (roles: string[] | undefined): boolean => {
 
 @Injectable()
 export class BillingService {
-  private readonly stripe = createStripeClient();
+  private readonly mode = getAppMode();
+  private readonly stripe: Stripe | null;
 
-  constructor(private readonly entitlementsService: EntitlementsService) {}
+  constructor(private readonly entitlementsService: EntitlementsService) {
+    this.stripe = createStripeClient();
+    if (this.mode !== "demo" && !this.stripe) {
+      throw new ServiceUnavailableException(
+        "Stripe is not configured outside demo mode",
+      );
+    }
+  }
 
   async getSummary(params?: {
     tenantId?: string;

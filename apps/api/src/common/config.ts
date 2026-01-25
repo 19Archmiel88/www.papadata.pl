@@ -112,9 +112,14 @@ export const getApiConfig = (): ApiConfig => {
 
   const nodeEnv: NodeEnv = process.env.NODE_ENV ?? "development";
 
+  const appMode: ApiConfig["appMode"] =
+    (process.env.APP_MODE ?? "").trim().toLowerCase() === "demo"
+      ? "demo"
+      : "prod";
+
   const config: ApiConfig = {
     nodeEnv,
-    appMode: process.env.APP_MODE === "prod" ? "prod" : "demo",
+    appMode,
     port: parseNumber(process.env.PORT, 4000),
     cacheTtlMs: parseNumber(
       process.env.DASHBOARD_CACHE_TTL_MS ?? process.env.CACHE_TTL_MS,

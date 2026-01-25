@@ -176,6 +176,10 @@ html:not(.dark) .aurora-blob {
   display: none;
 }
 
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
 /* Dashboard surfaces */
 .dashboard-surface {
   border-radius: 2.5rem;

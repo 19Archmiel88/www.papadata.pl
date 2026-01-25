@@ -410,7 +410,9 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
               bottom: isLandingRoute
                 ? `calc(24px + var(--pd-floating-offset, 0px))`
                 : '24px',
-              right: '24px',
+              right: isLandingRoute
+                ? `calc(24px + var(--pd-chat-panel-offset, 0px))`
+                : '24px',
             }}
             className="fixed z-[1900] w-[50px] h-[50px] md:w-[56px] md:h-[56px] rounded-2xl bg-white dark:bg-[#121217] border border-black/10 dark:border-white/10 text-gray-900 dark:text-white shadow-[0_15px_35px_rgba(0,0,0,0.2)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex items-center justify-center hover:border-brand-start/50 hover:scale-105 active:scale-95 transition-all cursor-pointer group overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-start"
             aria-label={t.common.scroll_to_top}

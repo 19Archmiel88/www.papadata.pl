@@ -29,7 +29,9 @@
     "diagnose:windows": "node tools/diagnose-windows-eperm.mjs",
     "verify:common": "node tools/ensure-npm-ci.mjs && pnpm run build:shared && pnpm run build:api && pnpm run build:web && pnpm run lint && pnpm run test:api:e2e && pnpm run test:smoke && pnpm run runtime-smoke",
     "verify:local": "pnpm run clean && pnpm run verify:common",
-    "verify:ci": "pnpm run clean && pnpm run verify:common"
+    "verify:ci": "pnpm run clean && pnpm run verify:common",
+    "verify:stg": "node tools/verify-stg.mjs",
+    "promote:prod": "node -e \"const{spawnSync}=require('node:child_process');const project=process.env.GOOGLE_CLOUD_PROJECT||process.env.GCP_PROJECT_ID||'';const okProject=project==='papadata-platform-prod';const confirmed=process.env.CONFIRM_PROD==='1';if(!okProject&&!confirmed){console.error('Refusing to deploy. Set GOOGLE_CLOUD_PROJECT=papadata-platform-prod (or GCP_PROJECT_ID) or CONFIRM_PROD=1.');process.exit(1);}const resolvedProject=okProject?project:'papadata-platform-prod';const result=spawnSync('gcloud',['builds','submit','--config','cloudbuild/prod.yaml','--project',resolvedProject],{stdio:'inherit'});process.exit(result.status??1);\""
   },
   "devDependencies": {
     "husky": "^9.1.7",

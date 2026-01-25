@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, ServiceUnavailableException } from "@nestjs/common";
 import Stripe from "stripe";
 import type { BillingStatus, PlanId } from "@papadata/shared";
 import { getApiConfig } from "../../common/config";
@@ -60,8 +60,8 @@ export class BillingWebhookService {
       getApiConfig().stripe as { webhookSecret?: string | undefined }
     ).webhookSecret;
     if (!this.stripe || !secret) {
-      this.logger.warn("Stripe not configured; webhook ignored.");
-      return;
+      this.logger.warn("Stripe not configured; webhook rejected.");
+      throw new ServiceUnavailableException("Stripe webhook unavailable");
     }
     if (!signature) {
       throw new Error("Missing Stripe signature");
