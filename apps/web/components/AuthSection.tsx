@@ -161,6 +161,26 @@ export const AuthSection: React.FC<AuthSectionProps> = ({
     return null;
   }, [nip, t.auth.nip_invalid]);
 
+  const trimmedCompanyName = companyName.trim();
+  const trimmedCompanyStreet = companyStreet.trim();
+  const trimmedCompanyPostalCode = companyPostalCode.trim();
+  const trimmedCompanyCity = companyCity.trim();
+
+  const hasCompanyName = Boolean(trimmedCompanyName);
+  const isAddressValid = Boolean(
+    trimmedCompanyStreet || (trimmedCompanyPostalCode && trimmedCompanyCity),
+  );
+
+  const addressError =
+    !isAddressValid &&
+    (trimmedCompanyStreet ||
+      trimmedCompanyPostalCode ||
+      trimmedCompanyCity ||
+      hasCompanyName ||
+      nip.length > 0)
+      ? t.auth.company_address_required
+      : null;
+
   const storeAuthToken = (accessToken: string) => {
     // Produkcyjnie: preferuj httpOnly cookie z backendu (anti-XSS).
     if (typeof window === 'undefined') return;
@@ -279,7 +299,9 @@ export const AuthSection: React.FC<AuthSectionProps> = ({
     }
   };
 
-  // === Email OTP start/verify (production-ready hooks) ===
+  // === Email OTP start/verify ===
+  // Obecny backend: POST /auth/magic-link (start), POST /auth/login (verify)
+  // Opcjonalnie: POST /auth/email/start, POST /auth/email/verify
   const startEmailVerification = async (context: EmailVerifyContext) => {
     if (!isValidEmail(email) || isSubmitting) return;
 
@@ -369,14 +391,20 @@ export const AuthSection: React.FC<AuthSectionProps> = ({
   };
 
   // === Register submit ===
+  // Obecny backend: POST /auth/register
   const handleRegister = async () => {
-    if (!isValidEmail(email) || !isPasswordValid || !companyName || isSubmitting) return;
+    if (!isValidEmail(email) || !isPasswordValid || !hasCompanyName || !isAddressValid || isSubmitting) {
+      return;
+    }
 
     setSubmitError(null);
     setSubmitAction('register');
 
     try {
-      const addressLine = [companyStreet, [companyPostalCode, companyCity].filter(Boolean).join(' ')]
+      const addressLine = [
+        trimmedCompanyStreet,
+        [trimmedCompanyPostalCode, trimmedCompanyCity].filter(Boolean).join(' '),
+      ]
         .filter(Boolean)
         .join(', ');
 
@@ -384,7 +412,7 @@ export const AuthSection: React.FC<AuthSectionProps> = ({
         email: email.trim(),
         password,
         nip,
-        companyName,
+        companyName: trimmedCompanyName,
         companyAddress: addressLine,
       };
 
@@ -1019,6 +1047,12 @@ export const AuthSection: React.FC<AuthSectionProps> = ({
                     </div>
                   </div>
 
+                  {addressError && (
+                    <p className="text-xs text-rose-500 font-semibold" aria-live="polite">
+                      {addressError}
+                    </p>
+                  )}
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <label className="text-2xs font-mono font-black text-gray-500 uppercase tracking-widest ml-1">
@@ -1061,12 +1095,14 @@ export const AuthSection: React.FC<AuthSectionProps> = ({
                   variant="primary"
                   className="w-full !py-5"
                   onClick={handleRegister}
-                  disabled={!companyName || isSubmitting || !isValidEmail(email) || !isPasswordValid}
+                  disabled={
+                    !hasCompanyName || !isAddressValid || isSubmitting || !isValidEmail(email) || !isPasswordValid
+                  }
                 >
                   {renderButtonLabel(t.auth.create_account_cta, submitAction === 'register')}
                 </InteractiveButton>
 
-                {!companyName && nip.length > 0 && !companyLookup.loading && (
+                {!hasCompanyName && nip.length > 0 && !companyLookup.loading && (
                   <p className="text-xs text-gray-500 font-medium" aria-live="polite">
                     {t.auth.nip_required_hint}
                   </p>

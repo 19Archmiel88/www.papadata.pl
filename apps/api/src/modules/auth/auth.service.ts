@@ -30,15 +30,16 @@ const getExpiresInSeconds = () => {
 };
 
 const resolveRoles = (email: string): string[] => {
-  const { ownerEmails, adminEmails } = getApiConfig().auth;
-  const owners = ownerEmails;
-  const admins = adminEmails;
+  const { auth, appMode } = getApiConfig();
+  const normalizedEmail = email.toLowerCase();
+  const owners = auth.ownerEmails.map((value) => value.toLowerCase());
+  const admins = auth.adminEmails.map((value) => value.toLowerCase());
 
   if (!owners.length && !admins.length) {
-    return ["owner"];
+    return appMode === "demo" ? ["owner"] : ["user"];
   }
-  if (owners.includes(email)) return ["owner"];
-  if (admins.includes(email)) return ["admin"];
+  if (owners.includes(normalizedEmail)) return ["owner"];
+  if (admins.includes(normalizedEmail)) return ["admin"];
   return ["user"];
 };
 

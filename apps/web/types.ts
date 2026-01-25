@@ -499,6 +499,7 @@ export interface AuthData {
   company_name_label: string;
   company_name_placeholder: string;
   company_address_label: string;
+  company_address_required: string;
   company_street_label: string;
   company_street_placeholder: string;
   company_postal_code_label: string;

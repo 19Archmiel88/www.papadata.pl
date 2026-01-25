@@ -56,7 +56,8 @@ async function bootstrap(): Promise<void> {
     routes: ["/api/billing/webhook"],
   });
 
-  await fastify.register(import("@fastify/helmet"), {
+  const helmet = (await import("@fastify/helmet")).default;
+  await fastify.register(helmet as any, {
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
@@ -82,7 +83,8 @@ async function bootstrap(): Promise<void> {
     crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
   });
 
-  await fastify.register(import("@fastify/cors"), {
+  const cors = (await import("@fastify/cors")).default;
+  await fastify.register(cors as any, {
     origin: getApiConfig().corsAllowedOrigins,
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],

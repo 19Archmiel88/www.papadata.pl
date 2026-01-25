@@ -16,7 +16,45 @@ import type {
   AuthRegisterResponse,
 } from "@papadata/shared";
 import { IS_PUBLIC_KEY } from "../../common/firebase-auth.guard";
+import { getApiConfig } from "../../common/config";
 import { AuthService } from "./auth.service";
+
+const resolveRedirectUri = (redirectUri?: string): string | null => {
+  const trimmed = redirectUri?.trim();
+  if (!trimmed) return null;
+  if (trimmed.startsWith("//")) return null;
+  if (trimmed.startsWith("/")) return trimmed;
+
+  try {
+    const url = new URL(trimmed);
+    if (!/^https?:$/.test(url.protocol)) return null;
+    const allowedOrigins = getApiConfig()
+      .corsAllowedOrigins.map((origin) => {
+        try {
+          return new URL(origin).origin;
+        } catch {
+          return null;
+        }
+      })
+      .filter((origin): origin is string => Boolean(origin));
+    if (!allowedOrigins.includes(url.origin)) return null;
+    return url.toString();
+  } catch {
+    return null;
+  }
+};
+
+const buildOAuthStubUrl = (redirectUri: string, provider: string): string => {
+  const isRelative = redirectUri.startsWith("/");
+  const url = new URL(redirectUri, "http://localhost");
+  url.searchParams.set("provider", provider);
+  url.searchParams.set("status", "connected");
+  url.searchParams.set("code", "stub");
+  if (isRelative) {
+    return `${url.pathname}${url.search}${url.hash}`;
+  }
+  return url.toString();
+};
 
 @Controller("auth")
 @SetMetadata(IS_PUBLIC_KEY, true)
@@ -43,9 +81,9 @@ export class AuthController {
     @Param("provider") provider: string,
     @Query("redirectUri") redirectUri?: string,
   ): { authUrl: string } {
-    const safeRedirect = (redirectUri ?? "").trim();
+    const safeRedirect = resolveRedirectUri(redirectUri);
     const authUrl = safeRedirect
-      ? `${safeRedirect}?provider=${encodeURIComponent(provider)}&status=connected&code=stub`
+      ? buildOAuthStubUrl(safeRedirect, provider)
       : `/auth/oauth/${encodeURIComponent(provider)}/stub`;
     return { authUrl };
   }

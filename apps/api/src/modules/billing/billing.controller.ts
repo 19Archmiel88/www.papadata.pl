@@ -23,10 +23,71 @@ import { BillingWebhookService } from "./billing-webhook.service";
 import { getApiConfig } from "../../common/config";
 import { Public } from "../../common/decorators/current-user.decorator";
 
+const normalizeOrigins = (): string[] =>
+  getApiConfig()
+    .corsAllowedOrigins.map((origin) => {
+      try {
+        return new URL(origin).origin;
+      } catch {
+        return null;
+      }
+    })
+    .filter((origin): origin is string => Boolean(origin));
+
+const resolveConfiguredReturnUrl = (
+  value: string,
+  allowedOrigins: string[],
+  fallbackOrigin: string,
+): string | null => {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  if (trimmed.startsWith("//")) return null;
+  if (trimmed.startsWith("/")) {
+    return `${fallbackOrigin}${trimmed}`;
+  }
+
+  try {
+    const url = new URL(trimmed);
+    if (!/^https?:$/.test(url.protocol)) return null;
+    if (allowedOrigins.length > 0 && !allowedOrigins.includes(url.origin)) {
+      return null;
+    }
+    return url.toString();
+  } catch {
+    return null;
+  }
+};
+
 const resolveReturnUrl = (req: FastifyRequest) => {
+  const allowedOrigins = normalizeOrigins();
+  const fallbackOrigin = (allowedOrigins[0] ?? getRequestBaseUrl(req)).replace(
+    /\/$/,
+    "",
+  );
   const envUrl = getApiConfig().stripe.portalReturnUrl?.trim();
-  if (envUrl) return envUrl;
-  return getRequestBaseUrl(req, "/dashboard/settings/org");
+  const resolvedEnvUrl = envUrl
+    ? resolveConfiguredReturnUrl(envUrl, allowedOrigins, fallbackOrigin)
+    : null;
+  if (resolvedEnvUrl) return resolvedEnvUrl;
+
+  const requestOrigin = String(req.headers.origin ?? "").trim();
+
+  if (requestOrigin) {
+    try {
+      const origin = new URL(requestOrigin).origin;
+      if (allowedOrigins.includes(origin)) {
+        return `${origin}/dashboard/settings/org`;
+      }
+    } catch {
+      // ignore invalid origin header
+    }
+  }
+
+  if (allowedOrigins.length > 0) {
+    return `${allowedOrigins[0]}/dashboard/settings/org`;
+  }
+
+  return `${fallbackOrigin}/dashboard/settings/org`;
 };
 
 @Controller("billing")
