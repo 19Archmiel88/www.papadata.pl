@@ -1,5 +1,3 @@
-// apps/web/components/PromoModal.tsx
-
 import React, { useEffect, useId, useMemo, useState, useCallback } from 'react';
 import type { Translation } from '../types';
 import { InteractiveButton } from './InteractiveButton';

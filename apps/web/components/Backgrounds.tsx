@@ -1,15 +1,3 @@
-/**
- * apps/web/components/Backgrounds.tsx (lub AuroraBackground.tsx / NeuralBackground.tsx – zależnie jak masz nazwany plik)
- *
- * Za co odpowiada ten plik?
- * - Dostarcza dwa tła aplikacji:
- *   1) AuroraBackground: statyczne “aurora blobs” + delikatny noise overlay (CSS-only).
- *   2) NeuralBackground: canvasowy “neural network” (cząstki + połączenia) reagujący na ruch myszki.
- * - Enterprise: poprawiona stabilność animacji na HiDPI, bez wycieków event listenerów,
- *   poprawione skalowanie canvasu, SSR-safety, ograniczenie kosztów pętli animacji.
- * - Treść/wygląd bez zmian — poprawki techniczne i jakościowe.
- */
-
 import React, { useRef, useEffect } from 'react';
 
 // --- AURORA BACKGROUND UTILS ---

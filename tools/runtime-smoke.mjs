@@ -9,7 +9,11 @@ import { rm } from "node:fs/promises";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "..");
 
-const baseUrl = process.env.API_URL || process.env.API || "http://localhost:4000";
+const normalizeBaseUrl = (value) =>
+  value.includes("localhost") ? value.replace("localhost", "127.0.0.1") : value;
+const baseUrl = normalizeBaseUrl(
+  process.env.API_URL || process.env.API || "http://127.0.0.1:4000",
+);
 const port = new URL(baseUrl).port || "4000";
 
 const ensureApiBuild = async () => {

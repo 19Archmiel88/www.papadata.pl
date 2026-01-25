@@ -2,7 +2,8 @@
 
 Szkic infrastruktury dla projektu Papadata: Cloud Run (API + Web), Global HTTPS Load Balancer (path-based routing), Cloud Armor (rate limiting), Cloud DNS, Identity Platform (Google/Microsoft), Secret Manager oraz Cloud SQL.
 
-Status: szkic referencyjny (nie production-ready). Aktualny stan produkcji i checklisty: `dokumentacjaProdukcyjna/GCP.md`.
+Status: szkic referencyjny (nie production-ready, nieużywany jako IaC produkcyjne).
+Aktualny stan produkcji i checklisty: `dokumentacjaProdukcyjna/GCP.md`.
 
 ## Szybki start
 
@@ -12,7 +13,7 @@ Status: szkic referencyjny (nie production-ready). Aktualny stan produkcji i che
    - `terraform plan -var-file=terraform.tfvars`
    - `terraform apply -var-file=terraform.tfvars`
 
-> Uwaga: To jest **szkic**. Wymaga dostosowania nazw, obrazów kontenerów oraz polityk bezpieczeństwa.
+> Uwaga: To jest **szkic**. Wymaga dostosowania nazw, obrazów kontenerów, IAM oraz polityk bezpieczeństwa.
 
 ## Zakres
 

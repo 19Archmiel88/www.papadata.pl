@@ -19,6 +19,9 @@ Scenario: Trial notice with owner permissions
 - [ ] Trial notice modal appears for 7/3/1 days.
 - [ ] CTA routes to billing portal when available.
 
+## Automatyzacja
+- E2E: `apps/web/tests/e2e/flow-pricing-trial-upsell.spec.ts`
+
 ## Asercje UI
 - Badge shows TRIAL and plan label.
 - Trial modal copy matches daysLeft.

@@ -7,12 +7,13 @@
 ## Wejścia / Preconditions
 - Wejście z route’ów: /, /features, /pricing, /integrations, /faq.
 - Brak wymagań auth.
-- Dane/copy z i18n: `translations.ts` (t.hero, t.featuresSection, t.pricing, t.faq, t.integrations, t.security, t.roi, t.finalCta).
+- Dane/copy z i18n: `translations.ts` (t.hero, t.featuresSection, t.pricing, t.faq, t.integrations, t.security, t.roi).
 - Cookie consent może być nieustawiony (localStorage `cookie_consent`).
 
 ## Układ (Figma-ready)
 ### Struktura
 - Header (MainLayout): logo + nav + CTA + login.
+- Tla: `AuroraBackground` + `NeuralBackground` (fixed).
 - Hero + CTA (primary/secondary) + badges.
 - Vertex Player (lazy; tylko desktop).
 - ROI Calculator.
@@ -23,16 +24,17 @@
 - Pricing cards + billing toggle + compare.
 - FAQ accordion.
 - Cookie banner overlay.
-- Promo modal (timer po consent) + teaser button.
+- Promo modal (timer po consent) + teaser button (CTA -> auth).
+- Dock czatu: `LandingChatWidget`.
 - Footer (MainLayout).
 
 ### Komponenty
 - Buttony: `InteractiveButton` (primary/secondary) + przyciski menu.
 - Inputy: brak (poza modalami).
-- Inne: `VertexPlayer`, `CookieBanner`, `PromoModal`.
+- Inne: `VertexPlayer`, `CookieBanner`, `PromoModal`, `LandingChatWidget`, `AuroraBackground`, `NeuralBackground`.
 
 ### Copy (teksty UI)
-- Wszystkie teksty z i18n: `t.hero.*`, `t.featuresSection.*`, `t.integrations.*`, `t.security.*`, `t.pricing.*`, `t.faq.*`, `t.roi.*`, `t.finalCta.*`.
+- Wszystkie teksty z i18n: `t.hero.*`, `t.featuresSection.*`, `t.integrations.*`, `t.security.*`, `t.pricing.*`, `t.faq.*`, `t.roi.*`.
 
 ### RWD
 - Desktop: hero + player (2 kolumny).
@@ -64,8 +66,11 @@
 
 ### Akcja: CTA w Pricing (Starter/Professional)
 - Trigger: klik `plan.cta`.
-- Efekt: otwiera modal auth (register).
-- Side effects: `openModal('auth', { isRegistered: false })`.
+- Efekt: gdy niezalogowany -> otwiera modal auth (register); gdy zalogowany -> start checkout.
+- Side effects:
+  - niezalogowany: `openModal('auth', { isRegistered: false })` + zapis wybranego planu do localStorage.
+  - zalogowany: `createCheckoutSession({ tenantId, planId })` i redirect na `url`.
+- Błędy: brak tenantId -> komunikat o błędzie + CTA do `/app/settings/workspace`.
 
 ### Akcja: CTA w Pricing (Enterprise)
 - Trigger: klik `plan.cta`.
@@ -91,6 +96,7 @@
 - Trigger: klik integracji.
 - Efekt: otwiera `IntegrationConnectModal`.
 - Side effects: `openModal('integration_connect', { integration })`.
+- Coming soon: kafelki disabled, brak przejścia do connect.
 
 ### Akcja: Cookie consent
 - Trigger: accept all / reject optional / save settings.
@@ -104,7 +110,11 @@
 
 ### Akcja: Promo teaser
 - Trigger: klik przycisku przyklejonego.
-- Efekt: ponownie otwiera `PromoModal`.
+- Efekt: otwiera modal auth (register).
+
+### Akcja: CTA w Vertex Player
+- Trigger: klik CTA w `VertexPlayer`.
+- Efekt: przejście do `/dashboard?mode=demo&scene={pipeline|exec|ai}`.
 
 ## Walidacje i komunikaty
 - Brak formularzy na screenie; walidacje w modalach.

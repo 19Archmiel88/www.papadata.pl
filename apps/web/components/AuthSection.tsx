@@ -1,17 +1,3 @@
-/**
- * apps/web/components/AuthSection.tsx
- *
- * Produkcyjnie gotowy UI auth:
- * - SSO (Google/Microsoft) -> redirect do backendu
- * - Email login/register -> wysyłka kodu + krok "wpisz kod" + weryfikacja
- * - Rejestracja 2-step z NIP + auto-uzupełnianie danych firmy (API, z fallbackiem)
- *
- * UWAGA: aby flow było w 100% produkcyjne, backend musi zapewnić endpointy:
- * - POST /auth/email/start
- * - POST /auth/email/verify
- * - GET /public/company?nip=...
- */
-
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { InteractiveButton } from './InteractiveButton';
 import { Logo } from './Logo';

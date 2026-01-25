@@ -55,6 +55,7 @@ export const TrialNoticeModal: React.FC<TrialNoticeModalProps> = ({
     <div
       className="relative w-full max-w-lg glass bg-white/95 dark:bg-[#050507]/95 rounded-[2.5rem] border border-emerald-500/20 shadow-[0_50px_120px_rgba(0,0,0,0.8)] overflow-hidden"
       role="document"
+      data-testid="trial-notice-modal"
       aria-labelledby={titleId}
       aria-describedby={descId}
     >
@@ -107,6 +108,7 @@ export const TrialNoticeModal: React.FC<TrialNoticeModalProps> = ({
             <InteractiveButton
               variant="primary"
               onClick={onPrimary}
+              data-testid="trial-notice-primary"
               className="!py-3 !text-xs font-black uppercase tracking-[0.3em] rounded-2xl"
             >
               {copy.trial_modal_cta_primary}
@@ -114,6 +116,7 @@ export const TrialNoticeModal: React.FC<TrialNoticeModalProps> = ({
             <InteractiveButton
               variant="secondary"
               onClick={closeModal}
+              data-testid="trial-notice-secondary"
               className="!py-3 !text-xs font-black uppercase tracking-[0.3em] rounded-2xl"
             >
               {copy.trial_modal_cta_secondary}

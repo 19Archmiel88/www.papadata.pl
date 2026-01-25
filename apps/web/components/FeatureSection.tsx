@@ -2,12 +2,6 @@ import React, { memo, useCallback, useMemo, useRef } from 'react';
 import type { FeatureDetail, Translation } from '../types';
 import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion';
 
-/**
- * FeaturesSection.tsx
- * Sekcja „Features” na landing page: siatka kafelków funkcji (z tłumaczeń),
- * animacje przy scrollu oraz klik kafelka (otwarcie modala ze szczegółami).
- */
-
 interface FeaturesSectionProps {
   t: Translation;
   onFeatureClick: (feature: FeatureDetail) => void;

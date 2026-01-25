@@ -1,10 +1,3 @@
-/**
- * apps/web/context/AuthContext.tsx
- *
- * UWAGA: to jest prosty "client-side flag" (placeholder), NIE realne bezpieczeństwo.
- * Docelowo: prawdziwe auth + sesja (najlepiej cookies httpOnly + backend validation).
- */
-
 import React, { useState, useEffect } from 'react';
 import { AuthContext } from './auth-context';
 

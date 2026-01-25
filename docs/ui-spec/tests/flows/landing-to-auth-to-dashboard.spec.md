@@ -19,6 +19,9 @@ Scenario: Trial signup to dashboard
 - [ ] Redirect to /dashboard/overview.
 - [ ] Logout clears token (if available in UI).
 
+## Automatyzacja
+- E2E: `apps/web/tests/e2e/flow-landing-auth-dashboard.spec.ts`
+
 ## Asercje UI
 - Dashboard layout visible (sidebar + topbar).
 - Mode badge shows correct status.

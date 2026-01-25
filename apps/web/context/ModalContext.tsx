@@ -1,12 +1,3 @@
-/**
- * apps/web/context/ModalContext.tsx
- *
- * ModalContext:
- * - trzyma aktywny modal + propsy
- * - openModal / closeModal
- * - stack (nested modals) opcjonalnie
- */
-
 import React, { useState, useCallback, useMemo } from 'react';
 import {
   ModalContext,

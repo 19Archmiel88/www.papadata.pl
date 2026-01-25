@@ -3,6 +3,10 @@
 ## Cel i zakres
 Wdrożenie backendu API na środowisko **STG** poprzez **push do Git** i automatyczny deploy do **Cloud Run** w projekcie `papadata-platform-stg`, wraz z weryfikacją po deployu (smoke + logi).
 
+Repo CI/CD:
+- Konfiguracja pipeline: `cloudbuild/stg.yaml` (API + WEB).
+- `cloudbuild/api-stg.yaml` jest deprecated (nieużywany placeholder).
+
 ---
 
 ## Wymagania
@@ -19,7 +23,7 @@ Wdrożenie backendu API na środowisko **STG** poprzez **push do Git** i automat
 ### Konfiguracja środowiska (STG) — wymagane wartości w Cloud Run (ENV)
 Minimalny zestaw zmiennych środowiskowych **na STG**:
 - `APP_MODE=demo`
-- `PORT=4000`
+- `PORT=8080`
 - `VERTEX_PROJECT_ID=papadata-platform-stg`
 - `VERTEX_LOCATION=europe-central2`
 - `VERTEX_MODEL=gemini-2.5-flash-lite`

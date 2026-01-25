@@ -607,7 +607,7 @@ export interface DashboardOverviewV2Alert {
   time: string;
   context: string;
   prompt: string;
-  target: 'ads' | 'products' | 'pipeline' | 'customers' | 'alerts' | 'pandl';
+  target: 'ads' | 'products' | 'pipeline' | 'customers' | 'alerts' | 'pandl' | 'guardian';
   badge?: 'delay' | 'quality';
   severity: 'critical' | 'warning' | 'info';
 }
@@ -869,6 +869,10 @@ export interface DashboardProductsV2 {
     falling_label: string;
     cta_alert: string;
     cta_ai: string;
+    driver_viral?: string;
+    driver_search?: string;
+    driver_stock?: string;
+    driver_competition?: string;
     rising: {
       id: string;
       label: string;
@@ -1000,6 +1004,8 @@ export interface DashboardReportsV2 {
   };
   list: {
     title: string;
+    empty_title?: string;
+    empty_desc?: string;
     items: {
       id: string;
       name: string;
@@ -1026,6 +1032,16 @@ export interface DashboardReportsV2 {
     title: string;
     items: string[];
   };
+  history_title?: string;
+  export_formats: string[];
+  export_history: {
+    id: string;
+    name: string;
+    format: string;
+    range: string;
+    created: string;
+    urlLabel: string;
+  }[];
 }
 
 export interface DashboardPipelineV2 {
@@ -1264,6 +1280,19 @@ export interface DashboardKnowledgeV2 {
     cta_report: string;
   };
   empty_list?: string;
+  booking: {
+    title: string;
+    subtitle: string;
+    topic_label: string;
+    topic_placeholder: string;
+    date_label: string;
+    budget_label: string;
+    budget_options: string[];
+    guarantee_title: string;
+    guarantee_desc: string;
+    submit_cta: string;
+    close_cta: string;
+  };
   expert?: {
     pill: string;
     title: string;
@@ -1294,12 +1323,18 @@ export interface DashboardKnowledgeV2 {
 export interface DashboardSettingsWorkspaceV2 {
   title: string;
   desc: string;
+  badge_label: string;
   data: {
     title: string;
     desc: string;
     retention_label: string;
     retention_options: { value: number; label: string }[];
     retention_help: string;
+    retention_warning?: {
+      title: string;
+      desc: string;
+      cta_export: string;
+    };
     region_label: string;
     region_options: { value: string; label: string }[];
   };
@@ -1322,6 +1357,18 @@ export interface DashboardSettingsWorkspaceV2 {
     desc: string;
     items: { id: string; label: string; enabled: boolean }[];
   };
+  notifications?: {
+    channels_title: string;
+    email_label: string;
+    schedule_title: string;
+    schedules: { id: string; label: string; value: string }[];
+    recipients_title: string;
+    recipients: string[];
+    quiet_hours_label: string;
+    quiet_hours_value: string;
+    export_title: string;
+    export_formats: string[];
+  };
   ai: {
     title: string;
     desc: string;
@@ -1335,6 +1382,8 @@ export interface DashboardSettingsWorkspaceV2 {
 export interface DashboardSettingsOrgV2 {
   title: string;
   desc: string;
+  badge_label: string;
+  license_label: string;
   company: {
     title: string;
     fields: { label: string; value: string }[];
@@ -1364,6 +1413,46 @@ export interface DashboardSettingsOrgV2 {
     items: { label: string; value: string }[];
     cta_export: string;
     cta_delete: string;
+  };
+  mock?: {
+    company_fields: { label: string; value: string }[];
+    team_members: { name: string; email: string; role: string; status: string }[];
+    billing_info: { label: string; value: string }[];
+    billing_plans: { id: string; name: string; note: string; price: string }[];
+    invoices: { id: string; label: string; status: string; amount: string }[];
+    audit_logs: { label: string; value: string }[];
+    login_methods: string[];
+    sessions: { id: string; label: string; value: string }[];
+    status_card: { label: string; value: string; desc: string };
+    payer: { label: string; value: string };
+    billing_cycle: { label: string; value: string };
+    payment_status: {
+      label: string;
+      ok: string;
+      error: string;
+      fix_cta: string;
+      ok_tooltip: string;
+    };
+    card_payment: { label: string; desc: string };
+    plans_label: string;
+    invoices_label: string;
+    invoice_pdf_cta: string;
+    approve_plan_cta: string;
+    security_title: string;
+    login_method_label: string;
+    login_method_value: string;
+    login_methods_label: string;
+    mfa_label: string;
+    mfa_value: string;
+    sessions_label: string;
+    compliance: {
+      title: string;
+      desc: string;
+      cta_dpa: string;
+      cta_retention: string;
+      cta_confirmations: string;
+      cta_delete_org: string;
+    };
   };
   footer_note: string;
   cta_save: string;
@@ -1405,6 +1494,7 @@ export interface DashboardOverviewV2 {
   alerts: {
     title: string;
     desc: string;
+    live_label?: string;
     view_all: string;
     action_open: string;
     action_ai: string;
@@ -1415,12 +1505,24 @@ export interface DashboardOverviewV2 {
     severity_info: string;
     items: DashboardOverviewV2Alert[];
   };
+  insights?: {
+    title?: string;
+    desc?: string;
+    cta?: string;
+    items: {
+      id: string;
+      title: string;
+      impact: string;
+      context?: string;
+    }[];
+  };
   ai: {
     title: string;
     desc: string;
     placeholder: string;
     submit: string;
     shortcut_hint: string;
+    toggle_hint?: string;
     suggested_label: string;
     recent_label: string;
     cached_label: string;
@@ -1450,10 +1552,13 @@ export interface DashboardOverviewV2 {
     title: string;
     cache_label: string;
     badge_quality: string;
+    badge_stale?: string;
     explain_action: string;
     actions_hint: string;
     labels: {
+      revenue?: string;
       spend: string;
+      roas?: string;
       profit: string;
       aov: string;
       new_returning: string;
@@ -1538,6 +1643,7 @@ export interface DashboardOverviewV2 {
         ai: string;
         report: string;
         alert: string;
+        view_all?: string;
       };
     };
     skus: {
@@ -1573,6 +1679,7 @@ export interface DashboardOverviewV2 {
         ai: string;
         report: string;
         alert: string;
+        inventory_hub?: string;
       };
     };
     sample: {
@@ -1842,8 +1949,8 @@ export interface DashboardData {
   pipeline_v2?: DashboardPipelineV2;
   products_v2?: DashboardProductsV2;
   reports_v2?: DashboardReportsV2;
-  settings_org_v2?: DashboardSettingsOrgV2;
-  settings_workspace_v2?: DashboardSettingsWorkspaceV2;
+  settings_org_v2: DashboardSettingsOrgV2;
+  settings_workspace_v2: DashboardSettingsWorkspaceV2;
 
   // === P&L v2 – używane w PandLViewV2.tsx ===
   pnl_revenue?: string;

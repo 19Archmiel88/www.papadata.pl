@@ -9,15 +9,6 @@ import { getWebConfig } from '../config';
 import type { AIChatMessage, DateRange, DatePreset, AppMode } from '@papadata/shared';
 import { streamChat } from '../data/ai';
 
-/**
- * PapaAI.tsx
- * Ten plik odpowiada za boczny panel czatu „Papa AI” (drawer) w dashboardzie:
- * - zarządza stanem otwarcia (controlled/uncontrolled),
- * - renderuje historię wiadomości + streaming odpowiedzi z API (/api/ai/chat),
- * - obsługuje focus management (focus trap, auto-focus input), ESC do zamknięcia,
- * - wspiera „draftMessage” (np. Explain in AI) oraz ostrzegawcze „chips” zależne od kontekstu.
- */
-
 interface Message {
   id: string;
   role: 'user' | 'papa';
@@ -216,12 +207,12 @@ export const PapaAI: React.FC<PapaAIProps> = memo(
         setInputValue('');
         setIsTyping(true);
 
-        const baseMessages = messagesRef.current
+        const baseMessages: AIChatMessage[] = messagesRef.current
           .filter((m) => m.id !== 'welcome' && m.text.trim())
-          .map((m) => ({
-            role: m.role === 'user' ? 'user' : 'assistant',
-            content: m.text,
-          }))
+          .map((m): AIChatMessage => {
+            const role: AIChatMessage['role'] = m.role === 'user' ? 'user' : 'assistant';
+            return { role, content: m.text };
+          })
           .slice(-29);
 
         const apiMessages: AIChatMessage[] = [

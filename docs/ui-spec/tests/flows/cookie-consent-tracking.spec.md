@@ -19,6 +19,9 @@ Scenario: Reject optional
 - [ ] `open-cookie-settings` opens settings.
 - [ ] Consent changes update analytics_storage flag.
 
+## Automatyzacja
+- E2E: `apps/web/tests/e2e/flow-cookie-consent.spec.ts`
+
 ## Asercje UI
 - Banner overlay closes after decision.
 - Settings toggles reflect stored consent.

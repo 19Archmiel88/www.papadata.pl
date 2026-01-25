@@ -1,0 +1,115 @@
+steps:
+  - id: "install-build-test"
+    name: "node:22-slim"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        set -euo pipefail
+        corepack enable
+        pnpm --version
+        pnpm install --frozen-lockfile
+        pnpm run build:shared
+        pnpm run build:api
+        pnpm run build:web
+        pnpm run lint
+        pnpm run test:api:e2e
+        pnpm run test:web:unit
+
+  - id: "build-api-image"
+    name: "gcr.io/cloud-builders/docker"
+    args:
+      - "build"
+      - "-f"
+      - "apps/api/Dockerfile"
+      - "-t"
+      - "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/papadata-api:${COMMIT_SHA}"
+      - "."
+
+  - id: "build-web-image"
+    name: "gcr.io/cloud-builders/docker"
+    args:
+      - "build"
+      - "-f"
+      - "apps/web/Dockerfile"
+      - "-t"
+      - "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/papadata-web:${COMMIT_SHA}"
+      - "--build-arg"
+      - "VITE_APP_ENV=${_APP_ENV}"
+      - "--build-arg"
+      - "VITE_API_BASE_URL=${_API_BASE_URL}"
+      - "--build-arg"
+      - "VITE_LEGAL_DOCS_BASE_URL=${_LEGAL_DOCS_BASE_URL}"
+      - "--build-arg"
+      - "VITE_OBSERVABILITY_PROVIDER=${_OBSERVABILITY_PROVIDER}"
+      - "--build-arg"
+      - "VITE_OBSERVABILITY_DSN=${_OBSERVABILITY_DSN}"
+      - "."
+
+  - id: "push-api-image"
+    name: "gcr.io/cloud-builders/docker"
+    args:
+      - "push"
+      - "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/papadata-api:${COMMIT_SHA}"
+
+  - id: "push-web-image"
+    name: "gcr.io/cloud-builders/docker"
+    args:
+      - "push"
+      - "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/papadata-web:${COMMIT_SHA}"
+
+  - id: "deploy-api"
+    name: "gcr.io/cloud-builders/gcloud"
+    args:
+      - "run"
+      - "deploy"
+      - "${_SERVICE_API}"
+      - "--image"
+      - "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/papadata-api:${COMMIT_SHA}"
+      - "--region"
+      - "${_REGION}"
+      - "--platform"
+      - "managed"
+      - "--allow-unauthenticated"
+      - "--set-env-vars"
+      - "APP_MODE=demo,PORT=8080,NODE_ENV=production,CORS_ALLOWED_ORIGINS=${_CORS_ALLOWED_ORIGINS}"
+
+  - id: "deploy-web"
+    name: "gcr.io/cloud-builders/gcloud"
+    args:
+      - "run"
+      - "deploy"
+      - "${_SERVICE_WEB}"
+      - "--image"
+      - "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/papadata-web:${COMMIT_SHA}"
+      - "--region"
+      - "${_REGION}"
+      - "--platform"
+      - "managed"
+      - "--allow-unauthenticated"
+
+  - id: "smoke-stg"
+    name: "curlimages/curl:8.11.1"
+    entrypoint: "sh"
+    args:
+      - "-c"
+      - |
+        set -e
+        curl -fsSL "${_API_SMOKE_URL}/health"
+        curl -fsSL "${_WEB_SMOKE_URL}/"
+
+substitutions:
+  _REGION: "europe-central2"
+  _ARTIFACT_REPO: "papadata-platform"
+  _SERVICE_API: "papadata-api-stg"
+  _SERVICE_WEB: "papadata-web-stg"
+  _APP_ENV: "stg"
+  _API_BASE_URL: "https://api.papadata.pl/api"
+  _LEGAL_DOCS_BASE_URL: ""
+  _OBSERVABILITY_PROVIDER: "none"
+  _OBSERVABILITY_DSN: ""
+  _CORS_ALLOWED_ORIGINS: "https://stg.papadata.pl"
+  _API_SMOKE_URL: "https://api.papadata.pl/api"
+  _WEB_SMOKE_URL: "https://stg.papadata.pl"
+
+timeout: "1200s"

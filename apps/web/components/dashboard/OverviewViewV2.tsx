@@ -1,8 +1,3 @@
-// OverviewViewV2.tsx
-// Widok "Overview": główne podsumowanie kondycji e-commerce (alerty, KPI, insighty).
-// Łączy dane z mocków/tłumaczeń, buduje wykresy i tabele kampanii/SKU
-// oraz wystawia akcje do AI i wejścia w inne sekcje dashboardu.
-
 import React, { useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate, useOutletContext } from 'react-router-dom';
 import { DashboardOutletContext } from './DashboardContext';

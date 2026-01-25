@@ -1,7 +1,3 @@
-// ProductsViewV2.tsx
-// Widok "Products": analiza SKU – macierz marża vs zysk, panel detali,
-// top movers i tabela SKU, z kontekstem dla Papa AI i akcjami alertów.
-
 import React, { useEffect, useMemo, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { DashboardOutletContext } from './DashboardContext';
@@ -16,6 +12,7 @@ import {
 import { useAltPressed, useContextMenu, useWidgetLoading } from './DashboardPrimitives.hooks';
 import { fetchDashboardProducts } from '../../data/api';
 import type { DashboardProductsResponse, KPIKey, TableRow } from '@papadata/shared';
+import type { DashboardProductsV2 } from '../../types';
 import { captureException } from '../../utils/telemetry';
 import {
   formatCurrency,
@@ -63,6 +60,105 @@ const InfoButton: React.FC<{ label: string }> = ({ label }) => (
   </button>
 );
 
+const emptyProducts: DashboardProductsV2 = {
+  title: '',
+  desc: '',
+  ai_prompt: '',
+  items: [],
+  scatter: {
+    title: '',
+    desc: '',
+    context_template: '',
+    size_label: '',
+    x_label: '',
+    y_label: '',
+    hint_top_right: '',
+    hint_bottom_right: '',
+    hint_top_left: '',
+    hint_bottom_left: '',
+    tooltip_profit: '',
+    tooltip_margin: '',
+    tooltip_units: '',
+    tooltip_returns: '',
+    tooltip_stock: '',
+    tooltip_trend: '',
+    tooltip_driver: '',
+    tags: {
+      toxic: '',
+      high_margin: '',
+      stock_risk: '',
+    },
+    multi_select_label: '',
+    compare: {
+      cta_ai: '',
+      cta_compare: '',
+      cta_clear: '',
+    },
+  },
+  details: {
+    title: '',
+    empty: '',
+    empty_cta: '',
+    labels: {
+      profit: '',
+      volume: '',
+      returns: '',
+      stock: '',
+    },
+    stock: {
+      low: '',
+      medium: '',
+      high: '',
+    },
+    actions: {
+      explain: '',
+      alert: '',
+      report: '',
+    },
+  },
+  movers: {
+    title: '',
+    desc: '',
+    rising_label: '',
+    falling_label: '',
+    cta_alert: '',
+    cta_ai: '',
+    driver_viral: '',
+    driver_search: '',
+    driver_stock: '',
+    driver_competition: '',
+    rising: [],
+    falling: [],
+  },
+  table: {
+    title: '',
+    desc: '',
+    filters_label: '',
+    filters: [],
+    columns: {
+      sku: '',
+      revenue: '',
+      profit: '',
+      margin: '',
+      returns: '',
+      stock: '',
+      trend: '',
+    },
+    metric_defs: {
+      margin: '',
+      returns: '',
+      trend: '',
+    },
+    actions: {
+      label: '',
+      drill: '',
+      ai: '',
+      report: '',
+      alert: '',
+    },
+  },
+};
+
 export const ProductsViewV2: React.FC = () => {
   const { t, setContextLabel, setAiDraft, timeRange, isDemo } =
     useOutletContext<DashboardOutletContext>();
@@ -75,6 +171,7 @@ export const ProductsViewV2: React.FC = () => {
   const [productsData, setProductsData] = useState<DashboardProductsResponse | null>(null);
   const [productsError, setProductsError] = useState<string | null>(null);
   const demoTooltip = t.dashboard.demo_tooltip;
+  const products = t.dashboard.products_v2 ?? emptyProducts;
   const [retryToken, setRetryToken] = useState(0);
   const handleRetry = () => setRetryToken((prev) => prev + 1);
 
@@ -117,8 +214,8 @@ export const ProductsViewV2: React.FC = () => {
 
   // List of mock products if translation items are missing or limited
   const productBase = useMemo<ProductFallbackItem[]>(
-    () => t.dashboard.products_v2.items ?? [],
-    [t]
+    () => products.items ?? [],
+    [products.items]
   );
 
   const fallbackNodes = useMemo(() => {
@@ -206,15 +303,17 @@ export const ProductsViewV2: React.FC = () => {
   // Derived Top Movers
   const movers = useMemo(() => {
     const sortedByTrend = [...nodes].sort((a, b) => b.trend - a.trend);
+    const driverViral = products.movers.driver_viral || 'Viral demand';
+    const driverSearch = products.movers.driver_search || 'Search demand';
+    const driverStock = products.movers.driver_stock || 'Inventory risk';
+    const driverCompetition = products.movers.driver_competition || 'Competitive pressure';
+
     return {
       rising: sortedByTrend.slice(0, 3).map((n) => ({
         id: n.id,
         label: n.name,
         impact: formatSignedPercentValue(n.trend, locale, 1),
-        driver:
-          n.trend > 15
-            ? t.dashboard.products_v2.movers.driver_viral
-            : t.dashboard.products_v2.movers.driver_search,
+        driver: n.trend > 15 ? driverViral : driverSearch,
       })),
       falling: sortedByTrend
         .slice(-3)
@@ -223,13 +322,10 @@ export const ProductsViewV2: React.FC = () => {
           id: n.id,
           label: n.name,
           impact: formatSignedPercentValue(n.trend, locale, 1),
-          driver:
-            n.trend < -15
-              ? t.dashboard.products_v2.movers.driver_stock
-              : t.dashboard.products_v2.movers.driver_competition,
+          driver: n.trend < -15 ? driverStock : driverCompetition,
         })),
     };
-  }, [nodes, locale, t]);
+  }, [nodes, locale, products.movers]);
 
   const selectedDetails = nodes.filter((node) => selectedSkus.includes(node.id));
   const hoveredSku = nodes.find((node) => node.id === hoveredSkuId) ?? null;
@@ -237,7 +333,7 @@ export const ProductsViewV2: React.FC = () => {
 
   const handleSelect = (id: string, name: string, shiftKey: boolean) => {
     const multi = shiftKey || isAltPressed;
-    const contextValue = t.dashboard.products_v2.scatter.context_template.replace('{name}', name);
+    const contextValue = products.scatter.context_template.replace('{name}', name);
     const next = multi
       ? selectedSkus.includes(id)
         ? selectedSkus.filter((item) => item !== id)
@@ -249,7 +345,7 @@ export const ProductsViewV2: React.FC = () => {
     setSelectedSkus(next);
     setContextLabel?.(next.length ? contextValue : null);
     if (next.length) {
-      setAiDraft?.(t.dashboard.products_v2.ai_prompt.replace('{name}', name));
+      setAiDraft?.(products.ai_prompt.replace('{name}', name));
     }
   };
 
@@ -265,8 +361,8 @@ export const ProductsViewV2: React.FC = () => {
   }, [setContextLabel]);
 
   const explainSku = (label: string) => {
-    setContextLabel?.(t.dashboard.products_v2.scatter.context_template.replace('{name}', label));
-    setAiDraft?.(t.dashboard.products_v2.ai_prompt.replace('{name}', label));
+    setContextLabel?.(products.scatter.context_template.replace('{name}', label));
+    setAiDraft?.(products.ai_prompt.replace('{name}', label));
   };
 
   const scrollToDetails = () => {
@@ -276,7 +372,7 @@ export const ProductsViewV2: React.FC = () => {
   };
 
   const buildMenuItems = (name: string, skuId?: string) => {
-    const contextValue = t.dashboard.products_v2.scatter.context_template.replace('{name}', name);
+    const contextValue = products.scatter.context_template.replace('{name}', name);
     return [
       {
         id: 'drill',
@@ -349,16 +445,16 @@ export const ProductsViewV2: React.FC = () => {
               </span>
             </div>
             <h2 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
-              {t.dashboard.products_v2.title}
+              {products.title}
             </h2>
             <p className="text-base text-gray-500 dark:text-gray-400 font-medium">
-              {t.dashboard.products_v2.desc}
+              {products.desc}
             </p>
           </div>
 
           <button
             type="button"
-            onClick={() => explainSku(t.dashboard.products_v2.title)}
+            onClick={() => explainSku(products.title)}
             className="text-xs font-black uppercase tracking-widest text-brand-start hover:underline"
           >
             {t.dashboard.context_menu.explain_ai}
@@ -417,22 +513,22 @@ export const ProductsViewV2: React.FC = () => {
               <div className="flex items-start justify-between mb-10">
                 <div>
                   <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
-                    {t.dashboard.products_v2.scatter.title}
+                    {products.scatter.title}
                   </h3>
                   <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-                    {t.dashboard.products_v2.scatter.desc}
+                    {products.scatter.desc}
                   </p>
                 </div>
                 <div className="flex items-center gap-4">
                   <button
                     type="button"
-                    onClick={() => explainSku(t.dashboard.products_v2.scatter.title)}
+                    onClick={() => explainSku(products.scatter.title)}
                     className="text-xs font-black uppercase tracking-widest text-brand-start hover:underline"
                   >
                     {t.dashboard.context_menu.explain_ai}
                   </button>
                   <div className="flex items-center gap-2 text-xs font-black text-gray-400 uppercase tracking-widest">
-                    <span>{t.dashboard.products_v2.scatter.size_label}</span>
+                    <span>{products.scatter.size_label}</span>
                     <InfoButton label="Bubble size indicates sales volume" />
                   </div>
                 </div>
@@ -442,7 +538,7 @@ export const ProductsViewV2: React.FC = () => {
                 <div className="mb-6 flex flex-wrap items-center gap-3 animate-reveal">
                   <div className="px-4 py-2 rounded-2xl bg-brand-start/10 border border-brand-start/30 text-brand-start font-black text-xs uppercase tracking-widest flex items-center gap-3">
                     <span>
-                      {t.dashboard.products_v2.scatter.multi_select_label}:{' '}
+                      {products.scatter.multi_select_label}:{' '}
                       {selectedDetails.length} items
                     </span>
                     <div className="h-3 w-[1px] bg-brand-start/30" />
@@ -483,16 +579,16 @@ export const ProductsViewV2: React.FC = () => {
 
                   {/* Quadrant Labels */}
                   <div className="absolute top-6 right-6 text-xs font-black text-emerald-500/40 uppercase tracking-[0.2em]">
-                    {t.dashboard.products_v2.scatter.hint_top_right}
+                    {products.scatter.hint_top_right}
                   </div>
                   <div className="absolute bottom-6 right-6 text-xs font-black text-brand-start/40 uppercase tracking-[0.2em]">
-                    {t.dashboard.products_v2.scatter.hint_bottom_right}
+                    {products.scatter.hint_bottom_right}
                   </div>
                   <div className="absolute top-6 left-6 text-xs font-black text-amber-500/40 uppercase tracking-[0.2em]">
-                    {t.dashboard.products_v2.scatter.hint_top_left}
+                    {products.scatter.hint_top_left}
                   </div>
                   <div className="absolute bottom-6 left-6 text-xs font-black text-rose-500/40 uppercase tracking-[0.2em]">
-                    {t.dashboard.products_v2.scatter.hint_bottom_left}
+                    {products.scatter.hint_bottom_left}
                   </div>
 
                   {/* Nodes */}
@@ -567,10 +663,10 @@ export const ProductsViewV2: React.FC = () => {
 
                   {/* Axis Legends */}
                   <div className="absolute left-1/2 bottom-2 -translate-x-1/2 text-xs font-black text-gray-400 uppercase tracking-[0.3em]">
-                    {t.dashboard.products_v2.scatter.x_label}
+                    {products.scatter.x_label}
                   </div>
                   <div className="absolute left-3 top-1/2 -translate-y-1/2 -rotate-90 text-xs font-black text-gray-400 uppercase tracking-[0.3em]">
-                    {t.dashboard.products_v2.scatter.y_label}
+                    {products.scatter.y_label}
                   </div>
                 </div>
               </div>
@@ -580,11 +676,11 @@ export const ProductsViewV2: React.FC = () => {
             <div className="space-y-6" id="products-details">
               <div className="flex items-center justify-between ml-2">
                 <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
-                  {t.dashboard.products_v2.details.title}
+                  {products.details.title}
                 </h3>
                 <button
                   type="button"
-                  onClick={() => explainSku(t.dashboard.products_v2.details.title)}
+                  onClick={() => explainSku(products.details.title)}
                   className="text-xs font-black uppercase tracking-widest text-brand-start hover:underline"
                 >
                   {t.dashboard.context_menu.explain_ai}
@@ -605,7 +701,7 @@ export const ProductsViewV2: React.FC = () => {
                     </svg>
                   </div>
                   <p className="text-sm font-bold text-gray-500 dark:text-gray-400">
-                    {t.dashboard.products_v2.details.empty}
+                    {products.details.empty}
                   </p>
                   <InteractiveButton
                     variant="secondary"
@@ -651,7 +747,7 @@ export const ProductsViewV2: React.FC = () => {
                         <div className="grid grid-cols-2 gap-8 mb-10">
                           <div className="space-y-1">
                             <div className="text-2xs font-black text-gray-400 uppercase tracking-widest">
-                              {t.dashboard.products_v2.details.labels.profit}
+                              {products.details.labels.profit}
                             </div>
                             <div className="text-2xl font-black text-brand-start tracking-tighter">
                               {formatCurrencyValue(item.profit)}
@@ -659,7 +755,7 @@ export const ProductsViewV2: React.FC = () => {
                           </div>
                           <div className="space-y-1">
                             <div className="text-2xs font-black text-gray-400 uppercase tracking-widest">
-                              {t.dashboard.products_v2.details.labels.volume}
+                              {products.details.labels.volume}
                             </div>
                             <div className="text-2xl font-black text-gray-900 dark:text-white tracking-tighter">
                               {item.volume} units
@@ -670,7 +766,7 @@ export const ProductsViewV2: React.FC = () => {
                         <div className="grid grid-cols-2 gap-8 mb-10 pt-8 border-t border-black/5 dark:border-white/5">
                           <div className="space-y-1">
                             <div className="text-2xs font-black text-gray-400 uppercase tracking-widest">
-                              {t.dashboard.products_v2.details.labels.returns}
+                              {products.details.labels.returns}
                             </div>
                             <div className="text-xl font-black text-gray-700 dark:text-gray-200">
                               {formatPercentValueLocal(item.returns)}
@@ -678,14 +774,14 @@ export const ProductsViewV2: React.FC = () => {
                           </div>
                           <div className="space-y-1">
                             <div className="text-2xs font-black text-gray-400 uppercase tracking-widest">
-                              {t.dashboard.products_v2.details.labels.stock}
+                              {products.details.labels.stock}
                             </div>
                             <div
                               className={`text-xl font-black ${
                                 item.stockRisk === 'high' ? 'text-rose-500' : 'text-emerald-500'
                               }`}
                             >
-                              {t.dashboard.products_v2.details.stock[item.stockRisk]}
+                              {products.details.stock[item.stockRisk]}
                             </div>
                           </div>
                         </div>
@@ -731,15 +827,15 @@ export const ProductsViewV2: React.FC = () => {
             <div className="flex items-start justify-between mb-8">
               <div>
                 <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
-                  {t.dashboard.products_v2.movers.title}
+                  {products.movers.title}
                 </h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-                  {t.dashboard.products_v2.movers.desc}
+                  {products.movers.desc}
                 </p>
               </div>
               <button
                 type="button"
-                onClick={() => explainSku(t.dashboard.products_v2.movers.title)}
+                onClick={() => explainSku(products.movers.title)}
                 className="text-xs font-black uppercase tracking-widest text-brand-start hover:underline"
               >
                 {t.dashboard.context_menu.explain_ai}
@@ -752,7 +848,7 @@ export const ProductsViewV2: React.FC = () => {
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 10l7-7m0 0l7 7m-7-7v18" />
                   </svg>
-                  {t.dashboard.products_v2.movers.rising_label}
+                  {products.movers.rising_label}
                 </div>
                 {movers.rising.map((m) => (
                   <div
@@ -777,7 +873,7 @@ export const ProductsViewV2: React.FC = () => {
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 14l-7 7m0 0l-7-7m7-7v18" />
                   </svg>
-                  {t.dashboard.products_v2.movers.falling_label}
+                  {products.movers.falling_label}
                 </div>
                 {movers.falling.map((m) => (
                   <div
@@ -804,21 +900,21 @@ export const ProductsViewV2: React.FC = () => {
             <div className="flex flex-wrap items-start justify-between gap-6 mb-10">
               <div>
                 <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
-                  {t.dashboard.products_v2.table.title}
+                  {products.table.title}
                 </h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-                  {t.dashboard.products_v2.table.desc}
+                  {products.table.desc}
                 </p>
               </div>
               <div className="flex gap-2">
                 <button
                   type="button"
-                  onClick={() => explainSku(t.dashboard.products_v2.table.title)}
+                  onClick={() => explainSku(products.table.title)}
                   className="text-xs font-black uppercase tracking-widest text-brand-start hover:underline"
                 >
                   {t.dashboard.context_menu.explain_ai}
                 </button>
-                {t.dashboard.products_v2.table.filters.map((f: string) => (
+                {products.table.filters.map((f: string) => (
                   <button
                     key={f}
                     type="button"
@@ -834,12 +930,12 @@ export const ProductsViewV2: React.FC = () => {
               <table className="dashboard-table">
                 <thead className="text-xs font-black text-gray-400 uppercase tracking-widest border-b border-black/5 dark:border-white/5">
                   <tr>
-                    <th className="py-4 px-2">{t.dashboard.products_v2.table.columns.sku}</th>
-                    <th className="py-4 px-2 text-right">{t.dashboard.products_v2.table.columns.revenue}</th>
-                    <th className="py-4 px-2 text-right">{t.dashboard.products_v2.table.columns.margin}</th>
-                    <th className="py-4 px-2 text-right">{t.dashboard.products_v2.table.columns.returns}</th>
-                    <th className="py-4 px-2 text-right">{t.dashboard.products_v2.table.columns.stock}</th>
-                    <th className="py-4 px-2 text-right">{t.dashboard.products_v2.table.columns.trend}</th>
+                    <th className="py-4 px-2">{products.table.columns.sku}</th>
+                    <th className="py-4 px-2 text-right">{products.table.columns.revenue}</th>
+                    <th className="py-4 px-2 text-right">{products.table.columns.margin}</th>
+                    <th className="py-4 px-2 text-right">{products.table.columns.returns}</th>
+                    <th className="py-4 px-2 text-right">{products.table.columns.stock}</th>
+                    <th className="py-4 px-2 text-right">{products.table.columns.trend}</th>
                     <th className="py-4 px-2"></th>
                   </tr>
                 </thead>
@@ -874,7 +970,7 @@ export const ProductsViewV2: React.FC = () => {
                               : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
                           }`}
                         >
-                          {t.dashboard.products_v2.details.stock[row.stockRisk]}
+                          {products.details.stock[row.stockRisk]}
                         </span>
                       </td>
                       <td

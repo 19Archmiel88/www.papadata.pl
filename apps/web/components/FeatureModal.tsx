@@ -4,14 +4,6 @@ import { Logo } from './Logo';
 import { motion, useReducedMotion } from 'framer-motion';
 import { InteractiveButton } from './InteractiveButton';
 
-/**
- * FeatureModal.tsx
- * Modal szczegółów funkcji (Feature).
- * Content-only: overlay/ESC/scroll/focus obsługuje ModalContainer.
- */
-
-// --- Narrative Sub-components ---
-
 const ScanningRay = memo(() => {
   const reduce = useReducedMotion();
   if (reduce) return null;

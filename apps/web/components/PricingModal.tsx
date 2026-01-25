@@ -1,9 +1,3 @@
-/**
- * PricingModal.tsx
- * Modal porownujacy plany cenowe (Starter / Professional / Enterprise).
- * Content-only: overlay/ESC/scroll/focus obsluguje ModalContainer.
- */
-
 import React, { useMemo, useId } from 'react';
 import { InteractiveButton } from './InteractiveButton';
 import type { Translation } from '../types';

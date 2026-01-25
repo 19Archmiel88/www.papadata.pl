@@ -6,6 +6,7 @@ Product/UX spec (high-level): `../../dokumentacjaProdukcyjna/docs/ux/ui-specs/*`
 Legenda statusów:
 - gotowe — opis komplet­ny wg kodu
 - mock/symulacja — dane i akcje symulowane w kodzie
+- nieuzywane — spec istnieje, ale sekcja/komponent nie jest renderowany w kodzie
 
 ## Screens
 - [screens/landing.md](screens/landing.md) — gotowe
@@ -45,7 +46,7 @@ Legenda statusów:
 - [sections/landing-security.md](sections/landing-security.md) — gotowe
 - [sections/landing-pricing.md](sections/landing-pricing.md) — gotowe
 - [sections/landing-faq.md](sections/landing-faq.md) — gotowe
-- [sections/landing-final-cta.md](sections/landing-final-cta.md) — gotowe
+- [sections/landing-final-cta.md](sections/landing-final-cta.md) — nieuzywane
 
 ## Modals
 - [modals/auth-modal.md](modals/auth-modal.md) — gotowe
@@ -68,6 +69,13 @@ Legenda statusów:
 - [components/papa-ai-drawer.md](components/papa-ai-drawer.md) — gotowe
 - [components/dashboard-primitives.md](components/dashboard-primitives.md) — gotowe
 - [components/legal-doc-page.md](components/legal-doc-page.md) — gotowe
+- [components/backgrounds.md](components/backgrounds.md) — gotowe
+- [components/landing-chat-widget.md](components/landing-chat-widget.md) — gotowe
+- [components/logo.md](components/logo.md) — gotowe
+- [components/offline-banner.md](components/offline-banner.md) — gotowe
+- [components/error-boundary.md](components/error-boundary.md) — gotowe
+- [components/data-readiness-banner.md](components/data-readiness-banner.md) — gotowe
+- [components/integration-callback.md](components/integration-callback.md) — gotowe
 
 ## Tests
 - [tests/00_TEST_INDEX.md](tests/00_TEST_INDEX.md)

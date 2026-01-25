@@ -2,12 +2,6 @@ import React, { useCallback, useId } from 'react';
 import { Translation } from '../types';
 import { InteractiveButton } from './InteractiveButton';
 
-/**
- * DemoNoticeModal.tsx
- * Informacyjny modal „demo notice” (tryb demo).
- * Content-only: overlay/ESC/scroll/focus obsługuje ModalContainer.
- */
-
 interface DemoNoticeModalProps {
   t: Translation;
   context?: string;

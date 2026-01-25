@@ -201,19 +201,19 @@ export const IntegrationsModal: React.FC<IntegrationsModalProps> = ({
             </button>
 
             {integrationCategories.map((tab) => {
-              const isActive = activeTab === tab.id;
+              const isActive = activeTab === tab;
               return (
                 <button
-                  key={tab.id}
+                  key={tab}
                   type="button"
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => setActiveTab(tab)}
                   className={`px-4 md:px-5 py-2.5 rounded-xl text-sm2 font-semibold transition-all duration-300 whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-start/60 ${
                     isActive
                       ? 'brand-gradient-bg text-white shadow-[0_8px_18px_rgba(78,38,226,0.28)]'
                       : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'
                   }`}
                 >
-                  {tabLabels[tab.id]}
+                  {tabLabels[tab]}
                 </button>
               );
             })}

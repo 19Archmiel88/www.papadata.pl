@@ -7,6 +7,7 @@ import { useContextMenu } from './DashboardPrimitives.hooks';
 import { motion, AnimatePresence } from 'framer-motion';
 import { fetchDashboardKnowledge } from '../../data/api';
 import type { DashboardKnowledgeResponse } from '@papadata/shared';
+import type { DashboardKnowledgeV2 } from '../../types';
 import { useOnlineStatus } from '../../hooks/useOnlineStatus';
 
 interface Resource {
@@ -47,6 +48,54 @@ type KnowledgeResourceInput = {
   content?: string;
 };
 
+const emptyKnowledge: DashboardKnowledgeV2 = {
+  title: '',
+  desc: '',
+  search_placeholder: '',
+  ai_prompt: '',
+  badge_label: '',
+  resources_label: '',
+  empty_title: '',
+  empty_desc: '',
+  clear_filters_label: '',
+  filters: {
+    category: [],
+    level: [],
+    type: [],
+    module: [],
+  },
+  card: {
+    cta_open: '',
+    cta_ai: '',
+  },
+  detail: {
+    title: '',
+    empty: '',
+    cta_apply: '',
+    cta_report: '',
+  },
+  empty_list: '',
+  booking: {
+    title: '',
+    subtitle: '',
+    topic_label: '',
+    topic_placeholder: '',
+    date_label: '',
+    budget_label: '',
+    budget_options: [],
+    guarantee_title: '',
+    guarantee_desc: '',
+    submit_cta: '',
+    close_cta: '',
+  },
+  actions: {
+    open_article: '',
+    share_team: '',
+    bookmark: '',
+  },
+  resources: [],
+};
+
 export const KnowledgeView: React.FC = () => {
   const { t, setAiDraft, setContextLabel, isDemo, apiAvailable } =
     useOutletContext<DashboardOutletContext>();
@@ -62,6 +111,7 @@ export const KnowledgeView: React.FC = () => {
   const [knowledgeError, setKnowledgeError] = useState<string | null>(null);
 
   const demoTooltip = t.dashboard.demo_tooltip;
+  const knowledge = t.dashboard.knowledge_v2 ?? emptyKnowledge;
   const modalTitleId = 'booking-modal-title';
   const modalDescId = 'booking-modal-desc';
   const modalRef = useRef<HTMLDivElement | null>(null);
@@ -72,11 +122,11 @@ export const KnowledgeView: React.FC = () => {
 
   // Options list for category filter (i18n-driven)
   const categoryOptions = useMemo(() => {
-    return (t.dashboard.knowledge_v2.filters.category ?? []).filter(Boolean) as Array<{
+    return (knowledge.filters.category ?? []).filter(Boolean) as Array<{
       id: string;
       label: string;
     }>;
-  }, [t]);
+  }, [knowledge.filters.category]);
 
   // Ensure category value always exists in options (or fallback safely)
   useEffect(() => {
@@ -92,7 +142,7 @@ export const KnowledgeView: React.FC = () => {
 
   // Mocked enriched data for Knowledge Base
   const fallbackResources: Resource[] = useMemo(() => {
-    const raw = (t.dashboard.knowledge_v2.resources as unknown as KnowledgeResourceInput[]) ?? [];
+    const raw = (knowledge.resources as unknown as KnowledgeResourceInput[]) ?? [];
     return raw
       .filter(Boolean)
       .map((r): Resource => {
@@ -119,7 +169,7 @@ export const KnowledgeView: React.FC = () => {
           author: String(r.author ?? ''),
         };
       });
-  }, [t]);
+  }, [knowledge.resources]);
 
   // Fetch data (but respect API availability if present)
   useEffect(() => {
@@ -305,13 +355,13 @@ export const KnowledgeView: React.FC = () => {
 
   const handleExplain = (title: string) => {
     setContextLabel?.(title);
-    setAiDraft?.(t.dashboard.knowledge_v2.ai_prompt.replace('{name}', title));
+    setAiDraft?.(knowledge.ai_prompt.replace('{name}', title));
   };
 
   const buildMenuItems = (resource: Resource) => [
     {
       id: 'drill',
-      label: t.dashboard.knowledge_v2.actions.open_article,
+      label: knowledge.actions.open_article,
       onSelect: () => setSelectedId(resource.id),
     },
     {
@@ -322,12 +372,12 @@ export const KnowledgeView: React.FC = () => {
     },
     {
       id: 'share',
-      label: t.dashboard.knowledge_v2.actions.share_team,
+      label: knowledge.actions.share_team,
       onSelect: () => {
         // Minimal meaningful behavior instead of no-op
         setContextLabel?.(resource.title);
         setAiDraft?.(
-          `${t.dashboard.knowledge_v2.actions.share_team}: ${resource.title}. Przygotuj krótką wiadomość do zespołu z kluczowymi punktami i rekomendowanymi next-steps.`,
+          `${knowledge.actions.share_team}: ${resource.title}. Przygotuj krótką wiadomość do zespołu z kluczowymi punktami i rekomendowanymi next-steps.`,
         );
       },
       disabled: isDemo,
@@ -335,12 +385,12 @@ export const KnowledgeView: React.FC = () => {
     },
     {
       id: 'bookmark',
-      label: t.dashboard.knowledge_v2.actions.bookmark,
+      label: knowledge.actions.bookmark,
       onSelect: () => {
         // Minimal meaningful behavior instead of no-op
         setContextLabel?.(resource.title);
         setAiDraft?.(
-          `${t.dashboard.knowledge_v2.actions.bookmark}: ${resource.title}. Zapisz do zakładek i zaproponuj kiedy wrócić do tego materiału (plan tygodniowy).`,
+          `${knowledge.actions.bookmark}: ${resource.title}. Zapisz do zakładek i zaproponuj kiedy wrócić do tego materiału (plan tygodniowy).`,
         );
       },
       disabled: isDemo,
@@ -357,20 +407,20 @@ export const KnowledgeView: React.FC = () => {
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-start/5 border border-brand-start/10 mb-2">
               <div className="w-1.5 h-1.5 rounded-full bg-brand-start animate-pulse" />
               <span className="text-xs font-black uppercase tracking-[0.2em] text-brand-start">
-                {t.dashboard.knowledge_v2.badge_label}
+                {knowledge.badge_label}
               </span>
             </div>
             <h2 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
-              {t.dashboard.knowledge_v2.title}
+              {knowledge.title}
             </h2>
             <p className="text-base text-gray-500 dark:text-gray-400 font-medium">
-              {t.dashboard.knowledge_v2.desc}
+              {knowledge.desc}
             </p>
           </div>
 
           <button
             type="button"
-            onClick={() => handleExplain(t.dashboard.knowledge_v2.title)}
+            onClick={() => handleExplain(knowledge.title)}
             className="text-xs font-black uppercase tracking-widest text-brand-start hover:underline"
           >
             {t.dashboard.context_menu.explain_ai}
@@ -392,7 +442,7 @@ export const KnowledgeView: React.FC = () => {
                 type="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder={t.dashboard.knowledge_v2.search_placeholder}
+                placeholder={knowledge.search_placeholder}
                 className="w-full pl-11 pr-4 py-3 rounded-2xl border border-black/10 dark:border-white/10 bg-white dark:bg-black/40 text-sm focus:border-brand-start/50 outline-none transition-all font-bold"
               />
             </div>
@@ -439,11 +489,11 @@ export const KnowledgeView: React.FC = () => {
         <div className="space-y-4">
           <div className="flex items-center justify-between ml-2 mb-4">
             <h3 className="text-sm font-black text-gray-400 uppercase tracking-[0.2em]">
-              {t.dashboard.knowledge_v2.resources_label}
+              {knowledge.resources_label}
             </h3>
             <button
               type="button"
-              onClick={() => handleExplain(t.dashboard.knowledge_v2.title)}
+              onClick={() => handleExplain(knowledge.title)}
               className="text-xs font-black uppercase tracking-widest text-brand-start hover:underline"
             >
               {t.dashboard.context_menu.explain_ai}
@@ -452,10 +502,10 @@ export const KnowledgeView: React.FC = () => {
 
           {filtered.length === 0 ? (
             <WidgetEmptyState
-              title={t.dashboard.knowledge_v2.empty_title}
-              desc={t.dashboard.knowledge_v2.empty_desc}
+              title={knowledge.empty_title}
+              desc={knowledge.empty_desc}
               onAction={clearFilters}
-              actionLabel={t.dashboard.knowledge_v2.clear_filters_label}
+              actionLabel={knowledge.clear_filters_label}
             />
           ) : (
             filtered.map((item) => (
@@ -518,7 +568,7 @@ export const KnowledgeView: React.FC = () => {
                     }}
                     className="text-2xs font-black uppercase tracking-widest text-brand-start hover:underline"
                   >
-                    {t.dashboard.knowledge_v2.card.cta_ai}
+                    {knowledge.card.cta_ai}
                   </button>
                 </div>
               </div>
@@ -530,16 +580,16 @@ export const KnowledgeView: React.FC = () => {
             <div className="relative z-10 space-y-6">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-black uppercase tracking-[0.2em] opacity-70">
-                  {t.dashboard.knowledge_v2.expert?.pill}
+                  {knowledge.expert?.pill}
                 </span>
                 <div className="w-2 h-2 rounded-full bg-white animate-pulse shadow-[0_0_10px_white]" />
               </div>
               <div>
                 <h4 className="text-3xl font-black tracking-tighter uppercase leading-none mb-1">
-                  {t.dashboard.knowledge_v2.expert?.title}
+                  {knowledge.expert?.title}
                 </h4>
                 <p className="text-xs font-medium opacity-80 leading-relaxed italic">
-                  {t.dashboard.knowledge_v2.expert?.desc}
+                  {knowledge.expert?.desc}
                 </p>
               </div>
 
@@ -553,12 +603,12 @@ export const KnowledgeView: React.FC = () => {
                 disabled={isDemo}
                 title={isDemo ? demoTooltip : undefined}
               >
-                {t.dashboard.knowledge_v2.expert?.cta_label}
+                {knowledge.expert?.cta_label}
               </InteractiveButton>
 
               <button
                 type="button"
-                onClick={() => handleExplain(t.dashboard.knowledge_v2.expert?.ai_context ?? '')}
+                onClick={() => handleExplain(knowledge.expert?.ai_context ?? '')}
                 className="text-xs font-black uppercase tracking-widest text-white/80 hover:text-white hover:underline"
               >
                 {t.dashboard.context_menu.explain_ai}
@@ -574,7 +624,7 @@ export const KnowledgeView: React.FC = () => {
             {!selectedResource ? (
               <div className="rounded-[2.5rem] border border-dashed border-black/10 dark:border-white/10 p-20 text-center">
                 <p className="text-sm font-black text-gray-400 uppercase tracking-widest">
-                  {t.dashboard.knowledge_v2.empty_list}
+                  {knowledge.empty_list}
                 </p>
               </div>
             ) : (
@@ -720,24 +770,24 @@ export const KnowledgeView: React.FC = () => {
             >
               <div className="brand-gradient-bg p-8 text-white">
                 <h3 id={modalTitleId} className="text-2xl font-black uppercase tracking-tighter">
-                  {t.dashboard.knowledge_v2.booking.title}
+                  {knowledge.booking.title}
                 </h3>
                 <p
                   id={modalDescId}
                   className="text-xs font-medium opacity-70 mt-1 uppercase tracking-widest"
                 >
-                  {t.dashboard.knowledge_v2.booking.subtitle}
+                  {knowledge.booking.subtitle}
                 </p>
               </div>
 
               <div className="p-8 space-y-6">
                 <div className="space-y-2">
                   <label className="text-2xs font-black text-gray-500 uppercase tracking-widest">
-                    {t.dashboard.knowledge_v2.booking.topic_label}
+                    {knowledge.booking.topic_label}
                   </label>
                   <input
                     type="text"
-                    placeholder={t.dashboard.knowledge_v2.booking.topic_placeholder}
+                    placeholder={knowledge.booking.topic_placeholder}
                     className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-2xl py-4 px-6 text-sm outline-none focus:border-brand-start font-bold"
                   />
                 </div>
@@ -745,7 +795,7 @@ export const KnowledgeView: React.FC = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-2xs font-black text-gray-500 uppercase tracking-widest">
-                      {t.dashboard.knowledge_v2.booking.date_label}
+                      {knowledge.booking.date_label}
                     </label>
                     <input
                       type="date"
@@ -754,10 +804,10 @@ export const KnowledgeView: React.FC = () => {
                   </div>
                   <div className="space-y-2">
                     <label className="text-2xs font-black text-gray-500 uppercase tracking-widest">
-                      {t.dashboard.knowledge_v2.booking.budget_label}
+                      {knowledge.booking.budget_label}
                     </label>
                     <select className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-2xl py-4 px-6 text-sm outline-none focus:border-brand-start font-bold">
-                        {t.dashboard.knowledge_v2.booking.budget_options.map((option: string) => (
+                        {knowledge.booking.budget_options.map((option: string) => (
                         <option key={option}>{option}</option>
                         ))}
                     </select>
@@ -766,10 +816,10 @@ export const KnowledgeView: React.FC = () => {
 
                 <div className="p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/20">
                   <div className="text-xs font-black text-emerald-500 uppercase tracking-widest mb-1">
-                    {t.dashboard.knowledge_v2.booking.guarantee_title}
+                    {knowledge.booking.guarantee_title}
                   </div>
                   <p className="text-xs text-gray-500 font-medium">
-                    {t.dashboard.knowledge_v2.booking.guarantee_desc}
+                    {knowledge.booking.guarantee_desc}
                   </p>
                 </div>
 
@@ -783,7 +833,7 @@ export const KnowledgeView: React.FC = () => {
                   disabled={isDemo}
                   title={isDemo ? demoTooltip : undefined}
                 >
-                  {t.dashboard.knowledge_v2.booking.submit_cta}
+                  {knowledge.booking.submit_cta}
                 </InteractiveButton>
 
                 <button
@@ -794,7 +844,7 @@ export const KnowledgeView: React.FC = () => {
                   }}
                   className="w-full text-xs font-black text-gray-400 uppercase tracking-widest hover:text-gray-900 dark:hover:text-white transition-colors"
                 >
-                  {t.dashboard.knowledge_v2.booking.close_cta}
+                  {knowledge.booking.close_cta}
                 </button>
               </div>
             </motion.div>

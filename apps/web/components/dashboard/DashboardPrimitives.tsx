@@ -1,7 +1,3 @@
-// DashboardPrimitives.tsx
-// Zbiór prymitywów UI dla dashboardu: hooki (Alt, loading, context menu),
-// context menu, skeleton, empty state, prosty wykres trendu i LazySection.
-
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { InteractiveButton } from '../InteractiveButton';
 import type { ContextMenuState } from './DashboardPrimitives.types';

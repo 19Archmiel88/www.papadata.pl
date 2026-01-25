@@ -1,7 +1,3 @@
-// AlertsViewV2.tsx
-// Widok strumienia alertów (Guardian) w dashboardzie PapaData – filtruje, drilluje
-// i otwiera kontekst dla Papa AI (explain, drill, mute) w trybie demo i produkcyjnym.
-
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useOutletContext } from 'react-router-dom';
 import { DashboardOutletContext } from './DashboardContext';

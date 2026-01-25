@@ -1,10 +1,3 @@
-/**
- * apps/web/components/ComingSoonModal.tsx
- *
- * - Renderuje modal „Coming soon” (opcjonalnie z kontekstem), gdy funkcja jest niedostepna.
- * - Content-only: overlay/ESC/scroll/focus obsługuje ModalContainer.
- */
-
 import React, { useId } from 'react';
 import { InteractiveButton } from './InteractiveButton';
 import type { Translation } from '../types';

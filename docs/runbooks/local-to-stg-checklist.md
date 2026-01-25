@@ -9,6 +9,10 @@ Jeden, spójny workflow: **zmiany lokalnie → push do Git → auto deploy na ST
 3) **STG**: smoke + e2e (rejestracja/płatności/integracje) + logi/observability  
 4) **PROD**: po pozytywnych testach → **jednokomendowy deploy na PROD** (`papadata-platform-prod`) pod `www.papadata.pl`
 
+Repo CI/CD (source of truth):
+- STG trigger: push do `main` → `cloudbuild/stg.yaml`.
+- PROD trigger: tag `v*` lub manual → `cloudbuild/prod.yaml` (promocja istniejących image’ów).
+
 ---
 
 ## 1) Wymagane env vars (LOCAL vs STG)
@@ -29,7 +33,7 @@ Jeden, spójny workflow: **zmiany lokalnie → push do Git → auto deploy na ST
 | Zmienna | LOCAL | STG | Uwagi |
 |---|---|---|---|
 | APP_MODE | `demo` | `demo` | STG działa w trybie demo. |
-| PORT | `4000` | `4000` | Cloud Run port 4000. |
+| PORT | `4000` | `8080` | Cloud Run port 8080. |
 | VERTEX_PROJECT_ID | (lokalnie puste lub stg) | `papadata-platform-stg` | Wymagane do AI. |
 | VERTEX_LOCATION | `europe-central2` | `europe-central2` | Warszawa. |
 | VERTEX_MODEL | `gemini-2.5-flash-lite` | `gemini-2.5-flash-lite` | — |

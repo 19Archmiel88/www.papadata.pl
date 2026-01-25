@@ -1,7 +1,3 @@
-// CustomersViewV2.tsx
-// Widok klientów w dashboardzie PapaData: cohort heatmap, LTV, churn i VIP segmenty.
-// Integruje się z Papa AI (kontekst + prompty) oraz context menu (drill, report, alert).
-
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useOutletContext } from 'react-router-dom';
 import { DashboardOutletContext } from './DashboardContext';

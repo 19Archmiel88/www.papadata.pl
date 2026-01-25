@@ -1,10 +1,11 @@
 import { spawn } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { existsSync, unlinkSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 const root = resolve(process.cwd());
 const npmLock = resolve(root, 'package-lock.json');
 const npmShrinkwrap = resolve(root, 'npm-shrinkwrap.json');
+const isWindows = process.platform === 'win32';
 
 const run = (cmd, args) =>
   new Promise((resolvePromise, rejectPromise) => {
@@ -26,6 +27,22 @@ const fail = (msg) => {
   process.exit(1);
 };
 
+const checkTmpDelete = () => {
+  const tmpFile = resolve(root, `_tmp_pnpm_${Date.now()}.tmp`);
+  try {
+    writeFileSync(tmpFile, 'ok');
+    unlinkSync(tmpFile);
+  } catch (err) {
+    fail(
+      [
+        'Windows delete permissions look blocked in repo root.',
+        'Fix ACL/AV exclusions and rerun "pnpm run diagnose:windows".',
+        `Error: ${err?.code ?? err}`,
+      ].join('\n'),
+    );
+  }
+};
+
 if (existsSync(npmLock) || existsSync(npmShrinkwrap)) {
   fail(
     [
@@ -35,6 +52,10 @@ if (existsSync(npmLock) || existsSync(npmShrinkwrap)) {
       '- npm-shrinkwrap.json',
     ].join('\n'),
   );
+}
+
+if (isWindows) {
+  checkTmpDelete();
 }
 
 try {

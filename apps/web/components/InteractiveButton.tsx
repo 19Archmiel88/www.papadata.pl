@@ -7,16 +7,6 @@ export type InteractiveButtonProps = React.ButtonHTMLAttributes<HTMLButtonElemen
   isLoading?: boolean;
 };
 
-/**
- * InteractiveButton.tsx
- * Ustandaryzowany przycisk UI (primary/secondary) z:
- * - bezpiecznym domyślnym type="button"
- * - focus-visible ring
- * - obsługą disabled / aria-disabled
- * - wbudowanym stanem ładowania (spinner)
- *
- * UWAGA: Nie wymuszamy tu uppercase – casing kontrolują konkretne sekcje.
- */
 export const InteractiveButton = memo(
   forwardRef<HTMLButtonElement, InteractiveButtonProps>(function InteractiveButton(
     { children, className = '', variant = 'secondary', disabled, isLoading, type, ...rest },

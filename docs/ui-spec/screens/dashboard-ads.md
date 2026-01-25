@@ -22,7 +22,7 @@
 - Focus/Keyboard: menu kontekstowe zamykane ESC.
 
 ## Interakcje
-- Zmiana `mixMetric`, `mixGranularity`, `effMetric`.
+- Zmiana `mixMetric` i `effMetric`.
 - Drilldown level (campaign/adset/creative).
 - Retry po błędzie.
 - Context menu actions (disabled w DEMO).

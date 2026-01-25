@@ -13,6 +13,7 @@
 ## Interakcje
 - CTA → `IntegrationsModal`.
 - Click tile → `IntegrationConnectModal`.
+- Status `coming_soon`: kafelki disabled, brak przejścia do connect.
 - Hover tile: highlight + ping trace.
 
 ## Dane

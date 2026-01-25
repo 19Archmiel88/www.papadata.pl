@@ -1,8 +1,3 @@
-// GuardianViewV2.tsx
-// Widok "Guardian": monitoring świeżości i jakości danych oraz status warstwy RAG
-// dla całego konta. Korzysta z API/Mocków, pokazuje tabelę źródeł + issues
-// i wystawia akcje do AI oraz innych widoków dashboardu.
-
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useOutletContext } from 'react-router-dom';
 import { DashboardOutletContext } from './DashboardContext';
@@ -17,6 +12,7 @@ import {
 import { useContextMenu } from './DashboardPrimitives.hooks';
 import { fetchDashboardGuardian } from '../../data/api';
 import type { DashboardGuardianResponse } from '@papadata/shared';
+import type { DashboardGuardianV2 } from '../../types';
 import { getNumberFormatter } from '../../utils/formatters';
 import { useOnlineStatus } from '../../hooks/useOnlineStatus';
 
@@ -61,6 +57,74 @@ type GuardianQualityIssue = {
   severity: string;
 };
 
+const emptyGuardian: DashboardGuardianV2 = {
+  title: '',
+  desc: '',
+  ai_prompt: '',
+  badge_label: '',
+  health_label: '',
+  health_status: '',
+  uptime_label: '',
+  uptime_value: '',
+  range_label: '',
+  range_options: [],
+  only_issues_label: '',
+  status_healthy: '',
+  status_delayed: '',
+  delay_under_2_min: '',
+  delay_na: '',
+  severity_critical: '',
+  severity_warning: '',
+  severity_info: '',
+  sources: [],
+  actions: {
+    run_validations: '',
+    rebuild_index: '',
+  },
+  freshness: {
+    title: '',
+    desc: '',
+    menu_label: '',
+    columns: {
+      source: '',
+      status: '',
+      last_sync: '',
+      delay: '',
+      records: '',
+      action: '',
+    },
+    items: [],
+    actions: {
+      explain: '',
+    },
+  },
+  quality: {
+    title: '',
+    desc: '',
+    empty_state: '',
+    items: [],
+    actions: {
+      view: '',
+      fix: '',
+    },
+  },
+  rag: {
+    title: '',
+    desc: '',
+    status_heading: '',
+    index_title: '',
+    index_subtitle: '',
+    explain_context: '',
+    cta: '',
+    status_label: '',
+    status_value: '',
+    last_update_label: '',
+    last_update_value: '',
+    coverage_label: '',
+    coverage_value: '',
+  },
+};
+
 export const GuardianViewV2: React.FC = () => {
   const { t, setAiDraft, setContextLabel, timeRange, isDemo } =
     useOutletContext<DashboardOutletContext>();
@@ -69,6 +133,7 @@ export const GuardianViewV2: React.FC = () => {
   const [guardianData, setGuardianData] = useState<DashboardGuardianResponse | null>(null);
   const [guardianError, setGuardianError] = useState<string | null>(null);
   const demoTooltip = t.dashboard.demo_tooltip;
+  const guardian = t.dashboard.guardian_v2 ?? emptyGuardian;
   const [retryToken, setRetryToken] = useState(0);
   const handleRetry = () => setRetryToken((prev) => prev + 1);
 
@@ -145,15 +210,15 @@ export const GuardianViewV2: React.FC = () => {
       return apiSources.map((source) => {
         const status =
           source.status === 'ok'
-            ? t.dashboard.guardian_v2.status_healthy
-            : t.dashboard.guardian_v2.status_delayed;
+            ? guardian.status_healthy
+            : guardian.status_delayed;
 
         const delay =
           typeof source.delayMinutes === 'number'
             ? `${source.delayMinutes} min`
-            : status === t.dashboard.guardian_v2.status_healthy
-            ? t.dashboard.guardian_v2.delay_under_2_min
-            : t.dashboard.guardian_v2.delay_na;
+            : status === guardian.status_healthy
+            ? guardian.delay_under_2_min
+            : guardian.delay_na;
 
         return {
           id: source.source,
@@ -169,7 +234,7 @@ export const GuardianViewV2: React.FC = () => {
       });
     }
 
-    const sources = (t.dashboard.guardian_v2.sources ?? []) as GuardianSourceTranslation[];
+    const sources = (guardian.sources ?? []) as GuardianSourceTranslation[];
     return sources.map((s, i) => {
       const baseSeed = timeSeed + i;
       const statusSeed = seeded(i, baseSeed);
@@ -177,13 +242,13 @@ export const GuardianViewV2: React.FC = () => {
       const records = Math.round((25000 + seeded(i, 11) * 75000) * timeMultiplier);
       const delay = isDelayed
         ? `${Math.round(15 + seeded(i, 22) * 45)} min`
-        : t.dashboard.guardian_v2.delay_under_2_min;
+        : guardian.delay_under_2_min;
 
       return {
         ...s,
         status: isDelayed
-          ? t.dashboard.guardian_v2.status_delayed
-          : t.dashboard.guardian_v2.status_healthy,
+          ? guardian.status_delayed
+          : guardian.status_healthy,
         last_sync: isDelayed
           ? t.common.time_minutes_ago.replace('{minutes}', '14')
           : t.common.time_now,
@@ -191,7 +256,7 @@ export const GuardianViewV2: React.FC = () => {
         records: numberFormatter.format(records),
       };
     });
-  }, [formatRelativeTime, guardianData, numberFormatter, t, timeMultiplier, timeSeed]);
+  }, [formatRelativeTime, guardian, guardianData, numberFormatter, t, timeMultiplier, timeSeed]);
 
   // Data Quality Issues (API first, fallback to mock)
   const qualityIssues = useMemo<GuardianQualityIssue[]>(() => {
@@ -203,19 +268,19 @@ export const GuardianViewV2: React.FC = () => {
         impact: issue.impact,
         severity:
           issue.severity === 'critical'
-            ? t.dashboard.guardian_v2.severity_critical
+            ? guardian.severity_critical
             : issue.severity === 'warning'
-            ? t.dashboard.guardian_v2.severity_warning
-            : t.dashboard.guardian_v2.severity_info,
+            ? guardian.severity_warning
+            : guardian.severity_info,
       }));
     }
 
-    return (t.dashboard.guardian_v2.quality.items ?? []) as GuardianQualityIssue[];
-  }, [guardianData, t]);
+    return (guardian.quality.items ?? []) as GuardianQualityIssue[];
+  }, [guardian, guardianData]);
 
   const handleExplain = (label: string) => {
     setContextLabel?.(label);
-    setAiDraft?.(t.dashboard.guardian_v2.ai_prompt.replace('{name}', label));
+    setAiDraft?.(guardian.ai_prompt.replace('{name}', label));
   };
 
   const buildMenuItems = (context: string) => [
@@ -284,31 +349,31 @@ export const GuardianViewV2: React.FC = () => {
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/5 border border-emerald-500/10 mb-2">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               <span className="text-xs font-black uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400">
-                {t.dashboard.guardian_v2.badge_label}
+                {guardian.badge_label}
               </span>
             </div>
             <h2 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
-              {t.dashboard.guardian_v2.title}
+              {guardian.title}
             </h2>
             <p className="text-base text-gray-500 dark:text-gray-400 font-medium">
-              {t.dashboard.guardian_v2.desc}
+              {guardian.desc}
             </p>
           </div>
 
           <div className="grid grid-cols-2 sm:flex items-center gap-4 w-full md:w-auto">
             <div className="p-4 px-6 rounded-2xl bg-black/5 dark:bg-white/5 border border-black/5 text-center min-w-[140px]">
               <div className="text-2xs font-black text-gray-400 uppercase tracking-widest mb-1">
-                {t.dashboard.guardian_v2.health_label}
+                {guardian.health_label}
               </div>
               <div className="text-2xl font-black text-emerald-500">
-                {t.dashboard.guardian_v2.health_status}
+                {guardian.health_status}
               </div>
             </div>
             <div className="p-4 px-6 rounded-2xl bg-brand-start text-white shadow-xl shadow-brand-start/20 text-center min-w-[140px]">
               <div className="text-2xs font-black uppercase tracking-widest mb-1 opacity-70">
-                {t.dashboard.guardian_v2.uptime_label}
+                {guardian.uptime_label}
               </div>
-              <div className="text-2xl font-black">{t.dashboard.guardian_v2.uptime_value}</div>
+              <div className="text-2xl font-black">{guardian.uptime_value}</div>
             </div>
           </div>
         </div>
@@ -343,17 +408,17 @@ export const GuardianViewV2: React.FC = () => {
             <div className="flex items-start justify-between gap-6 mb-10">
               <div>
                 <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
-                  {t.dashboard.guardian_v2.freshness.title}
+                  {guardian.freshness.title}
                 </h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-                  {t.dashboard.guardian_v2.freshness.desc}
+                  {guardian.freshness.desc}
                 </p>
               </div>
 
               <div className="flex gap-2">
                 <button
                   type="button"
-                  onClick={() => handleExplain(t.dashboard.guardian_v2.freshness.title)}
+                  onClick={() => handleExplain(guardian.freshness.title)}
                   className="text-xs font-black uppercase tracking-widest text-brand-start hover:underline"
                 >
                   {t.dashboard.context_menu.explain_ai}
@@ -381,8 +446,8 @@ export const GuardianViewV2: React.FC = () => {
                   onClick={(event) =>
                     openMenu(
                       event,
-                      buildMenuItems(t.dashboard.guardian_v2.freshness.title),
-                      t.dashboard.guardian_v2.freshness.menu_label,
+                      buildMenuItems(guardian.freshness.title),
+                      guardian.freshness.menu_label,
                     )
                   }
                   className="p-2.5 rounded-xl border border-black/10 dark:border-white/10 text-gray-500 hover:text-gray-900 dark:hover:text-white"
@@ -397,14 +462,14 @@ export const GuardianViewV2: React.FC = () => {
 
             <div className="overflow-x-auto no-scrollbar scroll-hint">
               <table className="w-full text-left border-collapse">
-                <caption className="sr-only">{t.dashboard.guardian_v2.freshness.title}</caption>
+                <caption className="sr-only">{guardian.freshness.title}</caption>
                 <thead className="text-xs font-black text-gray-400 uppercase tracking-widest border-b border-black/5 dark:border-white/5">
                   <tr>
-                    <th className="py-4 px-2">{t.dashboard.guardian_v2.freshness.columns.source}</th>
-                    <th className="py-4 px-2 text-center">{t.dashboard.guardian_v2.freshness.columns.status}</th>
-                    <th className="py-4 px-2 text-right">{t.dashboard.guardian_v2.freshness.columns.last_sync}</th>
-                    <th className="py-4 px-2 text-right">{t.dashboard.guardian_v2.freshness.columns.delay}</th>
-                    <th className="py-4 px-2 text-right">{t.dashboard.guardian_v2.freshness.columns.records}</th>
+                    <th className="py-4 px-2">{guardian.freshness.columns.source}</th>
+                    <th className="py-4 px-2 text-center">{guardian.freshness.columns.status}</th>
+                    <th className="py-4 px-2 text-right">{guardian.freshness.columns.last_sync}</th>
+                    <th className="py-4 px-2 text-right">{guardian.freshness.columns.delay}</th>
+                    <th className="py-4 px-2 text-right">{guardian.freshness.columns.records}</th>
                     <th className="py-4 px-2" />
                   </tr>
                 </thead>
@@ -426,11 +491,11 @@ export const GuardianViewV2: React.FC = () => {
                       <td className="py-5 px-2 text-center">
                         <span
                           className={`px-2 py-0.5 rounded-lg text-2xs font-black uppercase border ${
-                            item.status === t.dashboard.guardian_v2.status_delayed
+                            item.status === guardian.status_delayed
                               ? 'bg-rose-500/10 text-rose-500 border-rose-500/20'
                               : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
                           }`}
-                          aria-label={`${t.dashboard.guardian_v2.freshness.columns.status}: ${item.status}`}
+                          aria-label={`${guardian.freshness.columns.status}: ${item.status}`}
                         >
                           {item.status}
                         </span>
@@ -442,7 +507,7 @@ export const GuardianViewV2: React.FC = () => {
 
                       <td
                         className={`py-5 px-2 text-right text-xs-plus font-black ${
-                          item.status === t.dashboard.guardian_v2.status_delayed ? 'text-rose-500' : 'text-gray-400'
+                          item.status === guardian.status_delayed ? 'text-rose-500' : 'text-gray-400'
                         }`}
                       >
                         {item.delay}
@@ -483,16 +548,16 @@ export const GuardianViewV2: React.FC = () => {
               <div className="flex items-start justify-between mb-8">
                 <div>
                   <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
-                    {t.dashboard.guardian_v2.quality.title}
+                    {guardian.quality.title}
                   </h3>
                   <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-                    {t.dashboard.guardian_v2.quality.desc}
+                    {guardian.quality.desc}
                   </p>
                 </div>
 
                 <button
                   type="button"
-                  onClick={() => handleExplain(t.dashboard.guardian_v2.quality.title)}
+                  onClick={() => handleExplain(guardian.quality.title)}
                   className="text-xs font-black uppercase tracking-widest text-brand-start hover:underline"
                 >
                   {t.dashboard.context_menu.explain_ai}
@@ -508,7 +573,7 @@ export const GuardianViewV2: React.FC = () => {
                       </svg>
                     </div>
                     <span className="text-xs font-black uppercase tracking-widest text-gray-400">
-                      {t.dashboard.guardian_v2.quality.empty_state}
+                      {guardian.quality.empty_state}
                     </span>
                   </div>
                 ) : (
@@ -534,9 +599,9 @@ export const GuardianViewV2: React.FC = () => {
 
                         <span
                           className={`text-3xs font-black px-2 py-0.5 rounded-full border ${
-                            issue.severity === t.dashboard.guardian_v2.severity_critical
+                            issue.severity === guardian.severity_critical
                               ? 'bg-rose-500/10 text-rose-500 border-rose-500/20'
-                              : issue.severity === t.dashboard.guardian_v2.severity_warning
+                              : issue.severity === guardian.severity_warning
                               ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
                               : 'bg-blue-500/10 text-blue-500 border-blue-500/20'
                           }`}
@@ -558,7 +623,7 @@ export const GuardianViewV2: React.FC = () => {
                           }}
                           className="text-2xs font-black text-brand-start uppercase tracking-widest hover:underline"
                         >
-                          {t.dashboard.guardian_v2.quality.actions.view}
+                          {guardian.quality.actions.view}
                         </button>
 
                         <div className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-700 my-auto" />
@@ -569,7 +634,7 @@ export const GuardianViewV2: React.FC = () => {
                             e.stopPropagation();
                             if (isDemo) return;
                             setContextLabel?.(issue.title);
-                            setAiDraft?.(`${t.dashboard.guardian_v2.quality.actions.fix}: ${issue.title}`);
+                            setAiDraft?.(`${guardian.quality.actions.fix}: ${issue.title}`);
                           }}
                           className={`text-2xs font-black text-gray-400 uppercase tracking-widest ${
                             isDemo ? 'opacity-40 cursor-not-allowed' : 'hover:text-emerald-500'
@@ -577,7 +642,7 @@ export const GuardianViewV2: React.FC = () => {
                           disabled={isDemo}
                           title={isDemo ? demoTooltip : undefined}
                         >
-                          {t.dashboard.guardian_v2.quality.actions.fix}
+                          {guardian.quality.actions.fix}
                         </button>
                       </div>
                     </div>
@@ -591,48 +656,48 @@ export const GuardianViewV2: React.FC = () => {
               <div className="relative z-10 space-y-6">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-black uppercase tracking-[0.2em] opacity-70">
-                    {t.dashboard.guardian_v2.rag.status_heading}
+                    {guardian.rag.status_heading}
                   </span>
                   <div className="w-2 h-2 rounded-full bg-white animate-pulse shadow-[0_0_10px_white]" />
                 </div>
 
                 <div>
                   <h4 className="text-3xl font-black tracking-tighter uppercase leading-none mb-1">
-                    {t.dashboard.guardian_v2.rag.index_title}
+                    {guardian.rag.index_title}
                   </h4>
                   <span className="text-xs-plus font-bold opacity-70 uppercase tracking-widest">
-                    {t.dashboard.guardian_v2.rag.index_subtitle}
+                    {guardian.rag.index_subtitle}
                   </span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-6 pt-4 border-t border-white/20">
                   <div>
                     <div className="text-xs font-black uppercase tracking-widest opacity-60">
-                      {t.dashboard.guardian_v2.rag.coverage_label}
+                      {guardian.rag.coverage_label}
                     </div>
-                    <div className="text-2xl font-black">{t.dashboard.guardian_v2.rag.coverage_value}</div>
+                    <div className="text-2xl font-black">{guardian.rag.coverage_value}</div>
                   </div>
                   <div>
                     <div className="text-xs font-black uppercase tracking-widest opacity-60">
-                      {t.dashboard.guardian_v2.rag.status_label}
+                      {guardian.rag.status_label}
                     </div>
-                    <div className="text-2xl font-black">{t.dashboard.guardian_v2.rag.status_value}</div>
+                    <div className="text-2xl font-black">{guardian.rag.status_value}</div>
                   </div>
                 </div>
 
                 <InteractiveButton
                   variant="secondary"
-                  onClick={() => handleExplain(t.dashboard.guardian_v2.rag.explain_context)}
+                  onClick={() => handleExplain(guardian.rag.explain_context)}
                   className="w-full !bg-white/10 !border-white/20 !text-white !text-xs font-black uppercase tracking-widest !py-3"
                   disabled={isDemo}
                   title={isDemo ? demoTooltip : undefined}
                 >
-                  {t.dashboard.guardian_v2.rag.cta}
+                  {guardian.rag.cta}
                 </InteractiveButton>
 
                 <button
                   type="button"
-                  onClick={() => handleExplain(t.dashboard.guardian_v2.rag.title)}
+                  onClick={() => handleExplain(guardian.rag.title)}
                   className="text-xs font-black uppercase tracking-widest text-white/80 hover:text-white hover:underline"
                 >
                   {t.dashboard.context_menu.explain_ai}

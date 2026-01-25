@@ -42,6 +42,11 @@ Copy-Item -Path apps\web\.env.example -Destination apps\web\.env.local -Force
 pnpm install
 ```
 
+### Playwright (testy smoke/E2E)
+```bash
+pnpm --filter @papadata/web exec playwright install
+```
+
 ### Uruchomienie
 ```bash
 # terminal 1

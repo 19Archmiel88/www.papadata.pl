@@ -1,7 +1,3 @@
-// DashboardSection.tsx
-// Główny layout dashboardu PapaData: sidebar, topbar, filtry globalne,
-// kontekst dla widoków (Outlet + DashboardOutletContext) oraz szuflada PapaAI.
-
 import React, {
   Suspense,
   useCallback,

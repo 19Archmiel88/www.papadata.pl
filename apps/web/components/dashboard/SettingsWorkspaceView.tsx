@@ -1,11 +1,12 @@
-// SettingsWorkspaceView.tsx
-// Widok ustawień workspace: retencja danych, prywatność, modele atrybucji,
-// integracje, alerty operacyjne oraz konfiguracja modelu AI dla bieżącego workspace.
-
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { DashboardOutletContext } from './DashboardContext';
+import { DashboardOutletContext, GcpRegion } from './DashboardContext';
 import { InteractiveButton } from '../InteractiveButton';
+import { WidgetErrorState, WidgetOfflineState, WidgetSkeleton } from './DashboardPrimitives';
+import { fetchSettingsWorkspace } from '../../data/api';
+import type { SettingsWorkspaceResponse } from '@papadata/shared';
+import { useOnlineStatus } from '../../hooks/useOnlineStatus';
+import { captureException } from '../../utils/telemetry';
 
 type ActiveConnector = {
   id: string | number;
@@ -45,21 +46,132 @@ export const SettingsWorkspaceView: React.FC = () => {
     setRetentionDays,
     maskingEnabled,
     setMaskingEnabled,
+    region,
+    setRegion,
     isDemo,
+    isReadOnly,
+    apiAvailable,
     setContextLabel,
     setAiDraft,
   } = useOutletContext<DashboardOutletContext>();
+  const isOnline = useOnlineStatus();
+
+  const [workspaceData, setWorkspaceData] = useState<SettingsWorkspaceResponse | null>(null);
+  const [workspaceError, setWorkspaceError] = useState<string | null>(null);
+  const [workspaceLoading, setWorkspaceLoading] = useState(false);
+  const [retryToken, setRetryToken] = useState(0);
+  const handleRetry = () => setRetryToken((prev) => prev + 1);
 
   const demoTooltip = t.dashboard.demo_tooltip;
+  const lockTooltip = isDemo ? demoTooltip : t.dashboard.billing.read_only_tooltip;
+  const isLocked = Boolean(isDemo || isReadOnly);
 
-  const retentionOptions = useMemo(
-    () => t.dashboard.settings_workspace_v2.data.retention_options ?? [],
-    [t],
-  );
+  useEffect(() => {
+    let active = true;
+
+    if (apiAvailable === false) {
+      setWorkspaceData(null);
+      setWorkspaceError(null);
+      setWorkspaceLoading(false);
+      return () => {
+        active = false;
+      };
+    }
+
+    setWorkspaceLoading(true);
+    setWorkspaceError(null);
+
+    fetchSettingsWorkspace()
+      .then((data) => {
+        if (!active) return;
+        setWorkspaceData(data);
+        setWorkspaceError(null);
+
+        if (typeof data.retentionDays === 'number' && Number.isFinite(data.retentionDays)) {
+          setRetentionDays(data.retentionDays);
+        }
+        if (typeof data.maskingEnabled === 'boolean') {
+          setMaskingEnabled(data.maskingEnabled);
+        }
+        const preferredRegion = (data.regions ?? []).find(
+          (value): value is GcpRegion => value === 'europe-central2' || value === 'europe-west1',
+        );
+        if (preferredRegion) setRegion(preferredRegion);
+      })
+      .catch((err: unknown) => {
+        if (!active) return;
+        const message = err instanceof Error ? err.message : t.dashboard.widget.error_desc;
+        setWorkspaceError(message);
+        captureException(new Error(message), { scope: 'settings_workspace' });
+      })
+      .finally(() => {
+        if (active) setWorkspaceLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [
+    apiAvailable,
+    retryToken,
+    setRetentionDays,
+    setMaskingEnabled,
+    setRegion,
+    t.dashboard.widget.error_desc,
+  ]);
+
+  const retentionOptions = useMemo(() => {
+    const baseOptions =
+      (t.dashboard.settings_workspace_v2.data.retention_options ?? []) as Array<{
+        value?: number | null;
+        label?: string;
+      }>;
+    const apiOptions = workspaceData?.retentionOptions ?? [];
+    if (!apiOptions.length) return baseOptions;
+
+    const baseMap = new Map(
+      baseOptions
+        .filter((option) => typeof option?.value === 'number')
+        .map((option) => [option.value as number, option]),
+    );
+
+    return apiOptions.map((value) => {
+      const fallback = baseMap.get(value);
+      return fallback ?? { value, label: `${value} days` };
+    });
+  }, [t, workspaceData]);
   const retentionWarning = t.dashboard.settings_workspace_v2.data.retention_warning;
 
-  const attributionModels = t.dashboard.settings_workspace_v2.attribution.models ?? [];
-  const activeConnectors = (t.dashboard.settings_workspace_v2.integrations.items ?? []) as ActiveConnector[];
+  const attributionModels = useMemo(() => {
+    const baseModels =
+      (t.dashboard.settings_workspace_v2.attribution.models ?? []) as AttributionModel[];
+    const apiModels = workspaceData?.attributionModels ?? [];
+    if (!apiModels.length) return baseModels;
+
+    const allowed = new Set(apiModels.map((model) => String(model)));
+    const filtered = baseModels.filter((model) => allowed.has(String(model.id)));
+    return filtered.length ? filtered : baseModels;
+  }, [t, workspaceData]);
+
+  const activeConnectors = useMemo(() => {
+    const baseItems =
+      (t.dashboard.settings_workspace_v2.integrations.items ?? []) as ActiveConnector[];
+    const apiConnectors = workspaceData?.connectors ?? [];
+    if (!apiConnectors.length) return baseItems;
+
+    const baseMap = new Map(baseItems.map((item) => [String(item.id), item]));
+
+    return apiConnectors.map((connector) => {
+      const fallback = baseMap.get(String(connector.id));
+      const i18nMeta = t.integrations.items?.[connector.id as keyof typeof t.integrations.items];
+      const label = fallback?.label ?? i18nMeta?.name ?? connector.name ?? String(connector.id);
+      const desc = fallback?.desc ?? i18nMeta?.detail ?? '';
+      const status = connector.enabled
+        ? fallback?.status ?? 'Active'
+        : fallback?.status ?? 'Disabled';
+      return { id: connector.id, label, desc, status };
+    });
+  }, [t, workspaceData]);
   const aiConfig = (t.dashboard.settings_workspace_v2.ai.items ?? []) as AiConfigItem[];
   const notificationConfig = t.dashboard.settings_workspace_v2.notifications;
 
@@ -68,8 +180,7 @@ export const SettingsWorkspaceView: React.FC = () => {
   const alertRecipients: string[] = (notificationConfig?.recipients ?? []) as string[];
   const quietHours = notificationConfig?.quiet_hours_value ?? '';
 
-  // Region jest jeden na sztywno (EU)
-  const region = 'europe-central2';
+  const regionLabel = region ?? 'europe-central2';
 
   const safeRetentionValues = useMemo(() => {
     const values = retentionOptions
@@ -86,10 +197,10 @@ export const SettingsWorkspaceView: React.FC = () => {
   };
 
   const handleAction = (label: string, context: string) => {
-    if (isDemo) {
-      // DEMO: zamiast "ciche nic", dajemy jasny kontekst
-      setContextLabel?.(demoTooltip);
-      setAiDraft?.(`${demoTooltip} • ${label}: ${context}`);
+    if (isLocked) {
+      // DEMO/read-only: zamiast "ciche nic", dajemy jasny kontekst
+      setContextLabel?.(lockTooltip);
+      setAiDraft?.(`${lockTooltip} • ${label}: ${context}`);
       return;
     }
     setContextLabel?.(context);
@@ -97,7 +208,11 @@ export const SettingsWorkspaceView: React.FC = () => {
   };
 
   const handleRetentionChange = (raw: string) => {
-    if (isDemo) return;
+    if (isLocked) {
+      setContextLabel?.(lockTooltip);
+      setAiDraft?.(`${lockTooltip}: ${t.dashboard.settings_workspace_v2.data.retention_label}`);
+      return;
+    }
 
     const parsed = Number(raw);
     if (!Number.isFinite(parsed)) {
@@ -147,6 +262,34 @@ export const SettingsWorkspaceView: React.FC = () => {
         </div>
       </section>
 
+      {!isOnline && (
+        <section className="rounded-[2.5rem] border border-amber-500/30 bg-amber-500/10 p-6 shadow-xl">
+          <WidgetOfflineState
+            title={t.dashboard.widget.offline_title}
+            desc={t.dashboard.widget.offline_desc}
+            actionLabel={t.dashboard.widget.cta_retry}
+            onAction={handleRetry}
+          />
+        </section>
+      )}
+
+      {isOnline && workspaceError && (
+        <section className="rounded-[2.5rem] border border-rose-500/20 bg-rose-500/5 p-6 shadow-xl">
+          <WidgetErrorState
+            title={t.dashboard.widget.error_title}
+            desc={workspaceError || t.dashboard.widget.error_desc}
+            actionLabel={t.dashboard.widget.cta_retry}
+            onAction={handleRetry}
+          />
+        </section>
+      )}
+
+      {workspaceLoading && !workspaceData && (
+        <section className="dashboard-surface dashboard-card">
+          <WidgetSkeleton chartHeight="h-28" lines={3} />
+        </section>
+      )}
+
       <div className="grid gap-8 lg:grid-cols-2">
         {/* Data & Privacy */}
         <div className="dashboard-surface dashboard-card space-y-8">
@@ -177,8 +320,8 @@ export const SettingsWorkspaceView: React.FC = () => {
               <select
                 value={retentionDays}
                 onChange={(event) => handleRetentionChange(event.target.value)}
-                disabled={isDemo}
-                title={isDemo ? demoTooltip : undefined}
+                disabled={isLocked}
+                title={isLocked ? lockTooltip : undefined}
                 className="w-full px-5 py-4 rounded-2xl border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 text-sm font-bold outline-none focus:border-brand-start/50 transition-all appearance-none"
               >
                 {retentionOptions.map((option: { value?: number | null; label?: string }, index: number) => (
@@ -207,8 +350,8 @@ export const SettingsWorkspaceView: React.FC = () => {
                   onClick={() =>
                     handleAction(retentionCtaLabel!, t.dashboard.settings_workspace_v2.data.title)
                   }
-                  disabled={isDemo}
-                  title={isDemo ? demoTooltip : undefined}
+                  disabled={isLocked}
+                  title={isLocked ? lockTooltip : undefined}
                 >
                   {retentionCtaLabel}
                 </InteractiveButton>
@@ -228,9 +371,9 @@ export const SettingsWorkspaceView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => {
-                  if (isDemo) {
-                    setContextLabel?.(demoTooltip);
-                    setAiDraft?.(`${demoTooltip} • ${t.dashboard.settings_workspace_v2.privacy.masking_label}`);
+                  if (isLocked) {
+                    setContextLabel?.(lockTooltip);
+                    setAiDraft?.(`${lockTooltip} • ${t.dashboard.settings_workspace_v2.privacy.masking_label}`);
                     return;
                   }
                   setMaskingEnabled(!maskingEnabled);
@@ -241,10 +384,10 @@ export const SettingsWorkspaceView: React.FC = () => {
                     }`
                   );
                 }}
-                disabled={isDemo}
+                disabled={isLocked}
                 aria-pressed={maskingEnabled}
                 aria-label={t.dashboard.settings_workspace_v2.privacy.masking_label}
-                title={isDemo ? demoTooltip : undefined}
+                title={isLocked ? lockTooltip : undefined}
                 className={`relative w-12 h-6 rounded-full transition-all duration-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-start/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#0b0b0f] ${
                   maskingEnabled ? 'brand-gradient-bg' : 'bg-gray-200 dark:bg-gray-800'
                 }`}
@@ -263,7 +406,7 @@ export const SettingsWorkspaceView: React.FC = () => {
                 {t.dashboard.settings_workspace_v2.data.region_label}
               </label>
               <div className="w-full px-5 py-4 rounded-2xl border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 text-sm font-bold flex items-center justify-between">
-                <span className="text-gray-900 dark:text-white">{region}</span>
+                <span className="text-gray-900 dark:text-white">{regionLabel}</span>
                 <span className="text-xs font-black uppercase tracking-widest text-emerald-500">
                   EU
                 </span>
@@ -302,8 +445,8 @@ export const SettingsWorkspaceView: React.FC = () => {
                   type="radio"
                   name="attribution"
                   defaultChecked={model.default}
-                  disabled={isDemo}
-                  title={isDemo ? demoTooltip : undefined}
+                  disabled={isLocked}
+                  title={isLocked ? lockTooltip : undefined}
                   className="mt-1 accent-brand-start w-4 h-4"
                 />
                 <div className="space-y-1">
@@ -367,7 +510,15 @@ export const SettingsWorkspaceView: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                <span className="text-2xs font-black text-emerald-500 uppercase tracking-widest bg-emerald-500/10 px-2 py-0.5 rounded-lg border border-emerald-500/20">
+                <span
+                  className={`text-2xs font-black uppercase tracking-widest px-2 py-0.5 rounded-lg border ${
+                    String(item.status).toLowerCase() === 'active'
+                      ? 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20'
+                      : String(item.status).toLowerCase() === 'attention'
+                        ? 'text-amber-500 bg-amber-500/10 border-amber-500/20'
+                        : 'text-gray-400 bg-black/5 border-black/10'
+                  }`}
+                >
                   {item.status}
                 </span>
               </div>
@@ -404,8 +555,8 @@ export const SettingsWorkspaceView: React.FC = () => {
                 <input
                   type="checkbox"
                   defaultChecked={item.enabled}
-                  disabled={isDemo}
-                  title={isDemo ? demoTooltip : undefined}
+                  disabled={isLocked}
+                  title={isLocked ? lockTooltip : undefined}
                   className="w-4 h-4 accent-brand-start"
                 />
                 <span className="text-sm font-bold text-gray-700 dark:text-gray-200 uppercase tracking-tight group-hover:text-brand-start transition-colors">
@@ -427,8 +578,8 @@ export const SettingsWorkspaceView: React.FC = () => {
                 <input
                   type="checkbox"
                   defaultChecked
-                  disabled={isDemo}
-                  title={isDemo ? demoTooltip : undefined}
+                  disabled={isLocked}
+                  title={isLocked ? lockTooltip : undefined}
                   className="w-4 h-4 accent-brand-start"
                 />
               </label>
@@ -494,8 +645,8 @@ export const SettingsWorkspaceView: React.FC = () => {
                           t.dashboard.settings_workspace_v2.title
                       )
                     }
-                    disabled={isDemo}
-                    title={isDemo ? demoTooltip : undefined}
+                    disabled={isLocked}
+                    title={isLocked ? lockTooltip : undefined}
                   >
                     {format}
                   </InteractiveButton>
@@ -580,8 +731,8 @@ export const SettingsWorkspaceView: React.FC = () => {
                   t.dashboard.settings_workspace_v2.title
                 )
               }
-              disabled={isDemo}
-              title={isDemo ? demoTooltip : undefined}
+              disabled={isLocked}
+              title={isLocked ? lockTooltip : undefined}
             >
               {t.dashboard.settings_workspace_v2.cta_secondary}
             </InteractiveButton>
@@ -595,8 +746,8 @@ export const SettingsWorkspaceView: React.FC = () => {
                   t.dashboard.settings_workspace_v2.title
                 )
               }
-              disabled={isDemo}
-              title={isDemo ? demoTooltip : undefined}
+              disabled={isLocked}
+              title={isLocked ? lockTooltip : undefined}
             >
               {t.dashboard.settings_workspace_v2.cta_primary}
             </InteractiveButton>

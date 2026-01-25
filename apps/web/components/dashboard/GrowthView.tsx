@@ -1,14 +1,10 @@
-// GrowthView.tsx
-// Widok Growth: priorytety wzrostu (karty ICE) + rekomendacje budżetu
-// z integracją z kontekstem AI i nawigacją po dashboardzie.
-
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useOutletContext } from 'react-router-dom';
 import { DashboardOutletContext } from './DashboardContext';
 import { InteractiveButton } from '../InteractiveButton';
 import { ContextMenu } from './DashboardPrimitives';
 import { useContextMenu } from './DashboardPrimitives.hooks';
-import type { DashboardGrowthCard } from '../../types';
+import type { DashboardGrowth, DashboardGrowthCard } from '../../types';
 
 type GrowthStatus = 'new' | 'approved' | 'implemented' | 'measured' | 'closed';
 type Level = 'low' | 'medium' | 'high';
@@ -40,15 +36,87 @@ const statusClass = (status: GrowthStatus) => {
   }
 };
 
+const emptyGrowth: DashboardGrowth = {
+  title: '',
+  desc: '',
+  cards: {
+    title: '',
+    desc: '',
+    labels: {
+      impact: '',
+      confidence: '',
+      effort: '',
+      risk: '',
+      why_now: '',
+      evidence: '',
+      simulation: '',
+      status: '',
+    },
+    ctas: {
+      evidence: '',
+      explain: '',
+      save_task: '',
+      add_report: '',
+      open_measure: '',
+    },
+    statuses: {
+      new: '',
+      approved: '',
+      implemented: '',
+      measured: '',
+      closed: '',
+    },
+    priorities: {
+      low: '',
+      medium: '',
+      high: '',
+    },
+    values: {
+      low: '',
+      medium: '',
+      high: '',
+    },
+    simulation: {
+      before: '',
+      after: '',
+      delta: '',
+    },
+    items: [],
+  },
+  budget: {
+    title: '',
+    desc: '',
+    toggle_channels: '',
+    toggle_campaigns: '',
+    current_label: '',
+    suggested_label: '',
+    aggressiveness_label: '',
+    aggressiveness_steps: [],
+    aggressiveness_options: {
+      conservative: '',
+      standard: '',
+      aggressive: '',
+    },
+    assumptions_label: '',
+    assumptions_text: '',
+    channels: [],
+    campaigns: [],
+  },
+};
+
 export const GrowthView: React.FC = () => {
   const { t, setContextLabel, setAiDraft, isDemo } = useOutletContext<DashboardOutletContext>();
   const location = useLocation();
   const navigate = useNavigate();
   const navigateWithSearch = (path: string) => navigate(`${path}${location.search}`);
 
+  const growth = t.dashboard.growth ?? emptyGrowth;
+  const growthCards = growth.cards;
+  const growthBudget = growth.budget;
+
   const cards = useMemo(
-    () => (t.dashboard.growth?.cards?.items as DashboardGrowthCard[] ?? []),
-    [t],
+    () => (growthCards.items as DashboardGrowthCard[] ?? []),
+    [growthCards],
   );
   const [cardStatus, setCardStatus] = useState<Record<string, GrowthStatus>>({});
   const [allocationMode, setAllocationMode] = useState<'channels' | 'campaigns'>('channels');
@@ -61,9 +129,12 @@ export const GrowthView: React.FC = () => {
   }
 
   const aggressivenessKey: keyof AggressivenessOptions | undefined =
-    t.dashboard.growth?.budget?.aggressiveness_steps?.[aggressivenessIndex] as
+    growthBudget.aggressiveness_steps[aggressivenessIndex] as
       | keyof AggressivenessOptions
       | undefined;
+
+  const aggressivenessLabel =
+    (growthBudget.aggressiveness_options as Record<string, string>)[aggressivenessKey ?? ''] ?? '';
 
   useEffect(() => {
     setCardStatus(
@@ -77,8 +148,8 @@ export const GrowthView: React.FC = () => {
   const allocationItems = useMemo(() => {
     const source =
       allocationMode === 'channels'
-        ? (t.dashboard.growth?.budget?.channels as GrowthBudgetItem[] ?? [])
-        : (t.dashboard.growth?.budget?.campaigns as GrowthBudgetItem[] ?? []);
+        ? (growthBudget.channels as GrowthBudgetItem[])
+        : (growthBudget.campaigns as GrowthBudgetItem[]);
 
     const swing = aggressivenessIndex === 0 ? 0.03 : aggressivenessIndex === 2 ? 0.08 : 0.05;
 
@@ -87,7 +158,7 @@ export const GrowthView: React.FC = () => {
       const suggested = Math.max(0.05, Math.min(0.6, item.suggested + modifier));
       return { ...item, suggested };
     });
-  }, [allocationMode, aggressivenessIndex, t]);
+  }, [allocationMode, aggressivenessIndex, growthBudget]);
 
   const handleExplain = (context: string, prompt?: string) => {
     setContextLabel?.(context);
@@ -159,17 +230,17 @@ export const GrowthView: React.FC = () => {
               </span>
             </div>
             <h2 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
-              {t.dashboard.growth?.title}
+              {growth.title}
             </h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 font-medium max-w-[70ch]">
-              {t.dashboard.growth.desc}
+              {growth.desc}
             </p>
           </div>
 
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => handleExplain(t.dashboard.growth.title)}
+              onClick={() => handleExplain(growth.title)}
               className="text-xs font-black uppercase tracking-widest text-brand-start hover:underline"
             >
               {t.dashboard.context_menu.explain_ai}
@@ -182,11 +253,11 @@ export const GrowthView: React.FC = () => {
               title={isDemo ? demoTooltip : undefined}
               onClick={() => {
                 if (isDemo) return;
-                setContextLabel?.(t.dashboard.growth.title);
+                setContextLabel?.(growth.title);
                 navigateWithSearch('/dashboard/reports');
               }}
             >
-              {t.dashboard.growth.cards.ctas.open_measure}
+              {growth.cards.ctas.open_measure}
             </InteractiveButton>
 
             <button
@@ -194,8 +265,8 @@ export const GrowthView: React.FC = () => {
               onClick={(event) =>
                 openMenu(
                   event,
-                  buildMenuItems(t.dashboard.growth.title, '/dashboard/growth'),
-                  t.dashboard.growth.title,
+                  buildMenuItems(growth.title, '/dashboard/growth'),
+                  growth.title,
                 )
               }
               aria-label={t.dashboard.context_menu.label}
@@ -214,17 +285,17 @@ export const GrowthView: React.FC = () => {
         <div className="flex items-start justify-between gap-4">
           <div>
             <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
-              {t.dashboard.growth.cards.title}
+              {growth.cards.title}
             </h3>
             <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-              {t.dashboard.growth.cards.desc}
+              {growth.cards.desc}
             </p>
           </div>
 
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => handleExplain(t.dashboard.growth.cards.title)}
+              onClick={() => handleExplain(growth.cards.title)}
               className="text-xs font-black uppercase tracking-widest text-brand-start hover:underline"
             >
               {t.dashboard.context_menu.explain_ai}
@@ -235,8 +306,8 @@ export const GrowthView: React.FC = () => {
               onClick={(event) =>
                 openMenu(
                   event,
-                  buildMenuItems(t.dashboard.growth.cards.title, '/dashboard/growth'),
-                  t.dashboard.growth.cards.title,
+                  buildMenuItems(growth.cards.title, '/dashboard/growth'),
+                  growth.cards.title,
                 )
               }
               aria-label={t.dashboard.context_menu.label}
@@ -275,7 +346,7 @@ export const GrowthView: React.FC = () => {
                         card.priority as Level,
                       )}`}
                     >
-                      {t.dashboard.growth.cards.priorities[card.priority as Level]}
+                      {growth.cards.priorities[card.priority as Level]}
                     </span>
 
                     <button
@@ -305,7 +376,7 @@ export const GrowthView: React.FC = () => {
                 <div className="grid grid-cols-2 gap-4 text-xs">
                   <div>
                     <div className="text-xs font-black uppercase tracking-widest text-gray-400">
-                      {t.dashboard.growth.cards.labels.impact}
+                      {growth.cards.labels.impact}
                     </div>
                     <div className="text-sm font-black text-gray-900 dark:text-white">
                       {card.impact}
@@ -314,47 +385,47 @@ export const GrowthView: React.FC = () => {
 
                   <div>
                     <div className="text-xs font-black uppercase tracking-widest text-gray-400">
-                      {t.dashboard.growth.cards.labels.confidence}
+                      {growth.cards.labels.confidence}
                     </div>
                     <span
                       className={`inline-flex px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-widest border ${levelClass(
                         card.confidence as Level,
                       )}`}
                     >
-                      {t.dashboard.growth.cards.values[card.confidence as Level]}
+                      {growth.cards.values[card.confidence as Level]}
                     </span>
                   </div>
 
                   <div>
                     <div className="text-xs font-black uppercase tracking-widest text-gray-400">
-                      {t.dashboard.growth.cards.labels.effort}
+                      {growth.cards.labels.effort}
                     </div>
                     <span
                       className={`inline-flex px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-widest border ${levelClass(
                         card.effort as Level,
                       )}`}
                     >
-                      {t.dashboard.growth.cards.values[card.effort as Level]}
+                      {growth.cards.values[card.effort as Level]}
                     </span>
                   </div>
 
                   <div>
                     <div className="text-xs font-black uppercase tracking-widest text-gray-400">
-                      {t.dashboard.growth.cards.labels.risk}
+                      {growth.cards.labels.risk}
                     </div>
                     <span
                       className={`inline-flex px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-widest border ${levelClass(
                         card.risk as Level,
                       )}`}
                     >
-                      {t.dashboard.growth.cards.values[card.risk as Level]}
+                      {growth.cards.values[card.risk as Level]}
                     </span>
                   </div>
                 </div>
 
                 <div>
                   <div className="text-xs font-black uppercase tracking-widest text-gray-400">
-                    {t.dashboard.growth.cards.labels.why_now}
+                    {growth.cards.labels.why_now}
                   </div>
                   <div className="text-sm font-black text-gray-900 dark:text-white">
                     {card.why_now}
@@ -363,12 +434,12 @@ export const GrowthView: React.FC = () => {
 
                 <div className="rounded-2xl border border-black/5 dark:border-white/10 bg-black/5 dark:bg-white/5 p-4">
                   <div className="text-xs font-black uppercase tracking-widest text-gray-400">
-                    {t.dashboard.growth.cards.labels.simulation}
+                    {growth.cards.labels.simulation}
                   </div>
                   <div className="mt-2 grid grid-cols-3 gap-4 text-xs">
                     <div>
                       <div className="text-xs font-black uppercase tracking-widest text-gray-400">
-                        {t.dashboard.growth.cards.simulation.before}
+                        {growth.cards.simulation.before}
                       </div>
                       <div className="text-sm font-black text-gray-900 dark:text-white">
                         {card.simulation.before}
@@ -376,7 +447,7 @@ export const GrowthView: React.FC = () => {
                     </div>
                     <div>
                       <div className="text-xs font-black uppercase tracking-widest text-gray-400">
-                        {t.dashboard.growth.cards.simulation.after}
+                        {growth.cards.simulation.after}
                       </div>
                       <div className="text-sm font-black text-gray-900 dark:text-white">
                         {card.simulation.after}
@@ -384,7 +455,7 @@ export const GrowthView: React.FC = () => {
                     </div>
                     <div>
                       <div className="text-xs font-black uppercase tracking-widest text-gray-400">
-                        {t.dashboard.growth.cards.simulation.delta}
+                        {growth.cards.simulation.delta}
                       </div>
                       <div className="text-sm font-black text-emerald-500">
                         {card.simulation.delta}
@@ -396,7 +467,7 @@ export const GrowthView: React.FC = () => {
                 <div className="grid grid-cols-2 gap-4 text-xs">
                   <div>
                     <div className="text-xs font-black uppercase tracking-widest text-gray-400">
-                      {t.dashboard.growth.cards.labels.evidence}
+                      {growth.cards.labels.evidence}
                     </div>
                     <div className="text-sm font-black text-gray-900 dark:text-white">
                       {card.evidence}
@@ -405,7 +476,7 @@ export const GrowthView: React.FC = () => {
 
                   <div>
                     <div className="text-xs font-black uppercase tracking-widest text-gray-400">
-                      {t.dashboard.growth.cards.labels.status}
+                      {growth.cards.labels.status}
                     </div>
 
                     <select
@@ -419,9 +490,9 @@ export const GrowthView: React.FC = () => {
                       disabled={isDemo}
                       title={isDemo ? demoTooltip : undefined}
                       className="mt-1 w-full rounded-xl border border-black/10 dark:border-white/10 bg-white/80 dark:bg-white/5 px-3 py-2 text-xs text-gray-700 dark:text-gray-200 focus:outline-none"
-                      aria-label={t.dashboard.growth.cards.labels.status}
+                      aria-label={growth.cards.labels.status}
                     >
-                      {Object.entries(t.dashboard.growth.cards.statuses).map(([key, label]) => (
+                      {Object.entries(growth.cards.statuses).map(([key, label]) => (
                         <option key={key} value={key}>
                           {String(label)}
                         </option>
@@ -433,7 +504,7 @@ export const GrowthView: React.FC = () => {
                         status,
                       )}`}
                     >
-                      {t.dashboard.growth.cards.statuses[status]}
+                      {growth.cards.statuses[status]}
                     </div>
                   </div>
                 </div>
@@ -450,7 +521,7 @@ export const GrowthView: React.FC = () => {
                     title={isDemo ? demoTooltip : undefined}
                     className="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest border border-black/10 dark:border-white/10 bg-white dark:bg-white/5 hover:bg-brand-start hover:text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                   >
-                    {t.dashboard.growth.cards.ctas.evidence}
+                    {growth.cards.ctas.evidence}
                   </button>
 
                   <button
@@ -465,35 +536,35 @@ export const GrowthView: React.FC = () => {
                     title={isDemo ? demoTooltip : undefined}
                     className="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest border border-brand-start/30 text-brand-start bg-brand-start/10 hover:bg-brand-start hover:text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                   >
-                    {t.dashboard.growth.cards.ctas.explain}
+                    {growth.cards.ctas.explain}
                   </button>
 
                   <button
                     type="button"
                     onClick={() => {
                       if (isDemo) return;
-                      setContextLabel?.(`${t.dashboard.growth.cards.ctas.save_task}: ${card.title}`);
+                      setContextLabel?.(`${growth.cards.ctas.save_task}: ${card.title}`);
                       setAiDraft?.(`Przygotuj zadanie do backlogu dla inicjatywy wzrostu: "${card.title}".`);
                     }}
                     className="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest border border-black/10 dark:border-white/10 bg-white dark:bg-white/5 hover:bg-brand-start hover:text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     disabled={isDemo}
                     title={isDemo ? demoTooltip : undefined}
                   >
-                    {t.dashboard.growth.cards.ctas.save_task}
+                    {growth.cards.ctas.save_task}
                   </button>
 
                   <button
                     type="button"
                     onClick={() => {
                       if (isDemo) return;
-                      setContextLabel?.(`${t.dashboard.growth.cards.ctas.add_report}: ${card.title}`);
+                      setContextLabel?.(`${growth.cards.ctas.add_report}: ${card.title}`);
                       navigateWithSearch('/dashboard/reports');
                     }}
                     className="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest border border-black/10 dark:border-white/10 bg-white dark:bg-white/5 hover:bg-brand-start hover:text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     disabled={isDemo}
                     title={isDemo ? demoTooltip : undefined}
                   >
-                    {t.dashboard.growth.cards.ctas.add_report}
+                    {growth.cards.ctas.add_report}
                   </button>
                 </div>
               </div>
@@ -507,17 +578,17 @@ export const GrowthView: React.FC = () => {
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
-              {t.dashboard.growth.budget.title}
+              {growth.budget.title}
             </h3>
             <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-              {t.dashboard.growth.budget.desc}
+              {growth.budget.desc}
             </p>
           </div>
 
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => handleExplain(t.dashboard.growth.budget.title)}
+              onClick={() => handleExplain(growth.budget.title)}
               className="text-xs font-black uppercase tracking-widest text-brand-start hover:underline"
             >
               {t.dashboard.context_menu.explain_ai}
@@ -532,7 +603,7 @@ export const GrowthView: React.FC = () => {
                   : 'border-black/10 dark:border-white/10 text-gray-600 dark:text-gray-300'
               }`}
             >
-              {t.dashboard.growth.budget.toggle_channels}
+              {growth.budget.toggle_channels}
             </button>
 
             <button
@@ -544,13 +615,13 @@ export const GrowthView: React.FC = () => {
                   : 'border-black/10 dark:border-white/10 text-gray-600 dark:text-gray-300'
               }`}
             >
-              {t.dashboard.growth.budget.toggle_campaigns}
+              {growth.budget.toggle_campaigns}
             </button>
 
             <button
               type="button"
               onClick={(event) =>
-                openMenu(event, buildMenuItems(t.dashboard.growth.budget.title, '/dashboard/growth'), t.dashboard.growth.budget.title)
+                openMenu(event, buildMenuItems(growth.budget.title, '/dashboard/growth'), growth.budget.title)
               }
               aria-label={t.dashboard.context_menu.label}
               className="p-2 rounded-2xl border border-black/10 dark:border-white/10 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
@@ -565,17 +636,17 @@ export const GrowthView: React.FC = () => {
         <div className="mt-6 flex flex-wrap items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
           <span className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-gray-400" />
-            {t.dashboard.growth.budget.current_label}
+            {growth.budget.current_label}
           </span>
 
           <span className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-brand-start" />
-            {t.dashboard.growth.budget.suggested_label}
+            {growth.budget.suggested_label}
           </span>
 
           <div className="flex items-center gap-3 ml-auto">
             <span className="text-xs font-black uppercase tracking-widest">
-              {t.dashboard.growth.budget.aggressiveness_label}
+              {growth.budget.aggressiveness_label}
             </span>
 
             <input
@@ -587,11 +658,11 @@ export const GrowthView: React.FC = () => {
               className="accent-brand-start"
               disabled={isDemo}
               title={isDemo ? demoTooltip : undefined}
-              aria-label={t.dashboard.growth.budget.aggressiveness_label}
+              aria-label={growth.budget.aggressiveness_label}
             />
 
             <span className="text-gray-700 dark:text-gray-200 font-black text-xs uppercase tracking-widest">
-              {(t.dashboard.growth.budget.aggressiveness_options as Record<string, string>)[aggressivenessKey as string]}
+              {aggressivenessLabel}
             </span>
           </div>
         </div>
@@ -623,9 +694,9 @@ export const GrowthView: React.FC = () => {
 
         <div className="mt-6 rounded-2xl border border-black/5 dark:border-white/10 bg-black/5 dark:bg-white/5 p-4 text-xs text-gray-500 dark:text-gray-400">
           <div className="font-black uppercase tracking-widest text-xs text-gray-700 dark:text-gray-200">
-            {t.dashboard.growth.budget.assumptions_label}
+            {growth.budget.assumptions_label}
           </div>
-          <p className="mt-1">{t.dashboard.growth.budget.assumptions_text}</p>
+          <p className="mt-1">{growth.budget.assumptions_text}</p>
         </div>
       </section>
 

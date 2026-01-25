@@ -1,35 +1,3 @@
-/**
- * IntegrationsViewV2
- *
- * Widok centrum integracji w dashboardzie.
- *
- * Funkcje:
- * - Renderuje listę konektorów z `data/integrations`.
- * - Dociąga aktualny status z backendu:
- *   - lista integracji: `fetchIntegrations()`
- *   - statusy runtime: `GET /api/integrations/status` (z fallbackiem na logikę lokalną).
- * - Skaluje mockowane metryki (recordsSynced, uptime, latency, health)
- *   względem `timeRange` z kontekstu dashboardu.
- * - Wspiera:
- *   - wyszukiwanie po nazwie / opisie,
- *   - filtrowanie po statusie (all / active / attention / disabled),
- *   - sortowanie (issues / recent / name).
- *
- * Integracja z DashboardOutletContext:
- * - `timeRange`, `isDemo` – wpływają na mocki i blokady akcji.
- * - `openIntegrationModal` – otwiera modal konfiguracji integracji.
- * - `integrationStatus` – stan połączenia (idle / connecting / connected).
- * - `setContextLabel`, `setAiDraft` – ustawiają kontekst dla PapaAI (drill / explain).
- *
- * UX / UI:
- * - Karty integracji pokazują:
- *   - status (active / attention / disabled) z czytelnym badge + diody health,
- *   - metryki: Records Synced, Uptime (30d), Sync status, Auth type.
- * - Pasek health na dole karty wizualizuje stabilność integracji (0–100%).
- * - Context menu na PPM: drill, AI explain, dodanie do raportu, eksport, alert.
- * - Na dole widok ma sekcję „Bezpieczna Centralizacja” z copy o szyfrowaniu / SLA.
- */
-
 import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import { useLocation, useNavigate, useOutletContext } from 'react-router-dom';
 import { DashboardOutletContext } from './DashboardContext';
@@ -40,6 +8,7 @@ import { ContextMenu, WidgetEmptyState } from './DashboardPrimitives';
 import { clamp } from './DashboardPrimitives.constants';
 import { useContextMenu } from './DashboardPrimitives.hooks';
 import { formatNumber, getNumberFormatter } from '../../utils/formatters';
+import type { DashboardIntegrationsV2 } from '../../types';
 
 type FilterId = 'all' | 'active' | 'disabled' | 'attention';
 type SortId = 'issues' | 'recent' | 'name';
@@ -50,6 +19,55 @@ type RealtimeStatusMap = Partial<Record<string, Exclude<FilterId, 'all'>>>;
 const seeded = (i: number, seed: number) => {
   const x = Math.sin((i + 1) * seed) * 10000;
   return x - Math.floor(x);
+};
+
+const emptyIntegrations: DashboardIntegrationsV2 = {
+  title: '',
+  desc: '',
+  header_badge: '',
+  search_placeholder: '',
+  filters: {
+    all: '',
+    active: '',
+    disabled: '',
+    attention: '',
+  },
+  sorts: {
+    issues: '',
+    recent: '',
+    name: '',
+  },
+  status_active: '',
+  status_disabled: '',
+  status_attention: '',
+  status_connecting: '',
+  status_connected: '',
+  active_connectors_label: '',
+  records_synced_label: '',
+  uptime_label: '',
+  auth_prefix: '',
+  sync_prefix: '',
+  latency_prefix: '',
+  health_label: '',
+  scope_label: '',
+  scope_default: '',
+  auth_label: '',
+  last_sync_label: '',
+  last_sync_recent: '',
+  last_sync_delay: '',
+  last_sync_disabled: '',
+  freshness_label: '',
+  freshness_status: '',
+  security_badge_label: '',
+  security_title: '',
+  security_desc: '',
+  security_cta_keys: '',
+  security_cta_sla: '',
+  actions: {
+    test: '',
+    details: '',
+    refresh: '',
+  },
 };
 
 export const IntegrationsViewV2: React.FC = () => {
@@ -70,6 +88,7 @@ export const IntegrationsViewV2: React.FC = () => {
   const demoTooltip = t.dashboard.demo_tooltip;
   const isLocked = Boolean(isDemo || isReadOnly);
   const lockTooltip = isDemo ? demoTooltip : t.dashboard.billing.read_only_tooltip;
+  const integrationsCopy = t.dashboard.integrations_v2 ?? emptyIntegrations;
 
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<FilterId>('all');
@@ -283,9 +302,9 @@ export const IntegrationsViewV2: React.FC = () => {
 
   const handleSlaDownload = () => {
     if (isLocked) return;
-    setContextLabel?.(t.dashboard.integrations_v2.title);
+    setContextLabel?.(integrationsCopy.title);
     setAiDraft?.(
-      `${t.dashboard.integrations_v2.security_cta_sla}: ${t.dashboard.integrations_v2.title}. Przygotuj raport SLA i historię dostępności integracji.`,
+      `${integrationsCopy.security_cta_sla}: ${integrationsCopy.title}. Przygotuj raport SLA i historię dostępności integracji.`,
     );
   };
 
@@ -345,19 +364,19 @@ export const IntegrationsViewV2: React.FC = () => {
   const statusMeta = (status: 'active' | 'disabled' | 'attention') => {
     if (status === 'attention') {
       return {
-        label: t.dashboard.integrations_v2.status_attention,
+        label: integrationsCopy.status_attention,
         tone:
           'border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10 shadow-[0_0_15px_rgba(245,158,11,0.1)]',
       };
     }
     if (status === 'disabled') {
       return {
-        label: t.dashboard.integrations_v2.status_disabled,
+        label: integrationsCopy.status_disabled,
         tone: 'border-gray-200 dark:border-white/10 text-gray-500 bg-white/60 dark:bg-white/5',
       };
     }
     return {
-      label: t.dashboard.integrations_v2.status_active,
+      label: integrationsCopy.status_active,
       tone: 'border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10',
     };
   };
@@ -374,14 +393,14 @@ export const IntegrationsViewV2: React.FC = () => {
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-start/5 border border-brand-start/10 mb-2">
               <div className="w-1.5 h-1.5 rounded-full bg-brand-start animate-pulse" />
               <span className="text-xs font-black uppercase tracking-[0.2em] text-brand-start">
-                {t.dashboard.integrations_v2.header_badge}
+                {integrationsCopy.header_badge}
               </span>
             </div>
             <h2 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
-              {t.dashboard.integrations_v2.title}
+              {integrationsCopy.title}
             </h2>
             <p className="text-base text-gray-500 dark:text-gray-400 font-medium">
-              {t.dashboard.integrations_v2.desc}
+              {integrationsCopy.desc}
             </p>
           </div>
 
@@ -401,7 +420,7 @@ export const IntegrationsViewV2: React.FC = () => {
                 type="search"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder={t.dashboard.integrations_v2.search_placeholder}
+                placeholder={integrationsCopy.search_placeholder}
                 className="pl-11 pr-4 py-3 rounded-2xl border border-black/10 dark:border-white/10 bg-white dark:bg-black/40 text-sm focus:border-brand-start/50 outline-none transition-all w-full font-bold"
               />
             </div>
@@ -411,9 +430,9 @@ export const IntegrationsViewV2: React.FC = () => {
               onChange={(event) => setSortId(event.target.value as SortId)}
               className="px-4 py-3 rounded-2xl border border-black/10 dark:border-white/10 bg-white dark:bg-black/40 text-xs font-black uppercase tracking-widest outline-none focus:border-brand-start/50 cursor-pointer"
             >
-              <option value="issues">{t.dashboard.integrations_v2.sorts.issues}</option>
-              <option value="recent">{t.dashboard.integrations_v2.sorts.recent}</option>
-              <option value="name">{t.dashboard.integrations_v2.sorts.name}</option>
+              <option value="issues">{integrationsCopy.sorts.issues}</option>
+              <option value="recent">{integrationsCopy.sorts.recent}</option>
+              <option value="name">{integrationsCopy.sorts.name}</option>
             </select>
           </div>
         </div>
@@ -432,7 +451,7 @@ export const IntegrationsViewV2: React.FC = () => {
                 }`}
                 aria-pressed={statusFilter === filter}
               >
-                {t.dashboard.integrations_v2.filters[filter]}
+                {integrationsCopy.filters[filter]}
               </button>
             ))}
           </div>
@@ -440,17 +459,17 @@ export const IntegrationsViewV2: React.FC = () => {
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-3">
               {isFetchingStatuses && (
-                <div className="flex items-center gap-2 mr-2" aria-label={t.dashboard.integrations_v2.status_connecting}>
+                <div className="flex items-center gap-2 mr-2" aria-label={integrationsCopy.status_connecting}>
                   <div className="w-1 h-1 rounded-full bg-brand-start animate-bounce [animation-delay:-0.3s]" />
                   <div className="w-1 h-1 rounded-full bg-brand-start animate-bounce [animation-delay:-0.15s]" />
                   <div className="w-1 h-1 rounded-full bg-brand-start animate-bounce" />
                 </div>
               )}
               <span className="text-xs font-black text-gray-400 uppercase tracking-widest">
-                {t.dashboard.integrations_v2.freshness_label}:
+                {integrationsCopy.freshness_label}:
               </span>
               <span className="text-xs-plus font-black text-emerald-500 uppercase">
-                {t.dashboard.integrations_v2.freshness_status}
+                {integrationsCopy.freshness_status}
               </span>
             </div>
 
@@ -458,7 +477,7 @@ export const IntegrationsViewV2: React.FC = () => {
 
             <div className="flex items-center gap-3">
               <span className="text-xs font-black text-gray-400 uppercase tracking-widest">
-                {t.dashboard.integrations_v2.active_connectors_label}:
+                {integrationsCopy.active_connectors_label}:
               </span>
               <span className="text-xs-plus font-black text-gray-900 dark:text-white uppercase">
                 {integrations.filter((i) => i.status === 'live').length}
@@ -503,15 +522,15 @@ export const IntegrationsViewV2: React.FC = () => {
               : !isLive
                 ? t.integrations.status_soon
                 : connectionState === 'connecting'
-                  ? t.dashboard.integrations_v2.status_connecting
+                  ? integrationsCopy.status_connecting
                   : undefined;
 
             const lastSyncLabel =
               item.statusTag === 'attention'
-                ? t.dashboard.integrations_v2.last_sync_delay
+                ? integrationsCopy.last_sync_delay
                 : item.statusTag === 'disabled'
-                  ? t.dashboard.integrations_v2.last_sync_disabled
-                  : t.dashboard.integrations_v2.last_sync_recent;
+                  ? integrationsCopy.last_sync_disabled
+                  : integrationsCopy.last_sync_recent;
 
             return (
               <div
@@ -551,7 +570,7 @@ export const IntegrationsViewV2: React.FC = () => {
                         {statusLabel.label}
                       </span>
 
-                      <div className="flex gap-1" aria-label={t.dashboard.integrations_v2.health_label}>
+                      <div className="flex gap-1" aria-label={integrationsCopy.health_label}>
                         {[1, 2, 3].map((i) => (
                           <div
                             key={i}
@@ -576,7 +595,7 @@ export const IntegrationsViewV2: React.FC = () => {
                   <div className="grid grid-cols-2 gap-6 py-6 border-y border-black/5 dark:border-white/5">
                     <div className="space-y-1">
                       <div className="text-3xs font-black text-gray-400 uppercase tracking-widest">
-                        {t.dashboard.integrations_v2.records_synced_label}
+                        {integrationsCopy.records_synced_label}
                       </div>
                       <div className="text-sm font-black text-gray-900 dark:text-white tabular-nums">
                         {item.recordsSynced}
@@ -585,7 +604,7 @@ export const IntegrationsViewV2: React.FC = () => {
 
                     <div className="space-y-1">
                       <div className="text-3xs font-black text-gray-400 uppercase tracking-widest">
-                        {t.dashboard.integrations_v2.uptime_label}
+                        {integrationsCopy.uptime_label}
                       </div>
                       <div
                         className={`text-sm font-black tabular-nums ${
@@ -599,14 +618,14 @@ export const IntegrationsViewV2: React.FC = () => {
 
                   <div className="mt-6 flex flex-wrap items-center gap-4 text-xs font-black uppercase tracking-widest text-gray-500">
                     <div className="flex items-center gap-2">
-                      <span className="text-gray-400">{t.dashboard.integrations_v2.auth_prefix}:</span>
+                      <span className="text-gray-400">{integrationsCopy.auth_prefix}:</span>
                       <span className="text-gray-900 dark:text-gray-300">{authLabel(item.auth)}</span>
                     </div>
 
                     <div className="h-3 w-[1px] bg-black/10 dark:bg-white/10" />
 
                     <div className="flex items-center gap-2">
-                      <span className="text-gray-400">{t.dashboard.integrations_v2.sync_prefix}:</span>
+                      <span className="text-gray-400">{integrationsCopy.sync_prefix}:</span>
                       <span
                         className={`${
                           item.statusTag === 'attention' ? 'text-amber-500' : 'text-gray-900 dark:text-gray-300'
@@ -619,7 +638,7 @@ export const IntegrationsViewV2: React.FC = () => {
                     <div className="h-3 w-[1px] bg-black/10 dark:bg-white/10" />
 
                     <div className="flex items-center gap-2">
-                      <span className="text-gray-400">{t.dashboard.integrations_v2.latency_prefix}:</span>
+                      <span className="text-gray-400">{integrationsCopy.latency_prefix}:</span>
                       <span className="text-gray-900 dark:text-gray-300 tabular-nums">{item.latency}</span>
                     </div>
                   </div>
@@ -636,10 +655,10 @@ export const IntegrationsViewV2: React.FC = () => {
                       }}
                     >
                       {connectionState === 'connected'
-                        ? t.dashboard.integrations_v2.status_connected
+                        ? integrationsCopy.status_connected
                         : connectionState === 'connecting'
-                          ? t.dashboard.integrations_v2.status_connecting
-                          : t.dashboard.integrations_v2.actions.test}
+                          ? integrationsCopy.status_connecting
+                          : integrationsCopy.actions.test}
                     </InteractiveButton>
 
                     <button
@@ -685,7 +704,7 @@ export const IntegrationsViewV2: React.FC = () => {
                           : 'bg-transparent'
                     }`}
                     style={{ width: `${item.health}%` }}
-                    aria-label={`${t.dashboard.integrations_v2.health_label}: ${Math.round(item.health)}%`}
+                    aria-label={`${integrationsCopy.health_label}: ${Math.round(item.health)}%`}
                   />
                 </div>
               </div>
@@ -701,16 +720,16 @@ export const IntegrationsViewV2: React.FC = () => {
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20">
               <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
               <span className="text-xs font-black uppercase tracking-[0.2em] opacity-80">
-                {t.dashboard.integrations_v2.security_badge_label}
+                {integrationsCopy.security_badge_label}
               </span>
             </div>
 
             <h3 className="text-4xl font-black tracking-tighter uppercase leading-none">
-              {t.dashboard.integrations_v2.security_title}
+              {integrationsCopy.security_title}
             </h3>
 
             <p className="text-lg font-medium opacity-80 leading-relaxed italic max-w-xl">
-              {t.dashboard.integrations_v2.security_desc}
+              {integrationsCopy.security_desc}
             </p>
 
             <div className="flex gap-4">
@@ -723,12 +742,12 @@ export const IntegrationsViewV2: React.FC = () => {
                   isDemo ? 'opacity-40 cursor-not-allowed hover:scale-100' : 'hover:scale-105'
                 }`}
               >
-                {t.dashboard.integrations_v2.security_cta_keys}
+                {integrationsCopy.security_cta_keys}
               </button>
 
               <button
                 type="button"
-                onClick={() => handleExplain(t.dashboard.integrations_v2.title)}
+                onClick={() => handleExplain(integrationsCopy.title)}
                 className="px-6 py-3 rounded-xl bg-white/10 border border-white/20 text-xs font-black uppercase tracking-widest transition-all hover:bg-white/20"
               >
                 {t.dashboard.context_menu.explain_ai}
@@ -743,7 +762,7 @@ export const IntegrationsViewV2: React.FC = () => {
                   isLocked ? 'opacity-40 cursor-not-allowed hover:bg-white/10' : 'hover:bg-white/20'
                 }`}
               >
-                {t.dashboard.integrations_v2.security_cta_sla}
+                {integrationsCopy.security_cta_sla}
               </button>
             </div>
           </div>

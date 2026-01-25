@@ -1,8 +1,3 @@
-/**
- * PricingSection.tsx
- * Sekcja cennika na landing page.
- */
-
 import React, { useMemo, useState, memo, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Translation } from '../types';

@@ -4,13 +4,6 @@ interface LogoProps {
   className?: string;
   ariaLabel?: string;
 }
-
-/**
- * Logo.tsx
- * Ten plik odpowiada za spójne, wektorowe logo aplikacji (SVG) używane w UI.
- * Zapewnia a11y (role/img + aria-label) oraz bezpieczne unikanie kolizji ID w <defs>
- * przy wielokrotnym renderowaniu na jednej stronie.
- */
 export const Logo: React.FC<LogoProps> = memo(({ className, ariaLabel = 'PapaData Intelligence Logo' }) => {
   const uid = useId();
 

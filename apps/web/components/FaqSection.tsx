@@ -2,12 +2,6 @@ import React, { useId, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { Translation } from '../types';
 
-/**
- * FaqSection.tsx
- * Placeholder dla sekcji FAQ na landing page.
- * (Sekcja Features znajduje się w FeatureSection.tsx.)
- */
-
 export const FaqSection: React.FC<{ t: Translation }> = ({ t }) => {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
   const baseId = useId();

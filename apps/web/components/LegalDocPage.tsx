@@ -10,12 +10,6 @@ interface LegalDocPageProps {
   onBack: () => void;
 }
 
-/**
- * LegalDocPage.tsx
- * Ten plik odpowiada za renderowanie stron dokumentów prawnych (np. regulamin, polityka prywatności):
- * parsuje prosty nagłówek Markdown (# ...) na tytuł i wyświetla treść dokumentu w czytelnym layoucie
- * wraz z nawigacją „powrót”.
- */
 function parseLegalDoc(content: string, fallbackTitle: string): { title: string; body: string } {
   // enterprise: BOM + normalizacja końców linii
   const normalized = (content ?? '').replace(/^\uFEFF/, '').replace(/\r\n/g, '\n');

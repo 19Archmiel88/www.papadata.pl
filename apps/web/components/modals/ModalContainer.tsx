@@ -1,18 +1,3 @@
-// apps/web/components/modals/ModalContainer.tsx
-
-/**
- * apps/web/components/modals/ModalContainer.tsx
- *
- * Host dla wszystkich modali (jedno miejsce renderowania).
- * - Pobiera aktywny modal z ModalContext, dobiera komponent z ModalRegistry i renderuje na overlayu.
- * - Zapewnia UX: animacje, a11y, ESC, klik w tło, focus-trap, scroll-lock (z kompensacją scrollbara),
- *   fallback podczas lazy-load (Suspense).
- *
- * FIXES:
- * - Portal do document.body (odporny na transform/filter/layout parents -> "modal po lewej").
- * - Poprawna obsługa modalProps.shell (kontrakt z ModalContext; shell nie przecieka do propsów modala).
- */
-
 import React, { Suspense, useEffect, useId, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';

@@ -1,32 +1,41 @@
 # Dashboard — Customers — dashboard-customers
 
 ## Cel i kontekst
-- Segmenty klientów, LTV/CAC, insighty.
+- Retencja klientów: cohort heatmap, LTV, churn risk i segmenty VIP.
 
 ## Wejścia / Preconditions
 - Route: /dashboard/customers
-- Dane: `fetchDashboardCustomers({ timeRange })` z fallback mock.
+- Dane: `fetchDashboardCustomers({ timeRange })` + lokalne wyliczenia fallback.
+- Context: `timeRange`, tryb DEMO (blokuje część akcji).
 
 ## Układ (Figma-ready)
-- KPI + segmenty + tabela.
+- Header z KPI: średnia retencja + liczba VIP.
+- Heatmapa cohortów z przełącznikiem month/week.
+- Wykres LTV + karta szczegółów wybranego cohortu.
+- Sekcje list: churn risk i segmenty VIP.
 
 ## Stany UI
-- Loading: `WidgetSkeleton`.
-- Error/Empty: `WidgetEmptyState`.
-- Success: wykresy + listy.
-- Focus/Keyboard: CTA/akcje dostępne z klawiatury.
+- Loading: `WidgetSkeleton` (miękki loader heatmapy po zmianie zakresu/trybu).
+- Offline: `WidgetOfflineState` z retry.
+- Error: `WidgetErrorState` z retry.
+- Success: heatmapa + LTV + segmenty + detail card.
+- Focus/Keyboard: przełączniki trybu i komórki heatmapy fokusowalne.
 
 ## Interakcje
-- Context menu (AI/export/alert).
-- Retry po błędzie.
+- Zmiana trybu heatmapy (month/week).
+- Kliknięcie komórki cohortu: selekcja + detail card + kontekst dla AI.
+- Context menu na cohortach/segmentach (drill/explain/report/alert; report/alert disabled w DEMO).
+- Retry po błędzie/offline.
 
 ## Dane i integracje
-- API: `/api/dashboard/customers`.
-- Telemetria: `captureException`.
+- API: `/api/dashboard/customers` (client: `fetchDashboardCustomers`).
+- Telemetria: `captureException` przy błędzie.
+- AI: `setAiDraft` + `setContextLabel` (prompt `t.dashboard.customers_v2.ai_prompt`).
 
 ## A11y
-- Context menu ESC.
+- `aria-pressed` dla toggle month/week.
+- Context menu: ESC zamyka.
 
 ## Testy
 - Spec: [tests/screens/dashboard-customers.spec.md](../tests/screens/dashboard-customers.spec.md)
-- Dodatkowe: test empty state copy.
+- Dodatkowe: toggle month/week, selekcja cohortu -> detail card, akcje DEMO.

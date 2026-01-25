@@ -9,6 +9,7 @@ Ten etap jest warunkiem wejścia w **ETAP 2: push do Git → auto deploy na STG*
 ### Zależności
 - Node.js: >=18.18 <23 (zalecane 20/22 LTS)
 - pnpm: >= 9
+- Playwright browsers (smoke/E2E): `pnpm --filter @papadata/web exec playwright install`
 
 ### Porty
 - API: 4000
@@ -31,6 +32,11 @@ Skopiuj przykłady i ustaw wartości minimalne.
 - `VITE_API_AI_TIMEOUT_MS=60000`
 - `VITE_API_RETRY_MAX=2`
 - `VITE_API_RETRY_DELAY_MS=300`
+
+### Windows troubleshooting (EPERM / esbuild)
+- Uruchom `pnpm run diagnose:windows`, jeśli instalacja lub Vite kończą się EPERM.
+- Gdy nie da się usuwać `_tmp_*` w katalogu repo, napraw ACL/AV albo przenieś repo poza chronione ścieżki.
+- `pnpm --filter @papadata/web dev` używa `apps/web/scripts/run-vite.mjs` i ustawia `ESBUILD_BINARY_PATH`, jeśli binarka jest dostępna.
 
 ---
 

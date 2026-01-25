@@ -32,8 +32,6 @@
     "verify:ci": "pnpm run clean && pnpm run verify:common"
   },
   "devDependencies": {
-    "eslint": "8.57.1",
-    "eslint-plugin-prettier": "^5.2.1",
     "husky": "^9.1.7",
     "lint-staged": "^15.2.10"
   },

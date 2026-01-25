@@ -1,7 +1,3 @@
-// PandLViewV2.tsx
-// Widok P&L: syntetyczne i szczegółowe spojrzenie na rentowność (przychody, koszty, marże).
-// Łączy dane z API/mocków, buduje waterfall i kartę kosztów oraz wystawia kontekst dla AI/upgrade.
-
 import React, { useEffect, useMemo, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { DashboardOutletContext } from './DashboardContext';

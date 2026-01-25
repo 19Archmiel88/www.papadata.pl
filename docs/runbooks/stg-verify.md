@@ -3,6 +3,8 @@
 ## Cel i zakres
 Weryfikacja środowiska STG po wdrożeniu (API + WEB) po **automatycznym deployu po push do Git**. Obejmuje szybkie smoke testy kluczowych endpointów, kontrolę CORS i sanity check logów/metryk.
 
+Uwaga: pipeline `cloudbuild/stg.yaml` wykonuje minimalny smoke (HTTP 200). Ten runbook rozszerza weryfikację o dodatkowe kroki ręczne.
+
 ## Wymagania
 
 ### Dostępy

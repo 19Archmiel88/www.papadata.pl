@@ -4,16 +4,6 @@ import { motion, AnimatePresence, useMotionValue } from 'framer-motion';
 import { InteractiveButton } from './InteractiveButton';
 import { Translation } from '../types';
 
-/**
- * VertexPlayer.tsx (UPGRADED)
- * - Auto/Manual toggle
- * - Visibility pause + hover pause
- * - prefers-reduced-motion support
- * - AI mini-input + quick prompts
- * - Coherent narrative numbers across Pipeline/Exec/AI (seeded, stable per session)
- * - Currency ALWAYS PLN (locale via t.langCode)
- */
-
 type VertexTab = 'pipeline' | 'exec' | 'ai';
 
 const TAB_ORDER: VertexTab[] = ['pipeline', 'exec', 'ai'];

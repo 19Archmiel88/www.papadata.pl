@@ -13,7 +13,11 @@
 
 ## Interakcje
 - Toggle billing cycle.
-- CTA planu → auth modal lub mailto (enterprise).
+- CTA planu (starter/pro):
+  - niezalogowany: auth modal + zapis planu do localStorage.
+  - zalogowany: `createCheckoutSession({ tenantId, planId })` + redirect na `url`.
+  - brak tenantId: komunikat błędu + CTA do `/app/settings/workspace`.
+- CTA planu enterprise → mailto.
 - Compare → `PricingModal`.
 - Recommended plan wyróżniony wizualnie.
 

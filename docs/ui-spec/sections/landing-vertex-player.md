@@ -17,7 +17,7 @@
 
 ## Interakcje
 - Klik tab → zmiana sceny.
-- CTA Dashboard → /dashboard?mode=demo.
+- CTA Dashboard → /dashboard?mode=demo&scene={pipeline|exec|ai}.
 - Hover wstrzymuje auto-rotację scen.
 
 ## Dane i integracje

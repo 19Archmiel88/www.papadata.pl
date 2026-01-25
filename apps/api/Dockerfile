@@ -1,44 +1,35 @@
-# ---- build stage ----
-FROM node:22-slim AS build
+# ---- base ----
+FROM node:22-slim AS base
 WORKDIR /repo
+RUN corepack enable
 
-# Copy root manifests first (better caching for workspaces)
-COPY package.json package-lock.json ./
-
-# Copy workspace package.json files (so npm can resolve workspaces)
+# ---- deps ----
+FROM base AS deps
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/api/package.json apps/api/package.json
 COPY libs/shared/package.json libs/shared/package.json
 COPY libs/shared/tsconfig.json libs/shared/tsconfig.json
+RUN pnpm install --frozen-lockfile
 
-# Install all deps (including dev) to build TypeScript
-RUN npm ci
-
-# Copy sources
+# ---- build ----
+FROM deps AS build
 COPY libs/shared libs/shared
 COPY apps/api apps/api
+RUN pnpm --filter @papadata/shared build
+RUN pnpm --filter @papadata/api build
 
-# Build shared then API
-RUN npm -w @papadata/shared run build
-RUN npm -w @papadata/api run build
-
-# ---- runtime stage ----
-FROM node:22-slim AS runtime
+# ---- runtime ----
+FROM base AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=8080
 
-# Copy manifests for production install
-COPY package.json package-lock.json ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/api/package.json apps/api/package.json
 COPY libs/shared/package.json libs/shared/package.json
+RUN pnpm install --frozen-lockfile --prod --filter @papadata/api...
 
-# IMPORTANT: copy built shared dist so workspace file: dependency resolves
 COPY --from=build /repo/libs/shared/dist ./libs/shared/dist
-
-# Install production deps
-RUN npm ci --omit=dev
-
-# Copy API build output
 COPY --from=build /repo/apps/api/dist ./dist
 
 EXPOSE 8080

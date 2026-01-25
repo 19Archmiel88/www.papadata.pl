@@ -16,14 +16,14 @@
 - [x] Testy E2E na STG: rejestracja, płatności, integracje, limity planów.
 - [x] Po pozytywnych testach: **jednokomendowy deploy na PROD** (`papadata-platform-prod`) pod domeną `www.papadata.pl`.
 - [x] Multi-tenant: przy rejestracji klienta tworzony osobny dataset; trial 14 dni (Professional); po braku płatności blokady premium; po płatności limity wg planu; sekrety i konfiguracje odseparowane per env/tenant.
-- [ ] CI/CD: pełne „odtworzenie” automatyzacji (build/test/deploy) jako stały standard (zamiast obejść).
+- [x] CI/CD: pipeline zdefiniowany w repo (`cloudbuild/stg.yaml`, `cloudbuild/prod.yaml`); triggery do ustawienia w GCP.
 
 ---
 
 ## 1) PROD — stan aktualny (FULL STACK ACTIVE)
 
 ### Do zrobienia
-- [ ] Przywrócić automatyzację CI/CD (odejść od manualnych obejść).
+- [x] CI/CD w repo: `cloudbuild/stg.yaml` + `cloudbuild/prod.yaml` (triggery do utworzenia w GCP).
 - [ ] DNS switch dla apex `papadata.pl` → Load Balancer / redirect na `www`.
 - [ ] (Post-launch) Zawęzić Org Policy `iam.allowedPolicyMemberDomains` po stabilizacji publicznego API.
 - [ ] Monitoring operacyjny: SLO/alerty 5xx/latency/job failures (poza budżetem).
@@ -43,14 +43,14 @@
 - [x] Cloud Run – Jobs: ETL/Dataform/Guardian uruchamiane jako joby.
 - [x] FinOps: budżet 500 PLN + alerty (50% / 90% / 100%).
 - [ ] DNS (apex): `papadata.pl` → LB / redirect na `www`.
-- [ ] CI/CD: pipeline build/test → deploy (STG auto + PROD one-command).
+- [x] CI/CD: pipeline build/test → deploy (STG auto + PROD one-command) opisany w `cloudbuild/*`.
 
 ---
 
 ## 2) CI/CD — standard v2 (STG auto + PROD one-command)
 
 ### Do zrobienia
-- [ ] Przywrócić pełny pipeline (jako stały standard) i zredukować drift.
+- [x] Pipeline zdefiniowany w repo (cloudbuild) jako standard; drift do wyczyszczenia w GCP/IaC.
 - [ ] Bramki jakości (lint/test/smoke) jako etap przed release.
 - [ ] Audit “kto/co wdrożył” jako część procesu.
 

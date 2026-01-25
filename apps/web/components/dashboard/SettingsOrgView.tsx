@@ -1,11 +1,8 @@
-// SettingsOrgView.tsx
-// Widok ustawień organizacji: dane firmy, zespół, billing, bezpieczeństwo
-// oraz sekcja zgodności i globalnego zapisu zmian dla całego konta.
-
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useOutletContext } from 'react-router-dom';
 import { DashboardOutletContext } from './DashboardContext';
 import { InteractiveButton } from '../InteractiveButton';
+import { WidgetErrorState, WidgetOfflineState, WidgetSkeleton } from './DashboardPrimitives';
 import {
   fetchAdminAiUsage,
   fetchAdminBilling,
@@ -14,12 +11,40 @@ import {
   type AdminBilling,
   type AdminSources,
 } from '../../data/admin';
+import { fetchSettingsOrg } from '../../data/api';
 import { deleteOrganization } from '../../data/settings';
+import type { SettingsOrgResponse } from '@papadata/shared';
+import { useOnlineStatus } from '../../hooks/useOnlineStatus';
+import { captureException } from '../../utils/telemetry';
+
+type TeamMember = {
+  name: string;
+  email: string;
+  role: string;
+  status: string;
+  statusTone?: string;
+};
 
 export const SettingsOrgView: React.FC = () => {
-  const { t, isDemo, setContextLabel, setAiDraft } =
-    useOutletContext<DashboardOutletContext>();
+  const {
+    t,
+    isDemo,
+    isReadOnly,
+    canManageSubscription,
+    onManageSubscription,
+    onUpgrade,
+    apiAvailable,
+    setContextLabel,
+    setAiDraft,
+  } = useOutletContext<DashboardOutletContext>();
   const location = useLocation();
+  const isOnline = useOnlineStatus();
+
+  const [orgData, setOrgData] = useState<SettingsOrgResponse | null>(null);
+  const [orgError, setOrgError] = useState<string | null>(null);
+  const [orgLoading, setOrgLoading] = useState(false);
+  const [retryToken, setRetryToken] = useState(0);
+  const handleRetry = () => setRetryToken((prev) => prev + 1);
 
   const [adminState, setAdminState] = useState<{
     status: 'idle' | 'loading' | 'ready' | 'error';
@@ -47,7 +72,7 @@ export const SettingsOrgView: React.FC = () => {
   const [adminTenantId, setAdminTenantId] = useState<string>(activeTenantId ?? '');
 
   const refreshAdmin = useCallback((overrideTenantId?: string) => {
-    if (!isAdmin || isDemo) return;
+    if (!isAdmin || isDemo || isReadOnly) return;
     const tenantId = overrideTenantId?.trim() || adminTenantId.trim() || activeTenantId;
     setAdminState((prev) => ({ ...prev, status: 'loading', error: undefined }));
     Promise.all([
@@ -64,7 +89,43 @@ export const SettingsOrgView: React.FC = () => {
           error: error?.message || 'Failed to load admin data.',
         });
       });
-  }, [adminTenantId, activeTenantId, isAdmin, isDemo]);
+  }, [adminTenantId, activeTenantId, isAdmin, isDemo, isReadOnly]);
+
+  useEffect(() => {
+    let active = true;
+
+    if (apiAvailable === false) {
+      setOrgData(null);
+      setOrgError(null);
+      setOrgLoading(false);
+      return () => {
+        active = false;
+      };
+    }
+
+    setOrgLoading(true);
+    setOrgError(null);
+
+    fetchSettingsOrg()
+      .then((data) => {
+        if (!active) return;
+        setOrgData(data);
+        setOrgError(null);
+      })
+      .catch((err: unknown) => {
+        if (!active) return;
+        const message = err instanceof Error ? err.message : t.dashboard.widget.error_desc;
+        setOrgError(message);
+        captureException(new Error(message), { scope: 'settings_org' });
+      })
+      .finally(() => {
+        if (active) setOrgLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [apiAvailable, retryToken, t.dashboard.widget.error_desc]);
 
   useEffect(() => {
     refreshAdmin();
@@ -79,11 +140,28 @@ export const SettingsOrgView: React.FC = () => {
     }
   }, [location.hash]);
 
+  const locale = t.langCode ?? 'pl-PL';
   const demoTooltip = t.dashboard.demo_tooltip;
+  const lockTooltip = isDemo ? demoTooltip : t.dashboard.billing.read_only_tooltip;
+  const isLocked = Boolean(isDemo || isReadOnly);
   const mock = t.dashboard.settings_org_v2.mock;
 
   const safeText = (value: unknown, fallback = ''): string =>
     typeof value === 'string' && value.trim() ? value : fallback;
+
+  const formatDate = useCallback(
+    (value?: string) => {
+      if (!value) return '';
+      const ts = Date.parse(value);
+      if (Number.isNaN(ts)) return value;
+      return new Intl.DateTimeFormat(locale, {
+        year: 'numeric',
+        month: 'short',
+        day: '2-digit',
+      }).format(new Date(ts));
+    },
+    [locale],
+  );
 
   const safeInitials = (name: unknown) => {
     const n = safeText(name, '');
@@ -105,10 +183,10 @@ export const SettingsOrgView: React.FC = () => {
     const cleanLabel = safeText(label, '');
     if (!cleanLabel) return;
 
-    if (isDemo) {
-      // DEMO: nie „ciche nic” — pokazujemy dlaczego akcja jest zablokowana
-      setContextLabel?.(demoTooltip);
-      setAiDraft?.(`${demoTooltip}: ${cleanLabel} → ${context}`);
+    if (isLocked) {
+      // DEMO/read-only: nie „ciche nic” — pokazujemy dlaczego akcja jest zablokowana
+      setContextLabel?.(lockTooltip);
+      setAiDraft?.(`${lockTooltip}: ${cleanLabel} → ${context}`);
       return;
     }
 
@@ -116,8 +194,21 @@ export const SettingsOrgView: React.FC = () => {
     setAiDraft?.(`${cleanLabel}: ${context}`);
   };
 
+  const handleManageSubscription = () => {
+    const label = t.dashboard.settings_org_v2.billing.cta_change;
+    const context = t.dashboard.settings_org_v2.billing.title;
+    action(label, context);
+
+    if (isLocked) return;
+    if (canManageSubscription && onManageSubscription) {
+      onManageSubscription();
+      return;
+    }
+    onUpgrade();
+  };
+
   const deleteOrg = async () => {
-    if (isDemo) return;
+    if (isLocked) return;
     const confirmText = 'DELETE';
     const input = window.prompt('Type DELETE to confirm account deletion');
     if (input !== confirmText) return;
@@ -131,17 +222,87 @@ export const SettingsOrgView: React.FC = () => {
     }
   };
 
-  const companyFields = mock?.company_fields ?? [];
-  const teamMembers = (mock?.team_members ?? []) as Array<{
-    name: string;
-    email: string;
-    role: string;
-    status: string;
-  }>;
-  const billingInfo = (mock?.billing_info ?? []) as Array<{
-    label: string;
-    value: string;
-  }>;
+  const orgCompany = orgData?.company;
+  const orgBilling = orgData?.billing;
+  const orgUsers = useMemo(() => orgData?.users ?? [], [orgData?.users]);
+
+  const baseCompanyFields = useMemo(
+    () =>
+      (mock?.company_fields ?? []) as Array<{
+        label: string;
+        value: string;
+      }>,
+    [mock?.company_fields],
+  );
+  const companyFields = useMemo(() => {
+    if (!orgCompany) return baseCompanyFields;
+    if (!baseCompanyFields.length) {
+      return [
+        { label: 'Company', value: safeText(orgCompany.name, '—') },
+        { label: 'Region', value: safeText(orgCompany.region, '—') },
+      ];
+    }
+    return baseCompanyFields.map((field, idx) => {
+      if (idx === 0 && orgCompany.name) return { ...field, value: orgCompany.name };
+      if (idx === 1 && orgCompany.region) return { ...field, value: orgCompany.region };
+      return field;
+    });
+  }, [baseCompanyFields, orgCompany]);
+
+  const baseTeamMembers = useMemo(
+    () =>
+      (mock?.team_members ?? []) as Array<{
+        name: string;
+        email: string;
+        role: string;
+        status: string;
+      }>,
+    [mock?.team_members],
+  );
+  const teamMembers = useMemo<TeamMember[]>(() => {
+    if (!orgUsers.length) {
+      return baseTeamMembers.map((member) => ({
+        ...member,
+        statusTone: member.status === 'Online' ? 'text-emerald-500' : 'text-gray-400',
+      }));
+    }
+    return orgUsers.map((user, idx) => {
+      const fallback = baseTeamMembers[idx];
+      const statusKey = String(user.status ?? '').toLowerCase();
+      const statusTone =
+        statusKey === 'active'
+          ? 'text-emerald-500'
+          : statusKey === 'invited'
+            ? 'text-amber-500'
+            : 'text-gray-400';
+      const statusLabel =
+        statusKey === 'active'
+          ? 'Active'
+          : statusKey === 'invited'
+            ? 'Invited'
+            : 'Disabled';
+      return {
+        name: safeText(user.name, fallback?.name ?? '—'),
+        email: safeText(fallback?.email, safeText(user.id, '—')),
+        role: safeText(user.role, fallback?.role ?? '—'),
+        status: statusLabel,
+        statusTone,
+      };
+    });
+  }, [baseTeamMembers, orgUsers]);
+
+  const billingInfo = useMemo(() => {
+    const base = (mock?.billing_info ?? []) as Array<{ label: string; value: string }>;
+    if (!orgBilling) return base;
+    return base.map((item, idx) => {
+      if (idx === 0 && orgBilling.plan) return { ...item, value: orgBilling.plan };
+      if (idx === 1 && orgBilling.status) return { ...item, value: orgBilling.status };
+      if (idx === 2 && orgBilling.renewalDate) {
+        return { ...item, value: formatDate(orgBilling.renewalDate) };
+      }
+      return item;
+    });
+  }, [mock?.billing_info, orgBilling, formatDate]);
   const billingPlans = (mock?.billing_plans ?? []) as Array<{
     id: string;
     name: string;
@@ -169,14 +330,20 @@ export const SettingsOrgView: React.FC = () => {
   }>;
 
   const statusCardLabel = safeText(mock?.status_card?.label);
-  const statusCardValue = safeText(mock?.status_card?.value);
-  const statusCardDesc = safeText(mock?.status_card?.desc);
+  const statusCardValue = safeText(orgBilling?.status, safeText(mock?.status_card?.value));
+  const statusCardDesc = safeText(
+    formatDate(orgBilling?.renewalDate),
+    safeText(mock?.status_card?.desc),
+  );
 
   const payerLabel = safeText(mock?.payer?.label);
   const payerValue = safeText(mock?.payer?.value);
 
   const billingCycleLabel = safeText(mock?.billing_cycle?.label);
-  const billingCycleValue = safeText(mock?.billing_cycle?.value);
+  const billingCycleValue = safeText(
+    formatDate(orgBilling?.renewalDate),
+    safeText(mock?.billing_cycle?.value),
+  );
 
   const paymentStatusLabel = safeText(mock?.payment_status?.label);
   const paymentOk = safeText(mock?.payment_status?.ok);
@@ -244,6 +411,34 @@ export const SettingsOrgView: React.FC = () => {
           </button>
         </div>
       </section>
+
+      {!isOnline && (
+        <section className="rounded-[2.5rem] border border-amber-500/30 bg-amber-500/10 p-6 shadow-xl">
+          <WidgetOfflineState
+            title={t.dashboard.widget.offline_title}
+            desc={t.dashboard.widget.offline_desc}
+            actionLabel={t.dashboard.widget.cta_retry}
+            onAction={handleRetry}
+          />
+        </section>
+      )}
+
+      {isOnline && orgError && (
+        <section className="rounded-[2.5rem] border border-rose-500/20 bg-rose-500/5 p-6 shadow-xl">
+          <WidgetErrorState
+            title={t.dashboard.widget.error_title}
+            desc={orgError || t.dashboard.widget.error_desc}
+            actionLabel={t.dashboard.widget.cta_retry}
+            onAction={handleRetry}
+          />
+        </section>
+      )}
+
+      {orgLoading && !orgData && (
+        <section className="dashboard-surface dashboard-card">
+          <WidgetSkeleton chartHeight="h-28" lines={3} />
+        </section>
+      )}
 
       <div className="grid gap-8 lg:grid-cols-2">
         {/* Company Identity */}
@@ -323,7 +518,7 @@ export const SettingsOrgView: React.FC = () => {
                   </div>
                   <div
                     className={`text-3xs font-black uppercase tracking-widest ${
-                      user.status === 'Online' ? 'text-emerald-500' : 'text-gray-400'
+                      user.statusTone ?? (user.status === 'Online' ? 'text-emerald-500' : 'text-gray-400')
                     }`}
                   >
                     {user.status}
@@ -342,8 +537,8 @@ export const SettingsOrgView: React.FC = () => {
                 t.dashboard.settings_org_v2.users.title
               )
             }
-            disabled={isDemo}
-            title={isDemo ? demoTooltip : undefined}
+            disabled={isLocked}
+            title={isLocked ? lockTooltip : undefined}
           >
             {t.dashboard.settings_org_v2.users.cta_invite}
           </InteractiveButton>
@@ -369,14 +564,9 @@ export const SettingsOrgView: React.FC = () => {
               <InteractiveButton
                 variant="secondary"
                 className="!px-4 !py-2 !text-xs font-black uppercase tracking-[0.2em] rounded-xl"
-                onClick={() =>
-                  action(
-                    t.dashboard.settings_org_v2.billing.cta_change,
-                    t.dashboard.settings_org_v2.billing.title
-                  )
-                }
-                disabled={isDemo}
-                title={isDemo ? demoTooltip : undefined}
+                onClick={handleManageSubscription}
+                disabled={isLocked}
+                title={isLocked ? lockTooltip : undefined}
               >
                 {t.dashboard.settings_org_v2.billing.cta_change}
               </InteractiveButton>
@@ -440,10 +630,10 @@ export const SettingsOrgView: React.FC = () => {
                 variant="secondary"
                 className="!px-4 !py-2 !text-xs font-black uppercase tracking-[0.2em] rounded-xl"
                 onClick={() => action(paymentFixCta, t.dashboard.settings_org_v2.billing.title)}
-                disabled={isDemo || !paymentIssue || !paymentFixCta}
+                disabled={isLocked || !paymentIssue || !paymentFixCta}
                 title={
-                  isDemo
-                    ? demoTooltip
+                  isLocked
+                    ? lockTooltip
                     : paymentIssue
                     ? undefined
                     : paymentOkTooltip || undefined
@@ -508,8 +698,8 @@ export const SettingsOrgView: React.FC = () => {
                         variant="secondary"
                         className="!px-3 !py-2 !text-xs font-black uppercase tracking-[0.2em] rounded-xl"
                         onClick={() => action(invoicePdfCta, invoice.label)}
-                        disabled={isDemo || !invoicePdfCta}
-                        title={isDemo ? demoTooltip : undefined}
+                        disabled={isLocked || !invoicePdfCta}
+                        title={isLocked ? lockTooltip : undefined}
                       >
                         {invoicePdfCta || '—'}
                       </InteractiveButton>
@@ -524,8 +714,8 @@ export const SettingsOrgView: React.FC = () => {
             variant="primary"
             className="w-full !py-4 !text-xs font-black uppercase tracking-[0.2em] rounded-2xl shadow-xl"
             onClick={() => action(approvePlanCta, t.dashboard.settings_org_v2.billing.title)}
-            disabled={isDemo || !approvePlanCta}
-            title={isDemo ? demoTooltip : undefined}
+            disabled={isLocked || !approvePlanCta}
+            title={isLocked ? lockTooltip : undefined}
           >
             {approvePlanCta || '—'}
           </InteractiveButton>
@@ -625,8 +815,8 @@ export const SettingsOrgView: React.FC = () => {
                   t.dashboard.settings_org_v2.security.title
                 )
               }
-              disabled={isDemo}
-              title={isDemo ? demoTooltip : undefined}
+              disabled={isLocked}
+              title={isLocked ? lockTooltip : undefined}
             >
               {t.dashboard.settings_org_v2.security.cta_logout_all}
             </InteractiveButton>
@@ -640,8 +830,8 @@ export const SettingsOrgView: React.FC = () => {
                   t.dashboard.settings_org_v2.audit.title
                 )
               }
-              disabled={isDemo}
-              title={isDemo ? demoTooltip : undefined}
+              disabled={isLocked}
+              title={isLocked ? lockTooltip : undefined}
             >
               {t.dashboard.settings_org_v2.audit.cta_export}
             </InteractiveButton>
@@ -760,8 +950,8 @@ export const SettingsOrgView: React.FC = () => {
               action('Refresh admin data', 'Admin panel');
               refreshAdmin(adminTenantId);
             }}
-            disabled={isDemo}
-            title={isDemo ? demoTooltip : undefined}
+            disabled={isLocked}
+            title={isLocked ? lockTooltip : undefined}
           >
             Refresh
           </InteractiveButton>
@@ -792,8 +982,8 @@ export const SettingsOrgView: React.FC = () => {
               type="button"
               onClick={() => action(ctaDpa, complianceTitle)}
               className="px-5 py-2 rounded-xl border border-black/10 dark:border-white/10 text-xs font-black uppercase tracking-widest text-gray-500 hover:text-gray-900 dark:hover:text-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-start/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#0b0b0f]"
-              disabled={isDemo || !ctaDpa}
-              title={isDemo ? demoTooltip : undefined}
+              disabled={isLocked || !ctaDpa}
+              title={isLocked ? lockTooltip : undefined}
             >
               {ctaDpa || '—'}
             </button>
@@ -802,8 +992,8 @@ export const SettingsOrgView: React.FC = () => {
               type="button"
               onClick={() => action(ctaRetention, complianceTitle)}
               className="px-5 py-2 rounded-xl border border-black/10 dark:border-white/10 text-xs font-black uppercase tracking-widest text-gray-500 hover:text-gray-900 dark:hover:text-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-start/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#0b0b0f]"
-              disabled={isDemo || !ctaRetention}
-              title={isDemo ? demoTooltip : undefined}
+              disabled={isLocked || !ctaRetention}
+              title={isLocked ? lockTooltip : undefined}
             >
               {ctaRetention || '—'}
             </button>
@@ -812,8 +1002,8 @@ export const SettingsOrgView: React.FC = () => {
               type="button"
               onClick={() => action(ctaConfirmations, complianceTitle)}
               className="px-5 py-2 rounded-xl border border-black/10 dark:border-white/10 text-xs font-black uppercase tracking-widest text-gray-500 hover:text-gray-900 dark:hover:text-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-start/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#0b0b0f]"
-              disabled={isDemo || !ctaConfirmations}
-              title={isDemo ? demoTooltip : undefined}
+              disabled={isLocked || !ctaConfirmations}
+              title={isLocked ? lockTooltip : undefined}
             >
               {ctaConfirmations || '—'}
             </button>
@@ -825,10 +1015,10 @@ export const SettingsOrgView: React.FC = () => {
                 void deleteOrg();
               }}
               className={`px-5 py-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs font-black uppercase tracking-widest text-rose-500 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#0b0b0f] ${
-                isDemo || !ctaDeleteOrg ? 'opacity-40 cursor-not-allowed' : 'hover:bg-rose-500 hover:text-white'
+                isLocked || !ctaDeleteOrg ? 'opacity-40 cursor-not-allowed' : 'hover:bg-rose-500 hover:text-white'
               }`}
-              disabled={isDemo || !ctaDeleteOrg}
-              title={isDemo ? demoTooltip : undefined}
+              disabled={isLocked || !ctaDeleteOrg}
+              title={isLocked ? lockTooltip : undefined}
             >
               {ctaDeleteOrg || '—'}
             </button>
@@ -856,8 +1046,8 @@ export const SettingsOrgView: React.FC = () => {
             variant="primary"
             className="w-full sm:w-auto !px-16 !py-5 !text-xs-plus font-black uppercase tracking-[0.3em] rounded-2xl shadow-2xl"
             onClick={() => action(t.dashboard.settings_org_v2.cta_save, t.dashboard.settings_org_v2.title)}
-            disabled={isDemo}
-            title={isDemo ? demoTooltip : undefined}
+            disabled={isLocked}
+            title={isLocked ? lockTooltip : undefined}
           >
             {t.dashboard.settings_org_v2.cta_save}
           </InteractiveButton>

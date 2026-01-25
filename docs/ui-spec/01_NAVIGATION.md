@@ -1,7 +1,10 @@
 # Navigation
 
-## Routes (React Router)
-Źródło: [apps/web/App.tsx](apps/web/App.tsx)
+## Routes (React Router + HashRouter)
+Źródła: [apps/web/App.tsx](apps/web/App.tsx), [apps/web/index.tsx](apps/web/index.tsx)
+
+Uwaga: routing działa przez `HashRouter`, więc URL-e mają postać `/#/route`
+(np. `/#/dashboard/overview`). `ensureHashRouterPath` przekierowuje `/foo` -> `/#/foo`.
 
 ### Landing
 - / → LandingPage
@@ -9,6 +12,7 @@
 - /pricing → LandingPage (scroll do #pricing)
 - /integrations → LandingPage (scroll do #integrations)
 - /faq → LandingPage (scroll do #faq)
+- /security → LandingPage (scroll do #security)
 
 ### Legal
 - /legal/terms → LegalDocPage (terms-of-service.md)
@@ -18,6 +22,18 @@
 - /legal/subprocessors → LegalDocPage (privacy-and-data.md)
 - /legal/ai → LegalDocPage (ai-disclaimer.md)
 - /legal/accessibility → LegalDocPage (accessibility-statement.md)
+
+### Billing callbacks
+- /billing/success → CheckoutSuccess
+- /billing/cancel → CheckoutCancel
+
+### App alias
+- /app → redirect do /dashboard/overview
+- /app/:view → redirect do /dashboard/:view
+- /app/integrations/callback/:provider → IntegrationCallback
+
+### Health
+- /health → JSON health response
 
 ### Dashboard (nested under /dashboard)
 - /dashboard → redirect do /dashboard/overview
@@ -52,16 +68,18 @@
 
 ## Primary navigation actions
 - Header nav i footer links → scroll do sekcji lub route’y legal.
-- CTA „DEMO” (header) → /dashboard?mode=demo
+- CTA „DEMO” (header) → /dashboard?mode=demo (parametr używany w telemetry, nie przełącza UI)
 - CTA „Zaloguj” → modal auth (login)
 
 Reguły query params:
-- `mode=demo` aktywuje DEMO UI (mockowane write-actions).
-- `plan` może sterować pre-selekcją planu w DEMO.
+- `mode` używany tylko w telemetry (useApi); UI tryb DEMO zależy od `/api/health`.
+- `plan` nie jest obsługiwany przez UI.
 
 ## Redirect rules
 - /dashboard → /dashboard/overview
 - /dashboard/settings → /dashboard/settings/workspace
+- /app → /dashboard/overview
+- /app/:view → /dashboard/:view
 - unknown route → /
 
 Nawigacja z footeru:

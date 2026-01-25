@@ -1,11 +1,3 @@
-/**
- * apps/web/components/AboutModal.tsx
- *
- * - Renderuje modal "O nas" (About) jako samą kartę z treścią (bez overlayu).
- * - Content-only: zamykanie/ESC/scroll/focus obsługuje ModalContainer.
- * - Treści są pobierane z i18n (t) – bez hard-coded merytoryki.
- */
-
 import React, { useId, memo } from 'react';
 import type { Translation } from '../types';
 import { Logo } from './Logo';

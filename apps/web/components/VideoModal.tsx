@@ -1,7 +1,3 @@
-// VideoModal.tsx
-// Komponent content-only z osadzonym wideo (np. YouTube) używany na landing page/demo.
-// Overlay/ESC/scroll/focus obsługuje ModalContainer (dialog + a11y w shellu).
-
 import React from 'react';
 import type { Translation } from '../types';
 

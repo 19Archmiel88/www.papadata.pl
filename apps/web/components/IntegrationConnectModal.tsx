@@ -7,11 +7,6 @@ import { normalizeApiError } from '../hooks/useApiError';
 import { useTenants } from '../hooks/useTenants';
 import { useAuth } from '../context/useAuth';
 
-/**
- * IntegrationConnectModal.tsx
- * Content-only: overlay/ESC/scroll/focus obsługuje ModalContainer.
- */
-
 interface IntegrationConnectModalProps {
   t: Translation;
   isOpen?: boolean;

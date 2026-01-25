@@ -2,12 +2,6 @@ import React, { memo, useCallback, useId, useMemo } from 'react';
 import type { Translation } from '../types';
 import { InteractiveButton } from './InteractiveButton';
 
-/**
- * FinalCtaSection.tsx
- * Ten plik odpowiada za końcową sekcję CTA na landing page: prezentuje nagłówek, opis,
- * przyciski akcji (trial/demo) oraz zestaw badge’y z komunikatami z tłumaczeń.
- */
-
 interface FinalCtaSectionProps {
   t: Translation;
   onPrimaryClick?: () => void;

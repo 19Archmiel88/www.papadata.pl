@@ -298,6 +298,7 @@ export const LandingPage: React.FC = () => {
                 <InteractiveButton
                   variant="primary"
                   onClick={() => openModal('auth', { isRegistered: false })}
+                  data-testid="hero-cta"
                   className="!h-14 !px-10 !text-xs !font-black rounded-2xl shadow-2xl tracking-widest"
                 >
                   {t.hero.primary}

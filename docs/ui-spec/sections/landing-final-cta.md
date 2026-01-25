@@ -2,9 +2,10 @@
 
 ## Cel i kontekst
 - Ostatnie CTA: trial/demo.
+- Status: obecnie nie renderowana w `LandingPage` (planowana sekcja).
 
 ## Wejścia / Preconditions
-- `FinalCtaSection` (jeśli użyte w layoutach/landing).
+- `FinalCtaSection` (nieużywane w bieżącym `LandingPage`).
 
 ## Układ
 - Title + desc + 2 CTA + badges.

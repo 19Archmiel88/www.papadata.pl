@@ -75,7 +75,7 @@ Wymagane odpowiedzialności:
 - exporty (np. data export / Data Act)
 - proxy do AI + rate limiting + logging (bez PII)
 
-Kontrakty odpowiedzi/typow:
+Kontrakty odpowiedzi/typów:
 - `libs/shared/src/contracts/*`
 
 Hosting:

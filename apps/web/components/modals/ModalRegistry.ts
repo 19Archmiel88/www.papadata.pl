@@ -1,15 +1,3 @@
-// apps/web/components/modals/ModalRegistry.ts
-
-/**
- * apps/web/components/modals/ModalRegistry.ts
- *
- * Rejestr modali + meta.
- * Dodano: promo (PromoModal renderowany przez ModalContainer).
- *
- * Fix: poprawione ścieżki importów — ten plik jest w /components/modals,
- * a komponenty modalowe są w /components (poziom wyżej).
- */
-
 import React from 'react';
 
 export type ModalSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';

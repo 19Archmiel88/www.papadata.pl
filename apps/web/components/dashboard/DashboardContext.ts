@@ -1,8 +1,3 @@
-// DashboardContext.ts
-// Kontrakt typu dla kontekstu outletu dashboardu (useOutletContext<DashboardOutletContext>).
-// Udostępnia tłumaczenia, time range, stan integracji, ustawienia prywatności/regionu
-// oraz kontekst dla Papa AI (contextLabel, aiDraft, filtry, tryb AI).
-
 import React from 'react';
 import { Translation } from '../../types';
 import { IntegrationItem } from '../../data/integrations';

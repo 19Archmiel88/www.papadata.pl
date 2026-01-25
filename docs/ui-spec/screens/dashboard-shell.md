@@ -7,13 +7,13 @@
 ## Wejścia / Preconditions
 - Route: /dashboard/*
 - Auth: token w localStorage (PROD), DEMO działa bez logowania.
-- Dane: `api.health()`, `api.billingSummary()` z [apps/web/hooks/useApi.ts](apps/web/hooks/useApi.ts).
-- Query params: `mode=demo` wpływa na tryb DEMO.
+- Dane: `api.health()` (tryb), `api.billingSummary()` (billing).
+- Query params: `mode` używany tylko w telemetry (nie przełącza UI); tryb DEMO wynika z `/api/health`.
 
 ## Układ (Figma-ready)
 ### Struktura
 - Sidebar (menu widoków + pinned/hover state).
-- Topbar (status sesji, last update, time range, attribution, badges).
+- Topbar (status sesji, last update, time range, badges).
 - Outlet (render wybranego widoku).
 - Papa AI drawer (prawy panel).
 - CookieBanner (overlay) na dashboardzie.
@@ -41,9 +41,8 @@
 - Trigger: select w topbar.
 - Efekt: aktualizacja `timeRange`, re-render widoków.
 
-### Akcja: zmiana atrybucji
-- Trigger: toggle.
-- Efekt: zapis w state, wpływa na copy/wykresy (mock).
+### Atrybucja
+- Brak przełącznika w UI; model ustawiony na stałe (`data_driven`).
 
 ### Akcja: otwarcie AI drawer
 - Trigger: button „Papa AI”.

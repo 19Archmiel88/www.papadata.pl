@@ -29,7 +29,16 @@ Artefakty:
 
 ---
 
-## 2) Srodowiska i konfiguracja
+## 2) CI/CD (Cloud Build + Cloud Run)
+
+Repo (source of truth):
+- STG pipeline: `cloudbuild/stg.yaml` (build/test → obrazy → deploy).
+- PROD pipeline: `cloudbuild/prod.yaml` (promocja istniejących obrazów).
+- Dockerfiles: `apps/api/Dockerfile`, `apps/web/Dockerfile`.
+
+---
+
+## 3) Srodowiska i konfiguracja
 
 Zakladane srodowiska: `dev`, `staging`, `prod`.
 
@@ -45,7 +54,7 @@ Zasady:
 
 ---
 
-## 3) Hosting i routing
+## 4) Hosting i routing
 
 ### Frontend (SPA)
 Rekomendacje:
@@ -62,7 +71,7 @@ Rekomendacje:
 
 ---
 
-## 4) Cache policy (minimum)
+## 5) Cache policy (minimum)
 
 Frontend:
 - `index.html`: `Cache-Control: no-store` (zawsze swieza wersja)
@@ -73,7 +82,7 @@ Backend:
 
 ---
 
-## 5) Security headers (minimum)
+## 6) Security headers (minimum)
 
 Wymagane naglowki (dostosuj do realnych providerow i domen):
 - `Strict-Transport-Security: max-age=31536000; includeSubDomains; preload`
@@ -98,7 +107,7 @@ base-uri 'self';
 
 ---
 
-## 6) Rollback (minimum)
+## 7) Rollback (minimum)
 
 Strategia:
 - utrzymuj co najmniej 1 poprzednia wersje frontend i backend
@@ -114,7 +123,7 @@ Po rollbacku:
 
 ---
 
-## 7) Deploy checklist (minimum)
+## 8) Deploy checklist (minimum)
 
 - [ ] build FE i BE bez bledow
 - [ ] deploy FE (rewrites + cache + headers)
@@ -127,7 +136,7 @@ Po rollbacku:
 
 ---
 
-## 8) Smoke tests po deployu
+## 9) Smoke tests po deployu
 
 - landing laduje sie bez bledow
 - przejscie do dashboardu DEMO dziala

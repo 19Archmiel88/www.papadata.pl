@@ -1,5 +1,3 @@
-// apps/web/components/LandingChatWidget.tsx
-
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useModal } from '../context/useModal';
