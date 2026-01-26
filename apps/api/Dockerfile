@@ -5,6 +5,8 @@ ENV CI=true \
     HUSKY=0 \
     npm_config_ignore_scripts=true
 RUN corepack enable
+ENV CI=1
+ENV HUSKY=0
 
 # ---- deps ----
 FROM base AS deps
