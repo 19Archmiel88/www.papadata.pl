@@ -40,7 +40,11 @@ ENV CI=true
 RUN pnpm install --frozen-lockfile --prod --filter @papadata/api...
 
 COPY --from=build /repo/libs/shared/dist ./libs/shared/dist
-COPY --from=build /repo/apps/api/dist ./dist
+COPY --from=build /repo/apps/api/dist ./apps/api/dist
+
+WORKDIR /app/apps/api
 
 EXPOSE 8080
 CMD ["node", "dist/main.js"]
+
+
