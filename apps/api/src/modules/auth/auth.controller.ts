@@ -72,7 +72,9 @@ export class AuthController {
   }
 
   @Post("register")
-  register(@Body() payload: AuthRegisterRequest): AuthRegisterResponse {
+  async register(
+    @Body() payload: AuthRegisterRequest,
+  ): Promise<AuthRegisterResponse> {
     return this.authService.register(payload);
   }
 

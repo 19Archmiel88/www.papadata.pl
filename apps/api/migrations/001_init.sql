@@ -1,10 +1,3 @@
--- Cloud SQL schema for billing, AI usage, and integrations
-
-CREATE TABLE IF NOT EXISTS schema_migrations (
-  version TEXT PRIMARY KEY,
-  applied_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
 CREATE TABLE IF NOT EXISTS tenant_billing (
   tenant_id TEXT PRIMARY KEY,
   stripe_customer_id TEXT,

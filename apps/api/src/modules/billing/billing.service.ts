@@ -9,6 +9,7 @@ import { EntitlementsService } from "../../common/entitlements.service";
 import { resolveStripeCustomerId } from "../../common/billing.utils";
 import { getApiConfig } from "../../common/config";
 import { getAppMode } from "../../common/app-mode";
+import { TimeProvider } from "../../common/time.provider";
 
 const createStripeClient = () => {
   const apiKey = getApiConfig().stripe.secretKey;
@@ -16,9 +17,12 @@ const createStripeClient = () => {
   return new Stripe(apiKey, { apiVersion: "2023-10-16" });
 };
 
-const resolveTrialDaysLeft = (trialEndsAt?: string | null): number | null => {
+const resolveTrialDaysLeft = (
+  trialEndsAt: string | null | undefined,
+  nowMs: number,
+): number | null => {
   if (!trialEndsAt) return null;
-  const msLeft = Date.parse(trialEndsAt) - Date.now();
+  const msLeft = Date.parse(trialEndsAt) - nowMs;
   if (!Number.isFinite(msLeft)) return null;
   return Math.max(0, Math.ceil(msLeft / (24 * 60 * 60 * 1000)));
 };
@@ -33,7 +37,10 @@ export class BillingService {
   private readonly mode = getAppMode();
   private readonly stripe: Stripe | null;
 
-  constructor(private readonly entitlementsService: EntitlementsService) {
+  constructor(
+    private readonly entitlementsService: EntitlementsService,
+    private readonly timeProvider: TimeProvider,
+  ) {
     this.stripe = createStripeClient();
     if (this.mode !== "demo" && !this.stripe) {
       throw new ServiceUnavailableException(
@@ -54,7 +61,10 @@ export class BillingService {
       this.entitlementsService.isTrialExpired(entitlements);
     const isTrial =
       entitlements.billingStatus === "trialing" && !isTrialExpired;
-    const trialDaysLeft = resolveTrialDaysLeft(trialEndsAt);
+    const trialDaysLeft = resolveTrialDaysLeft(
+      trialEndsAt,
+      this.timeProvider.nowMs(),
+    );
 
     return {
       entitlements,

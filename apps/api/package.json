@@ -8,7 +8,9 @@
     "build": "tsc -p tsconfig.build.json",
     "lint": "eslint \"src/**/*.ts\" --max-warnings=0",
     "lint:fix": "eslint \"src/**/*.ts\" --fix",
-    "test:e2e": "node ./scripts/run-jest-e2e.mjs"
+    "test:e2e": "node ./scripts/run-jest-e2e.mjs",
+    "db:migrate": "node ./scripts/db-migrate.mjs",
+    "billing:backfill": "node --enable-source-maps -r ts-node/register ./src/jobs/backfill-billing.ts"
   },
   "dependencies": {
     "@fastify/cors": "^11.2.0",

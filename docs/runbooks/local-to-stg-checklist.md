@@ -12,6 +12,7 @@ Jeden, spójny workflow: **zmiany lokalnie → push do Git → auto deploy na ST
 Repo CI/CD (source of truth):
 - STG trigger: push do `main` → `cloudbuild/stg.yaml`.
 - PROD trigger: tag `v*` lub manual → `cloudbuild/prod.yaml` (promocja istniejących image’ów).
+- Setup w GCP: `docs/runbooks/gcp-ci-setup.md`.
 
 ---
 

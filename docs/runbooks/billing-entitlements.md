@@ -1,16 +1,18 @@
 # Billing + Entitlements — workflow LOKAL → STG → PROD (plan, trial, limits)
 
+Source of truth: `docs/billing-source-of-truth.md`.
+
 Cel: egzekucja planów (Starter/Professional/Trial), monitoring płatności oraz limitów AI i źródeł danych — zgodnie z naszym przepływem release.
 
 ---
 
 ## 0) Workflow (jak to przechodzi przez środowiska)
 
-### Etap 1 — LOKAL (kod + schematy)
+### Etap 1 — LOKAL (kod + migracje)
 - Przygotowujesz lokalnie w repo:
   - kod API (webhooki, entitlements, limity, joby),
-  - SQL schema: `docs/runbooks/cloudsql-schema.sql`,
-  - IaC/Terraform (jeśli dotyczy).
+  - migracje SQL: `apps/api/migrations/*` (canonical path),
+  - SQL schema referencyjny: `docs/runbooks/cloudsql-schema.sql`.
 - Lokalna weryfikacja: lint/testy/smoke (API+WEB).
 
 ### Etap 2 — PUSH → STG (auto deploy runtime)
@@ -19,7 +21,7 @@ Cel: egzekucja planów (Starter/Professional/Trial), monitoring płatności oraz
 
 ### Etap 3 — STG (pełna weryfikacja)
 - W STG robisz:
-  - zastosowanie schematu w Cloud SQL,
+  - uruchomienie migracji (`pnpm --filter @papadata/api run db:migrate`),
   - ustawienie secretów/env w API (Cloud Run),
   - test webhooks Stripe i egzekucji limitów,
   - E2E: rejestracja → trial → płatność → zmiana planu → limity.
@@ -36,8 +38,10 @@ Cel: egzekucja planów (Starter/Professional/Trial), monitoring płatności oraz
 - Ustaw metadata `tenant_id` w Stripe (Customer lub Subscription).
 
 ### 1.2 Cloud SQL
-- Wgraj schemat do Cloud SQL:
-  - plik: `docs/runbooks/cloudsql-schema.sql`
+- Zastosuj migracje do Cloud SQL:
+  - `pnpm --filter @papadata/api run db:migrate`
+- Plik referencyjny:
+  - `docs/runbooks/cloudsql-schema.sql`
 
 ### 1.3 API ENV/Secrets (Cloud Run)
 - Ustaw w API:
@@ -73,7 +77,7 @@ Cel: egzekucja planów (Starter/Professional/Trial), monitoring płatności oraz
 
 ---
 
-## 3) Monitorowanie płatności (Stripe) — kanał prawdy
+## 3) Monitorowanie płatności (Stripe) — kanał zdarzeń
 
 Kanał prawdy: Stripe Webhooks + zapis do Cloud SQL.
 
@@ -85,8 +89,9 @@ Zdarzenia:
 - `invoice.paid`
 - `invoice.payment_failed`
 
-Endpoint:
-- `POST /api/billing/webhook`
+Endpointy (aliasy):
+- `POST /api/webhooks/stripe` (preferowany)
+- `POST /api/billing/webhook` (wsteczna kompatybilnosc)
 
 Wymóg techniczny:
 - API musi mieć ustawiony `STRIPE_WEBHOOK_SECRET`
@@ -117,7 +122,7 @@ Tabela `tenant_billing` (minimalnie):
 - `updated_at`
 
 Egzekucja:
-- API odczytuje status i plan z Cloud SQL (fallback: ENV),
+- API odczytuje status i plan z Cloud SQL (ENV tylko w demo i tylko jawnie ustawione),
 - generuje `Entitlements`,
 - blokuje funkcje po `trial_expired` lub `past_due`.
 
@@ -170,6 +175,13 @@ Kroki:
 4. Integracje i AI egzekwują limity w runtime.
 
 ---
+
+## 7.5) Backfill niespojnych danych
+
+Skrypt jednorazowy:
+- `apps/api/src/jobs/backfill-billing.ts`
+- Tryb dry-run (domyslny): bez zmian w DB.
+- Tryb apply: `BACKFILL_APPLY=1` (wymaga `DATABASE_URL`).
 
 ## 8) Powiadomienia o końcu triala
 

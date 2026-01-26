@@ -114,6 +114,26 @@ export class BillingRepository {
     );
   }
 
+  async startTrialIfMissing(input: {
+    tenantId: string;
+    plan: PlanId;
+    trialEndsAt: string;
+  }): Promise<boolean> {
+    if (!this.db.isEnabled()) return false;
+    const { rowCount } = await this.db.query(
+      `INSERT INTO tenant_billing (
+         tenant_id,
+         plan,
+         billing_status,
+         trial_ends_at,
+         updated_at
+       ) VALUES ($1,$2,'trialing',$3,now())
+       ON CONFLICT (tenant_id) DO NOTHING`,
+      [input.tenantId, input.plan, input.trialEndsAt],
+    );
+    return (rowCount ?? 0) > 0;
+  }
+
   async getAiUsage(
     tenantId: string,
     periodStart: string,
@@ -300,6 +320,31 @@ export class BillingRepository {
         input.lastError ?? null,
       ],
     );
+  }
+
+  async getWebhookEvent(eventId: string): Promise<WebhookEventRow | null> {
+    if (!this.db.isEnabled()) return null;
+    const { rows } = await this.db.query<{
+      event_id: string;
+      event_type: string;
+      status: "received" | "processed" | "failed";
+      attempts: number;
+      last_error: string | null;
+    }>(
+      `SELECT event_id, event_type, status, attempts, last_error
+       FROM stripe_webhook_events
+       WHERE event_id = $1`,
+      [eventId],
+    );
+    const row = rows[0];
+    if (!row) return null;
+    return {
+      eventId: row.event_id,
+      eventType: row.event_type,
+      status: row.status,
+      attempts: row.attempts,
+      lastError: row.last_error,
+    };
   }
 
   async listFailedWebhookEvents(limit = 20): Promise<WebhookEventRow[]> {

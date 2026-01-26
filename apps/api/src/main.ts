@@ -23,13 +23,20 @@ async function bootstrap(): Promise<void> {
   ];
   const envPath = envCandidates.find((candidate) => existsSync(candidate));
   if (envPath) {
-    loadEnv({ path: envPath, override: true });
+    const overrideEnv = process.env.ENV_OVERRIDE !== "0";
+    loadEnv({ path: envPath, override: overrideEnv });
     resetApiConfig();
   }
 
   const logger = new PinoLoggerService("Bootstrap");
   const issues = validateApiConfig();
   issues.forEach((issue) => logger.warn(issue));
+  const hasCriticalIssues = issues.some((issue) =>
+    issue.startsWith("CRITICAL:"),
+  );
+  if (getApiConfig().appMode === "prod" && hasCriticalIssues) {
+    throw new Error("Critical configuration issues detected");
+  }
   const observability = initObservability();
   if (observability) {
     logger.log(
@@ -53,7 +60,7 @@ async function bootstrap(): Promise<void> {
     global: false,
     encoding: "utf8",
     runFirst: true,
-    routes: ["/api/billing/webhook"],
+    routes: ["/api/billing/webhook", "/api/webhooks/stripe"],
   });
 
   const helmet = (await import("@fastify/helmet")).default;

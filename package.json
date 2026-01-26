@@ -2,8 +2,7 @@
   "name": "papadata-monorepo",
   "private": true,
   "workspaces": [
-    "apps/web",
-    "apps/api",
+    "apps/*",
     "libs/*"
   ],
   "scripts": {

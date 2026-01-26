@@ -6,19 +6,22 @@ import type {
 import { getAppMode } from "../../common/app-mode";
 import { EntitlementsService } from "../../common/entitlements.service";
 import { BillingRepository } from "../../common/billing.repository";
+import { TimeProvider } from "../../common/time.provider";
 
 @Injectable()
 export class SettingsService {
   constructor(
     private readonly entitlementsService: EntitlementsService,
     private readonly billingRepository: BillingRepository,
+    private readonly timeProvider: TimeProvider,
   ) {}
 
   getWorkspace(): SettingsWorkspaceResponse {
     const mode = getAppMode();
+    const now = this.timeProvider.now();
     return {
       mode,
-      generatedAt: new Date().toISOString(),
+      generatedAt: now.toISOString(),
       retentionDays: 365,
       retentionOptions: [90, 180, 365, 730],
       regions: ["europe-central2", "europe-west1"],
@@ -39,9 +42,10 @@ export class SettingsService {
     const mode = getAppMode();
     const entitlements = await this.entitlementsService.getEntitlements();
     const planLabel = `${entitlements.plan.charAt(0).toUpperCase()}${entitlements.plan.slice(1)}`;
+    const nowMs = this.timeProvider.nowMs();
     return {
       mode,
-      generatedAt: new Date().toISOString(),
+      generatedAt: new Date(nowMs).toISOString(),
       company: {
         name: "PapaData Demo",
         region: "PL",
@@ -59,9 +63,7 @@ export class SettingsService {
       billing: {
         plan: planLabel,
         status: entitlements.billingStatus,
-        renewalDate: new Date(
-          Date.now() + 25 * 24 * 60 * 60 * 1000,
-        ).toISOString(),
+        renewalDate: new Date(nowMs + 25 * 24 * 60 * 60 * 1000).toISOString(),
       },
       entitlements,
     };

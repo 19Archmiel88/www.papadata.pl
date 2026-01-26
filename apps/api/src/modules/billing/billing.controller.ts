@@ -125,14 +125,18 @@ export class BillingController {
     const mode = getAppMode();
     const resolvedTenantId = req.user?.tenantId ?? req.user?.uid;
     const requestedTenantId = tenantId?.trim();
-    if (requestedTenantId && requestedTenantId !== resolvedTenantId) {
+    if (
+      requestedTenantId &&
+      requestedTenantId !== resolvedTenantId &&
+      mode !== "demo"
+    ) {
       throw new BadRequestException(
-        mode === "demo"
-          ? "Tenant mismatch"
-          : "Tenant override is not allowed outside demo mode",
+        "Tenant override is not allowed outside demo mode",
       );
     }
-    return this.billingService.getStatus({ tenantId: resolvedTenantId });
+    const effectiveTenantId =
+      requestedTenantId ?? resolvedTenantId ?? undefined;
+    return this.billingService.getStatus({ tenantId: effectiveTenantId });
   }
 
   @Post("checkout-session")

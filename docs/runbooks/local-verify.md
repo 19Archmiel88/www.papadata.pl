@@ -24,6 +24,12 @@ Skopiuj przykłady i ustaw wartości minimalne.
 - `AI_ENABLED`, `AI_ENABLED_DEMO`, `AI_ENABLED_PROD`
 - `AI_TIMEOUT_MS=12000`
 - `CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173`
+- `DATABASE_URL` (jesli uruchamiasz DB lokalnie)
+
+Jeśli DB jest skonfigurowana, odpal migracje:
+```bash
+pnpm --filter @papadata/api run db:migrate
+```
 
 **WEB:** `apps/web/.env.example`
 - `VITE_API_BASE_URL=/api`

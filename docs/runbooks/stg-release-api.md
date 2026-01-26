@@ -1,46 +1,47 @@
-# STG Release Runbook — API (ETAP 2: PUSH → AUTO DEPLOY NA STG)
+# STG Release Runbook — API (ETAP 2: PUSH -> AUTO DEPLOY NA STG)
 
 ## Cel i zakres
-Wdrożenie backendu API na środowisko **STG** poprzez **push do Git** i automatyczny deploy do **Cloud Run** w projekcie `papadata-platform-stg`, wraz z weryfikacją po deployu (smoke + logi).
-
-Repo CI/CD:
-- Konfiguracja pipeline: `cloudbuild/stg.yaml` (API + WEB).
-- `cloudbuild/api-stg.yaml` jest deprecated (nieużywany placeholder).
-
----
+Wdrozenie backendu API na STG przez push do Git i Cloud Build. Po deployu
+pipeline uruchamia `tools/verify-stg.mjs`.
 
 ## Wymagania
+- Node.js: >=18.18 <23
+- pnpm: >=9
+- Projekt GCP: `papadata-platform-stg`
+- Cloud Run region: `europe-central2`
 
-### Zależności lokalne
-- Node.js: >=18.18 <23 (zalecane 20/22 LTS)
-- pnpm: >= 9
-
-### STG (GCP)
-- Projekt: `papadata-platform-stg`
-- Cloud Run (region): `europe-central2`
-- Publiczny dostęp: HTTPS 443
-
-### Konfiguracja środowiska (STG) — wymagane wartości w Cloud Run (ENV)
-Minimalny zestaw zmiennych środowiskowych **na STG**:
+## Wymagane ENV/Secrets (Cloud Run)
+ENV:
 - `APP_MODE=demo`
 - `PORT=8080`
+- `NODE_ENV=production`
+- `CORS_ALLOWED_ORIGINS=https://stg.papadata.pl`
+- `ENTITLEMENTS_PLAN=professional`
+- `ENTITLEMENTS_BILLING_STATUS=active`
 - `VERTEX_PROJECT_ID=papadata-platform-stg`
 - `VERTEX_LOCATION=europe-central2`
 - `VERTEX_MODEL=gemini-2.5-flash-lite`
 - `AI_ENABLED=true`
 - `AI_ENABLED_DEMO=true`
 - `AI_ENABLED_PROD=false`
-- `AI_TIMEOUT_MS=12000`
 - `AI_RATE_LIMIT_MAX=30`
 - `AI_RATE_LIMIT_WINDOW_MS=60000`
-- `CORS_ALLOWED_ORIGINS=https://stg.papadata.pl`
+- `AI_TIMEOUT_MS=12000`
 
----
+Secrets (Secret Manager -> Cloud Run):
+- `DATABASE_URL`
+- `JWT_SECRET`
+- `STRIPE_SECRET_KEY`
+- `STRIPE_WEBHOOK_SECRET`
 
-## Kroki lokalne (copy-paste)
+## Migracje (Cloud SQL)
+Canonical path:
+```bash
+pnpm --filter @papadata/api run db:migrate
+```
+Plik referencyjny schematu:
+- `docs/runbooks/cloudsql-schema.sql`
 
-### Build (Windows PowerShell)
-```powershell
-Set-Location C:\path\to\www.papadata.pl
-pnpm install
-pnpm run api:build
+## Verifikacja po deployu
+- `node tools/verify-stg.mjs`
+- Logi Cloud Logging (brak 5xx po deployu)

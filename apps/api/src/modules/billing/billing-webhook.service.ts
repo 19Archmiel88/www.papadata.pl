@@ -4,6 +4,7 @@ import type { BillingStatus, PlanId } from "@papadata/shared";
 import { getApiConfig } from "../../common/config";
 import { BillingRepository } from "../../common/billing.repository";
 import { getLogger } from "../../common/logger";
+import { TimeProvider } from "../../common/time.provider";
 
 const createStripeClient = () => {
   const apiKey = getApiConfig().stripe.secretKey;
@@ -13,11 +14,12 @@ const createStripeClient = () => {
 
 const mapStatus = (
   status: Stripe.Subscription.Status,
-  trialEndsAt?: string,
+  trialEndsAt: string | undefined,
+  nowMs: number,
 ): BillingStatus => {
   if (status === "active") return "active";
   if (status === "trialing") {
-    if (trialEndsAt && Date.now() > Date.parse(trialEndsAt)) {
+    if (trialEndsAt && nowMs > Date.parse(trialEndsAt)) {
       return "trial_expired";
     }
     return "trialing";
@@ -42,7 +44,7 @@ const mapPlanFromPriceIds = (priceIds: string[]): PlanId => {
     return "enterprise";
   if (priceProfessional && priceIds.includes(priceProfessional))
     return "professional";
-  return "professional";
+  return "starter";
 };
 
 @Injectable()
@@ -50,7 +52,10 @@ export class BillingWebhookService {
   private readonly logger = getLogger(BillingWebhookService.name);
   private readonly stripe = createStripeClient();
 
-  constructor(private readonly billingRepository: BillingRepository) {}
+  constructor(
+    private readonly billingRepository: BillingRepository,
+    private readonly timeProvider: TimeProvider,
+  ) {}
 
   async handleWebhook(
     rawBody: string,
@@ -71,6 +76,15 @@ export class BillingWebhookService {
       signature,
       secret,
     );
+    const existing = await this.billingRepository.getWebhookEvent(event.id);
+    if (existing?.status === "processed") {
+      this.logger.info(
+        { eventId: event.id, eventType: event.type },
+        "Stripe webhook already processed",
+      );
+      return;
+    }
+
     await this.trackWebhook(event.id, event.type, "received");
     try {
       await this.handleStripeEvent(event);
@@ -180,6 +194,7 @@ export class BillingWebhookService {
     const billingStatus = mapStatus(
       subscription.status,
       trialEndsAt ?? undefined,
+      this.timeProvider.nowMs(),
     );
 
     const priceIds = subscription.items.data

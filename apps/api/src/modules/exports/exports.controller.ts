@@ -20,12 +20,12 @@ import { getRequestBaseUrl } from "../../common/request";
 import { getApiConfig } from "../../common/config";
 
 @Controller("exports")
+@UseGuards(EntitlementsGuard)
+@RequireEntitlements("exports", "reports")
 export class ExportsController {
   constructor(private readonly exportsService: ExportsService) {}
 
   @Post()
-  @UseGuards(EntitlementsGuard)
-  @RequireEntitlements("exports", "reports")
   create(
     @Body() payload: ExportCreateRequest,
     @Req() req: FastifyRequest,

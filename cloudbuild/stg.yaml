@@ -71,8 +71,10 @@ steps:
       - "--platform"
       - "managed"
       - "--allow-unauthenticated"
+      - "--set-secrets"
+      - "DATABASE_URL=DATABASE_URL:latest,JWT_SECRET=JWT_SECRET:latest,STRIPE_SECRET_KEY=STRIPE_SECRET_KEY:latest,STRIPE_WEBHOOK_SECRET=STRIPE_WEBHOOK_SECRET:latest"
       - "--set-env-vars"
-      - "APP_MODE=demo,PORT=8080,NODE_ENV=production,CORS_ALLOWED_ORIGINS=${_CORS_ALLOWED_ORIGINS}"
+      - "APP_MODE=demo,PORT=8080,NODE_ENV=production,CORS_ALLOWED_ORIGINS=${_CORS_ALLOWED_ORIGINS},VERTEX_PROJECT_ID=${_VERTEX_PROJECT_ID},VERTEX_LOCATION=${_VERTEX_LOCATION},VERTEX_MODEL=${_VERTEX_MODEL},AI_ENABLED=${_AI_ENABLED},AI_ENABLED_DEMO=${_AI_ENABLED_DEMO},AI_ENABLED_PROD=${_AI_ENABLED_PROD},AI_RATE_LIMIT_MAX=${_AI_RATE_LIMIT_MAX},AI_RATE_LIMIT_WINDOW_MS=${_AI_RATE_LIMIT_WINDOW_MS},AI_TIMEOUT_MS=${_AI_TIMEOUT_MS},AI_USAGE_LIMIT_BASIC=${_AI_USAGE_LIMIT_BASIC},AI_USAGE_LIMIT_PRIORITY=${_AI_USAGE_LIMIT_PRIORITY},AI_USAGE_LIMIT_FULL=${_AI_USAGE_LIMIT_FULL},OBSERVABILITY_PROVIDER=${_OBSERVABILITY_PROVIDER},OBSERVABILITY_DSN=${_OBSERVABILITY_DSN},FIREBASE_PROJECT_ID=${_FIREBASE_PROJECT_ID},ENTITLEMENTS_PLAN=${_ENTITLEMENTS_PLAN},ENTITLEMENTS_BILLING_STATUS=${_ENTITLEMENTS_BILLING_STATUS},ENTITLEMENTS_TRIAL_ENDS_AT=${_ENTITLEMENTS_TRIAL_ENDS_AT}"
 
   - id: "deploy-web"
     name: "gcr.io/cloud-builders/gcloud"
@@ -89,14 +91,13 @@ steps:
       - "--allow-unauthenticated"
 
   - id: "smoke-stg"
-    name: "curlimages/curl:8.11.1"
-    entrypoint: "sh"
+    name: "node:22-slim"
+    entrypoint: "bash"
     args:
       - "-c"
       - |
-        set -e
-        curl -fsSL "${_API_SMOKE_URL}/health"
-        curl -fsSL "${_WEB_SMOKE_URL}/"
+        set -euo pipefail
+        API_BASE="${_API_SMOKE_URL}" WEB_BASE="${_WEB_SMOKE_URL}" node tools/verify-stg.mjs
 
 substitutions:
   _REGION: "europe-central2"
@@ -111,5 +112,21 @@ substitutions:
   _CORS_ALLOWED_ORIGINS: "https://stg.papadata.pl"
   _API_SMOKE_URL: "https://api.papadata.pl/api"
   _WEB_SMOKE_URL: "https://stg.papadata.pl"
+  _VERTEX_PROJECT_ID: "papadata-platform-stg"
+  _VERTEX_LOCATION: "europe-central2"
+  _VERTEX_MODEL: "gemini-2.5-flash-lite"
+  _AI_ENABLED: "true"
+  _AI_ENABLED_DEMO: "true"
+  _AI_ENABLED_PROD: "false"
+  _AI_RATE_LIMIT_MAX: "30"
+  _AI_RATE_LIMIT_WINDOW_MS: "60000"
+  _AI_TIMEOUT_MS: "12000"
+  _AI_USAGE_LIMIT_BASIC: "50"
+  _AI_USAGE_LIMIT_PRIORITY: "500"
+  _AI_USAGE_LIMIT_FULL: "2000"
+  _FIREBASE_PROJECT_ID: ""
+  _ENTITLEMENTS_PLAN: "professional"
+  _ENTITLEMENTS_BILLING_STATUS: "active"
+  _ENTITLEMENTS_TRIAL_ENDS_AT: ""
 
 timeout: "1200s"

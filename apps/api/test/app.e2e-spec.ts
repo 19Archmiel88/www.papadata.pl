@@ -9,9 +9,14 @@ describe("API e2e", () => {
   let app!: INestApplication;
 
   beforeAll(async () => {
+    process.env.APP_MODE = "demo";
     process.env.JWT_SECRET = process.env.JWT_SECRET ?? "test-secret";
     process.env.JWT_ISSUER = process.env.JWT_ISSUER ?? "test-issuer";
     process.env.JWT_AUDIENCE = process.env.JWT_AUDIENCE ?? "test-audience";
+    process.env.ENTITLEMENTS_PLAN = "professional";
+    process.env.ENTITLEMENTS_BILLING_STATUS = "active";
+    process.env.ENTITLEMENTS_FEATURE_AI = "true";
+    process.env.ENTITLEMENTS_CACHE_TTL_MS = "0";
     resetApiConfig();
 
     const moduleRef = await Test.createTestingModule({

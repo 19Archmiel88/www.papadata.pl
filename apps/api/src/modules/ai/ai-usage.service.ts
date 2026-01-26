@@ -2,9 +2,9 @@ import { Injectable } from "@nestjs/common";
 import type { Entitlements } from "@papadata/shared";
 import { BillingRepository } from "../../common/billing.repository";
 import { getApiConfig } from "../../common/config";
+import { TimeProvider } from "../../common/time.provider";
 
-const getPeriodWindow = () => {
-  const now = new Date();
+const getPeriodWindow = (now: Date) => {
   const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
   const end = new Date(
     Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0),
@@ -17,7 +17,10 @@ const getPeriodWindow = () => {
 
 @Injectable()
 export class AiUsageService {
-  constructor(private readonly billingRepository: BillingRepository) {}
+  constructor(
+    private readonly billingRepository: BillingRepository,
+    private readonly timeProvider: TimeProvider,
+  ) {}
 
   private resolveLimit(entitlements: Entitlements): number {
     const limits = (
@@ -47,7 +50,7 @@ export class AiUsageService {
     const limit = this.resolveLimit(entitlements);
     if (!Number.isFinite(limit) || limit <= 0) return;
 
-    const { periodStart } = getPeriodWindow();
+    const { periodStart } = getPeriodWindow(this.timeProvider.now());
     const usage = await this.billingRepository.getAiUsage(
       tenantId,
       periodStart,
@@ -67,7 +70,7 @@ export class AiUsageService {
     tokensOut?: number;
   }): Promise<void> {
     if (!params.tenantId) return;
-    const { periodStart, periodEnd } = getPeriodWindow();
+    const { periodStart, periodEnd } = getPeriodWindow(this.timeProvider.now());
     await this.billingRepository.incrementAiUsage({
       tenantId: params.tenantId,
       periodStart,

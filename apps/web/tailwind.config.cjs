@@ -38,13 +38,21 @@ module.exports = {
           border: '#1F2937',
         },
         brand: {
-          start: '#4F46E5',
-          end: '#0EA5E9',
-          focus: '#4F46E5',
+          start: '#22D3EE',
+          end: '#34D399',
+          focus: '#22D3EE',
+        },
+        neon: {
+          glow: '#A7F3D0',
+          cyan: '#22D3EE',
+          teal: '#14B8A6',
+          lime: '#A3E635',
+          ink: '#05070F',
         },
       },
       backgroundImage: {
-        'brand-gradient': 'linear-gradient(135deg, #4F46E5 0%, #0EA5E9 100%)',
+        'brand-gradient': 'linear-gradient(135deg, #22D3EE 0%, #34D399 100%)',
+        'neon-halo': 'radial-gradient(circle at top, rgba(34,211,238,0.35), transparent 60%)',
       },
       animation: {
         aurora: 'aurora 30s ease infinite alternate',

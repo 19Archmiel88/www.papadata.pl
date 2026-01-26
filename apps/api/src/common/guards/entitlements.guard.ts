@@ -10,7 +10,6 @@ import {
   EntitlementFeature,
 } from "../decorators/entitlements.decorator";
 import { EntitlementsService } from "../entitlements.service";
-import { getAppMode } from "../app-mode";
 import { BillingRepository } from "../billing.repository";
 
 @Injectable()
@@ -28,10 +27,6 @@ export class EntitlementsGuard implements CanActivate {
     );
 
     if (!features || features.length === 0) {
-      return true;
-    }
-
-    if (getAppMode() === "demo") {
       return true;
     }
 

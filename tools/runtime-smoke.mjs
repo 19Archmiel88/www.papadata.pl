@@ -52,6 +52,12 @@ const spawnApi = () => {
       PORT: String(port),
       APP_MODE: process.env.APP_MODE || "demo",
       NODE_ENV: process.env.NODE_ENV || "production",
+      ENV_OVERRIDE: process.env.ENV_OVERRIDE || "0",
+      ENTITLEMENTS_PLAN: process.env.ENTITLEMENTS_PLAN || "professional",
+      ENTITLEMENTS_BILLING_STATUS:
+        process.env.ENTITLEMENTS_BILLING_STATUS || "active",
+      ENTITLEMENTS_CACHE_TTL_MS:
+        process.env.ENTITLEMENTS_CACHE_TTL_MS || "0",
     },
   });
 };

@@ -1,8 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { BillingRepository } from "../../common/billing.repository";
+import { TimeProvider } from "../../common/time.provider";
 
-const getPeriodWindow = () => {
-  const now = new Date();
+const getPeriodWindow = (now: Date) => {
   const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
   const end = new Date(
     Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0),
@@ -15,10 +15,13 @@ const getPeriodWindow = () => {
 
 @Injectable()
 export class AdminService {
-  constructor(private readonly billingRepository: BillingRepository) {}
+  constructor(
+    private readonly billingRepository: BillingRepository,
+    private readonly timeProvider: TimeProvider,
+  ) {}
 
   async getAiUsage(tenantId: string) {
-    const { periodStart, periodEnd } = getPeriodWindow();
+    const { periodStart, periodEnd } = getPeriodWindow(this.timeProvider.now());
     const usage = await this.billingRepository.getAiUsage(
       tenantId,
       periodStart,

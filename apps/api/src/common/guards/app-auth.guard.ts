@@ -49,6 +49,18 @@ export class AppAuthGuard implements CanActivate {
 
     const mode = getAppMode();
     if (mode === "demo") {
+      const request = context.switchToHttp().getRequest();
+      const authHeader = request?.headers?.authorization;
+      const authConfig = getApiConfig().auth;
+      const hasJwt = Boolean(authConfig.jwtSecret);
+      if (authHeader && authHeader.startsWith("Bearer ") && hasJwt) {
+        try {
+          const jwtResult = this.jwtAuthGuard.canActivate(context);
+          await resolveGuard(jwtResult);
+        } catch {
+          // ignore auth errors in demo mode
+        }
+      }
       return true;
     }
 

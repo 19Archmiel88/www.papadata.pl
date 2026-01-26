@@ -15,6 +15,8 @@ import type {
   AuthSession,
 } from "@papadata/shared";
 import { getApiConfig } from "../../common/config";
+import { BillingRepository } from "../../common/billing.repository";
+import { TimeProvider } from "../../common/time.provider";
 
 const isValidEmail = (email: string) =>
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
@@ -55,11 +57,17 @@ const resolveRoles = (email: string): string[] => {
   return ["user"];
 };
 
+const TRIAL_DAYS = 14;
+
 @Injectable()
 export class AuthService {
   private readonly expiresInSeconds = getExpiresInSeconds();
 
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly billingRepository: BillingRepository,
+    private readonly timeProvider: TimeProvider,
+  ) {}
 
   requestMagicLink(payload: AuthMagicLinkRequest): AuthMagicLinkResponse {
     ensureDemoMode();
@@ -82,7 +90,7 @@ export class AuthService {
     return this.createSession(email, undefined);
   }
 
-  register(payload: AuthRegisterRequest): AuthRegisterResponse {
+  async register(payload: AuthRegisterRequest): Promise<AuthRegisterResponse> {
     ensureDemoMode();
     const email = payload?.email?.trim().toLowerCase() ?? "";
     const password = payload?.password ?? "";
@@ -109,7 +117,10 @@ export class AuthService {
       throw new BadRequestException("Company details are required");
     }
 
-    return this.createSession(email, nip);
+    const session = this.createSession(email, nip);
+    const tenantId = session.user.tenantId;
+    await this.startTrialForTenant(tenantId);
+    return session;
   }
 
   private createSession(email: string, tenantId?: string): AuthSession {
@@ -139,5 +150,23 @@ export class AuthService {
         roles,
       },
     };
+  }
+
+  private async startTrialForTenant(tenantId: string): Promise<void> {
+    const trialEndsAt = new Date(
+      this.timeProvider.nowMs() + TRIAL_DAYS * 24 * 60 * 60 * 1000,
+    ).toISOString();
+    const started = await this.billingRepository.startTrialIfMissing({
+      tenantId,
+      plan: "professional",
+      trialEndsAt,
+    });
+    if (started) {
+      await this.billingRepository.insertAuditEvent({
+        tenantId,
+        action: "trial.started",
+        details: { trialEndsAt },
+      });
+    }
   }
 }

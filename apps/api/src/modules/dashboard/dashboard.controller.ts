@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from "@nestjs/common";
+import { Controller, Get, Query, UseGuards } from "@nestjs/common";
 import type {
   DashboardOverviewResponse,
   DashboardPandLResponse,
@@ -10,8 +10,12 @@ import type {
   DashboardKnowledgeResponse,
 } from "@papadata/shared";
 import { DashboardService } from "./dashboard.service";
+import { EntitlementsGuard } from "../../common/guards/entitlements.guard";
+import { RequireEntitlements } from "../../common/decorators/entitlements.decorator";
 
 @Controller("dashboard")
+@UseGuards(EntitlementsGuard)
+@RequireEntitlements("reports")
 export class DashboardController {
   constructor(private readonly dashboardService: DashboardService) {}
 

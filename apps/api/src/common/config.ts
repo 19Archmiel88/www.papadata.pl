@@ -248,5 +248,17 @@ export const validateApiConfig = (): string[] => {
     issues.push("CRITICAL: JWT_SECRET is missing. Authentication will fail.");
   }
 
+  if (config.appMode === "prod") {
+    if (!config.database.url) {
+      issues.push("CRITICAL: DATABASE_URL is missing in prod mode.");
+    }
+    if (!config.stripe.secretKey) {
+      issues.push("CRITICAL: STRIPE_SECRET_KEY is missing in prod mode.");
+    }
+    if (!config.stripe.webhookSecret) {
+      issues.push("CRITICAL: STRIPE_WEBHOOK_SECRET is missing in prod mode.");
+    }
+  }
+
   return issues;
 };

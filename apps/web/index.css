@@ -23,7 +23,7 @@ section[id] {
 
 /* Accessible focus styles */
 :where(a, button, [role='button'], input, textarea, select):focus-visible:not([class*='focus-visible:ring']) {
-  outline: 2px solid #4F46E5;
+  outline: 2px solid #22D3EE;
   outline-offset: 3px;
 }
 
@@ -62,7 +62,7 @@ html:not(.dark) .aurora-blob {
 }
 
 .brand-gradient-text {
-  background: linear-gradient(135deg, #4F46E5 0%, #0EA5E9 100%);
+  background: linear-gradient(135deg, #22D3EE 0%, #34D399 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -71,11 +71,11 @@ html:not(.dark) .aurora-blob {
 .animated-gradient-text {
   background: linear-gradient(
     to right,
-    #4F46E5,
-    #0EA5E9,
-    #8B5CF6,
-    #0EA5E9,
-    #4F46E5
+    #22D3EE,
+    #38BDF8,
+    #34D399,
+    #38BDF8,
+    #22D3EE
   );
   background-size: 200% auto;
   background-clip: text;
@@ -92,7 +92,7 @@ html:not(.dark) .aurora-blob {
 }
 
 .brand-gradient-bg {
-  background: linear-gradient(135deg, #4F46E5 0%, #0EA5E9 100%);
+  background: linear-gradient(135deg, #22D3EE 0%, #34D399 100%);
 }
 
 .glass {

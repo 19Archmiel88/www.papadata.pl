@@ -182,7 +182,7 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
         {t.common.skip_to_content}
       </a>
       <motion.div
-        className="fixed top-0 left-0 right-0 h-1 brand-gradient-bg z-[1000] origin-left shadow-[0_0_15px_rgba(78,38,226,0.5)]"
+        className="fixed top-0 left-0 right-0 h-1 brand-gradient-bg z-[1000] origin-left shadow-[0_0_15px_rgba(34,211,238,0.5)]"
         style={{ scaleX }}
       />
       <OfflineBanner />
@@ -427,7 +427,7 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
 
       {/* Footer – bez zmian funkcjonalnych */}
       <footer className="bg-[#050507] pt-20 md:pt-32 pb-10 md:pb-16 relative z-10 border-t border-white/5 overflow-hidden">
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(78,38,226,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(78,38,226,0.03)_1px,transparent_1px)] bg-[size:50px_50px] opacity-30 pointer-events-none" />
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(34,211,238,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.04)_1px,transparent_1px)] bg-[size:50px_50px] opacity-30 pointer-events-none" />
 
         <div className="relative max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-5 gap-12 md:gap-16 mb-16 md:mb-20">
           <div className="col-span-1 md:col-span-2 space-y-6 md:space-y-8">
