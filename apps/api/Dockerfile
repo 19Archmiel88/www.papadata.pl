@@ -1,6 +1,9 @@
 # ---- base ----
 FROM node:22-slim AS base
 WORKDIR /repo
+ENV CI=true \
+    HUSKY=0 \
+    npm_config_ignore_scripts=true
 RUN corepack enable
 
 # ---- deps ----
