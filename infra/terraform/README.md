@@ -17,7 +17,7 @@ Aktualny stan produkcji i checklisty: `dokumentacjaProdukcyjna/GCP.md`.
 
 ## Zakres
 
-- Cloud Run: `papadata-api-v2`, `papadata-frontend-v2`
+- Cloud Run: 
 - Path-based routing: `/api/*` → API, reszta → Web
 - Cloud Armor (WAF) na backendzie API
 - Rate limiting Cloud Armor

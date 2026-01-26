@@ -106,13 +106,13 @@
 ## 6) Runtime (Cloud Run) — usługi i joby
 
 ### Do zrobienia
-- [ ] Ujednolicić nazewnictwo serwisów jako standard (jeśli finalnie zostaje `-v2`, spisać to jako standard).
+- [ ] Ujednolicić nazewnictwo serwisów jako standard.
 - [ ] (Opcjonalnie) wydzielenie `ai/notifier/exporter` jako osobne serwisy — tylko jeśli faktycznie potrzebne.
 
 ### Checklist
-- [x] Cloud Run services (PROD): `papadata-api-v2`, `papadata-frontend-v2`.
-- [x] Cloud Run jobs: ETL/Dataform/Guardian działają jako joby.
-- [x] Orkiestracja: Scheduler → Pub/Sub → Joby (zgodnie z wdrożonymi zasobami w notatkach).
+- [ ] Cloud Run services (PROD):
+- [ ] Cloud Run jobs: ETL/Dataform/Guardian działają jako joby.
+- [ ] Orkiestracja: Scheduler → Pub/Sub → Joby (zgodnie z wdrożonymi zasobami w notatkach).
 
 ---
 

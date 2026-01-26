@@ -254,15 +254,13 @@ export const CustomersViewV2: React.FC = () => {
     const label = cohortLabel(rowIdx, colIdx);
     const context = `${t.dashboard.customers_v2.cohorts.context_label}: ${label}`;
 
-    setSelectedCell((prev) => {
-      const isSame = prev?.row === rowIdx && prev?.col === colIdx;
-      const next = isSame ? null : { row: rowIdx, col: colIdx, value, size };
-      setContextLabel?.(next ? context : null);
-      if (next) {
-        setAiDraft?.(t.dashboard.customers_v2.ai_prompt.replace('{name}', label));
-      }
-      return next;
-    });
+    const isSame = selectedCell?.row === rowIdx && selectedCell?.col === colIdx;
+    const next = isSame ? null : { row: rowIdx, col: colIdx, value, size };
+    setSelectedCell(next);
+    setContextLabel?.(next ? context : null);
+    if (next) {
+      setAiDraft?.(t.dashboard.customers_v2.ai_prompt.replace('{name}', label));
+    }
   };
 
   const handleExplain = (label: string) => {

@@ -366,11 +366,9 @@ export const AdsViewV2: React.FC = () => {
 
   const handleChannelSelect = (id: string, label: string) => {
     const contextValue = t.dashboard.ads_v2.media_mix.context_template.replace('{name}', label);
-    setSelectedChannel((prev) => {
-      const next = prev === id ? null : id;
-      setContextLabel?.(next ? contextValue : null);
-      return next;
-    });
+    const next = selectedChannel === id ? null : id;
+    setSelectedChannel(next);
+    setContextLabel?.(next ? contextValue : null);
   };
 
   const clearChannelSelection = () => {
