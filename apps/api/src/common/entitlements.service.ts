@@ -138,6 +138,24 @@ const createStripeClient = () => {
   return new Stripe(apiKey, { apiVersion: "2023-10-16" });
 };
 
+type EntitlementsSource = "db" | "stripe" | "env" | "fail_closed";
+
+const deriveReason = (
+  source: EntitlementsSource,
+  status: BillingStatus,
+  trialEndsAt: string | undefined,
+  nowMs: number,
+): string | undefined => {
+  if (status === "trial_expired") return "trial_expired";
+  if (status === "canceled") return "canceled";
+  if (status === "past_due") return "past_due";
+  if (status === "trialing" && trialEndsAt && nowMs > Date.parse(trialEndsAt)) {
+    return "trial_expired";
+  }
+  if (source === "fail_closed") return "missing_billing";
+  return undefined;
+};
+
 @Injectable()
 export class EntitlementsService {
   private readonly stripe = createStripeClient();
@@ -170,6 +188,7 @@ export class EntitlementsService {
       const fromDb = await this.billingRepository.getTenantBilling(tenantId);
       if (fromDb) {
         entitlements = this.buildEntitlements(
+          "db",
           fromDb.plan,
           fromDb.billingStatus,
           fromDb.trialEndsAt ?? undefined,
@@ -214,13 +233,7 @@ export class EntitlementsService {
   }
 
   isAccountActive(entitlements: Entitlements): boolean {
-    if (entitlements.billingStatus === "active") return true;
-    if (
-      entitlements.billingStatus === "trialing" &&
-      !this.isTrialExpired(entitlements)
-    )
-      return true;
-    return false;
+    return entitlements.isPremiumAllowed;
   }
 
   isFeatureAllowed(
@@ -264,11 +277,16 @@ export class EntitlementsService {
     }
 
     const plan = explicitPlan ?? "starter";
-    return this.buildEntitlements(plan, billingStatus, resolvedTrialEndsAt);
+    return this.buildEntitlements(
+      "env",
+      plan,
+      billingStatus,
+      resolvedTrialEndsAt,
+    );
   }
 
   private getFailClosedEntitlements(): Entitlements {
-    return this.buildEntitlements("starter", "canceled");
+    return this.buildEntitlements("fail_closed", "starter", "canceled");
   }
 
   private async getStripeEntitlements(
@@ -290,6 +308,7 @@ export class EntitlementsService {
     const plan = this.resolveStripePlan(subscription);
 
     return this.buildEntitlements(
+      "stripe",
       plan,
       billingStatusRaw,
       trialEndsAt,
@@ -379,6 +398,7 @@ export class EntitlementsService {
   }
 
   private buildEntitlements(
+    source: EntitlementsSource,
     plan: PlanId,
     billingStatus: BillingStatus,
     trialEndsAt?: string,
@@ -404,6 +424,13 @@ export class EntitlementsService {
       parseCadence(env.reportCadence) ?? defaults.reportCadence;
     const aiTier = parseAiTier(env.aiTier) ?? defaults.aiTier;
 
+    const isPremiumAllowed =
+      resolvedStatus === "active" ||
+      (resolvedStatus === "trialing" &&
+        !(trialEndsAt && nowMs > Date.parse(trialEndsAt)));
+
+    const reason = deriveReason(source, resolvedStatus, trialEndsAt, nowMs);
+
     const features = {
       ai: env.featureAi,
       exports: env.featureExports,
@@ -412,9 +439,11 @@ export class EntitlementsService {
     };
 
     return {
+      isPremiumAllowed,
       plan: effectivePlan,
       billingStatus: resolvedStatus,
       trialEndsAt,
+      reason,
       limits: {
         maxSources: Number.isFinite(maxSources)
           ? maxSources

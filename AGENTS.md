@@ -1,304 +1,308 @@
-# Plan działań — priorytety wdrożeniowe (papadata.pl)
+# Checklist po refaktorze (Repo + [GCP]) — papadata.pl
 **Ostatnia aktualizacja:** 2026-01-26  
-**Zakres:** repo (apps/web, apps/api, libs/*) + GCP (papadata-platform-stg) + proces release
+**Legenda:**
+- [x] zrobione
+- [ ] do zrobienia
+- [-] N/A (nie dotyczy po podjęciu decyzji)
+- **[GCP]** krok wymagający konfiguracji w Google Cloud (poza repo)
 
-> Zasada pracy w tym repo: najpierw opis zmian (bez kodu), wdrożenie pełnych plików dopiero po „AKCEPTUJĘ”; pliki dostarczane w całości (bez ellipsis).
-
----
-
-## Definicje
-- **P0 / MUST** — blokuje poprawny model biznesowy lub bezpieczne domyślne działanie.
-- **P1 / SHOULD** — domyka produkt i usuwa tech-debt, ale nie blokuje krytycznej ścieżki „money-path”.
-- **P2** — production-grade / operacyjne dopracowanie.
+> Wskazówka: przy punktach warunkowych (ETL / shadcn / deps / Cloud SQL) używaj `[-] N/A` dla gałęzi, która nie obowiązuje po decyzji.
 
 ---
 
-## P0 / MUST — Model biznesowy i bezpieczeństwo domyślne (aplikacja)
+## 0) Decyzje, które usuwają niejasności (zaznacz jedną opcję)
+### ETL
+- [x] ETL **TAK** (utrzymujemy w produkcie)
 
-### [BILL-000] Kontrakt „Billing Source of Truth” + model stanów (start od tego)
-**Cel:** jednoznaczne reguły skąd bierzemy prawdę o planie, trialu i dostępie.
+### Standard UI
+- [x] shadcn/ui **TAK** (wdrażamy jako standard)
 
-- [ ] Ustalić **source of truth**:
-  - DB vs Stripe vs ENV (ENV tylko jako fallback DEMO; nigdy jako „premium aktywne” bez dowodu płatności).
-- [ ] Zdefiniować i opisać **state machine** (statusy + przejścia), np.:
-  - `trialing` → `active` → `past_due`/`canceled` → `blocked`
-- [ ] Zdefiniować **kontrakt danych**: minimalny zestaw pól wymaganych do wyliczania entitlements (np. `plan`, `billingStatus`, `trialEndsAt`, `currentPeriodEnd`, `paymentProviderCustomerId`, itp.).
-- [ ] Ustalić **reguły fail-closed**: brak danych o płatności/trialu = brak premium.
-- [ ] Udokumentować to w repo (docs) jako „jedyna prawda” dla zespołu.
+### Martwe zależności (dla każdej wybierz „UŻYWAMY” albo „USUWAMY”)
+- [x] framer-motion **UŻYWAMY**
+- [x] recharts **UŻYWAMY**
 
-**DoD:**
-- Jednoznaczna dokumentacja decyzji + diagram stanów.
-- Brak niejawnych ścieżek typu „puste ENV ⇒ pro+active”.
+### Cloud SQL
+- [x] Cloud SQL **TAK** (docelowa baza na GCP)
 
 ---
 
-### [BILL-010] Bezpieczne domyślne entitlements (naprawa obecnego ryzyka)
-**Cel:** koniec z sytuacją: “puste ENV ⇒ plan=professional i billingStatus=active”.
+## P0 / MUST — Model biznesowy i bezpieczeństwo domyślne (aplikacja / repo)
 
-- [ ] Przejrzeć i uporządkować `apps/api/src/common/entitlements.service.ts`:
-  - usunąć/zmienić domyślne mapowanie na `professional + active`.
-- [ ] Ustalić bezpieczny default gdy brak Stripe/DB:
-  - opcja A: `trialing` z `trialEndsAt = now + 14 dni`,
-  - opcja B: `starter/demo` z ograniczeniami (jeśli trial wymaga Stripe).
-- [ ] Ujednolicić odpowiedzi API dla braku uprawnień premium (kody + komunikaty).
+### [BILL-000] Billing Source of Truth + state machine + kontrakt danych
+- [x] Źródło prawdy: **DB autorytatywne**, Stripe = event source, ENV = demo fallback (bez premium-by-default)
+- [x] State machine opisana (trialing/active/past_due/canceled/trial_expired + „blocked” jako access-state)
+- [x] Kontrakt danych billing (tenant_id, plan, billing_status, trial_ends_at, current_period_end, stripe ids, timestamps)
+- [x] Reguły fail-closed (brak danych o płatności/trialu = brak premium)
+- [x] Dokumentacja w repo jako „single truth”
 
-**DoD:**
-- Uruchomienie API z `.env.example` (puste wartości) nie daje premium.
-- Premium funkcje są niedostępne bez trial/płatności.
+**Doprecyzowanie (co ma się znaleźć w projekcie):**
+- Dokument ma zawierać: (1) diagram przejść, (2) „source precedence” DB→Stripe→ENV, (3) tabelę: status → dostęp → UI/komunikaty, (4) scenariusze brzegowe (brak DB, Stripe off, błędne ENV).
+
+---
+
+### [BILL-010] Bezpieczne domyślne entitlements (koniec premium-by-default)
+- [x] Refactor `entitlements.service.ts` (brak mapowania pustych ENV do pro+active)
+- [x] Safe default bez Stripe/DB: **trialing z końcem trialu** albo **starter/demo z ograniczeniami** (zgodnie z decyzją)
+- [x] Spójne kody i komunikaty API dla braku uprawnień
+
+**Doprecyzowanie:**
+- W projekcie musi istnieć jeden centralny „wynik” entitlements z polami typu: `isPremiumAllowed`, `plan`, `billingStatus`, `trialEndsAt`, `reason` (do logów/UI).
 
 ---
 
 ### [BILL-020] Automatyczny start trialu po rejestracji
-**Cel:** „fresh user” automatycznie dostaje trial 14 dni (`trialEndsAt`).
+- [x] Signup zapisuje rekord billing w DB (trialEndsAt=now+14d, status=trialing, plan=professional)
+- [x] Polityka kiedy trial startuje (np. demo-only vs zawsze) opisana i wdrożona
+- [x] Audit log: utworzenie trialu i moment expiry (przynajmniej w logach)
 
-- [ ] Na zdarzeniu rejestracji (signup) zapisać `trialEndsAt` i status `trialing` (zgodnie z kontraktem).
-- [ ] Zdefiniować politykę: czy trial startuje zawsze, czy tylko w trybie DEMO / wybranych tenantach.
-- [ ] Dodać logowanie audytowe: kiedy trial został utworzony i kiedy wygasł.
-
-**DoD:**
-- Nowy użytkownik/tenant zawsze ma spójny stan trial (status + trialEndsAt).
+**Doprecyzowanie:**
+- Rejestracja ma być idempotentna: ponowny register / retry nie powinien tworzyć duplikatów ani „resetować” trialu bez intencji.
 
 ---
 
 ### [BILL-030] Egzekucja blokad premium po trialu bez płatności
-**Cel:** twarde odcięcie premium po `trialEndsAt` bez aktywnej płatności.
+- [x] Jeden gate (EntitlementsGuard + dekorator) jako jedyna bramka
+- [x] Guard na **dashboard**, **integrations**, **exports**, **AI** (zgodnie z polityką premium)
+- [x] Brak demo-bypass (demo działa przez trial/stan, nie obejście)
+- [x] Mapa limitów/feature flags per plan
+- [x] Jasne zachowanie po expiry (które moduły blokujemy i jakim kodem)
 
-- [ ] Wprowadzić mechanizm enforcement:
-  - guard/middleware na endpointach premium (np. `dashboard/*` lub funkcje premium),
-  - centralny check „czy feature jest dozwolony” (nie rozproszony po kodzie).
-- [ ] Dodać mapę limitów/feature flags dla planów (Starter/Pro/Enterprise).
-- [ ] Ustalić zachowanie po wygaśnięciu:
-  - blokada tylko premium vs pełna blokada działania aplikacji.
-- [ ] Zdefiniować czy jest „grace period” (opcjonalnie) i jak jest liczony.
-
-**DoD:**
-- Po trialu bez płatności premium endpointy są blokowane deterministycznie.
+**Doprecyzowanie:**
+- W repo ma być lista „co jest premium” (endpointy + funkcje) oraz jedno miejsce w kodzie, które to mapuje (żeby nie rozjechało się w przyszłości).
 
 ---
 
-### [BILL-040] Stripe jako źródło zdarzeń płatniczych (jeśli płatności mają działać realnie)
-**Cel:** płatność → natychmiastowa aktualizacja dostępu, bez ręcznej interwencji.
+### [BILL-040] Stripe jako źródło zdarzeń płatniczych (webhook + idempotencja)
+- [x] Webhook działa z raw-body (Fastify/Nest)
+- [x] Idempotencja eventów (dedupe po `event.id`) + odporność na retry
+- [x] Weryfikacja podpisu Stripe
+- [x] Mapowanie Stripe plans ↔ app plans
+- [x] Retry job ponownie aplikuje business logic (nie tylko „odhacza”)
 
-- [ ] Zaimplementować webhooki Stripe:
-  - wybór minimalnego zestawu eventów zgodnie z flow,
-  - aktualizacja DB / stanu billing.
-- [ ] Zapewnić idempotencję (deduplikacja po `event.id`) + odporność na retry.
-- [ ] Zapewnić bezpieczną weryfikację podpisu webhooków.
-- [ ] Zmapować plany Stripe ↔ plany aplikacji.
-
-**DoD:**
-- Po udanej płatności stan w aplikacji przechodzi na `active` wg planu.
-- Webhooki są idempotentne i nie powodują „podwójnych” zmian.
-
----
-
-### [BILL-050] Backfill / migracja istniejących kont z błędnym stanem
-**Cel:** uniknąć „wiecznego premium” albo przypadkowego odcięcia istniejących tenantów.
-
-- [ ] Zidentyfikować konta z:
-  - `billingStatus=active` bez dowodu płatności,
-  - `trialEndsAt=null` przy trialing,
-  - innymi niespójnościami.
-- [ ] Przygotować skrypt naprawczy (jednorazowy) i raport:
-  - ilu tenantów dotyczy,
-  - jakie akcje wykonano.
-- [ ] Dodać zabezpieczenie w kodzie przed tworzeniem takich niespójności w przyszłości.
-
-**DoD:**
-- Dane billing są spójne dla wszystkich istniejących tenantów.
+**Doprecyzowanie (projekt):**
+- Musi być tabela/logika „event ledger”:
+  - status eventu: received/processed/failed
+  - powód błędu (dla retry)
+- W docs: lista eventów Stripe obsługiwanych + co aktualizują w DB.
 
 ---
 
-### [BILL-060] Testy E2E dla ścieżki trial → expiry → payment
-**Cel:** chronić model biznesowy testami.
+### [BILL-050] Backfill istniejących kont (jednorazowa naprawa)
+- [x] Identyfikacja niespójności (active bez dowodu, trialEndsAt null itd.)
+- [x] Skrypt backfill + raport (liczniki + przykłady)
+- [x] Zabezpieczenie przed tworzeniem takich stanów w przyszłości
 
-- [ ] Dodać abstrakcję czasu (np. `NowProvider`) aby testować „po 14 dniach” bez flakiness.
-- [ ] Testy e2e scenariuszy:
-  - fresh user → trialing + trialEndsAt,
-  - po 14 dniach → blokada premium,
-  - po płatności → aktywacja wg planu,
-  - brak Stripe/DB/ENV → fail-closed (brak premium).
-- [ ] Wpiąć testy do pipeline (lokalnie i CI).
-
-**DoD:**
-- Testy przechodzą deterministycznie lokalnie i w CI.
+**Doprecyzowanie:**
+- W repo musi być runbook: kiedy uruchamiać backfill, jak odwrócić skutki (jeśli potrzebne), gdzie sprawdzić raport.
 
 ---
 
-## P0 / MUST — DB: migracje / schema bootstrap (żeby nie robić ręcznego SQL jako jedynej drogi)
+### [BILL-060] Testy E2E trial → expiry → payment + testowalny czas
+- [x] TimeProvider/Clock (wstrzykiwalny czas) bez flaky testów
+- [x] E2E: fresh user → trial; po 14 dniach → blokada; payment → odblokowanie; brak Stripe/DB/ENV → fail-closed
+- [x] Wpięte do CI w repo
 
-### [DB-010] Mechanizm migracji lub „init schema” jako canonical path
-**Cel:** STG/PROD da się postawić powtarzalnie.
-
-- [ ] Wybrać 1 podejście jako standard:
-  - migracje (preferowane) **albo**
-  - Cloud Run Job `db:init` / `db:migrate` odpalany z CI.
-- [ ] Zapewnić minimalny schema bootstrap obejmujący:
-  - tabele/kolumny billing/trial,
-  - indeksy,
-  - ewentualne dane referencyjne.
-- [ ] Zaktualizować runbooki:
-  - usunąć zależność od ręcznego wykonywania `cloudsql-schema.sql` jako jedynej opcji.
-
-**DoD:**
-- Nowe środowisko STG można zainicjalizować z pipeline/job bez ręcznych kroków.
+**Doprecyzowanie:**
+- Minimalnie: testy muszą weryfikować **co najmniej 1 endpoint premium** (np. dashboard/exports/integrations) oraz 1 nie-premium (health), aby nie było false-positive.
 
 ---
 
-## P0 / MUST — GCP STG: automatyczne i przewidywalne wdrożenia
+## P0 / MUST — DB migracje / schema bootstrap (repo)
+
+### [DB-010] Canonical migracje (SQL runner) zamiast ręcznego SQL jako jedynej drogi
+- [x] Runner migracji + tabela `schema_migrations`
+- [x] Migracje tworzą/uzupełniają: billing/trial + tabela idempotencji Stripe eventów + indeksy
+- [x] Runbooki zaktualizowane: migracje jako canonical, `cloudsql-schema.sql` jako referencja
+
+**Doprecyzowanie:**
+- `db:migrate` ma być:
+  - idempotentne (można odpalić wiele razy),
+  - deterministyczne (ta sama kolejność, checksum),
+  - łatwe do uruchomienia w CI i lokalnie.
+
+---
+
+## P0 / MUST — GCP STG: automatyczne i przewidywalne wdrożenia (repo + [GCP])
+> **Uwaga:** tu często są dwa etapy: (1) przygotowanie w repo, (2) realna konfiguracja na GCP.
 
 ### [GCP-010] Cloud Build Triggery (push → build/test/deploy/smoke)
-**Cel:** STG działa automatycznie po pushu.
+- [x] (repo) `cloudbuild/stg.yaml` gotowy pod build+test+deploy+smoke
+- [ ] **[GCP]** Utworzyć trigger w `papadata-platform-stg` wskazujący `cloudbuild/stg.yaml`
+- [x] (repo) mechanizm promotion do prod (`cloudbuild/prod.yaml`, `pnpm run promote:prod`) opisany
+- [ ] **[GCP]** Utworzyć mechanizm promotion (trigger/manual) dla `cloudbuild/prod.yaml`
+- [ ] **[GCP]** Ustawić politykę tagowania (commit SHA / release tag) w procesie release (konwencja + egzekucja)
 
-- [ ] Utworzyć trigger w `papadata-platform-stg` dla `cloudbuild/stg.yaml`:
-  - build API/WEB, testy, deploy, smoke (`tools/verify-stg.mjs`).
-- [ ] Ustalić promotion do PROD:
-  - osobny trigger / ręczne wywołanie `cloudbuild/prod.yaml` (zgodnie z procesem i `pnpm run promote:prod`).
-- [ ] Wymusić spójne tagowanie obrazów (commit SHA / release tag).
-
-**DoD:**
-- Push na main (lub dedykowany branch) automatycznie aktualizuje STG i przechodzi smoke.
+**Doprecyzowanie ([GCP]):**
+- Trigger powinien odpalać się na konkretny branch (np. main) i mieć SA z uprawnieniami do Artifact Registry + Cloud Run.
 
 ---
 
-### [GCP-020] Artifact Registry (europe-central2) + IAM dla Cloud Build
-**Cel:** pipeline ma gdzie pushować obrazy i ma uprawnienia.
+### [GCP-020] Artifact Registry (europe-central2) + IAM
+- [x] (repo) pipeline publikuje obrazy zgodnie z konwencją
+- [ ] **[GCP]** Utworzyć Artifact Registry `papadata-platform` w `europe-central2`
+- [ ] **[GCP]** Nadać Cloud Build SA role do push/pull (Artifact Registry)
+- [ ] **[GCP]** Zweryfikować retencję/tag cleanup (opcjonalnie) i politykę dostępu
 
-- [ ] Zapewnić repozytorium Artifact Registry `papadata-platform` w `europe-central2`.
-- [ ] Nadać Cloud Build uprawnienia push/pull.
-- [ ] Zweryfikować, że `cloudbuild/stg.yaml` publikuje i deployuje poprawne obrazy.
-
-**DoD:**
-- Build nie wywala się na push/pull obrazów, deploy wskazuje na właściwe tagi.
+**Doprecyzowanie ([GCP]):**
+- Upewnić się, że Cloud Run runtime SA ma pull (jeśli wymagane) oraz że obrazy są w tym samym regionie.
 
 ---
 
 ### [GCP-030] Cloud Run STG — pełne ENV + polityki dostępu
-**Cel:** STG nie działa w trybie „okrojonym”, tylko jak realna aplikacja.
+- [x] (repo) lista wymaganych ENV + runbooki doprecyzowane
+- [ ] **[GCP]** Skonfigurować ENV w Cloud Run (APP_MODE, CORS, Vertex/AI, itd.)
+- [ ] **[GCP]** Polityki dostępu: ingress, allow-unauthenticated (świadomie), ewentualny LB
+- [ ] **[GCP]** Zweryfikować, że dashboard/AI działa w STG (zgodnie z trial/billing)
 
-- [ ] Ustawić komplet ENV wymaganych przez runbooki i aplikację:
-  - `APP_MODE=demo`, `PORT`, `NODE_ENV`,
-  - `CORS_ALLOWED_ORIGINS=https://stg.papadata.pl`,
-  - `VERTEX_PROJECT_ID=papadata-platform-stg`, `VERTEX_LOCATION=europe-central2`, `VERTEX_MODEL=gemini-2.5-flash-lite`,
-  - pozostałe `AI_*` wg potrzeb.
-- [ ] Ustawić polityki dostępu:
-  - `allow-unauthenticated` tylko tam, gdzie to świadome,
-  - ingress zgodnie z architekturą (LB / direct).
-
-**DoD:**
-- Po deployu runbook `stg-verify.md` przechodzi 1:1.
+**Doprecyzowanie ([GCP]):**
+- Kluczowe: `CORS_ALLOWED_ORIGINS=https://stg.papadata.pl` oraz komplet ustawień Vertex/AI wymaganych przez `/api/ai/chat`.
 
 ---
 
 ### [GCP-040] Secret Manager + mapowanie sekretów do Cloud Run
-**Cel:** brak ręcznego wklejania sekretów do ENV; runtime ma minimalne uprawnienia.
+- [x] (repo) dokumentacja i wymagania sekretów spójne z kodem
+- [ ] **[GCP]** Utworzyć sekrety (JWT, Stripe, Firebase, DB) w Secret Manager
+- [ ] **[GCP]** Nadać runtime SA `secretAccessor` tylko do wymaganych sekretów
+- [ ] **[GCP]** Zmapować sekrety do Cloud Run jako env/volumes (bez plaintext)
 
-- [ ] Utworzyć sekrety: `JWT_SECRET`, `STRIPE_SECRET_KEY`, Firebase, DB itd. (zgodnie z decyzją).
-- [ ] Nadać runtime SA rolę `secretAccessor` tylko do wymaganych sekretów.
-- [ ] Zmapować sekrety do usług Cloud Run jako env/volumes.
-
-**DoD:**
-- Aplikacja startuje bez wrażliwych wartości w plain ENV, sekrety są wersjonowane.
+**Doprecyzowanie ([GCP]):**
+- Wymuś zasadę: żadnych sekretów w `--set-env-vars` plaintext w pipeline.
 
 ---
 
 ### [GCP-050] Smoke/observability jako DoD po każdym deployu
-**Cel:** każda rewizja jest automatycznie zweryfikowana.
+- [x] (repo) `tools/verify-stg.mjs` + runbook `stg-verify.md`
+- [ ] **[GCP]** Ustawić minimalne log queries / dashboard w Cloud Logging (operacyjne)
+- [ ] **[GCP]** Alerty minimum: nieudany deploy / 5xx / brak odpowiedzi health (opcjonalnie, ale zalecane)
 
-- [ ] W pipeline wymusić uruchomienie `tools/verify-stg.mjs` po deployu.
-- [ ] Zdefiniować minimalne log queries w Cloud Logging dla Cloud Run revision.
-- [ ] (Jeśli używane) Sentry: potwierdzić integrację i brak krytycznych errorów po deployu.
-
-**DoD:**
-- `/api/health` 200, `/api/ai/chat?stream=0` 200, `/api/ai/chat?stream=1` SSE kończy `[DONE]`, CORS poprawny.
+**Doprecyzowanie ([GCP]):**
+- Jeśli używacie Sentry: runtime ENV + DSN, i alert na wzrost error rate po deployu.
 
 ---
 
-## P1 / SHOULD — domknięcie spójności produktu i redukcja tech-debt
+## P1 / SHOULD — spójność produktu i redukcja tech-debt (repo)
 
-### [ETL-010] ETL: dodać szkielet albo usunąć obietnicę
-- [ ] Decyzja: ETL istnieje czy nie.
-- Jeśli TAK:
-  - [ ] Dodać `apps/etl/*` minimalny szkielet + README (może być „no-op”).
-- Jeśli NIE:
-  - [ ] Usunąć wzmianki z docs/marketing/roadmap.
-
-**DoD:** repo nie obiecuje nieistniejącej części systemu.
-
----
-
-### [UI-010] Standard komponentów: shadcn/ui vs własny system
-- [ ] Decyzja: wdrażamy shadcn/ui jako standard czy nie.
-- [ ] Jeśli NIE: usunąć z roadmapy i konsekwentnie utrzymywać własny UI.
-- [ ] Jeśli TAK: dodać podstawowy zestaw komponentów + konwencje.
-
-**DoD:** spójny standard, brak „pół na pół”.
+### [ETL-010] ETL: szkielet albo usunięcie obietnic (doprecyzowane)
+- [x] ETL **TAK**:
+  - [x] Dodać `apps/etl/*` (minimalny szkielet, no-op dopuszczalny)
+  - [x] README w `apps/etl` musi zawierać:
+    - cel ETL w produkcie,
+    - jak uruchomić lokalnie,
+    - jak będzie wdrażane (docelowo: job/scheduler),
+    - granice (czego jeszcze nie robi).
 
 ---
 
-### [UI-020] Martwe zależności: framer-motion / recharts
-- [ ] Jeśli mają być używane: dodać konkretne komponenty/wykresy/animacje.
-- [ ] Jeśli nie: usunąć zależności i ich ślady z projektu.
+### [UI-010] Standard komponentów: shadcn/ui vs własny system (doprecyzowane)
+- [-] shadcn/ui **NIE**:
+  - [-] W docs/roadmap jasno: „własny UI, bez shadcn”
+  - [-] Usunąć wzmianki o planie shadcn z repo (docs / TODO)
+  - [-] Dopisać minimalne zasady własnych komponentów (foldery, naming, tokens)
+- [x] shadcn/ui **TAK**:
+  - [x] Zainstalować i skonfigurować shadcn/ui wg standardu projektu
+  - [x] Dodać minimalny zestaw komponentów (np. Button, Input, Dialog, Card)
+  - [x] Dodać konwencję: gdzie trzymamy komponenty, jak wersjonujemy i stylujemy
 
-**DoD:** brak „martwego ciężaru” w deps.
+> Po wyborze decyzji ustaw drugą gałąź na `[-] N/A`.
 
 ---
 
-### [UI-030] Neon-dark / gradient tokens wprost
-- [ ] Zdefiniować tokeny kolorów i gradienty w Tailwind config.
-- [ ] Ujednolicić styl LandingPage/MainLayout.
+### [UI-020] Martwe zależności: framer-motion / recharts (doprecyzowane)
+#### framer-motion
+- [-] framer-motion **USUWAMY** (rekomendacja, jeśli brak realnego użycia):
+  - [-] Usuń zależność z `apps/web/package.json` (lub root, jeśli tam jest)
+  - [-] Usuń importy/ślad w kodzie (global search)
+  - [-] `pnpm install` aktualizuje lockfile
+  - [-] `pnpm run build` + testy przechodzą
+  - [-] (opcjonalnie) docs: usuń wzmianki o animacjach jeśli były
+- [x] framer-motion **UŻYWAMY** (jeśli ma zostać):
+  - [x] Wprowadź min. 1 realny komponent używający framer-motion w UI marketingowym:
+    - np. animowany hero / CTA / modal (LandingPage/PromoModal)
+  - [x] Zadbaj o preferencje `prefers-reduced-motion`
+  - [x] Dopisz w docs „gdzie używamy i po co”
 
-**DoD:** repo „od razu pokazuje” docelowy kierunek wizualny.
+#### recharts
+- [-] recharts **USUWAMY** (jeśli nie ma wykresów):
+  - [-] Usuń zależność + upewnij się, że dashboard nie ma pustych placeholderów
+  - [-] Build/test bez regressions
+- [x] recharts **UŻYWAMY**:
+  - [x] Wprowadź min. 1 wykres w UI (tam gdzie realnie ma sens):
+    - np. prosty wykres trendu w sekcji dashboard/overview (jeśli UI istnieje),
+    - albo przykładowy wykres w landing („jak wygląda insight”)
+  - [x] Ustal format danych i fallback (gdy brak danych)
+  - [x] Dodaj test snapshot/DOM (minimalny), żeby nie zniknął przy refaktorze
+
+> Po wyborze decyzji ustaw pozostałe gałęzie na `[-] N/A`.
+
+---
+
+### [UI-030] Neon-dark / gradient tokens
+- [x] Tokeny i gradienty w Tailwind config
+- [x] Spójne style w LandingPage/MainLayout
 
 ---
 
 ### [DATA-010] UTM: taksonomia + lista kanałów/platform + normalizer
-- [ ] Dodać docs: `source/medium/campaign/content/term` + `channel_group`.
-- [ ] Dodać config w repo (np. JSON/TS) z listą kanałów/platform.
-- [ ] Dodać util: walidator/normalizer UTM.
-
-**DoD:** mniej „śmieci” w danych i spójne raportowanie.
+- [x] Docs UTM + `channel_group`
+- [x] Config kanałów/platform w repo
+- [x] Util normalizer/validator
 
 ---
 
 ### [CI-010] CI w repo: dopięcie parametrów pod realne STG
-- [ ] Zaktualizować `cloudbuild/stg.yaml`, by nie deployował „okrojonego” API bez kluczowych ENV/secrets (konwencja: wymagane vs opcjonalne).
-- [ ] Jeśli rotacja DB ma działać: potwierdzić, że obraz zawiera job i jest uruchamialny jako Cloud Run Job.
-
-**DoD:** pipeline STG jest „realny”, nie „demo-only”.
+- [x] `cloudbuild/stg.yaml` nie deployuje „okrojonego” API bez kluczowych ustawień
+- [x] Jeśli rotacja DB ma działać: obraz zawiera job i da się uruchomić jako job
 
 ---
 
-## P2 — Production-grade / operacyjne dopracowanie
+## P2 — Production-grade / operacyjne dopracowanie ([GCP] + trochę repo)
 
-### [DB-020] Cloud SQL (jeśli potrzebne): HA, backupy, maintenance, sieć
-- [ ] Decyzja: Cloud SQL tak/nie.
-- [ ] Jeśli tak: HA/backupy, private IP + VPC connector, minimalne role dostępu.
+### [DB-020] Cloud SQL: HA, backupy, maintenance, sieć
+- [x] Decyzja Cloud SQL: TAK/NIE (patrz sekcja 0)
+- [ ] **[GCP]** Jeśli TAK:
+  - [ ] Instancja + region/zone (zgodnie z architekturą)
+  - [ ] Automated backups + PITR (jeśli dostępne) + retencja
+  - [ ] Maintenance window (kontrolowane okno)
+  - [ ] HA (jeśli wymagane) + polityka failover
+  - [ ] Private IP + VPC connector (jeśli prywatne połączenie)
+  - [ ] IAM/role minimalne (cloudsql.client tylko gdzie trzeba)
+- [x] (repo) Jeśli TAK:
+  - [x] Runbook: jak łączy się Cloud Run do Cloud SQL (metoda, env, SSL)
+  - [x] Wymagane sekrety/ENV doprecyzowane i spójne z kodem
 
 ---
 
 ### [OPS-010] Rotacja hasła DB jako Cloud Run Job + Scheduler
-- [ ] Zdefiniować Cloud Run Job dla `apps/api/src/jobs/rotate-db-password.ts`.
-- [ ] Cloud Scheduler (np. co 30 dni), IAM, sieć (jeśli DB prywatna).
-- [ ] Integracja z Secret Manager (app zawsze czyta aktualną wersję).
+- [ ] **[GCP]** Cloud Run Job uruchamiający `rotate-db-password`:
+  - [ ] Konfiguracja env: `DB_PASSWORD_SECRET_NAME`, `DB_ROTATE_USER`, `DATABASE_URL`/`DATABASE_ADMIN_URL`, SSL flags
+  - [ ] IAM: `roles/cloudsql.client`, `roles/secretmanager.secretVersionAdder` (minimalnie)
+  - [ ] VPC connector (jeśli DB prywatna)
+- [ ] **[GCP]** Cloud Scheduler:
+  - [ ] harmonogram 
+  - [ ] uprawnienia do uruchamiania joba
+- [x] (repo) Runbook:
+  - [x] Jak przetestować rotację manualnie
+  - [x] Jak zweryfikować, że aplikacja czyta najnowszą wersję sekretu
 
 ---
 
 ### [SEC-010] Security / koszty / ochrona publicznych endpointów
-- [ ] Budżety + alerty kosztów.
-- [ ] Ograniczenie uprawnień SA do minimum.
-- [ ] Cloud Armor / rate limiting (jeśli endpointy publiczne).
-- [ ] Audit logging / podstawowe alerty.
+- [ ] **[GCP]** Budżety + alerty kosztów (billing alerts)
+- [ ] **[GCP]** Ograniczenia IAM (least privilege) dla Cloud Build i runtime SA
+- [ ] **[GCP]** Cloud Armor / rate limiting (jeśli endpointy publiczne)
+- [ ] **[GCP]** Audit logging / podstawowe alerty (5xx, spike error rate, brak health)
+- [x] (repo) Krótki runbook „Security baseline”:
+  - [x] jakie role są wymagane i dlaczego,
+  - [x] jakie alerty są obowiązkowe na STG/PROD,
+  - [x] checklista przed PROD promotion.
 
 ---
 
-## Minimalna kolejność wykonania (rekomendowana)
-1. **BILL-000 → BILL-010 → BILL-020 → BILL-030**
-2. (Jeśli Stripe) **BILL-040**
-3. **BILL-050 → BILL-060**
-4. **DB-010**
-5. **GCP-010 → GCP-020 → GCP-030 → GCP-040 → GCP-050**
-6. P1: ETL/UI/UTM/CI porządki
-7. P2: Cloud SQL/rotacje/hardening
+## Minimalna kolejność (po refaktorze)
+1) P0 repo: **BILL-000 → BILL-010 → BILL-020 → BILL-030 → BILL-040 → BILL-050 → BILL-060**
+2) P0 repo: **DB-010**
+3) P0 GCP: **[GCP-010..050]** (realna konfiguracja w papadata-platform-stg)
+4) P1 repo: ETL/UI-010/UI-020/UTM (wg decyzji)
+5) P2: Cloud SQL / rotacje / hardening **[GCP]**
 
 ---

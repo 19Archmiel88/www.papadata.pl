@@ -17,6 +17,16 @@ import {
   formatRatio,
 } from '../../utils/formatters';
 import type { DashboardOverviewV2, DashboardOverviewV2Alert } from '../../types';
+import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  Legend,
+} from 'recharts';
 
 type SortDir = 'asc' | 'desc';
 type CampaignSortKey = 'name' | 'spend' | 'revenue' | 'roas' | 'cpa' | 'ctr' | 'cvr' | 'delta';
@@ -242,6 +252,17 @@ export const OverviewViewV2: React.FC = () => {
         clamp(32 + seeded(idx + 17, baseSeed) * 24, 15, 95)
       ),
     [pointsCount, baseSeed]
+  );
+
+  const trendData = useMemo(
+    () =>
+      revenueSeries.map((value, index) => ({
+        label: `T${index + 1}`,
+        revenue: Math.round(value),
+        spend: Math.round(spendSeries[index] ?? 0),
+        roas: Number((roasSeries[index] ?? 0).toFixed(2)),
+      })),
+    [revenueSeries, spendSeries, roasSeries],
   );
 
   const totals = useMemo(() => {
@@ -607,6 +628,63 @@ export const OverviewViewV2: React.FC = () => {
           isStale={isStale}
           staleLabel={staleLabel}
         />
+      </section>
+
+      {/* Revenue trend (Recharts) */}
+      <section className="dashboard-surface dashboard-card">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h3 className="text-lg font-black uppercase tracking-tight text-gray-900 dark:text-white">
+              {t.dashboard.overview_v2?.charts?.revenue_title ?? 'Revenue vs Spend'}
+            </h3>
+            <p className="text-xs text-gray-500 font-medium">
+              {t.dashboard.overview_v2?.charts?.revenue_desc ??
+                'Syntetyczny trend z podziałem na przychód, spend i ROAS.'}
+            </p>
+          </div>
+          <span className="text-2xs font-black uppercase tracking-[0.2em] text-gray-400">
+            sample • demo
+          </span>
+        </div>
+        <div className="h-[320px]" data-testid="recharts-trend">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart
+              data={trendData}
+              margin={{ top: 16, right: 12, left: 0, bottom: 8 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
+              <XAxis dataKey="label" stroke="currentColor" tick={{ fontSize: 11 }} />
+              <YAxis stroke="currentColor" tick={{ fontSize: 11 }} />
+              <Tooltip />
+              <Legend />
+              <Line
+                type="monotone"
+                dataKey="revenue"
+                stroke="#5ce1e6"
+                strokeWidth={3}
+                dot={false}
+                name={t.dashboard.overview_v2?.charts?.revenue_label ?? 'Revenue'}
+              />
+              <Line
+                type="monotone"
+                dataKey="spend"
+                stroke="#7c3aed"
+                strokeWidth={2}
+                strokeDasharray="5 4"
+                dot={false}
+                name={t.dashboard.overview_v2?.charts?.spend_label ?? 'Spend'}
+              />
+              <Line
+                type="natural"
+                dataKey="roas"
+                stroke="#22c55e"
+                strokeWidth={2}
+                dot={false}
+                name={t.dashboard.overview_v2?.charts?.roas_label ?? 'ROAS'}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
       </section>
 
       {/* Executive Insights */}

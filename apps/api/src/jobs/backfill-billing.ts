@@ -45,6 +45,7 @@ const main = async () => {
     nowMs + TRIAL_DAYS * 24 * 60 * 60 * 1000,
   ).toISOString();
   const actions: Action[] = [];
+  const stats = new Map<string, number>();
 
   for (const row of rows) {
     const update: Action["update"] = {};
@@ -83,8 +84,18 @@ const main = async () => {
 
     if (Object.keys(update).length > 0) {
       actions.push({ tenantId: row.tenant_id, reason, update });
+      const key = reason || "unspecified";
+      stats.set(key, (stats.get(key) ?? 0) + 1);
     }
   }
+
+  const statsObject = Array.from(stats.entries()).reduce(
+    (acc, [key, value]) => {
+      acc[key] = value;
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
 
   if (!apply) {
     // eslint-disable-next-line no-console
@@ -93,6 +104,8 @@ const main = async () => {
         {
           apply: false,
           total: actions.length,
+          stats: statsObject,
+          sample: actions.slice(0, 5),
           actions,
         },
         null,
@@ -127,6 +140,8 @@ const main = async () => {
       {
         apply: true,
         total: actions.length,
+        stats: statsObject,
+        sample: actions.slice(0, 5),
         actions,
       },
       null,

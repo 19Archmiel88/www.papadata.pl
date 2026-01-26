@@ -4,9 +4,11 @@ export type ReportCadence = 'weekly' | 'daily' | 'realtime';
 export type AiTier = 'basic' | 'priority' | 'full';
 
 export interface Entitlements {
+  isPremiumAllowed: boolean;
   plan: PlanId;
   billingStatus: BillingStatus;
   trialEndsAt?: string;
+  reason?: string;
   limits: {
     maxSources: number;
     reportCadence: ReportCadence;

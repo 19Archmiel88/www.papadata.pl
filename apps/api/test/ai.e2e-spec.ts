@@ -71,9 +71,11 @@ describe("AiController /ai/chat", () => {
     aiUsageMock.assertWithinLimit.mockResolvedValue(undefined);
     aiUsageMock.recordUsage.mockResolvedValue(undefined);
     entitlementsMock.getEntitlements.mockResolvedValue({
+      isPremiumAllowed: true,
       plan: "professional",
       billingStatus: "active",
       trialEndsAt: undefined,
+      reason: undefined,
       limits: {
         maxSources: 15,
         reportCadence: "daily",

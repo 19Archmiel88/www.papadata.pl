@@ -2,6 +2,11 @@
 
 Source of truth: `docs/billing-source-of-truth.md`.
 
+- Centralny wynik entitlements: `{ isPremiumAllowed, plan, billingStatus, trialEndsAt, reason, limits, features }` (`apps/api/src/common/entitlements.service.ts`).
+- Lista premium endpointów: `apps/api/src/common/premium-features.ts` (AI, dashboard/reports, exports, integrations).
+- Webhook + ledger + retry: patrz `docs/runbooks/stripe-webhooks.md`.
+- Backfill jednorazowy: `docs/runbooks/billing-backfill.md`.
+
 Cel: egzekucja planów (Starter/Professional/Trial), monitoring płatności oraz limitów AI i źródeł danych — zgodnie z naszym przepływem release.
 
 ---

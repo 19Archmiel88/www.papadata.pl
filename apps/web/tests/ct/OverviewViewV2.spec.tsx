@@ -10,4 +10,5 @@ test.beforeEach(async ({ page }) => {
 test('OverviewViewV2 renders', async ({ mount }) => {
   const component = await mountDashboardView(mount, <OverviewViewV2 />);
   await expect(component).toBeVisible();
+  await expect(component.getByTestId('recharts-trend')).toBeVisible();
 });

@@ -164,6 +164,12 @@ describe("Billing trial + enforcement (e2e)", () => {
     expect(res.body?.code).toBe("entitlements_blocked");
   });
 
+  it("keeps non-premium health endpoint open even when premium is blocked", async () => {
+    const res = await request(app.getHttpServer()).get("/api/health");
+    expect([200, 201]).toContain(res.status);
+    expect(res.body?.status).toBe("ok");
+  });
+
   it("starts trial on registration and allows premium", async () => {
     const registerRes = await request(app.getHttpServer())
       .post("/api/auth/register")

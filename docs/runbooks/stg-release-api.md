@@ -16,8 +16,6 @@ ENV:
 - `PORT=8080`
 - `NODE_ENV=production`
 - `CORS_ALLOWED_ORIGINS=https://stg.papadata.pl`
-- `ENTITLEMENTS_PLAN=professional`
-- `ENTITLEMENTS_BILLING_STATUS=active`
 - `VERTEX_PROJECT_ID=papadata-platform-stg`
 - `VERTEX_LOCATION=europe-central2`
 - `VERTEX_MODEL=gemini-2.5-flash-lite`
@@ -33,6 +31,8 @@ Secrets (Secret Manager -> Cloud Run):
 - `JWT_SECRET`
 - `STRIPE_SECRET_KEY`
 - `STRIPE_WEBHOOK_SECRET`
+
+Uwaga: brak ENV dla entitlements = brak premium by default (fail-closed starter/canceled).
 
 ## Migracje (Cloud SQL)
 Canonical path:

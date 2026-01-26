@@ -47,3 +47,4 @@ node tools/verify-stg.mjs
 ## Logi (Cloud Logging)
 - Filtr: `resource.type="cloud_run_revision"` + nazwa serwisu
 - Sprawdz: brak bledow 5xx po deployu
+- Zapisz query jako „papadata-stg-5xx-after-deploy” (pod alert 5xx spike)

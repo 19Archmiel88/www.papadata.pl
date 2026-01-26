@@ -8,10 +8,12 @@ import { useInView } from './hooks/useLazyResource';
 
 // Shared UI
 import { AuroraBackground, NeuralBackground } from './components/Backgrounds';
-import { InteractiveButton } from './components/InteractiveButton';
 import { MainLayout } from './MainLayout';
 import { CookieBanner } from './components/CookieBanner';
 import { LandingChatWidget } from './components/LandingChatWidget';
+import { AnimatedHero } from './components/AnimatedHero';
+import { ShadcnShowcase } from './components/ShadcnShowcase';
+import { Button } from './components/ui/button';
 
 // Features (lazy)
 const FeaturesSection = React.lazy(() =>
@@ -310,25 +312,26 @@ export const LandingPage: React.FC = () => {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4 pt-4 justify-center lg:justify-start items-stretch sm:items-center">
-                <InteractiveButton
-                  variant="primary"
+                <Button
                   onClick={() => openModal('auth', { isRegistered: false })}
                   data-testid="hero-cta"
-                  className="!h-14 !px-10 !text-xs !font-black rounded-2xl shadow-2xl tracking-widest"
+                  size="lg"
+                  className="!h-14 !px-10 shadow-2xl"
                 >
                   {t.hero.primary}
-                </InteractiveButton>
+                </Button>
 
-                <InteractiveButton
-                  variant="secondary"
+                <Button
+                  variant="outline"
                   onClick={() => openModal('video')}
-                  className="!h-14 !px-8 !text-xs !font-black rounded-2xl tracking-widest"
+                  size="lg"
+                  className="!h-14 !px-8"
                 >
                   <svg className="w-5 h-5 mr-2.5 text-brand-start fill-current" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M8 5v14l11-7z" />
                   </svg>
                   {t.hero.secondary}
-                </InteractiveButton>
+                </Button>
               </div>
 
               <div className="flex flex-wrap justify-center lg:justify-start items-center gap-x-6 gap-y-3 pt-6">
@@ -343,18 +346,20 @@ export const LandingPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="relative animate-reveal hidden lg:block" style={{ animationDelay: '0.2s' }}>
-              <Suspense
-                fallback={
-                  <div className="w-full max-w-xl mx-auto h-[480px] rounded-[3rem] bg-gray-100/50 dark:bg-white/5 border border-black/5 dark:border-white/10 animate-pulse flex items-center justify-center">
-                    <div className="w-12 h-12 rounded-full border-2 border-brand-start/20 border-t-brand-start animate-spin" />
-                  </div>
-                }
-              >
-                <VertexPlayer {...({ t } as any)} />
-              </Suspense>
-              <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-brand-start/[0.05] blur-[140px] rounded-full pointer-events-none" />
-            </div>
+            <AnimatedHero>
+              <div className="relative animate-reveal hidden lg:block" style={{ animationDelay: '0.2s' }}>
+                <Suspense
+                  fallback={
+                    <div className="w-full max-w-xl mx-auto h-[480px] rounded-[3rem] bg-gray-100/50 dark:bg-white/5 border border-black/5 dark:border-white/10 animate-pulse flex items-center justify-center">
+                      <div className="w-12 h-12 rounded-full border-2 border-brand-start/20 border-t-brand-start animate-spin" />
+                    </div>
+                  }
+                >
+                  <VertexPlayer {...({ t } as any)} />
+                </Suspense>
+                <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-brand-start/[0.05] blur-[140px] rounded-full pointer-events-none" />
+              </div>
+            </AnimatedHero>
           </div>
         </section>
 
@@ -392,6 +397,10 @@ export const LandingPage: React.FC = () => {
         <LazyWrapper minHeight={420} label="Loading FAQ section">
           <FaqSection {...({ t } as any)} />
         </LazyWrapper>
+
+        <section className="max-w-5xl mx-auto px-4 md:px-8 py-12">
+          <ShadcnShowcase />
+        </section>
 
         <CookieBanner onResolution={handleCookieResolution} t={t} />
 

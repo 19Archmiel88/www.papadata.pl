@@ -36,6 +36,16 @@ Automatyczna rotacja hasła użytkownika DB w Cloud SQL + zapis nowego hasła w 
 - `DATABASE_SSL_ENABLED` (true/false)
 - `DATABASE_SSL_REJECT_UNAUTHORIZED` (true/false)
 
+### Test manualny (lokalnie/STG)
+```bash
+DB_ROTATE_USER=papadata ^
+DB_PASSWORD_SECRET_NAME=CLOUD_SQL_PASSWORD ^
+DATABASE_ADMIN_URL="postgres://..." ^
+pnpm --filter @papadata/api exec ts-node ./src/jobs/rotate-db-password.ts
+```
+- Sprawdź w Secret Manager: nowa wersja `CLOUD_SQL_PASSWORD`.
+- Uruchom `pnpm --filter @papadata/api run db:migrate` z nowym sekretem (powinno przejść bez auth error).
+
 ---
 
 ## 3) Harmonogram (GCP)
@@ -48,3 +58,4 @@ Automatyczna rotacja hasła użytkownika DB w Cloud SQL + zapis nowego hasła w 
 - Job zapisuje nowe hasło jako **nową wersję** w **Secret Manager**.
 - Aplikacja pobiera hasło z **Secret Manager** (mapowanie secret→ENV).
 - `DATABASE_URL` w Cloud Run korzysta z **Secret Manager**.
+- Walidacja: health check API po rotacji + log DB connection success (Cloud Logging), brak błędów auth.

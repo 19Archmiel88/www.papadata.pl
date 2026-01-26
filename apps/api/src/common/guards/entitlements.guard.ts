@@ -59,6 +59,7 @@ export class EntitlementsGuard implements CanActivate {
           blockedFeatures: blocked,
           billingStatus: entitlements.billingStatus,
           trialEndsAt: entitlements.trialEndsAt,
+          reason: entitlements.reason,
         },
       });
     }
