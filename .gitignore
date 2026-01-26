@@ -47,6 +47,8 @@ blob-report/
 
 # root-level accidental data folder
 data/
+!apps/web/data/
+!apps/web/data/**
 
 
 # audit backups (never commit)
