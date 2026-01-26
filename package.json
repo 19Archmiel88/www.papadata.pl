@@ -17,7 +17,7 @@
     "clean": "node tools/clean.mjs",
     "audit:encoding": "node scripts/audit-encoding.js",
     "fix:encoding": "node scripts/fix-encoding.js --write",
-    "prepare": "node scripts/setup-husky.cjs",
+    "prepare": "node -e \"const fs=require('fs'); if (process.env.CI || process.env.HUSKY==='0') process.exit(0); if (!fs.existsSync('scripts/setup-husky.cjs')) process.exit(0); require('./scripts/setup-husky.cjs');\"",
     "lint:api": "pnpm --filter @papadata/api lint",
     "lint:web": "pnpm --filter @papadata/web lint",
     "lint": "pnpm run lint:api && pnpm run lint:web",

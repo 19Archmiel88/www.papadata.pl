@@ -9,6 +9,8 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/api/package.json apps/api/package.json
 COPY libs/shared/package.json libs/shared/package.json
 COPY libs/shared/tsconfig.json libs/shared/tsconfig.json
+ENV HUSKY=0
+ENV CI=true
 RUN pnpm install --frozen-lockfile
 
 # ---- build ----
@@ -27,6 +29,8 @@ ENV PORT=8080
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/api/package.json apps/api/package.json
 COPY libs/shared/package.json libs/shared/package.json
+ENV HUSKY=0
+ENV CI=true
 RUN pnpm install --frozen-lockfile --prod --filter @papadata/api...
 
 COPY --from=build /repo/libs/shared/dist ./libs/shared/dist
