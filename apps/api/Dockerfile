@@ -18,7 +18,8 @@ FROM deps AS build
 COPY libs/shared libs/shared
 COPY apps/api apps/api
 RUN pnpm --filter @papadata/shared build
-RUN pnpm --filter @papadata/api build
+RUN pnpm --filter @papadata/api build \
+ && test -f apps/api/dist/main.js
 
 # ---- runtime ----
 FROM base AS runtime

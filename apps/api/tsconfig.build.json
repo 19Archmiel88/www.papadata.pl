@@ -1,12 +1,14 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
+    "outDir": "./dist",
     "paths": {
       "@nestjs/common": ["../../node_modules/@nestjs/common"],
       "@papadata/shared": ["../../libs/shared/dist"],
       "@papadata/shared/*": ["../../libs/shared/dist/*"]
     }
   },
+  "include": ["src/**/*.ts"],
   "exclude": [
     "node_modules",
     "dist",
