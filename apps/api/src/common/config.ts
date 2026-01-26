@@ -117,6 +117,8 @@ export const getApiConfig = (): ApiConfig => {
       ? "demo"
       : "prod";
 
+  const corsAllowedOrigins = parseCsv(process.env.CORS_ALLOWED_ORIGINS);
+
   const config: ApiConfig = {
     nodeEnv,
     appMode,
@@ -125,9 +127,10 @@ export const getApiConfig = (): ApiConfig => {
       process.env.DASHBOARD_CACHE_TTL_MS ?? process.env.CACHE_TTL_MS,
       15000,
     ),
-    corsAllowedOrigins: parseCsv(process.env.CORS_ALLOWED_ORIGINS).length
-      ? parseCsv(process.env.CORS_ALLOWED_ORIGINS)
-      : ["http://localhost:3000", "http://localhost:5173"],
+    corsAllowedOrigins:
+      corsAllowedOrigins.length > 0
+        ? corsAllowedOrigins
+        : ["http://localhost:3000", "http://localhost:5173"],
     database: {
       url: process.env.DATABASE_URL,
       poolMax: parseNumber(process.env.DATABASE_POOL_MAX, 10),

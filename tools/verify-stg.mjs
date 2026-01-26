@@ -1,7 +1,6 @@
-const defaultPrompt = "Sprawdz prosze dane sprzedazy za ostatni tydzien.";
+const defaultPrompt = "Return exactly two lines:\nPL: pong\nEN: pong";
 
-const normalizeBase = (value) =>
-  value.endsWith("/") ? value.slice(0, -1) : value;
+const normalizeBase = (value) => (value.endsWith("/") ? value.slice(0, -1) : value);
 
 const apiBase = normalizeBase(
   process.env.API_BASE ||
@@ -9,27 +8,23 @@ const apiBase = normalizeBase(
     process.env.API ||
     "https://api.papadata.pl/api",
 );
-const webBase =
-  process.env.WEB_BASE || process.env.WEB_URL || process.env.WEB;
+
+const webBase = process.env.WEB_BASE || process.env.WEB_URL || process.env.WEB;
 
 const authToken = process.env.AUTH_TOKEN;
 const tenantId = process.env.TENANT_ID;
+
+// Deterministyczny prompt dla smoke (możesz nadpisać przez env)
 const prompt = process.env.AI_PROMPT || defaultPrompt;
 
 const jsonHeaders = {
   "Content-Type": "application/json",
   Accept: "application/json",
 };
-if (authToken) {
-  jsonHeaders.Authorization = `Bearer ${authToken}`;
-}
-if (tenantId) {
-  jsonHeaders["X-Tenant-Id"] = tenantId;
-}
+if (authToken) jsonHeaders.Authorization = `Bearer ${authToken}`;
+if (tenantId) jsonHeaders["X-Tenant-Id"] = tenantId;
 
-const logPass = (label) => {
-  console.log(`PASS ${label}`);
-};
+const logPass = (label) => console.log(`PASS ${label}`);
 
 const logFail = (label, error) => {
   console.error(`FAIL ${label}`);
@@ -51,22 +46,50 @@ const assertJsonResponse = (payload, label) => {
   }
 };
 
-const assertChatResponse = (payload) => {
+const extractChatText = (payload) => {
   const text =
     typeof payload.text === "string" && payload.text.trim()
       ? payload.text
       : typeof payload.content === "string" && payload.content.trim()
         ? payload.content
         : null;
-  if (!text) {
-    throw new Error("AI chat JSON response missing text/content.");
-  }
-  if (
-    payload.finishReason !== undefined &&
-    typeof payload.finishReason !== "string"
-  ) {
+  return text;
+};
+
+const assertChatResponse = (payload) => {
+  const text = extractChatText(payload);
+  if (!text) throw new Error("AI chat JSON response missing text/content.");
+
+  if (payload.finishReason !== undefined && typeof payload.finishReason !== "string") {
     throw new Error("AI chat JSON response has invalid finishReason.");
   }
+
+  const hasPL = /(^|\n)PL:\s*/i.test(text);
+  const hasEN = /(^|\n)EN:\s*/i.test(text);
+  if (!hasPL || !hasEN) {
+    throw new Error("AI smoke response missing PL:/EN: sections.");
+  }
+};
+
+// SSE: parsujemy eventy data: {...} i sklejamy "text" żeby sprawdzić PL/EN.
+const extractSseText = (body) => {
+  const lines = body.split("\n");
+  let acc = "";
+  for (const line of lines) {
+    if (!line.startsWith("data:")) continue;
+    const data = line.slice("data:".length).trim();
+    if (!data || data === "[DONE]") continue;
+
+    try {
+      const payload = JSON.parse(data);
+      if (payload && typeof payload.text === "string") {
+        acc += payload.text;
+      }
+    } catch {
+      // ignorujemy linie, które nie są JSON (np. jakieś komentarze)
+    }
+  }
+  return acc.trim();
 };
 
 const fetchJson = async (url, options, label) => {
@@ -87,7 +110,7 @@ const runHealthCheck = async () => {
 };
 
 const runAiJsonCheck = async () => {
-  const url = `${apiBase}/ai/chat?stream=0`;
+  const url = `${apiBase}/ai/chat?stream=0&smoke=1`;
   const payload = await fetchJson(
     url,
     {
@@ -95,13 +118,13 @@ const runAiJsonCheck = async () => {
       headers: jsonHeaders,
       body: JSON.stringify({ prompt }),
     },
-    "POST /ai/chat?stream=0",
+    "POST /ai/chat?stream=0&smoke=1",
   );
   assertChatResponse(payload);
 };
 
 const runAiSseCheck = async () => {
-  const url = `${apiBase}/ai/chat?stream=1`;
+  const url = `${apiBase}/ai/chat?stream=1&smoke=1`;
   const response = await fetch(url, {
     method: "POST",
     headers: {
@@ -111,14 +134,27 @@ const runAiSseCheck = async () => {
     body: JSON.stringify({ prompt }),
   });
 
-  await assertOk(response, "POST /ai/chat?stream=1");
+  await assertOk(response, "POST /ai/chat?stream=1&smoke=1");
   const contentType = response.headers.get("content-type") ?? "";
   if (!contentType.toLowerCase().includes("text/event-stream")) {
     throw new Error(`SSE unexpected content-type: ${contentType}`);
   }
+
   const body = await response.text();
+
   if (!body.includes("[DONE]")) {
     throw new Error("SSE stream missing [DONE] terminator.");
+  }
+
+  const text = extractSseText(body);
+  if (!text) {
+    throw new Error("SSE smoke response missing text chunks.");
+  }
+
+  const hasPL = /(^|\n)PL:\s*/i.test(text);
+  const hasEN = /(^|\n)EN:\s*/i.test(text);
+  if (!hasPL || !hasEN) {
+    throw new Error("SSE smoke response missing PL:/EN: sections.");
   }
 };
 
@@ -127,9 +163,7 @@ const runCorsCheck = async () => {
   const url = `${apiBase}/health`;
   const response = await fetch(url, {
     method: "GET",
-    headers: {
-      Origin: webBase,
-    },
+    headers: { Origin: webBase },
   });
   await assertOk(response, "CORS /health");
   const allowOrigin = response.headers.get("access-control-allow-origin");
@@ -152,22 +186,14 @@ const runStep = async (label, fn) => {
 
 const main = async () => {
   console.log(`API_BASE=${apiBase}`);
-  if (webBase) {
-    console.log(`WEB_BASE=${webBase}`);
-  }
-  if (authToken) {
-    console.log("AUTH_TOKEN=present");
-  }
-  if (tenantId) {
-    console.log(`TENANT_ID=${tenantId}`);
-  }
+  if (webBase) console.log(`WEB_BASE=${webBase}`);
+  if (authToken) console.log("AUTH_TOKEN=present");
+  if (tenantId) console.log(`TENANT_ID=${tenantId}`);
 
   await runStep("health", runHealthCheck);
-  await runStep("ai chat json", runAiJsonCheck);
-  await runStep("ai chat sse", runAiSseCheck);
-  if (webBase) {
-    await runStep("cors", runCorsCheck);
-  }
+  await runStep("ai chat json (smoke)", runAiJsonCheck);
+  await runStep("ai chat sse (smoke)", runAiSseCheck);
+  if (webBase) await runStep("cors", runCorsCheck);
 };
 
 main().catch(() => {

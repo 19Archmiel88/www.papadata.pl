@@ -13,6 +13,7 @@ import { getLogger } from "../../common/logger";
 import { getApiConfig } from "../../common/config";
 
 const DEFAULT_MODEL = "gemini-2.5-flash-lite";
+
 const SYSTEM_INSTRUCTION = `You are Papa AI, a world-class e-commerce data scientist and strategic consultant.
 Your goal is to analyze e-commerce data (provided in the context) to detect anomalies, inefficiencies, and hidden growth opportunities.
 
@@ -28,6 +29,9 @@ EN:
 [English version]
 
 If the user provides a "DATA SNAPSHOT", treat it as the ground truth for your analysis.`;
+
+const SMOKE_SYSTEM_INSTRUCTION =
+  "Return exactly two sections only:\nPL:\nEN:\nKeep the answer extremely short.";
 
 const parseEnvFlag = (
   value: string | undefined,
@@ -62,9 +66,7 @@ const withTimeout = async <T>(
   try {
     return await Promise.race([promise, timeoutPromise]);
   } finally {
-    if (timer) {
-      clearTimeout(timer);
-    }
+    if (timer) clearTimeout(timer);
   }
 };
 
@@ -105,9 +107,7 @@ const mapMessageRole = (role: AIChatMessage["role"]): "user" | "model" => {
 
 const collectUserInput = (payload: AIChatRequest): string => {
   const parts: string[] = [];
-  if (payload.prompt) {
-    parts.push(payload.prompt);
-  }
+  if (payload.prompt) parts.push(payload.prompt);
   if (payload.messages) {
     parts.push(
       ...payload.messages
@@ -140,8 +140,12 @@ export class AiService {
   private readonly location = getApiConfig().ai.vertexLocation ?? "";
   private readonly modelName = getApiConfig().ai.vertexModel ?? DEFAULT_MODEL;
 
-  async respond(payload: AIChatRequest): Promise<AIChatResponse> {
+  async respond(
+    payload: AIChatRequest & { smoke?: boolean },
+  ): Promise<AIChatResponse> {
     const mode = payload.mode ?? getAppMode();
+    const isSmoke = Boolean((payload as any)?.smoke);
+
     if (!isAiEnabledForMode(mode)) {
       return {
         text: formatBilingual(
@@ -152,6 +156,7 @@ export class AiService {
       };
     }
 
+    // DEMO: zawsze blokuj sensitive. Bez smoke -> demo response. Smoke -> Vertex.
     if (mode === "demo") {
       const userInput = collectUserInput(payload);
       if (hasSensitiveInput(userInput)) {
@@ -163,10 +168,12 @@ export class AiService {
           finishReason: "safety",
         };
       }
-      return {
-        text: getDemoResponse(payload.prompt || ""),
-        finishReason: "stop",
-      };
+      if (!isSmoke) {
+        return {
+          text: getDemoResponse(payload.prompt || ""),
+          finishReason: "stop",
+        };
+      }
     }
 
     if (!this.projectId || !this.location) {
@@ -183,9 +190,10 @@ export class AiService {
       .filter((message) => message.role === "system")
       .map((message) => message.content.trim())
       .filter(Boolean);
-    const systemInstruction = [SYSTEM_INSTRUCTION, ...systemExtras]
-      .join("\n\n")
-      .trim();
+
+    const systemInstruction = isSmoke
+      ? SMOKE_SYSTEM_INSTRUCTION
+      : [SYSTEM_INSTRUCTION, ...systemExtras].join("\n\n").trim();
 
     const contents = (payload.messages || [])
       .filter((message) => message.role !== "system")
@@ -196,7 +204,10 @@ export class AiService {
 
     const prompt = buildContextPrompt(payload);
     if (prompt) {
-      contents.push({ role: "user", parts: [{ text: prompt }] });
+      const finalPrompt = isSmoke
+        ? `SMOKE CHECK (keep response short).\n${prompt}`
+        : prompt;
+      contents.push({ role: "user", parts: [{ text: finalPrompt }] });
     }
 
     if (contents.length === 0) {
@@ -213,6 +224,7 @@ export class AiService {
         project: this.projectId,
         location: this.location,
       });
+
       const model = vertex.getGenerativeModel({
         model: this.modelName,
         systemInstruction: {
@@ -225,6 +237,7 @@ export class AiService {
         model.generateContent({ contents }),
         timeoutMs,
       );
+
       const response = result.response;
       const candidate = response.candidates?.[0];
       const text = (candidate?.content?.parts || [])
@@ -239,6 +252,14 @@ export class AiService {
             "AI response was empty.",
           ),
           finishReason: "error",
+        };
+      }
+
+      // Smoke: nie robimy repair (żeby nie robić 2x requestów).
+      if (isSmoke) {
+        return {
+          text: hasBilingualSections(text) ? text : formatBilingual(text, text),
+          finishReason: mapFinishReason(candidate?.finishReason),
         };
       }
 
@@ -267,6 +288,7 @@ export class AiService {
         }),
         timeoutMs,
       );
+
       const repairCandidate = repair.response.candidates?.[0];
       const repairedText = (repairCandidate?.content?.parts || [])
         .map((part) => (typeof part.text === "string" ? part.text : ""))
@@ -293,6 +315,7 @@ export class AiService {
         error instanceof Error
           ? error.message
           : (error as { message?: string }).message;
+
       if (message === "timeout") {
         return {
           text: formatBilingual(
@@ -302,10 +325,12 @@ export class AiService {
           finishReason: "timeout",
         };
       }
+
       this.logger.warn(
         { errorMessage: message ?? "unknown" },
         "Vertex AI request failed",
       );
+
       return {
         text: formatBilingual(
           "Zadanie AI nie powiodlo sie.",

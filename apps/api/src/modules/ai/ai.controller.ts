@@ -55,51 +55,68 @@ export class AiController {
     @Req() req: FastifyRequest,
     @Res({ passthrough: false }) reply: FastifyReply,
     @Query("stream") stream?: string,
+    @Query("smoke") smoke?: string,
   ): Promise<AIChatResponse> {
     if (!payload?.prompt || !payload.prompt.trim()) {
       throw new BadRequestException("Prompt is required");
     }
-    const tenantId = (req as any)?.user?.tenantId ?? (req as any)?.user?.uid;
+
+    const isSmoke = smoke === "1" || smoke === "true";
+
+    const tenantId =
+      (req as any)?.user?.tenantId ?? (req as any)?.user?.uid ?? "anonymous";
+
     const entitlements =
       (req as any)?.entitlements ??
       (await this.entitlementsService.getEntitlements(tenantId));
-    try {
-      await this.aiUsageService.assertWithinLimit(tenantId, entitlements);
-    } catch (error: any) {
-      if (error?.code === "ai_limit_exceeded") {
-        throw new HttpException(
-          {
-            code: "ai_limit_exceeded",
-            message: "AI usage limit exceeded",
-            details: error?.details ?? {},
-          },
-          HttpStatus.TOO_MANY_REQUESTS,
-        );
+
+    if (!isSmoke) {
+      try {
+        await this.aiUsageService.assertWithinLimit(tenantId, entitlements);
+      } catch (error: any) {
+        if (error?.code === "ai_limit_exceeded") {
+          throw new HttpException(
+            {
+              code: "ai_limit_exceeded",
+              message: "AI usage limit exceeded",
+              details: error?.details ?? {},
+            },
+            HttpStatus.TOO_MANY_REQUESTS,
+          );
+        }
+        throw error;
       }
-      throw error;
     }
+
     const mode = getAppMode();
     const startedAt = Date.now();
-    const response = await this.aiService.respond({ ...payload, mode });
+
+    const response = await this.aiService.respond({
+      ...payload,
+      mode,
+      smoke: isSmoke,
+    } as any);
     const durationMs = Date.now() - startedAt;
     const finishReason = response.finishReason ?? "stop";
     const requestId =
       (req.headers["x-request-id"] as string | undefined) ??
-      req.id ??
+      (req as any)?.id ??
       "unknown";
+
     this.logger.info(
       {
         finishReason,
         mode,
         durationMs,
         requestId,
+        smoke: isSmoke,
       },
       "ai.chat",
     );
 
-    await this.aiUsageService.recordUsage({
-      tenantId,
-    });
+    if (!isSmoke) {
+      await this.aiUsageService.recordUsage({ tenantId });
+    }
 
     const acceptHeader = String(req.headers.accept ?? "").toLowerCase();
     const acceptAllowsStream =
@@ -108,6 +125,7 @@ export class AiController {
       acceptHeader.includes("*/*");
     const wantsStream =
       stream !== "0" && (stream === "1" || acceptAllowsStream);
+
     if (!wantsStream) {
       reply.send(response);
       return response;
@@ -123,6 +141,7 @@ export class AiController {
     raw.setHeader("Cache-Control", "no-cache, no-transform");
     raw.setHeader("Connection", "keep-alive");
     raw.setHeader("X-Accel-Buffering", "no");
+
     const text = response.text ?? "";
     const chunkSize = 120;
     let closed = false;
@@ -152,6 +171,7 @@ export class AiController {
     } finally {
       clearInterval(heartbeat);
     }
+
     return response;
   }
 }
