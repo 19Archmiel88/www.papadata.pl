@@ -179,7 +179,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
       aria-labelledby={headingId}
       ref={sectionRef}
       style={{ opacity }}
-      className="py-24 sm:py-32 px-4 md:px-8 relative overflow-hidden"
+      className="py-24 sm:py-32 portrait:py-20 px-4 xs:px-5 md:px-8 relative overflow-hidden"
     >
       <div className="absolute inset-0 pointer-events-none -z-10" aria-hidden>
         <div className="absolute inset-0 bg-[linear-gradient(rgba(78,38,226,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(78,38,226,0.01)_1px,transparent_1px)] bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_at_center,black,transparent_80%)]" />
@@ -200,7 +200,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-8 xl:gap-10">
           {featureKeys.map((key, index) => {
             const feature = t.features[key];
             return (

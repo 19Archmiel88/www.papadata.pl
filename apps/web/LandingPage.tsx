@@ -280,8 +280,8 @@ export const LandingPage: React.FC = () => {
         <AuroraBackground {...({ theme } as any)} />
         <NeuralBackground {...({ theme } as any)} />
 
-        <section className="relative z-10 pt-28 md:pt-40 pb-20 px-4 md:px-8 max-w-7xl mx-auto min-h-[80vh] flex flex-col justify-center">
-          <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-12 lg:gap-16 items-center">
+        <section className="relative z-10 pt-24 xs:pt-28 md:pt-40 pb-16 md:pb-20 px-4 xs:px-5 md:px-8 max-w-7xl mx-auto min-h-[78vh] portrait:min-h-[70vh] flex flex-col justify-center">
+          <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-10 lg:gap-16 items-center">
             <div className="space-y-6 md:space-y-8 animate-reveal text-center lg:text-left">
               {t.hero.pill && (
                 <span className="inline-block px-4 py-1.5 rounded-full bg-brand-start/10 border border-brand-start/20 text-xs font-black uppercase tracking-[0.2em] leading-none text-brand-start mb-2">
@@ -406,7 +406,12 @@ export const LandingPage: React.FC = () => {
 
         {/* Teaser po zamknięciu promo – LEWY dół */}
         {showPromoTeaser && activeModal !== 'promo' && (
-          <aside className="fixed bottom-6 left-6 z-[1850] flex items-center gap-2" role="complementary" aria-label="Promo teaser">
+          <aside
+            className="fixed bottom-6 left-6 landscape:bottom-4 landscape:left-4 portrait:bottom-4 portrait:left-4 z-[1850] flex items-center gap-2"
+            role="complementary"
+            aria-label="Promo teaser"
+            style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+          >
             <button
               type="button"
               onClick={() => openModal('auth', { isRegistered: false })}
@@ -436,7 +441,13 @@ export const LandingPage: React.FC = () => {
         )}
 
         {/* Dock: prawy dół – czat Papa AI */}
-        <aside ref={dockRef} className="fixed bottom-6 right-6 z-[1900] flex flex-col items-end gap-3" role="complementary" aria-label="Chat">
+        <aside
+          ref={dockRef}
+          className="fixed bottom-6 right-6 landscape:bottom-4 landscape:right-4 portrait:bottom-4 portrait:right-4 z-[1900] flex flex-col items-end gap-3"
+          role="complementary"
+          aria-label="Chat"
+          style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+        >
           <LandingChatWidget
             lang={lang}
             onStartTrial={() => openModal('auth', { isRegistered: false })}

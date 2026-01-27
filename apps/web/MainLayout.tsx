@@ -182,13 +182,13 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
         {t.common.skip_to_content}
       </a>
       <motion.div
-        className="fixed top-0 left-0 right-0 h-1 brand-gradient-bg z-[1000] origin-left shadow-[0_0_15px_rgba(34,211,238,0.5)]"
+        className="fixed top-0 left-0 right-0 h-1 brand-gradient-bg z-[1000] origin-left shadow-[0_0_15px_rgba(78,38,226,0.5)]"
         style={{ scaleX }}
       />
       <OfflineBanner />
 
       <nav
-        className={`fixed top-0 w-full z-[100] transition-all duration-500 flex justify-center pt-2 md:pt-6 px-4 ${
+        className={`fixed top-0 w-full z-[100] transition-all duration-500 flex justify-center pt-2 md:pt-6 px-4 xs:px-5 ${
           visible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
         }`}
         aria-label={t.common.main_nav_label}
@@ -333,7 +333,7 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="absolute top-full left-4 right-4 mt-2 p-6 rounded-3xl glass shadow-2xl border border-brand-start/20 flex flex-col gap-6 lg:hidden"
+              className="absolute top-full left-4 right-4 mt-2 p-6 rounded-3xl glass shadow-2xl border border-brand-start/20 flex flex-col gap-6 lg:hidden max-h-[calc(100vh-140px)] landscape:max-h-[calc(100vh-110px)] overflow-y-auto overscroll-contain pr-1 pb-[calc(16px+env(safe-area-inset-bottom,0px))]"
             >
               <div className="grid gap-4">
                 {t.nav.items.map((item) => (
@@ -408,8 +408,8 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
             onClick={scrollToTop}
             style={{
               bottom: isLandingRoute
-                ? `calc(24px + var(--pd-floating-offset, 0px))`
-                : '24px',
+                ? `calc(24px + var(--pd-floating-offset, 0px) + env(safe-area-inset-bottom, 0px))`
+                : 'calc(24px + env(safe-area-inset-bottom, 0px))',
               right: isLandingRoute
                 ? `calc(24px + var(--pd-chat-panel-offset, 0px))`
                 : '24px',
@@ -427,7 +427,7 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
 
       {/* Footer – bez zmian funkcjonalnych */}
       <footer className="bg-[#050507] pt-20 md:pt-32 pb-10 md:pb-16 relative z-10 border-t border-white/5 overflow-hidden">
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(34,211,238,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.04)_1px,transparent_1px)] bg-[size:50px_50px] opacity-30 pointer-events-none" />
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(78,38,226,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(78,38,226,0.03)_1px,transparent_1px)] bg-[size:50px_50px] opacity-30 pointer-events-none" />
 
         <div className="relative max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-5 gap-12 md:gap-16 mb-16 md:mb-20">
           <div className="col-span-1 md:col-span-2 space-y-6 md:space-y-8">

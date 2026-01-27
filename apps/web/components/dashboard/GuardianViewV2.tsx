@@ -343,37 +343,37 @@ export const GuardianViewV2: React.FC = () => {
   return (
     <div className="space-y-8 animate-reveal">
       {/* Guardian Header / Control Center */}
-      <section className="rounded-[2.5rem] border border-black/10 dark:border-white/10 bg-white/90 dark:bg-[#0b0b0f] p-8 shadow-xl">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
-          <div className="space-y-2">
+      <section className="rounded-[2rem] md:rounded-[2.5rem] border border-black/10 dark:border-white/10 bg-white/90 dark:bg-[#0b0b0f] px-6 xs:px-7 md:px-8 py-6 md:py-8 shadow-xl">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 md:gap-8">
+          <div className="space-y-2 max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/5 border border-emerald-500/10 mb-2">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-xs font-black uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400">
+              <span className="text-2xs xs:text-xs font-black uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400">
                 {guardian.badge_label}
               </span>
             </div>
-            <h2 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
+            <h2 className="text-2xl md:text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tight leading-tight">
               {guardian.title}
             </h2>
-            <p className="text-base text-gray-500 dark:text-gray-400 font-medium">
+            <p className="text-sm md:text-base text-gray-500 dark:text-gray-400 font-medium">
               {guardian.desc}
             </p>
           </div>
 
           <div className="grid grid-cols-2 sm:flex items-center gap-4 w-full md:w-auto">
-            <div className="p-4 px-6 rounded-2xl bg-black/5 dark:bg-white/5 border border-black/5 text-center min-w-[140px]">
+            <div className="p-4 px-5 md:px-6 rounded-2xl bg-black/5 dark:bg-white/5 border border-black/5 text-center min-w-[130px]">
               <div className="text-2xs font-black text-gray-400 uppercase tracking-widest mb-1">
                 {guardian.health_label}
               </div>
-              <div className="text-2xl font-black text-emerald-500">
+              <div className="text-xl md:text-2xl font-black text-emerald-500">
                 {guardian.health_status}
               </div>
             </div>
-            <div className="p-4 px-6 rounded-2xl bg-brand-start text-white shadow-xl shadow-brand-start/20 text-center min-w-[140px]">
+            <div className="p-4 px-5 md:px-6 rounded-2xl bg-brand-start text-white shadow-xl shadow-brand-start/20 text-center min-w-[130px]">
               <div className="text-2xs font-black uppercase tracking-widest mb-1 opacity-70">
                 {guardian.uptime_label}
               </div>
-              <div className="text-2xl font-black">{guardian.uptime_value}</div>
+              <div className="text-xl md:text-2xl font-black">{guardian.uptime_value}</div>
             </div>
           </div>
         </div>
@@ -402,15 +402,15 @@ export const GuardianViewV2: React.FC = () => {
       )}
 
       <LazySection fallback={cardSkeleton}>
-        <section className="grid gap-8 lg:grid-cols-[1.3fr_0.7fr]">
+        <section className="grid gap-8 xl:grid-cols-[1.3fr_0.7fr]">
           {/* Freshness Monitor */}
-          <div className="rounded-[2.5rem] border border-black/10 dark:border-white/10 bg-white/90 dark:bg-[#0b0b0f] p-8 shadow-xl">
-            <div className="flex items-start justify-between gap-6 mb-10">
-              <div>
-                <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
+          <div className="rounded-[2rem] md:rounded-[2.5rem] border border-black/10 dark:border-white/10 bg-white/90 dark:bg-[#0b0b0f] px-5 xs:px-6 md:px-8 py-6 md:py-8 shadow-xl">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6 mb-8 md:mb-10">
+              <div className="space-y-1">
+                <h3 className="text-lg md:text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
                   {guardian.freshness.title}
                 </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium max-w-xl">
                   {guardian.freshness.desc}
                 </p>
               </div>
@@ -461,15 +461,15 @@ export const GuardianViewV2: React.FC = () => {
             </div>
 
             <div className="overflow-x-auto no-scrollbar scroll-hint">
-              <table className="w-full text-left border-collapse">
+              <table className="w-full min-w-[640px] text-left border-collapse">
                 <caption className="sr-only">{guardian.freshness.title}</caption>
-                <thead className="text-xs font-black text-gray-400 uppercase tracking-widest border-b border-black/5 dark:border-white/5">
+                <thead className="text-2xs xs:text-xs font-black text-gray-400 uppercase tracking-widest border-b border-black/5 dark:border-white/5">
                   <tr>
-                    <th className="py-4 px-2">{guardian.freshness.columns.source}</th>
-                    <th className="py-4 px-2 text-center">{guardian.freshness.columns.status}</th>
-                    <th className="py-4 px-2 text-right">{guardian.freshness.columns.last_sync}</th>
-                    <th className="py-4 px-2 text-right">{guardian.freshness.columns.delay}</th>
-                    <th className="py-4 px-2 text-right">{guardian.freshness.columns.records}</th>
+                    <th className="py-3.5 md:py-4 px-2">{guardian.freshness.columns.source}</th>
+                    <th className="py-3.5 md:py-4 px-2 text-center whitespace-nowrap">{guardian.freshness.columns.status}</th>
+                    <th className="py-3.5 md:py-4 px-2 text-right whitespace-nowrap">{guardian.freshness.columns.last_sync}</th>
+                    <th className="py-3.5 md:py-4 px-2 text-right whitespace-nowrap">{guardian.freshness.columns.delay}</th>
+                    <th className="py-3.5 md:py-4 px-2 text-right whitespace-nowrap">{guardian.freshness.columns.records}</th>
                     <th className="py-4 px-2" />
                   </tr>
                 </thead>
@@ -481,14 +481,14 @@ export const GuardianViewV2: React.FC = () => {
                       onContextMenu={(event) => openMenu(event, buildMenuItems(item.name), item.name)}
                       className="group hover:bg-black/[0.01] dark:hover:bg-white/[0.01] transition-colors"
                     >
-                      <td className="py-5 px-2">
+                      <td className="py-4 md:py-5 px-2">
                         <div className="text-sm font-black text-gray-900 dark:text-white group-hover:text-brand-start transition-colors uppercase tracking-tight">
                           {item.name}
                         </div>
-                        <div className="text-2xs font-mono text-gray-400 mt-1">{item.id}</div>
+                        <div className="text-3xs xs:text-2xs font-mono text-gray-400 mt-1 break-all">{item.id}</div>
                       </td>
 
-                      <td className="py-5 px-2 text-center">
+                      <td className="py-4 md:py-5 px-2 text-center">
                         <span
                           className={`px-2 py-0.5 rounded-lg text-2xs font-black uppercase border ${
                             item.status === guardian.status_delayed
@@ -501,7 +501,7 @@ export const GuardianViewV2: React.FC = () => {
                         </span>
                       </td>
 
-                      <td className="py-5 px-2 text-right text-xs-plus font-bold text-gray-500">
+                      <td className="py-4 md:py-5 px-2 text-right text-xs-plus font-bold text-gray-500 whitespace-nowrap">
                         {item.last_sync}
                       </td>
 
@@ -544,13 +544,13 @@ export const GuardianViewV2: React.FC = () => {
 
           {/* Quality Issues & Anomalies */}
           <div className="space-y-8">
-            <div className="rounded-[2.5rem] border border-black/10 dark:border-white/10 bg-white/90 dark:bg-[#0b0b0f] p-8 shadow-xl">
-              <div className="flex items-start justify-between mb-8">
+            <div className="rounded-[2rem] md:rounded-[2.5rem] border border-black/10 dark:border-white/10 bg-white/90 dark:bg-[#0b0b0f] px-5 xs:px-6 md:px-8 py-6 md:py-8 shadow-xl">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6 mb-6 md:mb-8">
                 <div>
-                  <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
+                  <h3 className="text-lg md:text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
                     {guardian.quality.title}
                   </h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 font-medium max-w-xl">
                     {guardian.quality.desc}
                   </p>
                 </div>
@@ -566,7 +566,7 @@ export const GuardianViewV2: React.FC = () => {
 
               <div className="space-y-4">
                 {qualityIssues.length === 0 ? (
-                  <div className="py-12 text-center">
+                  <div className="py-10 md:py-12 text-center">
                     <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto text-emerald-500 mb-4">
                       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -581,7 +581,7 @@ export const GuardianViewV2: React.FC = () => {
                     <div
                       key={issue.id}
                       onContextMenu={(event) => openMenu(event, buildMenuItems(issue.title), issue.title)}
-                      className="rounded-[1.5rem] border border-black/5 dark:border-white/5 bg-black/[0.02] dark:bg-white/[0.02] p-5 group/issue hover:border-brand-start/30 transition-all cursor-pointer"
+                      className="rounded-[1.5rem] border border-black/5 dark:border-white/5 bg-black/[0.02] dark:bg-white/[0.02] p-5 xs:p-6 group/issue hover:border-brand-start/30 transition-all cursor-pointer"
                       onClick={() => handleExplain(issue.title)}
                       role="button"
                       tabIndex={0}
@@ -652,36 +652,36 @@ export const GuardianViewV2: React.FC = () => {
             </div>
 
             {/* RAG Status Detail */}
-            <div className="rounded-[2.5rem] brand-gradient-bg p-8 text-white shadow-2xl animate-reveal relative overflow-hidden">
+            <div className="rounded-[2rem] md:rounded-[2.5rem] brand-gradient-bg px-6 xs:px-7 md:px-8 py-6 md:py-8 text-white shadow-2xl animate-reveal relative overflow-hidden">
               <div className="relative z-10 space-y-6">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-black uppercase tracking-[0.2em] opacity-70">
+                  <span className="text-2xs xs:text-xs font-black uppercase tracking-[0.2em] opacity-70">
                     {guardian.rag.status_heading}
                   </span>
                   <div className="w-2 h-2 rounded-full bg-white animate-pulse shadow-[0_0_10px_white]" />
                 </div>
 
                 <div>
-                  <h4 className="text-3xl font-black tracking-tighter uppercase leading-none mb-1">
+                  <h4 className="text-2xl md:text-3xl font-black tracking-tighter uppercase leading-none mb-1">
                     {guardian.rag.index_title}
                   </h4>
-                  <span className="text-xs-plus font-bold opacity-70 uppercase tracking-widest">
+                  <span className="text-xs font-bold opacity-70 uppercase tracking-widest">
                     {guardian.rag.index_subtitle}
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-6 pt-4 border-t border-white/20">
+                <div className="grid grid-cols-2 gap-4 md:gap-6 pt-4 border-t border-white/20">
                   <div>
                     <div className="text-xs font-black uppercase tracking-widest opacity-60">
                       {guardian.rag.coverage_label}
                     </div>
-                    <div className="text-2xl font-black">{guardian.rag.coverage_value}</div>
+                    <div className="text-xl md:text-2xl font-black">{guardian.rag.coverage_value}</div>
                   </div>
                   <div>
                     <div className="text-xs font-black uppercase tracking-widest opacity-60">
                       {guardian.rag.status_label}
                     </div>
-                    <div className="text-2xl font-black">{guardian.rag.status_value}</div>
+                    <div className="text-xl md:text-2xl font-black">{guardian.rag.status_value}</div>
                   </div>
                 </div>
 

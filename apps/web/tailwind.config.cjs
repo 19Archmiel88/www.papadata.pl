@@ -1,3 +1,4 @@
+// @ts-nocheck
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: 'class',
@@ -8,6 +9,16 @@ module.exports = {
     '!./dist/**',
   ],
   theme: {
+    screens: {
+      xs: '360px',
+      sm: '480px',
+      md: '768px',
+      lg: '1024px',
+      xl: '1280px',
+      '2xl': '1536px',
+      portrait: { raw: '(orientation: portrait)' },
+      landscape: { raw: '(orientation: landscape)' },
+    },
     extend: {
       fontFamily: {
         sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
@@ -19,7 +30,7 @@ module.exports = {
         '2xs': ['0.5625rem', { lineHeight: '1rem' }],
         xs: ['0.625rem', { lineHeight: '1rem' }],
         'xs-plus': ['0.6875rem', { lineHeight: '1rem' }],
-        'sm2': ['0.75rem', { lineHeight: '1.25rem' }],
+        sm2: ['0.75rem', { lineHeight: '1.25rem' }],
         'sm-plus': ['0.8125rem', { lineHeight: '1.25rem' }],
       },
       colors: {
@@ -38,9 +49,9 @@ module.exports = {
           border: '#1F2937',
         },
         brand: {
-          start: '#22D3EE',
-          end: '#34D399',
-          focus: '#22D3EE',
+          start: '#4F46E5',
+          end: '#0EA5E9',
+          focus: '#4F46E5',
         },
         neon: {
           glow: '#A7F3D0',
@@ -51,8 +62,10 @@ module.exports = {
         },
       },
       backgroundImage: {
-        'brand-gradient': 'linear-gradient(135deg, #22D3EE 0%, #34D399 100%)',
-        'neon-halo': 'radial-gradient(circle at top, rgba(34,211,238,0.35), transparent 60%)',
+        'brand-gradient':
+          'linear-gradient(135deg, #4F46E5 0%, #0EA5E9 100%)',
+        'neon-halo':
+          'radial-gradient(circle at top, rgba(34,211,238,0.35), transparent 60%)',
       },
       animation: {
         aurora: 'aurora 30s ease infinite alternate',

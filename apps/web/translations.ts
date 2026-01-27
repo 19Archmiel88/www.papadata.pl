@@ -8,6 +8,7 @@ export const translations: Translations = {
       open_menu: 'Open menu',
       close_menu: 'Close menu',
       skip_to_content: 'Skip to content',
+      skip_to_content: 'Skip to content',
       scroll_to_top: 'Scroll to top',
       coming_soon_title: 'In preparation',
       coming_soon_desc: 'This feature is in preparation. We are finalizing the last details.',
@@ -1867,6 +1868,7 @@ export const translations: Translations = {
     common: {
       open_menu: 'Otwórz menu',
       close_menu: 'Zamknij menu',
+      skip_to_content: 'Przejdź do treści',
       skip_to_content: 'Przejdź do treści',
       scroll_to_top: 'Przewiń do góry',
       coming_soon_title: 'W przygotowaniu',

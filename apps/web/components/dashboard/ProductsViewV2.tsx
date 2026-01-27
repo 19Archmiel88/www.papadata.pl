@@ -435,19 +435,19 @@ export const ProductsViewV2: React.FC = () => {
   return (
     <div className="space-y-8 animate-reveal">
       {/* Dynamic Header Summary */}
-      <section className="dashboard-surface dashboard-card">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
-          <div className="space-y-2">
+      <section className="dashboard-surface dashboard-card px-5 xs:px-6 md:px-8 py-6 md:py-8 rounded-[2rem] md:rounded-[2.5rem]">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 md:gap-8">
+          <div className="space-y-2 max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-start/5 border border-brand-start/10 mb-2">
               <div className="w-1.5 h-1.5 rounded-full bg-brand-start animate-pulse" />
-              <span className="text-xs font-black uppercase tracking-[0.2em] text-brand-start">
+              <span className="text-2xs xs:text-xs font-black uppercase tracking-[0.2em] text-brand-start">
                 SKU Intelligence Active
               </span>
             </div>
-            <h2 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
+            <h2 className="text-2xl md:text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tight leading-tight">
               {products.title}
             </h2>
-            <p className="text-base text-gray-500 dark:text-gray-400 font-medium">
+            <p className="text-sm md:text-base text-gray-500 dark:text-gray-400 font-medium">
               {products.desc}
             </p>
           </div>
@@ -461,19 +461,19 @@ export const ProductsViewV2: React.FC = () => {
           </button>
 
           <div className="grid grid-cols-2 sm:flex items-center gap-4 w-full md:w-auto">
-            <div className="p-4 rounded-[1.5rem] bg-black/5 dark:bg-white/5 border border-black/5 text-center min-w-[140px]">
+            <div className="p-4 px-5 md:px-6 rounded-[1.25rem] md:rounded-[1.5rem] bg-black/5 dark:bg-white/5 border border-black/5 text-center min-w-[130px]">
               <div className="text-2xs font-black text-gray-400 uppercase tracking-widest mb-1">
                 Avg. Return Rate
               </div>
-              <div className="text-2xl font-black text-rose-500">
+              <div className="text-xl md:text-2xl font-black text-rose-500">
                 {avgReturnRate === null ? '--' : formatPercentValue(avgReturnRate, locale, 1)}
               </div>
             </div>
-            <div className="p-4 rounded-[1.5rem] bg-brand-start text-white shadow-xl shadow-brand-start/20 text-center min-w-[140px]">
+            <div className="p-4 px-5 md:px-6 rounded-[1.25rem] md:rounded-[1.5rem] bg-brand-start text-white shadow-xl shadow-brand-start/20 text-center min-w-[130px]">
               <div className="text-2xs font-black uppercase tracking-widest mb-1 opacity-70">
                 Inventory Value
               </div>
-              <div className="text-2xl font-black">
+              <div className="text-xl md:text-2xl font-black">
                 {inventoryValue === null ? '--' : formatCurrencyValue(inventoryValue)}
               </div>
             </div>
@@ -507,19 +507,19 @@ export const ProductsViewV2: React.FC = () => {
         {chartLoading ? (
           cardSkeleton('h-96', 4)
         ) : (
-          <section className="grid gap-8 lg:grid-cols-[1.25fr_0.75fr]">
+          <section className="grid gap-8 xl:grid-cols-[1.25fr_0.75fr]">
             {/* Matrix Visualization */}
-            <div className="dashboard-surface dashboard-card relative overflow-hidden">
-              <div className="flex items-start justify-between mb-10">
+            <div className="dashboard-surface dashboard-card relative overflow-hidden px-5 xs:px-6 md:px-8 py-6 md:py-8 rounded-[2rem] md:rounded-[2.5rem]">
+              <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 lg:gap-6 mb-8 md:mb-10">
                 <div>
-                  <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
+                  <h3 className="text-lg md:text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
                     {products.scatter.title}
                   </h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 font-medium max-w-2xl">
                     {products.scatter.desc}
                   </p>
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex flex-wrap items-center gap-3">
                   <button
                     type="button"
                     onClick={() => explainSku(products.scatter.title)}
@@ -527,7 +527,7 @@ export const ProductsViewV2: React.FC = () => {
                   >
                     {t.dashboard.context_menu.explain_ai}
                   </button>
-                  <div className="flex items-center gap-2 text-xs font-black text-gray-400 uppercase tracking-widest">
+                  <div className="flex items-center gap-2 text-2xs xs:text-xs font-black text-gray-400 uppercase tracking-widest">
                     <span>{products.scatter.size_label}</span>
                     <InfoButton label="Bubble size indicates sales volume" />
                   </div>
@@ -570,7 +570,7 @@ export const ProductsViewV2: React.FC = () => {
 
               <div className="relative">
                 {/* 2D Matrix Grid */}
-                <div className="relative h-[480px] rounded-[2rem] border border-black/5 dark:border-white/5 bg-gradient-to-br from-black/[0.01] to-black/[0.03] dark:from-white/[0.01] dark:to-white/[0.03] shadow-inner overflow-hidden">
+                <div className="relative h-[400px] md:h-[480px] landscape:h-[340px] rounded-[2rem] border border-black/5 dark:border-white/5 bg-gradient-to-br from-black/[0.01] to-black/[0.03] dark:from-white/[0.01] dark:to-white/[0.03] shadow-inner overflow-hidden">
                   <div className="absolute inset-0 grid grid-cols-4 grid-rows-4 pointer-events-none">
                     {Array.from({ length: 16 }).map((_, idx) => (
                       <div key={idx} className="border border-black/[0.03] dark:border-white/[0.03]" />
@@ -674,8 +674,8 @@ export const ProductsViewV2: React.FC = () => {
 
             {/* Details Console */}
             <div className="space-y-6" id="products-details">
-              <div className="flex items-center justify-between ml-2">
-                <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 ml-2">
+                <h3 className="text-lg md:text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
                   {products.details.title}
                 </h3>
                 <button
@@ -688,7 +688,7 @@ export const ProductsViewV2: React.FC = () => {
               </div>
 
               {selectedDetails.length === 0 ? (
-                <div className="p-10 rounded-[2.5rem] border border-black/5 dark:border-white/10 bg-white/40 dark:bg-[#0b0b0f] flex flex-col items-center justify-center text-center space-y-4">
+                <div className="p-8 md:p-10 rounded-[2rem] md:rounded-[2.5rem] border border-black/5 dark:border-white/10 bg-white/40 dark:bg-[#0b0b0f] flex flex-col items-center justify-center text-center space-y-4">
                   <div className="w-16 h-16 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center text-gray-400">
                     <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -720,7 +720,7 @@ export const ProductsViewV2: React.FC = () => {
                   {selectedDetails.map((item) => (
                     <div
                       key={item.id}
-                      className="p-8 rounded-[2rem] bg-white/90 dark:bg-[#0b0b0f] border border-black/10 dark:border-white/10 shadow-xl animate-reveal relative overflow-hidden group"
+                      className="p-6 xs:p-7 md:p-8 rounded-[1.75rem] md:rounded-[2rem] bg-white/90 dark:bg-[#0b0b0f] border border-black/10 dark:border-white/10 shadow-xl animate-reveal relative overflow-hidden group"
                     >
                       <div className="relative z-10">
                         <div className="flex items-start justify-between mb-8">
@@ -821,15 +821,15 @@ export const ProductsViewV2: React.FC = () => {
 
       {/* Movers and Table Row */}
       <LazySection fallback={cardSkeleton('h-40', 4)}>
-        <section className="grid gap-8 lg:grid-cols-[0.75fr_1.25fr]">
+        <section className="grid gap-8 xl:grid-cols-[0.75fr_1.25fr]">
           {/* Movers Card */}
-          <div className="dashboard-surface dashboard-card">
-            <div className="flex items-start justify-between mb-8">
+          <div className="dashboard-surface dashboard-card px-5 xs:px-6 md:px-8 py-6 md:py-8 rounded-[2rem] md:rounded-[2.5rem]">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6 mb-6 md:mb-8">
               <div>
-                <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
+                <h3 className="text-lg md:text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
                   {products.movers.title}
                 </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium max-w-xl">
                   {products.movers.desc}
                 </p>
               </div>
@@ -896,13 +896,13 @@ export const ProductsViewV2: React.FC = () => {
           </div>
 
           {/* Table Card */}
-          <div className="dashboard-surface dashboard-card">
-            <div className="flex flex-wrap items-start justify-between gap-6 mb-10">
+          <div className="dashboard-surface dashboard-card px-5 xs:px-6 md:px-8 py-6 md:py-8 rounded-[2rem] md:rounded-[2.5rem]">
+            <div className="flex flex-wrap items-start justify-between gap-4 md:gap-6 mb-8 md:mb-10">
               <div>
-                <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
+                <h3 className="text-lg md:text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
                   {products.table.title}
                 </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium max-w-xl">
                   {products.table.desc}
                 </p>
               </div>
@@ -927,16 +927,16 @@ export const ProductsViewV2: React.FC = () => {
             </div>
 
             <div className="overflow-x-auto no-scrollbar scroll-hint">
-              <table className="dashboard-table">
-                <thead className="text-xs font-black text-gray-400 uppercase tracking-widest border-b border-black/5 dark:border-white/5">
+              <table className="dashboard-table min-w-[720px]">
+                <thead className="text-2xs xs:text-xs font-black text-gray-400 uppercase tracking-widest border-b border-black/5 dark:border-white/5">
                   <tr>
-                    <th className="py-4 px-2">{products.table.columns.sku}</th>
-                    <th className="py-4 px-2 text-right">{products.table.columns.revenue}</th>
-                    <th className="py-4 px-2 text-right">{products.table.columns.margin}</th>
-                    <th className="py-4 px-2 text-right">{products.table.columns.returns}</th>
-                    <th className="py-4 px-2 text-right">{products.table.columns.stock}</th>
-                    <th className="py-4 px-2 text-right">{products.table.columns.trend}</th>
-                    <th className="py-4 px-2"></th>
+                    <th className="py-3.5 md:py-4 px-2">{products.table.columns.sku}</th>
+                    <th className="py-3.5 md:py-4 px-2 text-right whitespace-nowrap">{products.table.columns.revenue}</th>
+                    <th className="py-3.5 md:py-4 px-2 text-right whitespace-nowrap">{products.table.columns.margin}</th>
+                    <th className="py-3.5 md:py-4 px-2 text-right whitespace-nowrap">{products.table.columns.returns}</th>
+                    <th className="py-3.5 md:py-4 px-2 text-right whitespace-nowrap">{products.table.columns.stock}</th>
+                    <th className="py-3.5 md:py-4 px-2 text-right whitespace-nowrap">{products.table.columns.trend}</th>
+                    <th className="py-3.5 md:py-4 px-2"></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-black/5 dark:divide-white/5">
@@ -947,22 +947,22 @@ export const ProductsViewV2: React.FC = () => {
                       onClick={() => handleSelect(row.id, row.name, false)}
                       onContextMenu={(event) => openMenu(event, buildMenuItems(row.name, row.id), row.name)}
                     >
-                      <td className="py-5 px-2">
+                      <td className="py-4 md:py-5 px-2">
                         <div className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tight group-hover:text-brand-start transition-colors">
                           {row.name}
                         </div>
-                        <div className="text-2xs font-mono text-gray-400 mt-1">{row.id}</div>
+                        <div className="text-3xs xs:text-2xs font-mono text-gray-400 mt-1 break-all">{row.id}</div>
                       </td>
-                      <td className="py-5 px-2 text-right font-black text-gray-700 dark:text-gray-300 tabular-nums">
+                      <td className="py-4 md:py-5 px-2 text-right font-black text-gray-700 dark:text-gray-300 tabular-nums whitespace-nowrap">
                         {formatCurrencyValue(row.revenue)}
                       </td>
-                      <td className="py-5 px-2 text-right font-black text-gray-700 dark:text-gray-300 tabular-nums">
+                      <td className="py-4 md:py-5 px-2 text-right font-black text-gray-700 dark:text-gray-300 tabular-nums whitespace-nowrap">
                         {formatPercentValueLocal(row.margin)}
                       </td>
-                      <td className="py-5 px-2 text-right font-black text-gray-700 dark:text-gray-300 tabular-nums">
+                      <td className="py-4 md:py-5 px-2 text-right font-black text-gray-700 dark:text-gray-300 tabular-nums whitespace-nowrap">
                         {formatPercentValueLocal(row.returns)}
                       </td>
-                      <td className="py-5 px-2 text-right">
+                      <td className="py-4 md:py-5 px-2 text-right">
                         <span
                           className={`px-2 py-0.5 rounded-lg text-2xs font-black uppercase border ${
                             row.stockRisk === 'high'
@@ -974,7 +974,7 @@ export const ProductsViewV2: React.FC = () => {
                         </span>
                       </td>
                       <td
-                        className={`py-5 px-2 text-right font-black tabular-nums ${
+                        className={`py-4 md:py-5 px-2 text-right font-black tabular-nums ${
                           row.trend > 0 ? 'text-emerald-500' : 'text-rose-500'
                         }`}
                       >

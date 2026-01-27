@@ -17,6 +17,7 @@ export interface NavItem {
 export interface CommonData {
   open_menu: string;
   close_menu: string;
+  skip_to_content: string;
   main_nav_label: string;
   home_link_label: string;
   error_title: string;

@@ -1,6 +1,8 @@
 const formatterCache = new Map<string, Intl.NumberFormat>();
 
 const DEFAULT_CACHE_LIMIT = 200;
+const DEFAULT_NUMBER_MAX_FRACTION = 2;
+const DEFAULT_PERCENT_FRACTION = 2;
 
 const stableStringify = (value: unknown): string => {
   const seen = new WeakSet<object>();
@@ -74,7 +76,9 @@ export const getNumberFormatter = (
 export const formatNumber = (
   value: number,
   locale: string,
-  options: Intl.NumberFormatOptions = {},
+  options: Intl.NumberFormatOptions = {
+    maximumFractionDigits: DEFAULT_NUMBER_MAX_FRACTION,
+  },
   fallback: string = '—',
 ) => {
   if (!Number.isFinite(value)) return fallback;
@@ -84,38 +88,48 @@ export const formatNumber = (
 export const formatPercent = (
   value: number,
   locale: string,
-  maximumFractionDigits = 1,
+  maximumFractionDigits = DEFAULT_PERCENT_FRACTION,
   fallback: string = '—',
 ) => {
   // Intl percent expects fraction: 0.25 => 25%
   if (!Number.isFinite(value)) return fallback;
+  const digits = maximumFractionDigits ?? DEFAULT_PERCENT_FRACTION;
   return getNumberFormatter(locale, {
     style: 'percent',
-    maximumFractionDigits,
+    maximumFractionDigits: digits,
+    minimumFractionDigits: digits,
   }).format(value);
 };
 
 export const formatPercentValue = (
   value: number,
   locale: string,
-  maximumFractionDigits = 1,
+  maximumFractionDigits = DEFAULT_PERCENT_FRACTION,
   fallback: string = '—',
 ) => {
   if (!Number.isFinite(value)) return fallback;
-  const formatted = getNumberFormatter(locale, { maximumFractionDigits }).format(value);
+  const digits = maximumFractionDigits ?? DEFAULT_PERCENT_FRACTION;
+  const formatted = getNumberFormatter(locale, {
+    maximumFractionDigits: digits,
+    minimumFractionDigits: digits,
+  }).format(value);
   return `${formatted}%`;
 };
 
 export const formatSignedPercentValue = (
   value: number,
   locale: string,
-  maximumFractionDigits = 1,
+  maximumFractionDigits = DEFAULT_PERCENT_FRACTION,
   fallback: string = '—',
 ) => {
   if (!Number.isFinite(value)) return fallback;
   const abs = Math.abs(value);
   const sign = value > 0 ? '+' : value < 0 ? '-' : '';
-  const formatted = getNumberFormatter(locale, { maximumFractionDigits }).format(abs);
+  const digits = maximumFractionDigits ?? DEFAULT_PERCENT_FRACTION;
+  const formatted = getNumberFormatter(locale, {
+    maximumFractionDigits: digits,
+    minimumFractionDigits: digits,
+  }).format(abs);
   return `${sign}${formatted}%`;
 };
 
