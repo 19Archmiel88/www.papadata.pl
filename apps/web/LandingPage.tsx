@@ -367,10 +367,12 @@ export const LandingPage: React.FC = () => {
           <RoiSection t={t} onCtaClick={() => openModal('auth', { isRegistered: false })} />
         </LazyWrapper>
 
-        <div className="w-full bg-white/50 dark:bg-[#050507]/40 backdrop-blur-3xl border-y border-black/5 dark:border-white/5 py-8 md:py-10 px-8 shadow-2xl relative overflow-hidden">
-          <LazyWrapper minHeight={160} label="Loading integrations marquee">
-            <IntegrationsMarquee t={t} />
-          </LazyWrapper>
+        <div className="w-full flex justify-center px-4 md:px-6">
+          <div className="w-full max-w-6xl bg-white/50 dark:bg-[#050507]/40 backdrop-blur-3xl border border-black/5 dark:border-white/5 py-4 md:py-5 px-4 sm:px-6 shadow-2xl relative overflow-hidden rounded-[24px]">
+            <LazyWrapper minHeight={90} label="Loading integrations marquee">
+              <IntegrationsMarquee t={t} />
+            </LazyWrapper>
+          </div>
         </div>
 
         <LazyWrapper minHeight={520} label="Loading features section">
