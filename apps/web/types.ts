@@ -2175,16 +2175,7 @@ export interface DashboardData {
   demo_banner_desc: string;
   demo_banner_cta_primary: string;
 
-  // Allow additional dashboard translation keys without strict excess property errors
-  [key: string]:
-    | string
-    | number
-    | string[]
-    | DashboardViewSchema
-    | DashboardPnlSection
-    | DashboardProductCatalogItem[]
-    | DashboardGuardianLog[]
-    | undefined;
+  // Index signature removed to fix type errors for custom-typed properties
 }
 
 export interface PromoData {

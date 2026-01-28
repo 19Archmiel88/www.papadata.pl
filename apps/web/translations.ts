@@ -8,7 +8,6 @@ export const translations: Translations = {
       open_menu: 'Open menu',
       close_menu: 'Close menu',
       skip_to_content: 'Skip to content',
-      skip_to_content: 'Skip to content',
       scroll_to_top: 'Scroll to top',
       coming_soon_title: 'In preparation',
       coming_soon_desc: 'This feature is in preparation. We are finalizing the last details.',
@@ -954,7 +953,7 @@ export const translations: Translations = {
       overview_connectors_col_load: "Load",
       overview_connectors_col_rows: "Rows",
       overview_connectors_col_status: "Status",
-      overview_connectors: [{ id: "1", label: "Shopify" }],
+      overview_connectors: [{ id: "shopify", label: "Shopify" }],
       ai_mode_label: "Papa AI",
       ai_mode_on: "On",
       ai_mode_off: "Off",
@@ -968,6 +967,7 @@ export const translations: Translations = {
       },
       widget: {
         empty_title: "No Data",
+        empty_desc: "No data available yet.",
         empty_desc_filters: "Try changing filters.",
         cta_clear_filters: "Clear filters",
         partial_badge: "Partial Data",
@@ -992,33 +992,36 @@ export const translations: Translations = {
           severity_warning: "Warning",
           severity_info: "Info",
           items: [
-            {
-              id: "1",
-              title: "ROAS anomaly: Meta Ads",
-              impact: "-14.2% vs yesterday",
-              time: "12m ago",
-              severity: "critical",
-              context: "Meta Ads",
-              target: "ads"
-            },
-            {
-              id: "2",
-              title: "Projected stock-out",
-              impact: "SKU-742 (3 days)",
-              time: "1h ago",
-              severity: "warning",
-              context: "Logistics",
-              target: "products"
-            },
-            {
-              id: "3",
-              title: "ETL delay: Google Analytics",
-              impact: "Lag: 42 min",
-              time: "3h ago",
-              severity: "info",
-              context: "GA4 Stream",
-              target: "guardian"
-            }
+          {
+            id: "1",
+            title: "ROAS anomaly: Meta Ads",
+            impact: "-14.2% vs yesterday",
+            time: "12m ago",
+            severity: "critical",
+            context: "Meta Ads",
+            prompt: "Explain why ROAS dropped and what to fix first.",
+            target: "ads"
+          },
+          {
+            id: "2",
+            title: "Projected stock-out",
+            impact: "SKU-742 (3 days)",
+            time: "1h ago",
+            severity: "warning",
+            context: "Logistics",
+            prompt: "Estimate stock-out risk and propose replenishment actions.",
+            target: "products"
+          },
+          {
+            id: "3",
+            title: "ETL delay: Google Analytics",
+            impact: "Lag: 42 min",
+            time: "3h ago",
+            severity: "info",
+            context: "GA4 Stream",
+            prompt: "Investigate the GA4 ETL delay and suggest mitigation.",
+            target: "guardian"
+          }
           ]
         },
         ai: {
@@ -1636,7 +1639,18 @@ export const translations: Translations = {
       pnl_status_fixed: "Fixed",
       pnl_gross_profit: "Gross Profit", pnl_net_profit: "Net Profit", pnl_after_opex: "After OpEx",
       pnl_waterfall: "Waterfall", pnl_region_label: "Region", pnl_final_state: "Final State",
-      pnl_cost_breakdown: "Costs", pnl_dim_category: "Category", pnl_badge_audited: "Audited",
+      pnl_cost_breakdown: {
+        ad_spend: "Ad spend",
+        cogs: "COGS",
+        fees: "Fees",
+        refunds: "Refunds",
+        shipping: "Shipping",
+        payroll: "Payroll",
+        tools: "Tools",
+        taxes: "Taxes",
+        other: "Other"
+      },
+      pnl_dim_category: "Category", pnl_badge_audited: "Audited",
       pnl_revenue: "Revenue", pnl_cogs: "COGS", pnl_fees: "Fees", pnl_refunds: "Refunds",
       pnl_shipping: "Shipping", pnl_ad_spend: "Ad Spend", pnl_payroll: "Payroll",
       pnl_tools: "Tools", pnl_contribution: "Contribution", pnl_export_live: "Export",
@@ -1721,22 +1735,15 @@ export const translations: Translations = {
       filter_option_shopify: "Shopify", filter_option_allegro: "Allegro", filter_option_pos: "POS",
       sidebar_tagline: "Tag", nav_group_start: "Start", nav_group_ai: "AI",
       nav_group_performance: "Perf", nav_group_fundamentals: "Fund", nav_group_ops: "Ops",
-      nav_group_settings: "Sett", nav_overview: "Over", nav_growth: "Grow", nav_ads: "Ads",
-      nav_products: "Prod", nav_customers: "Cust", nav_pandl: "P&L", nav_alerts: "Alrt",
-      nav_integrations: "Int", nav_guardian: "Guard", nav_reports: "Rep", nav_pipeline: "Pipe",
-      nav_knowledge: "Know", nav_settings_workspace: "Work", nav_settings_org: "Org",
-      sidebar_pin: "Pin", sidebar_unpin: "Unpin", session_label: "Sess", session_ready: "Ready",
-      session_processing: "Proc", session_error: "Err", mode_demo: "Demo", mode_live: "Live",
-      workspace_label: "Work", workspace_papastore_pl: "PL", workspace_papastore_pl_detail: "Detail",
-      workspace_papastore_eu: "EU", workspace_papastore_eu_detail: "Detail",
-      workspace_demo: "Demo", workspace_demo_detail: "Detail",
-      workspace_last_sync_recent: "Now", workspace_last_sync_delay: "Delay",
-      workspace_last_sync_error: "Err", workspace_search: "Search", workspace_pinned_label: "Pin",
-      workspace_recent_label: "Rec", workspace_empty: "Empty", status_ok: "OK", status_delay: "Dly",
-      status_error: "Err", data_freshness_label: "Fresh", command_open: "Open",
-      command_shortcut: "K", command_title: "Palette", command_desc: "Run",
-      command_placeholder: "Type", command_group_navigation: "Nav",
-      command_group_actions: "Act", command_group_resources: "Res", command_empty: "None",
+      
+
+
+      session_processing: "Proc", session_error: "Err",
+
+
+
+
+      command_empty: "None",
       command_nav_hint: "Hint", command_action_report: "Rep", command_action_report_desc: "Desc",
       command_action_alert: "Alrt", command_action_alert_desc: "Desc",
       command_action_pipeline: "Pipe", command_action_pipeline_desc: "Desc",
@@ -1868,7 +1875,6 @@ export const translations: Translations = {
     common: {
       open_menu: 'Otwórz menu',
       close_menu: 'Zamknij menu',
-      skip_to_content: 'Przejdź do treści',
       skip_to_content: 'Przejdź do treści',
       scroll_to_top: 'Przewiń do góry',
       coming_soon_title: 'W przygotowaniu',
@@ -2832,6 +2838,7 @@ export const translations: Translations = {
       },
       widget: {
         empty_title: "Brak Danych",
+        empty_desc: "Brak danych do wyświetlenia.",
         empty_desc_filters: "Spróbuj zmienić filtry.",
         cta_clear_filters: "Wyczyść filtry",
         partial_badge: "Dane częściowe",
@@ -2856,33 +2863,36 @@ export const translations: Translations = {
           severity_warning: "Ostrzeżenie",
           severity_info: "Info",
           items: [
-            {
-              id: "1",
-              title: "Anomalia ROAS: Meta Ads",
-              impact: "-14,2% vs wczoraj",
-              time: "12m temu",
-              severity: "critical",
-              context: "Meta Ads",
-              target: "ads"
-            },
-            {
-              id: "2",
-              title: "Prognozowany Stock-out",
-              impact: "SKU-742 (3 dni)",
-              time: "1h temu",
-              severity: "warning",
-              context: "Logistyka",
-              target: "products"
-            },
-            {
-              id: "3",
-              title: "Opóźnienie ETL: Google Analytics",
-              impact: "Lag: 42 min",
-              time: "3h temu",
-              severity: "info",
-              context: "GA4 Stream",
-              target: "guardian"
-            }
+          {
+            id: "1",
+            title: "Anomalia ROAS: Meta Ads",
+            impact: "-14,2% vs wczoraj",
+            time: "12m temu",
+            severity: "critical",
+            context: "Meta Ads",
+            prompt: "Wyjaśnij spadek ROAS i wskaż pierwszy krok naprawczy.",
+            target: "ads"
+          },
+          {
+            id: "2",
+            title: "Prognozowany Stock-out",
+            impact: "SKU-742 (3 dni)",
+            time: "1h temu",
+            severity: "warning",
+            context: "Logistyka",
+            prompt: "Oceń ryzyko braku towaru i zaproponuj działania uzupełnienia.",
+            target: "products"
+          },
+          {
+            id: "3",
+            title: "Opóźnienie ETL: Google Analytics",
+            impact: "Lag: 42 min",
+            time: "3h temu",
+            severity: "info",
+            context: "GA4 Stream",
+            prompt: "Zdiagnozuj opóźnienie ETL GA4 i zaproponuj kroki naprawcze.",
+            target: "guardian"
+          }
           ]
         },
         ai: {
@@ -3118,7 +3128,13 @@ export const translations: Translations = {
         },
         list: { title: "Archiwum Raportów", items: [], actions: { preview: "Widok", download: "Pobierz", open: "Link" } },
         generate: { title: "Nowy Raport", desc: "Szybkie generowanie", cta: "Uruchom Silnik", fields: [{ label: "L", value: "V" }], sections: ["Overview", "Revenue", "Profit"] },
-        diff: { title: "Kluczowe Różnice", items: ["ROAS -12%", "Przychód +6%"] }
+        diff: { title: "Kluczowe Różnice", items: ["ROAS -12%", "Przychód +6%"] },
+        export_formats: ["PDF", "CSV", "JSON"],
+        export_history: [
+          { id: "exp-1", name: "Tygodniowe Podsumowanie", format: "PDF", range: "Ostatnie 7 dni", created: "12:40", urlLabel: "signed-url" },
+          { id: "exp-2", name: "Miesięczny Raport Zarządczy", format: "CSV", range: "Grudzień 2024", created: "09:15", urlLabel: "signed-url" },
+          { id: "exp-3", name: "Snapshot Wyników", format: "JSON", range: "Q1 2025", created: "08:02", urlLabel: "signed-url" }
+        ]
       },
       pipeline_v2: {
         title: "DATA PIPELINE", desc: "Status ETL i synchronizacji", ai_prompt: "Analiza błędu {name}",
@@ -3492,7 +3508,18 @@ export const translations: Translations = {
       pnl_status_fixed: "Stałe",
       pnl_gross_profit: "Zysk brutto", pnl_net_profit: "Zysk netto", pnl_after_opex: "Po OpEx",
       pnl_waterfall: "Waterfall", pnl_region_label: "Region", pnl_final_state: "Stan końcowy",
-      pnl_cost_breakdown: "Rozbicie kosztów", pnl_dim_category: "Kategoria", pnl_badge_audited: "Audytowane",
+      pnl_cost_breakdown: {
+        ad_spend: "Wydatki reklamowe",
+        cogs: "COGS",
+        fees: "Prowizje",
+        refunds: "Zwroty",
+        shipping: "Wysyłka",
+        payroll: "Płace",
+        tools: "Narzędzia",
+        taxes: "Podatki",
+        other: "Inne"
+      },
+      pnl_dim_category: "Kategoria", pnl_badge_audited: "Audytowane",
       pnl_revenue: "Przychód", pnl_cogs: "COGS", pnl_fees: "Prowizje", pnl_refunds: "Zwroty",
       pnl_shipping: "Wysyłka", pnl_ad_spend: "Wydatki na reklamy", pnl_payroll: "Płace",
       pnl_tools: "Narzędzia", pnl_contribution: "Kontrybucja", pnl_export_live: "Eksportuj Live",
@@ -3576,22 +3603,15 @@ export const translations: Translations = {
       filter_option_shopify: "Shopify", filter_option_allegro: "Allegro", filter_option_pos: "POS",
       sidebar_tagline: "Tagline", nav_group_start: "Start", nav_group_ai: "AI",
       nav_group_performance: "Perf", nav_group_fundamentals: "Fund", nav_group_ops: "Ops",
-      nav_group_settings: "Ust", nav_overview: "Przeg", nav_growth: "Wzr", nav_ads: "Rekl",
-      nav_products: "Prod", nav_customers: "Klient", nav_pandl: "P&L", nav_alerts: "Alert",
-      nav_integrations: "Int", nav_guardian: "Guard", nav_reports: "Rap", nav_pipeline: "Pipe",
-      nav_knowledge: "Wiedza", nav_settings_workspace: "Prac", nav_settings_org: "Org",
-      sidebar_pin: "Pin", sidebar_unpin: "Unpin", session_label: "Sesja", session_ready: "Gotowy",
-      session_processing: "Proc", session_error: "Błąd", mode_demo: "Demo", mode_live: "Live",
-      workspace_label: "Workspace", workspace_papastore_pl: "PL", workspace_papastore_pl_detail: "Sklep PL",
-      workspace_papastore_eu: "EU", workspace_papastore_eu_detail: "Sklep EU",
-      workspace_demo: "Demo", workspace_demo_detail: "Dane demo",
-      workspace_last_sync_recent: "Teraz", workspace_last_sync_delay: "Opóźn",
-      workspace_last_sync_error: "Błąd", workspace_search: "Szukaj", workspace_pinned_label: "Pin",
-      workspace_recent_label: "Ost", workspace_empty: "Pusto", status_ok: "OK", status_delay: "Dly",
-      status_error: "Err", data_freshness_label: "Świeże", command_open: "Otwórz",
-      command_shortcut: "K", command_title: "Paleta", command_desc: "Run",
-      command_placeholder: "Wpisz", command_group_navigation: "Naw",
-      command_group_actions: "Akcje", command_group_resources: "Zasoby", command_empty: "Brak",
+      
+
+
+      session_processing: "Proc", session_error: "Błąd",
+
+
+
+
+      command_empty: "Brak",
       command_nav_hint: "Hint", command_action_report: "Rap", command_action_report_desc: "Opis",
       command_action_alert: "Alert", command_action_alert_desc: "Opis",
       command_action_pipeline: "Pipe", command_action_pipeline_desc: "Opis",
@@ -3719,3 +3739,6 @@ export const translations: Translations = {
     }
   }
 };
+export default translations;
+
+
