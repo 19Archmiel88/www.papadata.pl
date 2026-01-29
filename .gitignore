@@ -71,3 +71,5 @@ docs/audits/backup/
 CLEAN_AUDIT.txt
 PROJECT_INVENTORY.txt
 dump_repo.ps1
+!.vscode/settings.json
+!.vscode/extensions.json
