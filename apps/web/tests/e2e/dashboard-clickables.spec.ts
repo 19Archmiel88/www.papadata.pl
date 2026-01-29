@@ -39,7 +39,7 @@ test.describe('dashboard clickables', () => {
   test('overview actions and AI input respond', async ({ page }) => {
     await gotoDashboard(page, 'overview');
 
-    await page.getByRole('button', { name: /See All|Zobacz Wszystkie/i }).click();
+    await page.getByRole('button', { name: /See All|Zobacz Wszystkie/i }).first().click();
     await expect(page).toHaveURL(/dashboard\/alerts/i);
 
     await gotoDashboard(page, 'overview');
@@ -62,7 +62,10 @@ test.describe('dashboard clickables', () => {
 
   test('ads view opens context menu and shows demo locks', async ({ page }) => {
     await gotoDashboard(page, 'ads');
-    await page.getByText(/Summer 2024 Collection/i).first().click({ button: 'right' });
+    await page
+      .getByText(/Summer 2024 Collection/i)
+      .first()
+      .click({ button: 'right' });
     await expect(page.getByRole('menu')).toBeVisible();
     await page.keyboard.press('Escape');
     await expect(page.getByRole('menu')).toBeHidden();
@@ -74,7 +77,10 @@ test.describe('dashboard clickables', () => {
     await campaignsToggle.click();
     await expect(campaignsToggle).toHaveClass(/text-brand-start/);
 
-    await page.getByRole('button', { name: /Opcje|Options/i }).first().click();
+    await page
+      .getByRole('button', { name: /Opcje|Options/i })
+      .first()
+      .click();
     await expect(page.getByRole('menu')).toBeVisible();
     await page.keyboard.press('Escape');
     await expect(page.getByRole('menu')).toBeHidden();
@@ -104,7 +110,10 @@ test.describe('dashboard clickables', () => {
     await search.fill('Shopify');
     await expect(page.getByText(/Shopify/i)).toBeVisible();
     await search.fill('');
-    await page.getByText(/Shopify/i).first().click({ button: 'right' });
+    await page
+      .getByText(/Shopify/i)
+      .first()
+      .click({ button: 'right' });
     await expect(page.getByRole('menu')).toBeVisible();
     await page.keyboard.press('Escape');
     await expect(page.getByRole('menu')).toBeHidden();
@@ -126,7 +135,10 @@ test.describe('dashboard clickables', () => {
     await expect(page).toHaveURL(/dashboard\/guardian/i);
 
     await gotoDashboard(page, 'pipeline');
-    await page.getByRole('button', { name: /Opcje|Options/i }).first().click();
+    await page
+      .getByRole('button', { name: /Opcje|Options/i })
+      .first()
+      .click();
     await expect(page.getByRole('menu')).toBeVisible();
     await page.keyboard.press('Escape');
     await expect(page.getByRole('menu')).toBeHidden();
@@ -136,7 +148,10 @@ test.describe('dashboard clickables', () => {
     await gotoDashboard(page, 'knowledge');
     await expect(page.getByRole('button', { name: /Zarezerwuj termin/i })).toBeDisabled();
 
-    await page.getByText(/Skalowanie Meta Ads/i).first().click({ button: 'right' });
+    await page
+      .getByText(/Skalowanie Meta Ads/i)
+      .first()
+      .click({ button: 'right' });
     await expect(page.getByRole('menu')).toBeVisible();
     await page.keyboard.press('Escape');
     await expect(page.getByRole('menu')).toBeHidden();
