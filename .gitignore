@@ -73,3 +73,5 @@ PROJECT_INVENTORY.txt
 dump_repo.ps1
 !.vscode/settings.json
 !.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
