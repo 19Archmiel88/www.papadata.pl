@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useId, useCallback, memo } from 'react';
+﻿import React, { useState, useEffect, useId, useCallback, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { InteractiveButton } from './InteractiveButton';
 import type { Translation } from '../types';
 import { updateConsentMode, type ConsentSettings } from '../utils/consent-mode';
 import { initObservability } from '../utils/observability.provider';
 import { useFocusTrap } from '../hooks/useFocusTrap';
+import { safeLocalStorage } from '../utils/safeLocalStorage';
 
 interface CookieBannerProps {
   onResolution: () => void;
@@ -31,7 +32,7 @@ type StoredConsent = CookieSettings & {
 
 const canUseBrowserStorage = () => {
   try {
-    return typeof window !== 'undefined' && typeof window.localStorage !== 'undefined';
+    return typeof window !== 'undefined' && typeof safeLocalStorage !== 'undefined';
   } catch {
     return false;
   }
@@ -40,7 +41,7 @@ const canUseBrowserStorage = () => {
 const safeGetItem = (key: string) => {
   if (!canUseBrowserStorage()) return null;
   try {
-    return window.localStorage.getItem(key);
+    return safeLocalStorage.getItem(key);
   } catch {
     return null;
   }
@@ -49,7 +50,7 @@ const safeGetItem = (key: string) => {
 const safeSetItem = (key: string, value: string) => {
   if (!canUseBrowserStorage()) return;
   try {
-    window.localStorage.setItem(key, value);
+    safeLocalStorage.setItem(key, value);
   } catch {
     // noop
   }
@@ -63,7 +64,7 @@ const readStoredConsent = (): StoredConsent | null => {
     const parsed = JSON.parse(raw) as Partial<StoredConsent> | null;
     if (!parsed) return null;
 
-    // jeśli zmienisz kiedyś strukturę → wersjonowanie pozwoli na bezpieczny reset
+    // jeĹ›li zmienisz kiedyĹ› strukturÄ™ â†’ wersjonowanie pozwoli na bezpieczny reset
     if (parsed.v && parsed.v !== CONSENT_VERSION) return null;
 
     return {
@@ -90,20 +91,22 @@ const persistConsent = (settings: CookieSettings, sessionId: string) => {
   safeSetItem(STORAGE_KEY, JSON.stringify(payload));
 };
 
-const PrivacyTag = memo(({ label, color = 'brand' }: { label: string; color?: 'brand' | 'gray' }) => (
-  <span
-    className={`text-4xs md:text-3xs font-mono font-black tracking-[0.2em] px-2 py-0.5 rounded uppercase border ${
-      color === 'brand'
-        ? 'bg-brand-start/10 border-brand-start/30 text-brand-start'
-        : 'bg-gray-500/10 border-gray-500/30 text-gray-500'
-    }`}
-  >
-    {label}
-  </span>
-));
+const PrivacyTag = memo(
+  ({ label, color = 'brand' }: { label: string; color?: 'brand' | 'gray' }) => (
+    <span
+      className={`text-4xs md:text-3xs font-mono font-black tracking-[0.2em] px-2 py-0.5 rounded uppercase border ${
+        color === 'brand'
+          ? 'bg-brand-start/10 border-brand-start/30 text-brand-start'
+          : 'bg-gray-500/10 border-gray-500/30 text-gray-500'
+      }`}
+    >
+      {label}
+    </span>
+  )
+);
 PrivacyTag.displayName = 'PrivacyTag';
 
-// prosty guard, żeby initObservability nie odpalało się wielokrotnie
+// prosty guard, ĹĽeby initObservability nie odpalaĹ‚o siÄ™ wielokrotnie
 let observabilityInitialized = false;
 
 export const CookieBanner: React.FC<CookieBannerProps> = ({ onResolution, t }) => {
@@ -140,7 +143,7 @@ export const CookieBanner: React.FC<CookieBannerProps> = ({ onResolution, t }) =
       setShowSettings(false);
       onResolution();
     },
-    [onResolution, sessionId],
+    [onResolution, sessionId]
   );
 
   const handleAcceptAll = useCallback(() => {
@@ -169,7 +172,7 @@ export const CookieBanner: React.FC<CookieBannerProps> = ({ onResolution, t }) =
     });
   }, [applyChoice, settings]);
 
-  // Pierwsze wyświetlenie banera + aplikacja istniejącej zgody (PROD!)
+  // Pierwsze wyĹ›wietlenie banera + aplikacja istniejÄ…cej zgody (PROD!)
   useEffect(() => {
     const stored = readStoredConsent();
 
@@ -186,7 +189,7 @@ export const CookieBanner: React.FC<CookieBannerProps> = ({ onResolution, t }) =
 
     setSettings(normalized);
 
-    // kluczowe: po refreshu musimy odtworzyć consent + ewentualnie observability
+    // kluczowe: po refreshu musimy odtworzyÄ‡ consent + ewentualnie observability
     updateConsentMode(normalized);
     if (normalized.analytical && !observabilityInitialized) {
       observabilityInitialized = true;
@@ -212,10 +215,11 @@ export const CookieBanner: React.FC<CookieBannerProps> = ({ onResolution, t }) =
     };
 
     window.addEventListener('open-cookie-settings', handleOpenSettings as EventListener);
-    return () => window.removeEventListener('open-cookie-settings', handleOpenSettings as EventListener);
+    return () =>
+      window.removeEventListener('open-cookie-settings', handleOpenSettings as EventListener);
   }, []);
 
-  // ESC: zamknij (odrzuć lub wyjdź z ustawień)
+  // ESC: zamknij (odrzuÄ‡ lub wyjdĹş z ustawieĹ„)
   useEffect(() => {
     if (!isVisible) return;
 
@@ -237,7 +241,7 @@ export const CookieBanner: React.FC<CookieBannerProps> = ({ onResolution, t }) =
     <AnimatePresence>
       {isVisible && (
         <div className="fixed inset-0 z-[4000] flex items-end lg:items-center justify-center p-4 sm:p-6 md:p-8">
-          {/* Tło */}
+          {/* TĹ‚o */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -246,7 +250,7 @@ export const CookieBanner: React.FC<CookieBannerProps> = ({ onResolution, t }) =
             onClick={() => !showSettings && handleRejectOptional()}
           />
 
-          {/* Główne okno */}
+          {/* GĹ‚Ăłwne okno */}
           <motion.div
             ref={focusTrapRef}
             role="dialog"
@@ -277,14 +281,31 @@ export const CookieBanner: React.FC<CookieBannerProps> = ({ onResolution, t }) =
                       className="absolute right-0 top-0 p-2 rounded-xl bg-black/5 dark:bg-white/5 text-gray-400 hover:text-brand-start transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-start/60"
                       aria-label={t.common.close}
                     >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2.5}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
                       </svg>
                     </button>
 
                     <div className="flex items-center gap-4">
                       <div className="w-10 h-10 rounded-2xl brand-gradient-bg flex items-center justify-center text-white shadow-lg">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          aria-hidden="true"
+                        >
                           <path
                             strokeLinecap="round"
                             strokeLinejoin="round"
@@ -356,7 +377,10 @@ export const CookieBanner: React.FC<CookieBannerProps> = ({ onResolution, t }) =
                   >
                     <div className="flex items-start justify-between">
                       <div className="space-y-3">
-                        <h3 id={titleId} className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">
+                        <h3
+                          id={titleId}
+                          className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tighter"
+                        >
                           {t.cookies.title}
                         </h3>
                         <p
@@ -373,8 +397,19 @@ export const CookieBanner: React.FC<CookieBannerProps> = ({ onResolution, t }) =
                         className="p-2 rounded-xl bg-black/5 dark:bg-white/5 text-gray-400 hover:text-brand-start transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-start/60"
                         aria-label={t.cookies.back}
                       >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                        <svg
+                          className="w-6 h-6"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          aria-hidden="true"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2.5}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
                         </svg>
                       </button>
                     </div>
@@ -422,7 +457,10 @@ export const CookieBanner: React.FC<CookieBannerProps> = ({ onResolution, t }) =
                                 <span className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tight">
                                   {item.label}
                                 </span>
-                                <PrivacyTag label={item.tag} color={item.fixed ? 'gray' : 'brand'} />
+                                <PrivacyTag
+                                  label={item.tag}
+                                  color={item.fixed ? 'gray' : 'brand'}
+                                />
                               </div>
                               <p className="text-xs-plus text-gray-500 dark:text-gray-400 leading-relaxed font-medium">
                                 {item.desc}
@@ -439,7 +477,9 @@ export const CookieBanner: React.FC<CookieBannerProps> = ({ onResolution, t }) =
                                 }))
                               }
                               className={`relative w-12 h-6 rounded-full transition-all duration-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-start/60 ${
-                                enabled ? 'brand-gradient-bg shadow-lg shadow-brand-start/20' : 'bg-gray-200 dark:bg-gray-800'
+                                enabled
+                                  ? 'brand-gradient-bg shadow-lg shadow-brand-start/20'
+                                  : 'bg-gray-200 dark:bg-gray-800'
                               } ${item.fixed ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                               role="switch"
                               aria-checked={enabled}
@@ -467,7 +507,12 @@ export const CookieBanner: React.FC<CookieBannerProps> = ({ onResolution, t }) =
                       </div>
 
                       <div className="grid gap-3 sm:grid-cols-2">
-                        {[t.cookies.provider_ga4, t.cookies.provider_ads, t.cookies.provider_meta, t.cookies.provider_gtm].map((p, i) => (
+                        {[
+                          t.cookies.provider_ga4,
+                          t.cookies.provider_ads,
+                          t.cookies.provider_meta,
+                          t.cookies.provider_gtm,
+                        ].map((p, i) => (
                           <div
                             key={i}
                             className="flex items-start gap-3 p-4 rounded-2xl bg-black/[0.01] dark:bg-white/[0.01] border border-black/5 dark:border-white/5"
@@ -538,9 +583,13 @@ export const CookieBanner: React.FC<CookieBannerProps> = ({ onResolution, t }) =
             <div className="px-10 py-5 border-t border-black/5 dark:border-white/5 bg-black/[0.03] dark:bg-black/40 flex flex-col sm:flex-row justify-between items-center gap-4 opacity-30 select-none">
               <div className="flex items-center gap-3">
                 <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-3xs font-mono font-bold uppercase tracking-[0.3em]">{t.cookies.footer_left}</span>
+                <span className="text-3xs font-mono font-bold uppercase tracking-[0.3em]">
+                  {t.cookies.footer_left}
+                </span>
               </div>
-              <span className="text-3xs font-mono font-bold uppercase tracking-[0.3em]">{t.cookies.footer_right}</span>
+              <span className="text-3xs font-mono font-bold uppercase tracking-[0.3em]">
+                {t.cookies.footer_right}
+              </span>
             </div>
           </motion.div>
         </div>
@@ -548,3 +597,4 @@ export const CookieBanner: React.FC<CookieBannerProps> = ({ onResolution, t }) =
     </AnimatePresence>
   );
 };
+

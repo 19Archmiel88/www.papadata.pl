@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useId, useMemo, useState } from 'react';
+﻿import React, { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { startIntegrationOAuth, type IntegrationItem } from '../data/integrations';
 import type { Translation } from '../types';
@@ -6,6 +6,7 @@ import { InteractiveButton } from './InteractiveButton';
 import { normalizeApiError } from '../hooks/useApiError';
 import { useTenants } from '../hooks/useTenants';
 import { useAuth } from '../context/useAuth';
+import { safeLocalStorage } from '../utils/safeLocalStorage';
 
 interface IntegrationConnectModalProps {
   t: Translation;
@@ -27,12 +28,17 @@ export const IntegrationConnectModal: React.FC<IntegrationConnectModalProps> = (
   const { isAuthenticated } = useAuth();
   const [connectState, setConnectState] = useState<'idle' | 'loading' | 'error'>('idle');
   const [connectError, setConnectError] = useState<string | null>(null);
-  const { data: tenants, loading: tenantsLoading, error: tenantsError, refresh: refreshTenants } = useTenants({
+  const {
+    data: tenants,
+    loading: tenantsLoading,
+    error: tenantsError,
+    refresh: refreshTenants,
+  } = useTenants({
     enabled: isAuthenticated,
   });
   const [selectedTenantId, setSelectedTenantId] = useState<string | null>(() => {
     if (typeof window === 'undefined') return null;
-    return window.localStorage.getItem('pd_active_tenant_id');
+    return safeLocalStorage.getItem('pd_active_tenant_id');
   });
   const rid = useId();
   const titleId = `integration-connect-title-${rid}`;
@@ -68,7 +74,7 @@ export const IntegrationConnectModal: React.FC<IntegrationConnectModalProps> = (
 
   useEffect(() => {
     if (!selectedTenantId || typeof window === 'undefined') return;
-    window.localStorage.setItem('pd_active_tenant_id', selectedTenantId);
+    safeLocalStorage.setItem('pd_active_tenant_id', selectedTenantId);
     if (connectError) {
       setConnectError(null);
       setConnectState('idle');
@@ -140,11 +146,17 @@ export const IntegrationConnectModal: React.FC<IntegrationConnectModalProps> = (
             </span>
           </div>
 
-          <h3 id={titleId} className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tight">
+          <h3
+            id={titleId}
+            className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tight"
+          >
             {title}
           </h3>
 
-          <p id={descId} className="text-sm sm:text-base text-gray-500 dark:text-gray-400 font-medium max-w-xl">
+          <p
+            id={descId}
+            className="text-sm sm:text-base text-gray-500 dark:text-gray-400 font-medium max-w-xl"
+          >
             {t.integrations.connect.desc}
           </p>
 
@@ -152,9 +164,13 @@ export const IntegrationConnectModal: React.FC<IntegrationConnectModalProps> = (
             <span className="text-2xs font-mono font-bold tracking-[0.25em] uppercase text-gray-500">
               {t.integrations.status_live}
             </span>
-            <span className="text-xs font-black uppercase tracking-widest text-brand-start">{authLabel}</span>
+            <span className="text-xs font-black uppercase tracking-widest text-brand-start">
+              {authLabel}
+            </span>
             {detail && (
-              <span className="text-xs font-black uppercase tracking-widest text-gray-500">{detail}</span>
+              <span className="text-xs font-black uppercase tracking-widest text-gray-500">
+                {detail}
+              </span>
             )}
           </div>
         </div>
@@ -165,8 +181,19 @@ export const IntegrationConnectModal: React.FC<IntegrationConnectModalProps> = (
           aria-label={t.common.close}
           type="button"
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2.5}
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         </button>
       </div>
@@ -249,7 +276,9 @@ export const IntegrationConnectModal: React.FC<IntegrationConnectModalProps> = (
           <div className="text-xs font-black uppercase tracking-[0.3em] text-gray-500 mb-2">
             {t.integrations.connect.security_title}
           </div>
-          <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">{t.integrations.connect.security_desc}</p>
+          <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">
+            {t.integrations.connect.security_desc}
+          </p>
         </div>
       </div>
 
@@ -265,7 +294,9 @@ export const IntegrationConnectModal: React.FC<IntegrationConnectModalProps> = (
           disabled={connectState === 'loading'}
           className="!h-12 !px-8 !text-xs font-black uppercase tracking-[0.2em] rounded-2xl"
         >
-          {connectState === 'loading' ? t.dashboard.integrations_v2?.status_connecting ?? '' : t.integrations.connect.cta_connect}
+          {connectState === 'loading'
+            ? (t.dashboard.integrations_v2?.status_connecting ?? '')
+            : t.integrations.connect.cta_connect}
         </InteractiveButton>
 
         <InteractiveButton
@@ -279,3 +310,4 @@ export const IntegrationConnectModal: React.FC<IntegrationConnectModalProps> = (
     </div>
   );
 };
+

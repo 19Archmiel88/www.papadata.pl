@@ -1,4 +1,5 @@
-import { getWebConfig } from '../config';
+﻿import { getWebConfig } from '../config';
+import { safeLocalStorage } from './safeLocalStorage';
 
 export type ConsentSettings = {
   necessary: boolean;
@@ -89,7 +90,7 @@ export const loadStoredConsent = (): ConsentSettings | null => {
   if (typeof window === 'undefined') return null;
 
   try {
-    const stored = window.localStorage.getItem(CONSENT_STORAGE_KEY);
+    const stored = safeLocalStorage.getItem(CONSENT_STORAGE_KEY);
     if (!stored) return null;
 
     const parsed = JSON.parse(stored) as Partial<ConsentSettings> | null;
@@ -118,7 +119,7 @@ export const loadStoredConsent = (): ConsentSettings | null => {
 /**
  * Wymuszona, bezpieczna sekwencja:
  * 1) initConsentMode() - default denied
- * 2) jeśli jest zapis - updateConsentMode() i doładuj tagi wg zgód
+ * 2) jeĹ›li jest zapis - updateConsentMode() i doĹ‚aduj tagi wg zgĂłd
  */
 export const applyStoredConsent = (): boolean => {
   if (typeof window === 'undefined') return false;
@@ -216,7 +217,7 @@ const loadMetaPixel = (pixelId: string) => {
 
   loadScriptOnce('meta-pixel', 'https://connect.facebook.net/en_US/fbevents.js');
 
-  // init może być wołany wielokrotnie, meta sama to ogarnia, ale nie spamujemy
+  // init moĹĽe byÄ‡ woĹ‚any wielokrotnie, meta sama to ogarnia, ale nie spamujemy
   try {
     (window.fbq as any)('init', pixelId);
   } catch {
@@ -251,8 +252,8 @@ const grantMetaPixelConsentAndTrackPageView = () => {
 };
 
 /**
- * Minimalny "state" ładowania tagów.
- * Nie usuwamy GTM/gtag przy cofnięciu zgody (Consent Mode robi swoje),
+ * Minimalny "state" Ĺ‚adowania tagĂłw.
+ * Nie usuwamy GTM/gtag przy cofniÄ™ciu zgody (Consent Mode robi swoje),
  * ale Meta Pixel warto soft-disable przez revoke.
  */
 const loadedTags = {
@@ -266,7 +267,7 @@ export const applyConsentTags = (settings: ConsentSettings): void => {
 
   const { gtmId, ga4Id, googleAdsId, metaPixelId } = getTagConfig();
 
-  // GTM: ładuj tylko jeśli cokolwiek poza necessary ma sens (analytics/marketing)
+  // GTM: Ĺ‚aduj tylko jeĹ›li cokolwiek poza necessary ma sens (analytics/marketing)
   if (gtmId && (settings.analytical || settings.marketing)) {
     if (!loadedTags.gtm.has(gtmId)) {
       loadGtm(gtmId);
@@ -281,10 +282,10 @@ export const applyConsentTags = (settings: ConsentSettings): void => {
         loadGa4(ga4Id);
         loadedTags.gtag.add(ga4Id);
       } else {
-        // jeśli już załadowane, wystarczy update consent (robione w updateConsentMode)
+        // jeĹ›li juĹĽ zaĹ‚adowane, wystarczy update consent (robione w updateConsentMode)
       }
     }
-    // przy cofnięciu zgody analytics nie usuwamy skryptów — Consent Mode + brak nowych eventów
+    // przy cofniÄ™ciu zgody analytics nie usuwamy skryptĂłw â€” Consent Mode + brak nowych eventĂłw
   }
 
   // Google Ads: tylko marketing
@@ -295,7 +296,7 @@ export const applyConsentTags = (settings: ConsentSettings): void => {
         loadedTags.gtag.add(googleAdsId);
       }
     }
-    // przy cofnięciu zgody marketing — Consent Mode zatrzyma personalizację i storage
+    // przy cofniÄ™ciu zgody marketing â€” Consent Mode zatrzyma personalizacjÄ™ i storage
   }
 
   // Meta Pixel: tylko marketing (plus revoke przy wycofaniu)
@@ -312,3 +313,4 @@ export const applyConsentTags = (settings: ConsentSettings): void => {
     }
   }
 };
+

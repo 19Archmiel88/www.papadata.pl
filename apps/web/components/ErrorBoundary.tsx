@@ -1,7 +1,8 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+﻿import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { translations } from '../translations';
 import { captureException } from '../utils/telemetry';
 import { InteractiveButton } from './InteractiveButton';
+import { safeLocalStorage } from '../utils/safeLocalStorage';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -32,7 +33,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
         href: typeof window !== 'undefined' ? window.location.href : undefined,
       });
     } catch {
-      // noop (ErrorBoundary nie może wybuchnąć drugi raz)
+      // noop (ErrorBoundary nie moĹĽe wybuchnÄ…Ä‡ drugi raz)
     }
   }
 
@@ -53,7 +54,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   private getLang(): 'pl' | 'en' {
     if (typeof window === 'undefined') return 'pl';
     try {
-      const v = window.localStorage.getItem('lang');
+      const v = safeLocalStorage.getItem('lang');
       return v === 'en' || v === 'pl' ? v : 'pl';
     } catch {
       return 'pl';
@@ -68,7 +69,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
       return (
         <div className="min-h-[80vh] flex items-center justify-center p-6 text-center animate-reveal">
           <div className="max-w-md w-full glass p-10 md:p-12 rounded-[3rem] border border-rose-500/20 shadow-[0_50px_100px_rgba(0,0,0,0.5)] relative overflow-hidden bg-white/95 dark:bg-[#050507]/95">
-            {/* Tło błędu */}
+            {/* TĹ‚o bĹ‚Ä™du */}
             <div className="absolute -top-20 -right-20 w-40 h-40 bg-rose-500/10 blur-[80px] rounded-full pointer-events-none" />
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-rose-500 via-brand-start to-rose-500 opacity-70" />
 
@@ -89,10 +90,8 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
               </svg>
             </div>
 
-            {/* Treść błędu */}
-            <h1 className="text-2xl font-black text-rose-500 mb-4">
-              {t.common.error_title}
-            </h1>
+            {/* TreĹ›Ä‡ bĹ‚Ä™du */}
+            <h1 className="text-2xl font-black text-rose-500 mb-4">{t.common.error_title}</h1>
             <p className="text-gray-600 dark:text-gray-300 mb-8 font-medium leading-relaxed">
               {t.common.error_desc}
             </p>
@@ -115,7 +114,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
               </InteractiveButton>
             </div>
 
-            {/* Diagnostyka (ukryta dla UI, ale dostępna devom) */}
+            {/* Diagnostyka (ukryta dla UI, ale dostÄ™pna devom) */}
             <div className="mt-8 opacity-40 select-none">
               <div className="text-3xs font-mono font-bold uppercase tracking-[0.3em] text-gray-500">
                 ERROR_BOUNDARY_V2
@@ -131,3 +130,4 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 }
 
 export default ErrorBoundary;
+

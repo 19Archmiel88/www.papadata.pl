@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+﻿import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { InteractiveButton } from './InteractiveButton';
 import { Logo } from './Logo';
 import type { Translation } from '../types';
@@ -8,10 +8,11 @@ import { useModal } from '../context/useModal';
 import { normalizeApiError } from '../hooks/useApiError';
 import { useCompanyLookup } from '../hooks/useCompanyLookup';
 import type { AuthSession } from '@papadata/shared';
+import { safeLocalStorage } from '../utils/safeLocalStorage';
 
 interface AuthSectionProps {
   t: Translation;
-  /** Jeśli modal otwierany z intencją "login" (np. przycisk w headerze) */
+  /** JeĹ›li modal otwierany z intencjÄ… "login" (np. przycisk w headerze) */
   isRegistered?: boolean;
 }
 
@@ -20,8 +21,7 @@ type EmailVerifyContext = 'login' | 'register';
 
 const OTP_LEN = 6;
 
-const isValidEmail = (email: string) =>
-  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 
 const isValidNip = (nip: string) => {
   if (!/^\d{10}$/.test(nip)) return false;
@@ -35,17 +35,14 @@ const isValidNip = (nip: string) => {
 const isAuthSessionLike = (v: any): v is AuthSession =>
   Boolean(v && typeof v === 'object' && typeof v.accessToken === 'string' && v.user);
 
-export const AuthSection: React.FC<AuthSectionProps> = ({
-  t,
-  isRegistered = false,
-}) => {
+export const AuthSection: React.FC<AuthSectionProps> = ({ t, isRegistered = false }) => {
   const api = useApi();
   const { setIsAuthenticated, setToken } = useAuth();
   const { closeModal, openModal } = useModal();
 
   const [mode, setMode] = useState<AuthMode>(isRegistered ? 'login' : 'register');
 
-  // wspólne pola
+  // wspĂłlne pola
   const [email, setEmail] = useState('');
   const [submitAction, setSubmitAction] = useState<
     'oauth_google' | 'oauth_ms' | 'email_start' | 'email_verify' | 'register' | null
@@ -65,7 +62,7 @@ export const AuthSection: React.FC<AuthSectionProps> = ({
   const [companyKrs, setCompanyKrs] = useState('');
   const [regStep, setRegStep] = useState(1);
 
-  // UX: śledzimy czy dane firmy zostały auto-uzupełnione (żeby nie kasować ręcznych zmian)
+  // UX: Ĺ›ledzimy czy dane firmy zostaĹ‚y auto-uzupeĹ‚nione (ĹĽeby nie kasowaÄ‡ rÄ™cznych zmian)
   const [isCompanyAutofilled, setIsCompanyAutofilled] = useState(false);
   const [isCompanyManualOverride, setIsCompanyManualOverride] = useState(false);
   const [autofillSource, setAutofillSource] = useState<{ gus: boolean; mf: boolean } | null>(null);
@@ -136,7 +133,7 @@ export const AuthSection: React.FC<AuthSectionProps> = ({
       uppercase: /[A-Z]/.test(password),
       special: /[^A-Za-z0-9]/.test(password),
     }),
-    [password],
+    [password]
   );
 
   const passwordScore = useMemo(() => {
@@ -168,7 +165,7 @@ export const AuthSection: React.FC<AuthSectionProps> = ({
 
   const hasCompanyName = Boolean(trimmedCompanyName);
   const isAddressValid = Boolean(
-    trimmedCompanyStreet || (trimmedCompanyPostalCode && trimmedCompanyCity),
+    trimmedCompanyStreet || (trimmedCompanyPostalCode && trimmedCompanyCity)
   );
 
   const addressError =
@@ -184,15 +181,15 @@ export const AuthSection: React.FC<AuthSectionProps> = ({
   const storeAuthToken = (accessToken: string) => {
     // Produkcyjnie: preferuj httpOnly cookie z backendu (anti-XSS).
     if (typeof window === 'undefined') return;
-    localStorage.setItem('papadata_auth_token', accessToken);
+    safeLocalStorage.setItem('papadata_auth_token', accessToken);
   };
 
   const storeAuthSession = (session: AuthSession) => {
     storeAuthToken(session.accessToken);
-    localStorage.setItem('papadata_user_id', session.user.id);
-    localStorage.setItem('papadata_user_roles', JSON.stringify(session.user.roles ?? []));
+    safeLocalStorage.setItem('papadata_user_id', session.user.id);
+    safeLocalStorage.setItem('papadata_user_roles', JSON.stringify(session.user.roles ?? []));
     if (session.user?.tenantId) {
-      localStorage.setItem('pd_active_tenant_id', session.user.tenantId);
+      safeLocalStorage.setItem('pd_active_tenant_id', session.user.tenantId);
     }
   };
 
@@ -202,9 +199,9 @@ export const AuthSection: React.FC<AuthSectionProps> = ({
     setIsAuthenticated(true);
     closeModal();
     try {
-      const redirect = localStorage.getItem('pd_post_login_redirect');
+      const redirect = safeLocalStorage.getItem('pd_post_login_redirect');
       if (redirect) {
-        localStorage.removeItem('pd_post_login_redirect');
+        safeLocalStorage.removeItem('pd_post_login_redirect');
         window.location.assign(redirect);
       }
     } catch {
@@ -261,11 +258,11 @@ export const AuthSection: React.FC<AuthSectionProps> = ({
     // reset per flow
     resetEmailVerification(next);
 
-    // UX: unikamy "duchów formularza" — resetujemy pola rejestracji przy wejściu w register
+    // UX: unikamy "duchĂłw formularza" â€” resetujemy pola rejestracji przy wejĹ›ciu w register
     if (next === 'register') {
       resetRegisterFields();
     } else {
-      // przy wejściu w login też czyścimy pola rejestracji
+      // przy wejĹ›ciu w login teĹĽ czyĹ›cimy pola rejestracji
       resetRegisterFields();
     }
   };
@@ -290,9 +287,9 @@ export const AuthSection: React.FC<AuthSectionProps> = ({
         setSubmitAction(null);
         return;
       }
-      // Zakładamy endpointy: /auth/oauth/{provider}/start
+      // ZakĹ‚adamy endpointy: /auth/oauth/{provider}/start
       window.location.assign(`${base}/auth/oauth/${provider}/start`);
-      // zwykle następuje nawigacja, ale zostawiamy bezpiecznie:
+      // zwykle nastÄ™puje nawigacja, ale zostawiamy bezpiecznie:
     } catch (e) {
       setSubmitError(normalizeApiError(e, t.common.error_desc));
       setSubmitAction(null);
@@ -393,7 +390,13 @@ export const AuthSection: React.FC<AuthSectionProps> = ({
   // === Register submit ===
   // Obecny backend: POST /auth/register
   const handleRegister = async () => {
-    if (!isValidEmail(email) || !isPasswordValid || !hasCompanyName || !isAddressValid || isSubmitting) {
+    if (
+      !isValidEmail(email) ||
+      !isPasswordValid ||
+      !hasCompanyName ||
+      !isAddressValid ||
+      isSubmitting
+    ) {
       return;
     }
 
@@ -422,9 +425,7 @@ export const AuthSection: React.FC<AuthSectionProps> = ({
         | undefined;
 
       // Fallback: api.authRegister(payload) -> AuthSession
-      const authRegister = (api as any).authRegister as
-        | ((p: any) => Promise<any>)
-        | undefined;
+      const authRegister = (api as any).authRegister as ((p: any) => Promise<any>) | undefined;
       const usesOtpRegister = Boolean(authRegisterStart);
 
       const result = authRegisterStart
@@ -514,7 +515,8 @@ export const AuthSection: React.FC<AuthSectionProps> = ({
     }
   };
 
-  const codeStepTitle = verifyContext === 'register' ? t.auth.code_title_register : t.auth.code_title_login;
+  const codeStepTitle =
+    verifyContext === 'register' ? t.auth.code_title_register : t.auth.code_title_login;
 
   const codeStepDesc = t.auth.code_desc;
   const magicLinkTitle = t.auth.login_link_sent_title;
@@ -546,8 +548,19 @@ export const AuthSection: React.FC<AuthSectionProps> = ({
         className="absolute top-6 right-6 p-2.5 rounded-2xl bg-black/5 dark:bg-white/5 hover:bg-brand-start hover:text-white transition-all text-gray-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-start/60"
         aria-label={t.common.close}
       >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2.5}
+            d="M6 18L18 6M6 6l12 12"
+          />
         </svg>
       </button>
 
@@ -604,7 +617,7 @@ export const AuthSection: React.FC<AuthSectionProps> = ({
             <span className="text-xs font-black uppercase tracking-widest text-gray-700 dark:text-gray-200">
               {renderButtonLabel(
                 `${t.auth.oauth_google} ${t.auth.oauth_account_suffix}`,
-                submitAction === 'oauth_google',
+                submitAction === 'oauth_google'
               )}
             </span>
           </button>
@@ -615,13 +628,18 @@ export const AuthSection: React.FC<AuthSectionProps> = ({
             disabled={isSubmitting}
             className="w-full flex items-center justify-center gap-4 py-4 px-6 rounded-2xl bg-white dark:bg-white/5 border border-black/10 dark:border-white/10 hover:border-brand-start/40 transition-all group focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-start/60"
           >
-            <svg className="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <svg
+              className="w-5 h-5 text-blue-500"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
               <path d="M11.4 24H0V12.6h11.4V24zM24 24H12.6V12.6H24V24zM11.4 11.4H0V0h11.4v11.4zM24 11.4H12.6V0H24v11.4z" />
             </svg>
             <span className="text-xs font-black uppercase tracking-widest text-gray-700 dark:text-gray-200">
               {renderButtonLabel(
                 `${t.auth.oauth_ms} ${t.auth.oauth_account_suffix}`,
-                submitAction === 'oauth_ms',
+                submitAction === 'oauth_ms'
               )}
             </span>
           </button>
@@ -666,7 +684,7 @@ export const AuthSection: React.FC<AuthSectionProps> = ({
                 >
                   {renderButtonLabel(
                     resendIn > 0 ? `${t.auth.resend_in} ${resendIn}s` : resendLabel,
-                    submitAction === 'email_start',
+                    submitAction === 'email_start'
                   )}
                 </InteractiveButton>
 
@@ -716,7 +734,11 @@ export const AuthSection: React.FC<AuthSectionProps> = ({
                   aria-describedby={otpError ? 'auth-otp-error' : undefined}
                 />
                 {otpError && (
-                  <p id="auth-otp-error" className="text-xs text-rose-500 font-semibold" aria-live="polite">
+                  <p
+                    id="auth-otp-error"
+                    className="text-xs text-rose-500 font-semibold"
+                    aria-live="polite"
+                  >
                     {otpError}
                   </p>
                 )}
@@ -729,10 +751,7 @@ export const AuthSection: React.FC<AuthSectionProps> = ({
                   onClick={verifyEmailCode}
                   disabled={isSubmitting || otp.replace(/\D/g, '').length !== OTP_LEN}
                 >
-                  {renderButtonLabel(
-                    t.auth.verify_session,
-                    submitAction === 'email_verify',
-                  )}
+                  {renderButtonLabel(t.auth.verify_session, submitAction === 'email_verify')}
                 </InteractiveButton>
 
                 <button
@@ -741,9 +760,7 @@ export const AuthSection: React.FC<AuthSectionProps> = ({
                   disabled={isSubmitting || resendIn > 0}
                   className="w-full py-3 rounded-2xl border border-black/10 dark:border-white/10 text-xs font-black uppercase tracking-widest text-gray-500 hover:text-gray-900 dark:hover:text-white hover:border-brand-start/40 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-start/60 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  {resendIn > 0
-                    ? `${t.auth.resend_in} ${resendIn}s`
-                    : resendLabel}
+                  {resendIn > 0 ? `${t.auth.resend_in} ${resendIn}s` : resendLabel}
                 </button>
 
                 <button
@@ -783,7 +800,11 @@ export const AuthSection: React.FC<AuthSectionProps> = ({
                 aria-describedby={emailError ? emailErrorId : undefined}
               />
               {emailError && (
-                <p id={emailErrorId} className="text-xs text-rose-500 font-semibold" aria-live="polite">
+                <p
+                  id={emailErrorId}
+                  className="text-xs text-rose-500 font-semibold"
+                  aria-live="polite"
+                >
                   {emailError}
                 </p>
               )}
@@ -795,10 +816,7 @@ export const AuthSection: React.FC<AuthSectionProps> = ({
               onClick={() => startEmailVerification('login')}
               disabled={!isValidEmail(email) || isSubmitting}
             >
-              {renderButtonLabel(
-                t.auth.send_login_link,
-                submitAction === 'email_start',
-              )}
+              {renderButtonLabel(t.auth.send_login_link, submitAction === 'email_start')}
             </InteractiveButton>
 
             {!isValidEmail(email) && email.length > 0 && (
@@ -823,7 +841,9 @@ export const AuthSection: React.FC<AuthSectionProps> = ({
                     {s}
                   </div>
                   {s < 2 && (
-                    <div className={`h-0.5 w-16 ${regStep > s ? 'bg-brand-start' : 'bg-black/5 dark:bg-white/5'}`} />
+                    <div
+                      className={`h-0.5 w-16 ${regStep > s ? 'bg-brand-start' : 'bg-black/5 dark:bg-white/5'}`}
+                    />
                   )}
                 </div>
               ))}
@@ -848,7 +868,11 @@ export const AuthSection: React.FC<AuthSectionProps> = ({
                     aria-describedby={emailError ? emailErrorId : undefined}
                   />
                   {emailError && (
-                    <p id={emailErrorId} className="text-xs text-rose-500 font-semibold" aria-live="polite">
+                    <p
+                      id={emailErrorId}
+                      className="text-xs text-rose-500 font-semibold"
+                      aria-live="polite"
+                    >
                       {emailError}
                     </p>
                   )}
@@ -874,13 +898,19 @@ export const AuthSection: React.FC<AuthSectionProps> = ({
                       <span className="text-brand-start">{passwordScore}</span>
                     </div>
                     <div className="grid grid-cols-3 gap-2 text-2xs font-black uppercase tracking-widest">
-                      <span className={passwordChecks.length ? 'text-emerald-500' : 'text-gray-400'}>
+                      <span
+                        className={passwordChecks.length ? 'text-emerald-500' : 'text-gray-400'}
+                      >
                         {t.auth.password_req_length}
                       </span>
-                      <span className={passwordChecks.uppercase ? 'text-emerald-500' : 'text-gray-400'}>
+                      <span
+                        className={passwordChecks.uppercase ? 'text-emerald-500' : 'text-gray-400'}
+                      >
                         {t.auth.password_req_uppercase}
                       </span>
-                      <span className={passwordChecks.special ? 'text-emerald-500' : 'text-gray-400'}>
+                      <span
+                        className={passwordChecks.special ? 'text-emerald-500' : 'text-gray-400'}
+                      >
                         {t.auth.password_req_special}
                       </span>
                     </div>
@@ -941,7 +971,10 @@ export const AuthSection: React.FC<AuthSectionProps> = ({
                   />
 
                   {companyLookup.loading && (
-                    <div className="mt-2 flex items-center gap-2 text-xs text-gray-500" aria-live="polite">
+                    <div
+                      className="mt-2 flex items-center gap-2 text-xs text-gray-500"
+                      aria-live="polite"
+                    >
                       <span className="w-2 h-2 rounded-full bg-brand-start animate-pulse" />
                       <span>{t.auth.entity_validating}</span>
                     </div>
@@ -962,7 +995,9 @@ export const AuthSection: React.FC<AuthSectionProps> = ({
                   {companyLookup.error && !companyLookup.loading && (
                     <p className="mt-2 text-xs text-rose-500 font-semibold" aria-live="polite">
                       {companyLookup.error.message}
-                      {companyLookup.error.requestId ? ` (Request ID: ${companyLookup.error.requestId})` : ''}
+                      {companyLookup.error.requestId
+                        ? ` (Request ID: ${companyLookup.error.requestId})`
+                        : ''}
                     </p>
                   )}
                 </div>
@@ -1096,7 +1131,11 @@ export const AuthSection: React.FC<AuthSectionProps> = ({
                   className="w-full !py-5"
                   onClick={handleRegister}
                   disabled={
-                    !hasCompanyName || !isAddressValid || isSubmitting || !isValidEmail(email) || !isPasswordValid
+                    !hasCompanyName ||
+                    !isAddressValid ||
+                    isSubmitting ||
+                    !isValidEmail(email) ||
+                    !isPasswordValid
                   }
                 >
                   {renderButtonLabel(t.auth.create_account_cta, submitAction === 'register')}
@@ -1113,7 +1152,10 @@ export const AuthSection: React.FC<AuthSectionProps> = ({
         )}
       </div>
 
-      <div className="p-8 border-t border-black/5 dark:border-white/5 text-center opacity-40" aria-hidden="true">
+      <div
+        className="p-8 border-t border-black/5 dark:border-white/5 text-center opacity-40"
+        aria-hidden="true"
+      >
         <span className="text-3xs font-mono font-bold uppercase tracking-[0.3em]">
           SECURE_ACCESS_GATEWAY_V2
         </span>
@@ -1121,3 +1163,4 @@ export const AuthSection: React.FC<AuthSectionProps> = ({
     </div>
   );
 };
+

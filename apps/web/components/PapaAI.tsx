@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState, useCallback, memo } from 'react';
+﻿import React, { useEffect, useMemo, useRef, useState, useCallback, memo } from 'react';
 import { Logo } from './Logo';
 import { Translation } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -8,6 +8,7 @@ import { createRateLimiter } from '../utils/rate-limit';
 import { getWebConfig } from '../config';
 import type { AIChatMessage, DateRange, DatePreset, AppMode } from '@papadata/shared';
 import { streamChat } from '../data/ai';
+import { safeLocalStorage } from '../utils/safeLocalStorage';
 
 interface Message {
   id: string;
@@ -30,10 +31,11 @@ interface PapaAIProps {
 }
 
 const createId = (): string => {
-  // Bezpieczne, stabilne ID (na wypadek równoległych zdarzeń / szybkich klików).
-  // crypto.randomUUID jest dostępne w nowoczesnych przeglądarkach.
-  // Fallback zachowuje kompatybilność.
-  const randomId = typeof globalThis !== 'undefined' ? globalThis.crypto?.randomUUID?.() : undefined;
+  // Bezpieczne, stabilne ID (na wypadek rĂłwnolegĹ‚ych zdarzeĹ„ / szybkich klikĂłw).
+  // crypto.randomUUID jest dostÄ™pne w nowoczesnych przeglÄ…darkach.
+  // Fallback zachowuje kompatybilnoĹ›Ä‡.
+  const randomId =
+    typeof globalThis !== 'undefined' ? globalThis.crypto?.randomUUID?.() : undefined;
   return randomId ?? `${Date.now()}_${Math.random().toString(16).slice(2)}`;
 };
 
@@ -74,7 +76,7 @@ export const PapaAI: React.FC<PapaAIProps> = memo(
         }
         setInternalOpen(next);
       },
-      [isControlled, onOpenChange],
+      [isControlled, onOpenChange]
     );
 
     const focusTrapRef = useFocusTrap(isOpen);
@@ -84,12 +86,12 @@ export const PapaAI: React.FC<PapaAIProps> = memo(
     const { max: aiRateMax, windowMs: aiRateWindowMs } = getWebConfig().aiClientRateLimit;
     const rateLimiter = useMemo(
       () => createRateLimiter(aiRateMax, aiRateWindowMs),
-      [aiRateMax, aiRateWindowMs],
+      [aiRateMax, aiRateWindowMs]
     );
 
     const currentView = useMemo(
       () => location.pathname.split('/')[2] || 'Overview',
-      [location.pathname],
+      [location.pathname]
     );
 
     const panelTitleId = 'papadata-papaai-title';
@@ -98,8 +100,8 @@ export const PapaAI: React.FC<PapaAIProps> = memo(
     const tenantId = useMemo(() => {
       if (typeof window === 'undefined') return null;
       return (
-        window.localStorage.getItem('pd_active_tenant_id') ||
-        window.localStorage.getItem('papadata_user_id') ||
+        safeLocalStorage.getItem('pd_active_tenant_id') ||
+        safeLocalStorage.getItem('papadata_user_id') ||
         null
       );
     }, []);
@@ -143,7 +145,9 @@ export const PapaAI: React.FC<PapaAIProps> = memo(
       const streamingId = streamingMessageIdRef.current;
       if (!streamingId) return;
 
-      setMessages((prev) => prev.map((m) => (m.id === streamingId ? { ...m, isStreaming: false } : m)));
+      setMessages((prev) =>
+        prev.map((m) => (m.id === streamingId ? { ...m, isStreaming: false } : m))
+      );
       streamingMessageIdRef.current = null;
     }, []);
 
@@ -186,8 +190,11 @@ export const PapaAI: React.FC<PapaAIProps> = memo(
           const retrySeconds = Math.max(1, Math.ceil(retryAfterMs / 1000));
           const rateLimitMessage =
             copy.rate_limit?.replace('{seconds}', String(retrySeconds)) ??
-            `Zbyt wiele zapytań. Spróbuj ponownie za ${retrySeconds}s.`;
-          setMessages((prev) => [...prev, { id: createId(), role: 'papa', text: rateLimitMessage }]);
+            `Zbyt wiele zapytaĹ„. SprĂłbuj ponownie za ${retrySeconds}s.`;
+          setMessages((prev) => [
+            ...prev,
+            { id: createId(), role: 'papa', text: rateLimitMessage },
+          ]);
           return;
         }
 
@@ -201,7 +208,7 @@ export const PapaAI: React.FC<PapaAIProps> = memo(
             ...prev,
             userMessage,
             { id: assistantMessageId, role: 'papa', text: '', isStreaming: true },
-          ]),
+          ])
         );
 
         setInputValue('');
@@ -217,13 +224,13 @@ export const PapaAI: React.FC<PapaAIProps> = memo(
 
         const apiMessages: AIChatMessage[] = [
           ...baseMessages,
-          { role: 'user', content: promptText }
+          { role: 'user', content: promptText },
         ];
 
         const dateRange = buildDateRange();
 
         const runStream = async (attempt: number) => {
-          // Anuluj poprzednie żądanie jeśli jeszcze trwa (defensywnie).
+          // Anuluj poprzednie ĹĽÄ…danie jeĹ›li jeszcze trwa (defensywnie).
           if (abortControllerRef.current) abortControllerRef.current.abort();
           abortControllerRef.current = new AbortController();
 
@@ -247,12 +254,12 @@ export const PapaAI: React.FC<PapaAIProps> = memo(
               onToken: (token) => {
                 fullText += token;
                 setMessages((prev) =>
-                  prev.map((m) => (m.id === assistantMessageId ? { ...m, text: fullText } : m)),
+                  prev.map((m) => (m.id === assistantMessageId ? { ...m, text: fullText } : m))
                 );
               },
               onDone: () => {
                 setMessages((prev) =>
-                  prev.map((m) => (m.id === assistantMessageId ? { ...m, isStreaming: false } : m)),
+                  prev.map((m) => (m.id === assistantMessageId ? { ...m, isStreaming: false } : m))
                 );
                 streamingMessageIdRef.current = null;
                 setIsTyping(false);
@@ -273,14 +280,14 @@ export const PapaAI: React.FC<PapaAIProps> = memo(
                   prev.map((m) =>
                     m.id === assistantMessageId
                       ? { ...m, text: resolvedError, isStreaming: false }
-                      : m,
-                  ),
+                      : m
+                  )
                 );
                 streamingMessageIdRef.current = null;
                 setIsTyping(false);
                 abortControllerRef.current = null;
               },
-            },
+            }
           );
         };
 
@@ -301,8 +308,8 @@ export const PapaAI: React.FC<PapaAIProps> = memo(
         rateLimiter,
         tenantId,
         trimHistory,
-        t.papaAI.error_generic
-      ],
+        t.papaAI.error_generic,
+      ]
     );
 
     const handleSend = useCallback(
@@ -312,10 +319,10 @@ export const PapaAI: React.FC<PapaAIProps> = memo(
         if (!prompt) return;
         await sendPrompt(prompt);
       },
-      [inputValue, sendPrompt],
+      [inputValue, sendPrompt]
     );
 
-    // Focus: zapamiętaj element aktywny przed otwarciem + przywróć po zamknięciu.
+    // Focus: zapamiÄ™taj element aktywny przed otwarciem + przywrĂłÄ‡ po zamkniÄ™ciu.
     useEffect(() => {
       if (typeof document === 'undefined') return;
 
@@ -324,7 +331,7 @@ export const PapaAI: React.FC<PapaAIProps> = memo(
         return;
       }
 
-      // przy zamknięciu: preferuj toggle (spójny powrót), fallback: poprzedni aktywny element
+      // przy zamkniÄ™ciu: preferuj toggle (spĂłjny powrĂłt), fallback: poprzedni aktywny element
       window.setTimeout(() => {
         if (toggleBtnRef.current) {
           toggleBtnRef.current.focus();
@@ -334,7 +341,7 @@ export const PapaAI: React.FC<PapaAIProps> = memo(
       }, 0);
     }, [isOpen]);
 
-    // ESC do zamknięcia
+    // ESC do zamkniÄ™cia
     useEffect(() => {
       if (!isOpen) return;
 
@@ -345,18 +352,18 @@ export const PapaAI: React.FC<PapaAIProps> = memo(
         }
       };
 
-      // capture = true, żeby ESC działał nawet jeśli fokus jest w środku inputów/komponentów
+      // capture = true, ĹĽeby ESC dziaĹ‚aĹ‚ nawet jeĹ›li fokus jest w Ĺ›rodku inputĂłw/komponentĂłw
       document.addEventListener('keydown', handleEsc, true);
       return () => document.removeEventListener('keydown', handleEsc, true);
     }, [isOpen, setOpen]);
 
-    // Scroll na dół przy nowych wiadomościach
+    // Scroll na dĂłĹ‚ przy nowych wiadomoĹ›ciach
     useEffect(() => {
       if (!scrollRef.current) return;
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }, [messages, isTyping]);
 
-    // Draft z „Explain in AI”
+    // Draft z â€žExplain in AIâ€ť
     useEffect(() => {
       if (!draftMessage) return;
 
@@ -378,7 +385,7 @@ export const PapaAI: React.FC<PapaAIProps> = memo(
       return () => window.clearTimeout(focusTimer);
     }, [copy.intro, isOpen, trimHistory]);
 
-    // Gdy zamykasz panel w trakcie streamingu: anuluj request, żeby nie zostawiać „żyjącego” fetch’a w tle
+    // Gdy zamykasz panel w trakcie streamingu: anuluj request, ĹĽeby nie zostawiaÄ‡ â€žĹĽyjÄ…cegoâ€ť fetchâ€™a w tle
     useEffect(() => {
       if (isOpen) return;
       if (isTyping || streamingMessageIdRef.current) {
@@ -399,7 +406,7 @@ export const PapaAI: React.FC<PapaAIProps> = memo(
           label: s.label,
           prompt: s.prompt.replace('{view}', currentView),
         })) ?? [],
-      [currentView, t.papaAI.suggestions],
+      [currentView, t.papaAI.suggestions]
     );
 
     const handleToggle = useCallback(() => setOpen(!isOpen), [isOpen, setOpen]);
@@ -407,7 +414,7 @@ export const PapaAI: React.FC<PapaAIProps> = memo(
     return (
       <>
         {/* Floating Toggle Button
-            UWAGA: gdy drawer jest otwarty, ukrywamy FAB, żeby nie nachodził na inne fixed-elementy / modale. */}
+            UWAGA: gdy drawer jest otwarty, ukrywamy FAB, ĹĽeby nie nachodziĹ‚ na inne fixed-elementy / modale. */}
         {!isOpen && (
           <button
             ref={toggleBtnRef}
@@ -423,7 +430,13 @@ export const PapaAI: React.FC<PapaAIProps> = memo(
             }}
           >
             <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-            <svg className="w-8 h-8 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <svg
+              className="w-8 h-8 relative z-10"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -434,7 +447,7 @@ export const PapaAI: React.FC<PapaAIProps> = memo(
           </button>
         )}
 
-        {/* Backdrop (ZAWSZE, także na desktop) */}
+        {/* Backdrop (ZAWSZE, takĹĽe na desktop) */}
         <AnimatePresence>
           {isOpen && (
             <motion.div
@@ -494,8 +507,19 @@ export const PapaAI: React.FC<PapaAIProps> = memo(
                     aria-label={t.papaAI.close_label}
                     className="p-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 text-gray-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-start/60"
                   >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                    <svg
+                      className="w-6 h-6"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2.5}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
                     </svg>
                   </button>
                 </div>
@@ -517,7 +541,10 @@ export const PapaAI: React.FC<PapaAIProps> = memo(
                 )}
 
                 {messages.map((msg) => (
-                  <div key={msg.id} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'} animate-reveal`}>
+                  <div
+                    key={msg.id}
+                    className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'} animate-reveal`}
+                  >
                     <div
                       className={`max-w-[90%] p-5 rounded-2xl text-sm leading-relaxed ${
                         msg.role === 'user'
@@ -527,7 +554,9 @@ export const PapaAI: React.FC<PapaAIProps> = memo(
                     >
                       <div className="whitespace-pre-wrap">{msg.text}</div>
 
-                      {msg.isStreaming && <span className="inline-block w-1.5 h-4 ml-1 bg-brand-start animate-pulse align-middle" />}
+                      {msg.isStreaming && (
+                        <span className="inline-block w-1.5 h-4 ml-1 bg-brand-start animate-pulse align-middle" />
+                      )}
 
                       {/* Meta Actions for AI Responses */}
                       {msg.role === 'papa' && !msg.isStreaming && msg.id !== 'welcome' && (
@@ -548,7 +577,13 @@ export const PapaAI: React.FC<PapaAIProps> = memo(
                             type="button"
                             className="px-3 py-1.5 rounded-lg bg-black/5 dark:bg-white/5 text-gray-500 text-xs font-black uppercase border border-black/10 dark:border-white/10 hover:bg-black/10 dark:hover:bg-white/10 transition-all flex items-center gap-2"
                           >
-                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <svg
+                              className="w-3 h-3"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                              aria-hidden="true"
+                            >
                               <path
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
@@ -606,8 +641,19 @@ export const PapaAI: React.FC<PapaAIProps> = memo(
                       aria-label={t.papaAI.send}
                       className="h-12 w-12 rounded-xl brand-gradient-bg text-white flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all disabled:opacity-30"
                     >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 19l9-2-9-18-9 18 9 2zm0 0v-8" />
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2.5}
+                          d="M12 19l9-2-9-18-9 18 9 2zm0 0v-8"
+                        />
                       </svg>
                     </button>
                   )}
@@ -624,7 +670,8 @@ export const PapaAI: React.FC<PapaAIProps> = memo(
         </AnimatePresence>
       </>
     );
-  },
+  }
 );
 
 PapaAI.displayName = 'PapaAI';
+

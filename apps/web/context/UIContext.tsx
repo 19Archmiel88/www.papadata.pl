@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+﻿import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { translations } from '../translations';
 import { UIContext, Lang, Theme } from './ui-context';
+import { safeLocalStorage } from '../utils/safeLocalStorage';
 
 const safeGet = (key: string): string | null => {
   try {
     if (typeof window === 'undefined') return null;
-    return window.localStorage.getItem(key);
+    return safeLocalStorage.getItem(key);
   } catch {
     return null;
   }
@@ -14,7 +15,7 @@ const safeGet = (key: string): string | null => {
 const safeSet = (key: string, value: string) => {
   try {
     if (typeof window === 'undefined') return;
-    window.localStorage.setItem(key, value);
+    safeLocalStorage.setItem(key, value);
   } catch {
     // noop
   }
@@ -45,7 +46,15 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     document.documentElement.lang = t?.langCode ?? lang;
   }, [lang, t]);
 
-  const toggleTheme = useCallback(() => setTheme((prev) => (prev === 'light' ? 'dark' : 'light')), []);
+  const toggleTheme = useCallback(
+    () => setTheme((prev) => (prev === 'light' ? 'dark' : 'light')),
+    []
+  );
 
-  return <UIContext.Provider value={{ theme, lang, t, setLang, toggleTheme }}>{children}</UIContext.Provider>;
+  return (
+    <UIContext.Provider value={{ theme, lang, t, setLang, toggleTheme }}>
+      {children}
+    </UIContext.Provider>
+  );
 };
+

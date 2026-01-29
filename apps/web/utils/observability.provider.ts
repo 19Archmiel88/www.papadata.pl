@@ -1,7 +1,8 @@
-// apps/web/utils/observability.provider.ts
+﻿// apps/web/utils/observability.provider.ts
 import { getObservabilityConfig } from './observability';
 import { initWebVitals } from './web-vitals';
 import { devLog } from './devlog';
+import { safeLocalStorage } from './safeLocalStorage';
 
 type SentryModule = {
   init: (options: Record<string, unknown>) => void;
@@ -25,7 +26,7 @@ type ObservabilityConfig = {
 const hasAnalyticsConsent = () => {
   if (typeof window === 'undefined') return false;
   try {
-    const raw = window.localStorage.getItem('cookie_consent');
+    const raw = safeLocalStorage.getItem('cookie_consent');
     if (!raw) return false;
     const parsed = JSON.parse(raw) as { analytical?: boolean } | null;
     return Boolean(parsed?.analytical);
@@ -197,3 +198,4 @@ export const captureMessage = (
     Sentry.captureMessage(message, options as any);
   })();
 };
+

@@ -1,4 +1,4 @@
-import {
+﻿import {
   createApiClient,
   type DashboardPandLResponse,
   type DashboardOverviewResponse,
@@ -13,6 +13,7 @@ import {
   type IntegrationSummary,
 } from '@papadata/shared';
 import { getWebConfig } from '../config';
+import { safeLocalStorage } from '../utils/safeLocalStorage';
 
 type ApiRuntimeConfig = {
   getToken?: () => string | null;
@@ -69,10 +70,12 @@ const isAbsoluteUrl = (url: string) => /^https?:\/\//i.test(url);
 
 const mergeQuery = (
   url: string,
-  params?: Record<string, string | number | undefined | null>,
+  params?: Record<string, string | number | undefined | null>
 ): string => {
   if (!params) return url;
-  const entries = Object.entries(params).filter(([, value]) => value !== undefined && value !== null);
+  const entries = Object.entries(params).filter(
+    ([, value]) => value !== undefined && value !== null
+  );
   if (!entries.length) return url;
 
   const [base, rawQuery] = url.split('?');
@@ -83,7 +86,10 @@ const mergeQuery = (
   return queryString ? `${base}?${queryString}` : base;
 };
 
-const buildUrl = (path: string, params?: Record<string, string | number | undefined | null>): string => {
+const buildUrl = (
+  path: string,
+  params?: Record<string, string | number | undefined | null>
+): string => {
   const baseUrl = getApiBaseUrl();
   const resolved = isAbsoluteUrl(path)
     ? path
@@ -92,24 +98,25 @@ const buildUrl = (path: string, params?: Record<string, string | number | undefi
 };
 
 const createRequestId = (): string => {
-  const randomId = typeof globalThis !== 'undefined' ? globalThis.crypto?.randomUUID?.() : undefined;
+  const randomId =
+    typeof globalThis !== 'undefined' ? globalThis.crypto?.randomUUID?.() : undefined;
   if (randomId) return randomId;
   return `${Date.now()}_${Math.random().toString(16).slice(2)}`;
 };
 
 const getStoredToken = (): string | null => {
   if (typeof window === 'undefined') return null;
-  return window.localStorage.getItem('papadata_auth_token');
+  return safeLocalStorage.getItem('papadata_auth_token');
 };
 
 const getStoredTenantId = (): string | null => {
   if (typeof window === 'undefined') return null;
-  return window.localStorage.getItem('pd_active_tenant_id');
+  return safeLocalStorage.getItem('pd_active_tenant_id');
 };
 
 const buildHeaders = (
   existing?: HeadersInit,
-  options?: { includeJsonContentType?: boolean; requestId?: string },
+  options?: { includeJsonContentType?: boolean; requestId?: string }
 ): Headers => {
   const headers = new Headers(existing);
 
@@ -200,7 +207,7 @@ export const apiRequestRaw = async (
   method: string,
   path: string,
   body?: unknown,
-  options?: ApiRequestOptions,
+  options?: ApiRequestOptions
 ): Promise<Response> => {
   const url = buildUrl(path);
   const timeoutMs = options?.timeoutMs ?? getWebConfig().api.timeoutMs;
@@ -208,7 +215,8 @@ export const apiRequestRaw = async (
   const controller = new AbortController();
   let didTimeout = false;
   const setTimeoutFn = typeof window === 'undefined' ? globalThis.setTimeout : window.setTimeout;
-  const clearTimeoutFn = typeof window === 'undefined' ? globalThis.clearTimeout : window.clearTimeout;
+  const clearTimeoutFn =
+    typeof window === 'undefined' ? globalThis.clearTimeout : window.clearTimeout;
 
   if (options?.signal) {
     if (options.signal.aborted) {
@@ -260,7 +268,7 @@ const apiRequest = async <T>(
   method: string,
   path: string,
   body?: unknown,
-  options?: ApiRequestOptions,
+  options?: ApiRequestOptions
 ): Promise<T> => {
   const response = await apiRequestRaw(method, path, body, options);
   return parseResponse<T>(response);
@@ -273,14 +281,16 @@ export const apiGet = async <T>(path: string, options?: ApiRequestOptions): Prom
 export const apiPost = async <T>(
   path: string,
   body?: unknown,
-  options?: ApiRequestOptions,
+  options?: ApiRequestOptions
 ): Promise<T> => {
   return apiRequest<T>('POST', path, body, options);
 };
 
 const toQueryString = (params?: Record<string, string | number | undefined | null>): string => {
   if (!params) return '';
-  const entries = Object.entries(params).filter(([, value]) => value !== undefined && value !== null);
+  const entries = Object.entries(params).filter(
+    ([, value]) => value !== undefined && value !== null
+  );
   if (!entries.length) return '';
   const search = new URLSearchParams();
   entries.forEach(([key, value]) => search.set(key, String(value)));
@@ -308,10 +318,13 @@ export const fetchDashboardGuardian = (params?: { timeRange?: string }) =>
 export const fetchDashboardAlerts = (params?: { timeRange?: string }) =>
   apiGet<DashboardAlertsResponse>(`/dashboard/alerts${toQueryString(params)}`);
 
-export const fetchDashboardKnowledge = () => apiGet<DashboardKnowledgeResponse>('/dashboard/knowledge');
+export const fetchDashboardKnowledge = () =>
+  apiGet<DashboardKnowledgeResponse>('/dashboard/knowledge');
 
-export const fetchSettingsWorkspace = () => apiGet<SettingsWorkspaceResponse>('/settings/workspace');
+export const fetchSettingsWorkspace = () =>
+  apiGet<SettingsWorkspaceResponse>('/settings/workspace');
 
 export const fetchSettingsOrg = () => apiGet<SettingsOrgResponse>('/settings/org');
 
 export const fetchIntegrations = () => apiGet<IntegrationSummary[]>('/integrations');
+

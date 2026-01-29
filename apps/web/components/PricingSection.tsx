@@ -1,4 +1,4 @@
-import React, { useMemo, useState, memo, useCallback, useEffect } from 'react';
+﻿import React, { useMemo, useState, memo, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Translation } from '../types';
 import { InteractiveButton } from './InteractiveButton';
@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { useModal } from '../context/useModal';
 import { createCheckoutSession } from '../data/billing';
 import { useAuth } from '../context/useAuth';
+import { safeLocalStorage } from '../utils/safeLocalStorage';
 
 interface PricingSectionProps {
   t: Translation;
@@ -19,7 +20,7 @@ const parsePriceNumber = (value: unknown): number | null => {
   const raw = String(value ?? '').trim();
   if (!raw) return null;
 
-  // wyciągamy pierwszą sensowną liczbę (obsługa "399", "399.00", "399,00", "399 PLN")
+  // wyciÄ…gamy pierwszÄ… sensownÄ… liczbÄ™ (obsĹ‚uga "399", "399.00", "399,00", "399 PLN")
   const m = raw.replace(/\s+/g, '').match(/(\d+(?:[.,]\d+)?)/);
   if (!m) return null;
   const normalized = m[1].replace(',', '.');
@@ -45,11 +46,7 @@ const FeatureNode = memo(({ text, isFeatured }: { text: string; isFeatured: bool
 ));
 FeatureNode.displayName = 'FeatureNode';
 
-export const PricingSection: React.FC<PricingSectionProps> = ({
-  t,
-  onCompare,
-  onPlanCtaClick,
-}) => {
+export const PricingSection: React.FC<PricingSectionProps> = ({ t, onCompare, onPlanCtaClick }) => {
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('yearly');
   const [loadingPlanId, setLoadingPlanId] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -105,7 +102,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
 
   const resolveTenantId = useCallback((): string | undefined => {
     if (typeof window === 'undefined') return undefined;
-    return window.localStorage.getItem('pd_active_tenant_id') || undefined;
+    return safeLocalStorage.getItem('pd_active_tenant_id') || undefined;
   }, []);
 
   const startCheckout = useCallback(
@@ -123,14 +120,14 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
         setLoadingPlanId(null);
       }
     },
-    [t.pricing.errors.payment_generic, t.pricing.errors.payment_start],
+    [t.pricing.errors.payment_generic, t.pricing.errors.payment_start]
   );
 
   useEffect(() => {
     if (!isAuthenticated || typeof window === 'undefined') return;
-    const storedPlan = window.localStorage.getItem('pd_selected_plan');
+    const storedPlan = safeLocalStorage.getItem('pd_selected_plan');
     if (!storedPlan) return;
-    window.localStorage.removeItem('pd_selected_plan');
+    safeLocalStorage.removeItem('pd_selected_plan');
 
     if (storedPlan === 'enterprise') return;
 
@@ -155,14 +152,17 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
     }
 
     try {
-      window.localStorage.setItem('pd_selected_plan', planId);
+      safeLocalStorage.setItem('pd_selected_plan', planId);
     } catch {
       // ignore
     }
 
     if (!isAuthenticated) {
       try {
-        window.localStorage.setItem('pd_post_login_redirect', window.location.pathname + window.location.search);
+        safeLocalStorage.setItem(
+          'pd_post_login_redirect',
+          window.location.pathname + window.location.search
+        );
       } catch {
         // ignore
       }
@@ -350,3 +350,4 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
     </section>
   );
 };
+
