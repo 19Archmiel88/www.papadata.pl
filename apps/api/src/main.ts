@@ -25,7 +25,8 @@ async function bootstrap(): Promise<void> {
   const issues = validateApiConfig();
   issues.forEach((issue) => logger.warn(issue));
   const hasCriticalIssues = issues.some((issue) => issue.startsWith('CRITICAL:'));
-  if (getApiConfig().appMode === 'prod' && hasCriticalIssues) {
+  const apiConfig = getApiConfig();
+  if (apiConfig.appMode === 'prod' && hasCriticalIssues) {
     throw new Error('Critical configuration issues detected');
   }
   const observability = initObservability();
@@ -53,13 +54,20 @@ async function bootstrap(): Promise<void> {
     routes: ['/api/billing/webhook', '/api/webhooks/stripe'],
   });
 
+  const scriptSrc = ["'self'", 'https://www.googletagmanager.com'];
+  const styleSrc = ["'self'", 'https://fonts.googleapis.com'];
+  if (apiConfig.appMode !== 'prod') {
+    scriptSrc.push("'unsafe-inline'");
+    styleSrc.push("'unsafe-inline'");
+  }
+
   const helmet = (await import('@fastify/helmet')).default;
   await fastify.register(helmet as any, {
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-inline'", 'https://www.googletagmanager.com'],
-        styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+        scriptSrc,
+        styleSrc,
         fontSrc: ["'self'", 'https://fonts.gstatic.com'],
         imgSrc: ["'self'", 'data:', 'https:'],
         connectSrc: [
@@ -78,7 +86,7 @@ async function bootstrap(): Promise<void> {
 
   const cors = (await import('@fastify/cors')).default;
   await fastify.register(cors as any, {
-    origin: getApiConfig().corsAllowedOrigins,
+    origin: apiConfig.corsAllowedOrigins,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-ID'],
@@ -86,7 +94,7 @@ async function bootstrap(): Promise<void> {
 
   app.setGlobalPrefix('api');
 
-  const port = getApiConfig().port;
+  const port = apiConfig.port;
   await app.listen(port, '0.0.0.0');
 }
 

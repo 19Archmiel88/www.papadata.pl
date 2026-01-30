@@ -37,7 +37,14 @@ export const useTenantStatus = (
         setLoading(false);
       } catch (err) {
         if (!active) return;
-        setError(err instanceof Error ? err.message : 'Nie udało się pobrać statusu danych.');
+        const statusCode = (err as { status?: number } | null)?.status;
+        const rawMessage = err instanceof Error ? err.message : '';
+        const friendlyMessage = `Nie udało się pobrać statusu danych${
+          statusCode ? ` (kod ${statusCode})` : ''
+        }. Sprawdź połączenie lub spróbuj ponownie.`;
+        const sanitized =
+          rawMessage && !/^request failed/i.test(rawMessage) ? rawMessage : friendlyMessage;
+        setError(sanitized);
         setLoading(false);
       }
     };
