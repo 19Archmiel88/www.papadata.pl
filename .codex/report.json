@@ -1,0 +1,86 @@
+{
+  "generatedAt": "2026-01-30",
+  "branch": "codex/audit-20260130",
+  "issues": [
+    {
+      "id": "API-001",
+      "area": "API/BE",
+      "severity": "high",
+      "location": "apps/api/src/modules/ai/ai.controller.ts",
+      "problem": "AI chat endpoint disables throttling because the controller is decorated with @SkipThrottle(), so the per-route @Throttle settings are never enforced.",
+      "reproduction": [
+        "Send repeated POST /api/ai/chat requests in a tight loop.",
+        "Observe that requests are not rate-limited despite configured throttling limits."
+      ],
+      "recommendation": "Remove @SkipThrottle() from the AI controller (or limit it only to routes that must bypass throttling) so ThrottlerGuard can enforce limits. (Fixed in patch.)"
+    },
+    {
+      "id": "UX-001",
+      "area": "UX/UI",
+      "severity": "medium",
+      "location": "apps/web/components/LandingChatWidget.tsx",
+      "problem": "The demo chat input relies on placeholder text only, so screen readers do not announce an accessible label for the field.",
+      "reproduction": [
+        "Open the landing page chat widget.",
+        "Tab to the input using a screen reader and note that no label is announced."
+      ],
+      "recommendation": "Provide an aria-label or an explicit <label> element for the input. (Fixed in patch.)"
+    },
+    {
+      "id": "API-002",
+      "area": "API/BE",
+      "severity": "medium",
+      "location": "apps/api/src/main.ts",
+      "problem": "There is no global ValidationPipe configuration, so DTO validation/whitelisting is not enforced for incoming requests.",
+      "reproduction": [
+        "Send malformed or unexpected payloads to endpoints like /api/auth/login or /api/ai/chat.",
+        "Observe that payloads are accepted without schema validation." 
+      ],
+      "recommendation": "Enable a global ValidationPipe with whitelist/forbidNonWhitelisted and add class-validator decorators on DTOs."
+    },
+    {
+      "id": "SEC-001",
+      "area": "API/BE",
+      "severity": "medium",
+      "location": "apps/api/src/main.ts",
+      "problem": "Helmet CSP allows 'unsafe-inline' in scriptSrc/styleSrc, which weakens XSS protections.",
+      "reproduction": [
+        "Inspect response headers and note CSP includes 'unsafe-inline' for scripts/styles."
+      ],
+      "recommendation": "Replace inline allowances with nonces or hashes and limit to required third-party domains."
+    },
+    {
+      "id": "UX-002",
+      "area": "UX/UI",
+      "severity": "low",
+      "location": "apps/web/MainLayout.tsx",
+      "problem": "Smooth scrolling is always enabled (scrollIntoView/scrollTo with behavior: 'smooth'), which can conflict with prefers-reduced-motion user settings.",
+      "reproduction": [
+        "Enable reduced motion in OS settings.",
+        "Trigger navigation that scrolls to sections and observe smooth scrolling still occurs."
+      ],
+      "recommendation": "Respect prefers-reduced-motion and fall back to instant scrolling when users request reduced motion."
+    },
+    {
+      "id": "TEST-001",
+      "area": "Quality/Test",
+      "severity": "low",
+      "location": "apps/api/test/ai.e2e-spec.ts",
+      "problem": "AI E2E tests verify streaming and empty prompts but do not assert throttling behavior, so rate limit regressions can slip through.",
+      "reproduction": [
+        "Run API E2E tests and note lack of assertions for throttling/rate limit responses."
+      ],
+      "recommendation": "Add a test that triggers the throttler and expects HTTP 429 with the configured limit/window."
+    }
+  ],
+  "environmentNotes": {
+    "envFilesCreated": [
+      "apps/api/.env.local (copied from .env.example)",
+      "apps/web/.env.local (copied from .env.example)"
+    ],
+    "missingSecrets": [
+      "apps/api: JWT_SECRET, DATABASE_URL, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, FIREBASE_PROJECT_ID, VERTEX_PROJECT_ID, OBSERVABILITY_DSN (if provider enabled)",
+      "apps/web: VITE_OBSERVABILITY_DSN, VITE_GTM_ID, VITE_GA4_ID, VITE_GOOGLE_ADS_ID, VITE_META_PIXEL_ID"
+    ]
+  }
+}

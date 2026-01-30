@@ -192,6 +192,7 @@ export const LandingChatWidget: React.FC<{
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder={copy.placeholder}
+                  aria-label={copy.placeholder}
                   className="flex-1 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-2xl px-4 py-3 text-sm font-medium outline-none focus:border-brand-start/50 transition-all text-gray-900 dark:text-white"
                 />
                 <button

@@ -11,7 +11,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import { SkipThrottle, Throttle } from '@nestjs/throttler';
+import { Throttle } from '@nestjs/throttler';
 import type { AIChatRequest, AIChatResponse } from '@papadata/shared';
 import { AiService } from './ai.service';
 import { getAppMode } from '../../common/app-mode';
@@ -31,7 +31,6 @@ const getRateLimitConfig = () => {
 };
 
 @Controller('ai')
-@SkipThrottle()
 export class AiController {
   private readonly logger = getLogger(AiController.name);
 

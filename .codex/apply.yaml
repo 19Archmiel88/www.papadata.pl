@@ -1,0 +1,12 @@
+version: 1
+apply:
+  - description: Apply audit fixes
+    command: git apply .codex/changes.patch
+validate:
+  - command: pnpm install
+  - command: pnpm --filter @papadata/web lint
+  - command: pnpm --filter @papadata/web test:unit
+  - command: pnpm --filter @papadata/web test:e2e
+  - command: pnpm --filter @papadata/web test:smoke
+  - command: pnpm --filter @papadata/api lint
+  - command: pnpm --filter @papadata/api test:e2e
