@@ -183,17 +183,21 @@ export const LandingChatWidget: React.FC<{
             <div className="p-4 border-t border-black/5 dark:border-white/5 space-y-3">
               <form
                 onSubmit={(e) => {
-                  e.preventDefault();
-                  sendMessage();
-                }}
-                className="flex items-center gap-2"
-              >
-                <input
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  placeholder={copy.placeholder}
-                  className="flex-1 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-2xl px-4 py-3 text-sm font-medium outline-none focus:border-brand-start/50 transition-all text-gray-900 dark:text-white"
-                />
+              e.preventDefault();
+              sendMessage();
+            }}
+            className="flex items-center gap-2"
+          >
+            <label className="sr-only" htmlFor="landing-chat-input">
+              {copy.placeholder}
+            </label>
+            <input
+              id="landing-chat-input"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder={copy.placeholder}
+              className="flex-1 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-2xl px-4 py-3 text-sm font-medium outline-none focus:border-brand-start/50 transition-all text-gray-900 dark:text-white"
+            />
                 <button
                   type="submit"
                   disabled={!input.trim()}

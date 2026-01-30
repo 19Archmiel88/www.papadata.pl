@@ -21,8 +21,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./*"],
-      "@papadata/shared": ["../../libs/shared/src/index.ts"],
-      "@papadata/shared/*": ["../../libs/shared/src/*"]
+      "@papadata/shared": ["../../libs/shared/dist"],
+      "@papadata/shared/*": ["../../libs/shared/dist/*"]
     },
 
     "allowImportingTsExtensions": true,

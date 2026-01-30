@@ -113,16 +113,22 @@ export const getApiConfig = (): ApiConfig => {
     (process.env.APP_MODE ?? '').trim().toLowerCase() === 'demo' ? 'demo' : 'prod';
 
   const corsAllowedOrigins = parseCsv(process.env.CORS_ALLOWED_ORIGINS);
+  const requireExplicitCors = appMode === 'prod' && nodeEnv === 'production';
+  if (requireExplicitCors && corsAllowedOrigins.length === 0) {
+    throw new Error('CORS_ALLOWED_ORIGINS must be set in prod mode.');
+  }
+
+  const resolvedCorsAllowedOrigins =
+    corsAllowedOrigins.length > 0
+      ? corsAllowedOrigins
+      : ['http://localhost:3000', 'http://localhost:5173'];
 
   const config: ApiConfig = {
     nodeEnv,
     appMode,
     port: parseNumber(process.env.PORT, 4000),
     cacheTtlMs: parseNumber(process.env.DASHBOARD_CACHE_TTL_MS ?? process.env.CACHE_TTL_MS, 15000),
-    corsAllowedOrigins:
-      corsAllowedOrigins.length > 0
-        ? corsAllowedOrigins
-        : ['http://localhost:3000', 'http://localhost:5173'],
+    corsAllowedOrigins: resolvedCorsAllowedOrigins,
     database: {
       url: process.env.DATABASE_URL,
       poolMax: parseNumber(process.env.DATABASE_POOL_MAX, 10),
