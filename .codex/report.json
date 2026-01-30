@@ -1,0 +1,132 @@
+[
+  {
+    "area": "architecture",
+    "severity": "medium",
+    "location": "apps/web/tsconfig.json:21-26",
+    "title": "Alias @papadata/shared wskazuje bezpośrednio na src",
+    "description": "Wskazanie aliasu na ../../libs/shared/src pozwala na importy poza publicznym API pakietu i może powodować rozjazd między środowiskiem dev (src) a buildem (dist).",
+    "recommendation": "Rozważyć ograniczenie aliasu do publicznego entrypointu lub stosowanie package exports/tsconfig references oraz reguł lint blokujących deep importy."
+  },
+  {
+    "area": "architecture",
+    "severity": "medium",
+    "location": "apps/api/tsconfig.json:6-11",
+    "title": "API importuje @papadata/shared bezpośrednio z src",
+    "description": "Ścieżki TS wskazują na ../../libs/shared/src, co omija publiczne API i utrudnia wykrywanie niekompatybilnych importów przy buildzie do dist.",
+    "recommendation": "Ujednolicić strategię importów do @papadata/shared (np. tylko przez exports lub dist) i wprowadzić lint guard na deep importy."
+  },
+  {
+    "area": "config",
+    "severity": "low",
+    "location": "apps/api/.eslintrc.json:1-4",
+    "title": "Duplikacja konfiguracji ESLint w apps/api",
+    "description": "W katalogu API są jednocześnie .eslintrc.js i .eslintrc.json, co może wprowadzać niejednoznaczność i trudniejsze utrzymanie reguł.",
+    "recommendation": "Pozostawić jeden plik konfiguracji ESLint i przenieść potrzebne ustawienia do głównego .eslintrc.js."
+  },
+  {
+    "area": "deps",
+    "severity": "medium",
+    "location": "apps/web/package.json:30-52",
+    "title": "Niespójne wersje TypeScript w monorepo",
+    "description": "apps/web i libs/shared używają TypeScript ~5.8.2, a apps/api ~5.5.4, co może prowadzić do różnic w type-checkingu i emitowanych typach.",
+    "recommendation": "Ujednolicić wersję TypeScript w całym monorepo (np. w root i/lub przez workspace constraints)."
+  },
+  {
+    "area": "deps",
+    "severity": "low",
+    "location": "apps/api/package.json:47-50",
+    "title": "Różne majorowe wersje ESLint w monorepo",
+    "description": "apps/web używa ESLint 9, a apps/api ESLint 8, co utrudnia spójność reguł i współdzielenie konfiguracji.",
+    "recommendation": "Ujednolicić wersję ESLint lub jasno rozdzielić configi i tooling dla pakietów."
+  },
+  {
+    "area": "deps",
+    "severity": "low",
+    "location": "libs/utm/package.json:1-10",
+    "title": "Pakiet @papadata/utm nieużywany w kodzie",
+    "description": "W workspace istnieje libs/utm, ale brak importów w apps/* i libs/*; utrudnia to utrzymanie i sugeruje martwy kod.",
+    "recommendation": "Albo podłączyć pakiet do konsumentów, albo usunąć z workspace, jeśli jest zbędny."
+  },
+  {
+    "area": "security",
+    "severity": "medium",
+    "location": "apps/api/src/common/config.ts:115-125",
+    "title": "CORS ma domyślny fallback do localhost",
+    "description": "Jeżeli CORS_ALLOWED_ORIGINS nie jest ustawione, API dopuszcza localhost, co w produkcji może prowadzić do niezamierzonej konfiguracji i trudnego debugowania.",
+    "recommendation": "Wymusić jawne ustawienie CORS_ALLOWED_ORIGINS w środowiskach prod (np. fail-fast lub osobny default zależny od APP_MODE)."
+  },
+  {
+    "area": "security",
+    "severity": "medium",
+    "location": "apps/api/src/main.ts:56-73",
+    "title": "CSP dopuszcza unsafe-inline",
+    "description": "Ustawienia CSP pozwalają na 'unsafe-inline' dla skryptów i styli, co obniża odporność na XSS.",
+    "recommendation": "Rozważyć użycie nonce/hash CSP lub ograniczenie inline tylko tam, gdzie to konieczne."
+  },
+  {
+    "area": "security",
+    "severity": "low",
+    "location": "apps/api/tsconfig.json:13-21",
+    "title": "Source maps w buildzie API",
+    "description": "sourceMap=true w tsconfig może skutkować publikacją map w środowisku produkcyjnym, co ułatwia podgląd źródeł.",
+    "recommendation": "Wyłączyć source maps dla produkcji lub usuwać .map podczas packagingu obrazu."
+  },
+  {
+    "area": "dx",
+    "severity": "low",
+    "location": "apps/web/package.json:1-5",
+    "title": "Brak README dla apps/web",
+    "description": "Pakiet nie posiada README z opisem roli, uruchamiania i publicznego API, co utrudnia onboarding.",
+    "recommendation": "Dodać README.md w apps/web z krótkim opisem i instrukcjami."
+  },
+  {
+    "area": "dx",
+    "severity": "low",
+    "location": "apps/api/package.json:1-5",
+    "title": "Brak README dla apps/api",
+    "description": "Brak lokalnej dokumentacji pakietu (cele, uruchamianie, konfiguracja), co utrudnia utrzymanie.",
+    "recommendation": "Dodać README.md w apps/api z podstawową dokumentacją."
+  },
+  {
+    "area": "dx",
+    "severity": "low",
+    "location": "libs/shared/package.json:1-8",
+    "title": "Brak README dla libs/shared",
+    "description": "Pakiet współdzielony nie posiada opisanej publicznej powierzchni i zasad zmian.",
+    "recommendation": "Dodać README.md w libs/shared z opisem API i zasad wersjonowania."
+  },
+  {
+    "area": "dx",
+    "severity": "low",
+    "location": "libs/utm/package.json:1-8",
+    "title": "Brak README dla libs/utm",
+    "description": "Brak dokumentacji utrudnia zrozumienie celu i sposobu użycia pakietu.",
+    "recommendation": "Dodać README.md z krótkim opisem, nawet jeśli pakiet jest tymczasowy."
+  },
+  {
+    "area": "uxui",
+    "severity": "medium",
+    "location": "apps/web/components/LandingChatWidget.tsx:191-196",
+    "title": "Input w czacie nie ma dostępnej etykiety",
+    "description": "Pole input ma tylko placeholder, bez aria-label lub widocznej etykiety, co pogarsza dostępność dla czytników ekranu.",
+    "recommendation": "Dodać aria-label lub widoczną etykietę powiązaną z polem."
+  },
+  {
+    "area": "uxui",
+    "severity": "low",
+    "location": "apps/web/components/dashboard/OverviewViewV2.tsx:656-656",
+    "title": "Stała wysokość wykresu może powodować problemy responsywne",
+    "description": "Wykres ma stałą wysokość (h-[320px]), co na małych ekranach może powodować overflow i obcięcia.",
+    "recommendation": "Rozważyć adaptacyjną wysokość (np. clamp) i zweryfikować na małych viewportach.",
+    "needs_visual_check": true
+  },
+  {
+    "area": "uxui",
+    "severity": "low",
+    "location": "apps/web/components/dashboard/OverviewViewV2.tsx:664-685",
+    "title": "Hardcoded kolory wykresu bez tokenów tematu",
+    "description": "Kolory linii wykresu są zakodowane na sztywno, co może dawać słabszy kontrast w dark theme lub przy zmianie brandu.",
+    "recommendation": "Zastąpić kolory tokenami tematu lub zmiennymi CSS i zweryfikować kontrast.",
+    "needs_visual_check": true
+  }
+]
