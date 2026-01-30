@@ -1,0 +1,27 @@
+{
+  "generated_at": "2026-01-30",
+  "findings": [
+    {
+      "area": "uxui-visual",
+      "severity": "medium",
+      "location": "/dashboard/overview",
+      "description": "Widoczny jest techniczny, nieprzetłumaczony komunikat błędu \"Request failed (500)\" w górnym banerze. To psuje spójność językową i wygląda jak błąd systemu zamiast kontrolowanego stanu UI.",
+      "evidence": {
+        "viewport": "desktop 1440x900",
+        "mode": "dark",
+        "screenshot": "browser:/tmp/codex_browser_invocations/869ed5c9f55bce95/artifacts/artifacts/uxui/dashboard-overview-desktop-dark.png"
+      }
+    },
+    {
+      "area": "uxui-visual",
+      "severity": "low",
+      "location": "Landing page – sekcja 'Kluczowe raporty'",
+      "description": "Nagłówek sekcji \"Kluczowe raporty gotowe dla Ciebie\" ma zbyt niski kontrast w trybie jasnym (jasnoszary tekst na białym tle), przez co jest słabo czytelny.",
+      "evidence": {
+        "viewport": "desktop 1440x900",
+        "mode": "light",
+        "screenshot": "browser:/tmp/codex_browser_invocations/869ed5c9f55bce95/artifacts/artifacts/uxui/landing-desktop-light.png"
+      }
+    }
+  ]
+}
