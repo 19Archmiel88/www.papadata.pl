@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Post,
-  Query,
-  SetMetadata,
-} from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Query, SetMetadata } from '@nestjs/common';
 import type {
   AuthMagicLinkRequest,
   AuthMagicLinkResponse,
@@ -14,16 +6,16 @@ import type {
   AuthLoginResponse,
   AuthRegisterRequest,
   AuthRegisterResponse,
-} from "@papadata/shared";
-import { IS_PUBLIC_KEY } from "../../common/firebase-auth.guard";
-import { getApiConfig } from "../../common/config";
-import { AuthService } from "./auth.service";
+} from '@papadata/shared';
+import { IS_PUBLIC_KEY } from '../../common/firebase-auth.guard';
+import { getApiConfig } from '../../common/config';
+import { AuthService } from './auth.service';
 
 const resolveRedirectUri = (redirectUri?: string): string | null => {
   const trimmed = redirectUri?.trim();
   if (!trimmed) return null;
-  if (trimmed.startsWith("//")) return null;
-  if (trimmed.startsWith("/")) return trimmed;
+  if (trimmed.startsWith('//')) return null;
+  if (trimmed.startsWith('/')) return trimmed;
 
   try {
     const url = new URL(trimmed);
@@ -45,43 +37,41 @@ const resolveRedirectUri = (redirectUri?: string): string | null => {
 };
 
 const buildOAuthStubUrl = (redirectUri: string, provider: string): string => {
-  const isRelative = redirectUri.startsWith("/");
-  const url = new URL(redirectUri, "http://localhost");
-  url.searchParams.set("provider", provider);
-  url.searchParams.set("status", "connected");
-  url.searchParams.set("code", "stub");
+  const isRelative = redirectUri.startsWith('/');
+  const url = new URL(redirectUri, 'http://localhost');
+  url.searchParams.set('provider', provider);
+  url.searchParams.set('status', 'connected');
+  url.searchParams.set('code', 'stub');
   if (isRelative) {
     return `${url.pathname}${url.search}${url.hash}`;
   }
   return url.toString();
 };
 
-@Controller("auth")
+@Controller('auth')
 @SetMetadata(IS_PUBLIC_KEY, true)
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post("magic-link")
+  @Post('magic-link')
   magicLink(@Body() payload: AuthMagicLinkRequest): AuthMagicLinkResponse {
     return this.authService.requestMagicLink(payload);
   }
 
-  @Post("login")
+  @Post('login')
   login(@Body() payload: AuthLoginRequest): AuthLoginResponse {
     return this.authService.login(payload);
   }
 
-  @Post("register")
-  async register(
-    @Body() payload: AuthRegisterRequest,
-  ): Promise<AuthRegisterResponse> {
+  @Post('register')
+  async register(@Body() payload: AuthRegisterRequest): Promise<AuthRegisterResponse> {
     return this.authService.register(payload);
   }
 
-  @Get("oauth/:provider/start")
+  @Get('oauth/:provider/start')
   oauthStart(
-    @Param("provider") provider: string,
-    @Query("redirectUri") redirectUri?: string,
+    @Param('provider') provider: string,
+    @Query('redirectUri') redirectUri?: string
   ): { authUrl: string } {
     const safeRedirect = resolveRedirectUri(redirectUri);
     const authUrl = safeRedirect

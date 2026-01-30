@@ -19,50 +19,50 @@ import { Button } from './components/ui/button';
 const FeaturesSection = React.lazy(() =>
   import('./components/FeatureSection').then((m) => ({
     default: m.FeaturesSection,
-  })),
+  }))
 );
 
 const IntegrationsMarquee = React.lazy(() =>
   import('./components/IntegrationsMarquee').then((m) => ({
     default: m.IntegrationsMarquee,
-  })),
+  }))
 );
 
 const RoiSection = React.lazy(() =>
   import('./components/RoiSection').then((m) => ({
     default: m.RoiSection,
-  })),
+  }))
 );
 
 // Lazy Loaded Features
 const VertexPlayer = React.lazy(() =>
   import('./components/VertexPlayer').then((m) => ({
     default: m.VertexPlayer,
-  })),
+  }))
 );
 
 const IntegrationsSection = React.lazy(() =>
   import('./components/IntegrationsSection').then((m) => ({
     default: m.IntegrationsSection,
-  })),
+  }))
 );
 
 const SecuritySection = React.lazy(() =>
   import('./components/SecuritySection').then((m) => ({
     default: m.SecuritySection,
-  })),
+  }))
 );
 
 const PricingSection = React.lazy(() =>
   import('./components/PricingSection').then((m) => ({
     default: m.PricingSection,
-  })),
+  }))
 );
 
 const FaqSection = React.lazy(() =>
   import('./components/FaqSection').then((m) => ({
     default: m.FaqSection,
-  })),
+  }))
 );
 
 type LazyWrapperProps = {
@@ -176,15 +176,17 @@ export const LandingPage: React.FC = () => {
   }, [chatPanelWidth]);
 
   // CTA z promo – zgodnie z zasadą: NIE idziemy do demo, tylko do auth.
-  const handleSelectPlan = useCallback((plan: 'starter' | 'professional') => {
-    try {
-      window.localStorage.setItem('pd_selected_plan', plan);
-    } catch {
-      // ignore
-    }
-    openModal('auth', { isRegistered: false });
-  }, [openModal]);
-
+  const handleSelectPlan = useCallback(
+    (plan: 'starter' | 'professional') => {
+      try {
+        window.localStorage.setItem('pd_selected_plan', plan);
+      } catch {
+        // ignore
+      }
+      openModal('auth', { isRegistered: false });
+    },
+    [openModal]
+  );
 
   const handleCookieResolution = () => {
     setHasCookieResolution(true);
@@ -210,7 +212,7 @@ export const LandingPage: React.FC = () => {
             // disableOverlayClose: true,
           },
         },
-        { stack: false },
+        { stack: false }
       );
     }, 30000);
 
@@ -240,7 +242,7 @@ export const LandingPage: React.FC = () => {
       pl: new Set(['ai', 'dane', 'rekomendacje', 'wzrostu']),
       en: new Set(['ai', 'data', 'recommendations', 'growth']),
     }),
-    [],
+    []
   );
 
   const heroLines = useMemo(
@@ -249,7 +251,7 @@ export const LandingPage: React.FC = () => {
       part2: t.hero.h1_part2,
       part3: t.hero.h1_part3,
     }),
-    [t],
+    [t]
   );
 
   const renderHeroLine = (line: string) => {
@@ -268,7 +270,9 @@ export const LandingPage: React.FC = () => {
       return (
         <React.Fragment key={`${token}-${index}`}>
           {index > 0 && ' '}
-          <span className={isHighlight ? 'animated-gradient-text font-black' : undefined}>{token}</span>
+          <span className={isHighlight ? 'animated-gradient-text font-black' : undefined}>
+            {token}
+          </span>
         </React.Fragment>
       );
     });
@@ -327,7 +331,11 @@ export const LandingPage: React.FC = () => {
                   size="lg"
                   className="!h-14 !px-8"
                 >
-                  <svg className="w-5 h-5 mr-2.5 text-brand-start fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                  <svg
+                    className="w-5 h-5 mr-2.5 text-brand-start fill-current"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
                     <path d="M8 5v14l11-7z" />
                   </svg>
                   {t.hero.secondary}
@@ -347,7 +355,10 @@ export const LandingPage: React.FC = () => {
             </div>
 
             <AnimatedHero>
-              <div className="relative animate-reveal hidden lg:block" style={{ animationDelay: '0.2s' }}>
+              <div
+                className="relative animate-reveal hidden lg:block"
+                style={{ animationDelay: '0.2s' }}
+              >
                 <Suspense
                   fallback={
                     <div className="w-full max-w-xl mx-auto h-[480px] rounded-[3rem] bg-gray-100/50 dark:bg-white/5 border border-black/5 dark:border-white/10 animate-pulse flex items-center justify-center">
@@ -423,8 +434,19 @@ export const LandingPage: React.FC = () => {
               <span className="w-2 h-2 rounded-full bg-brand-start animate-pulse" />
               <span className="hidden sm:inline">{t.hero.primary}</span>
               <span className="sm:hidden">TRIAL</span>
-              <svg className="w-4 h-4 text-brand-start" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              <svg
+                className="w-4 h-4 text-brand-start"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2.5}
+                  d="M13 7l5 5m0 0l-5 5m5-5H6"
+                />
               </svg>
             </button>
 
@@ -435,8 +457,19 @@ export const LandingPage: React.FC = () => {
               aria-label={t.common.close}
               title={t.common.close}
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2.5}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </aside>

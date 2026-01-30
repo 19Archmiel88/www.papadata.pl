@@ -10,7 +10,7 @@ test.beforeEach(async ({ page }) => {
 test('TrialNoticeModal renders', async ({ mount }) => {
   const component = await mountWithProviders(
     mount,
-    <TrialNoticeModal t={t} daysLeft={3} onPrimary={() => {}} isOpen />,
+    <TrialNoticeModal t={t} daysLeft={3} onPrimary={() => {}} isOpen />
   );
   await expect(component).toBeVisible();
 });

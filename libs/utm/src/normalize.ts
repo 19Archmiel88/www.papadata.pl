@@ -1,5 +1,5 @@
-import type { ChannelGroup } from "./channel-groups";
-import { CHANNEL_RULES } from "./channel-groups";
+import type { ChannelGroup } from './channel-groups';
+import { CHANNEL_RULES } from './channel-groups';
 
 export type UtmInput = {
   source?: string | null;
@@ -24,28 +24,24 @@ const normalizeToken = (value?: string | null): string | undefined => {
   const trimmed = value.trim().toLowerCase();
   if (!trimmed) return undefined;
   return trimmed
-    .replace(/[^a-z0-9]+/g, "_")
-    .replace(/^_+/, "")
-    .replace(/_+$/, "");
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+/, '')
+    .replace(/_+$/, '');
 };
 
 const resolveChannelGroup = (
   source: string | undefined,
-  medium: string | undefined,
+  medium: string | undefined
 ): ChannelGroup => {
-  if (!source || !medium) return "unknown";
+  if (!source || !medium) return 'unknown';
   for (const rule of CHANNEL_RULES) {
-    const sourceMatch = rule.sources
-      ? rule.sources.includes(source)
-      : true;
-    const mediumMatch = rule.mediums
-      ? rule.mediums.includes(medium)
-      : true;
+    const sourceMatch = rule.sources ? rule.sources.includes(source) : true;
+    const mediumMatch = rule.mediums ? rule.mediums.includes(medium) : true;
     if (sourceMatch && mediumMatch) {
       return rule.channelGroup;
     }
   }
-  return "unknown";
+  return 'unknown';
 };
 
 export const normalizeUtm = (input: UtmInput): UtmNormalized => {
@@ -56,8 +52,8 @@ export const normalizeUtm = (input: UtmInput): UtmNormalized => {
   const term = normalizeToken(input.term);
   const warnings: string[] = [];
 
-  if (!source) warnings.push("source_missing");
-  if (!medium) warnings.push("medium_missing");
+  if (!source) warnings.push('source_missing');
+  if (!medium) warnings.push('medium_missing');
 
   return {
     source,

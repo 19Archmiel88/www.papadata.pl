@@ -1,1 +1,1 @@
-console.log("ETL placeholder - no-op");
+console.log('ETL placeholder - no-op');

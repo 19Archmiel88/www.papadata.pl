@@ -40,7 +40,13 @@ export const SecuritySection: React.FC<SecuritySectionProps> = memo(({ t }) => {
         title: t.security.card1_title,
         desc: t.security.card1_desc,
         icon: (
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -55,7 +61,13 @@ export const SecuritySection: React.FC<SecuritySectionProps> = memo(({ t }) => {
         title: t.security.card2_title,
         desc: t.security.card2_desc,
         icon: (
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -70,7 +82,13 @@ export const SecuritySection: React.FC<SecuritySectionProps> = memo(({ t }) => {
         title: t.security.card3_title,
         desc: t.security.card3_desc,
         icon: (
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -85,17 +103,31 @@ export const SecuritySection: React.FC<SecuritySectionProps> = memo(({ t }) => {
         title: t.security.card4_title,
         desc: t.security.card4_desc,
         icon: (
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M13 10V3L4 14h7v7l9-11h-7z"
+            />
           </svg>
         ),
       },
     ],
-    [t],
+    [t]
   );
 
   return (
-    <section id="security" className="py-24 md:py-32 px-6 max-w-7xl mx-auto relative overflow-hidden">
+    <section
+      id="security"
+      className="py-24 md:py-32 px-6 max-w-7xl mx-auto relative overflow-hidden"
+    >
       <div className="text-center max-w-4xl mx-auto mb-20 space-y-8 animate-reveal">
         <h2
           className="font-black tracking-tighter text-gray-900 dark:text-white leading-[1.05] py-2 uppercase"
@@ -129,12 +161,16 @@ export const SecuritySection: React.FC<SecuritySectionProps> = memo(({ t }) => {
 
             <div className="space-y-4 relative z-20">
               <div className="inline-flex px-2.5 py-0.5 rounded bg-brand-start/10 border border-brand-start/20">
-                <span className="text-3xs font-mono font-black tracking-widest uppercase text-brand-start">{card.tag}</span>
+                <span className="text-3xs font-mono font-black tracking-widest uppercase text-brand-start">
+                  {card.tag}
+                </span>
               </div>
               <h3 className="text-base md:text-lg font-black text-gray-900 dark:text-white tracking-tighter leading-tight group-hover:brand-gradient-text transition-all duration-500 uppercase">
                 {card.title}
               </h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed font-medium">{card.desc}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed font-medium">
+                {card.desc}
+              </p>
             </div>
           </motion.div>
         ))}

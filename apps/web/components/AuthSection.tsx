@@ -1163,4 +1163,3 @@ export const AuthSection: React.FC<AuthSectionProps> = ({ t, isRegistered = fals
     </div>
   );
 };
-

@@ -1,11 +1,4 @@
-import React, {
-  Suspense,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate, Outlet, Link } from 'react-router-dom';
 import type { BillingSummary } from '@papadata/shared';
 import { useUI } from '../../context/useUI';
@@ -31,7 +24,7 @@ import { useIntegrations } from '../../hooks/useIntegrations';
 const PapaAI = React.lazy(() =>
   import('../PapaAI').then((m) => ({
     default: m.PapaAI,
-  })),
+  }))
 );
 
 const PapaAiFallback: React.FC = () => (
@@ -45,28 +38,26 @@ const PapaAiFallback: React.FC = () => (
   />
 );
 
-const SessionTimer: React.FC<{ sessionStartTime: Date }> = React.memo(
-  ({ sessionStartTime }) => {
-    const { t } = useUI();
-    const [now, setNow] = useState(() => new Date());
+const SessionTimer: React.FC<{ sessionStartTime: Date }> = React.memo(({ sessionStartTime }) => {
+  const { t } = useUI();
+  const [now, setNow] = useState(() => new Date());
 
-    useEffect(() => {
-      const id = window.setInterval(() => setNow(new Date()), 15_000);
-      return () => window.clearInterval(id);
-    }, []);
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(new Date()), 15_000);
+    return () => window.clearInterval(id);
+  }, []);
 
-    const minutesInSession = useMemo(() => {
-      const ms = now.getTime() - sessionStartTime.getTime();
-      return Math.max(0, Math.floor(ms / 60000));
-    }, [now, sessionStartTime]);
+  const minutesInSession = useMemo(() => {
+    const ms = now.getTime() - sessionStartTime.getTime();
+    return Math.max(0, Math.floor(ms / 60000));
+  }, [now, sessionStartTime]);
 
-    return (
-      <span className="text-2xs font-mono font-bold tracking-widest text-gray-500 dark:text-gray-400">
-        {t.dashboard.footer_session_time}: {minutesInSession}m
-      </span>
-    );
-  },
-);
+  return (
+    <span className="text-2xs font-mono font-bold tracking-widest text-gray-500 dark:text-gray-400">
+      {t.dashboard.footer_session_time}: {minutesInSession}m
+    </span>
+  );
+});
 
 function useMediaQuery(query: string) {
   const getMatch = () => {
@@ -121,10 +112,8 @@ export const DashboardSection: React.FC = () => {
   const [sessionStartTime] = useState(new Date());
   const [lastUpdate] = useState(() => new Date(Date.now() - 45 * 60 * 1000));
   const [now, setNow] = useState(() => new Date());
-  const [appMode, setAppMode] =
-    useState<DashboardOutletContext['appMode']>('prod');
-  const [billingSummary, setBillingSummary] =
-    useState<BillingSummary | null>(null);
+  const [appMode, setAppMode] = useState<DashboardOutletContext['appMode']>('prod');
+  const [billingSummary, setBillingSummary] = useState<BillingSummary | null>(null);
   const [billingError, setBillingError] = useState<string | null>(null);
   const tenantId = useMemo(() => {
     if (typeof window === 'undefined') return undefined;
@@ -156,25 +145,20 @@ export const DashboardSection: React.FC = () => {
   const [integrationStatus, setIntegrationStatus] = useState<
     Record<string, IntegrationConnectionState>
   >(() =>
-    (integrations || [])
-      .filter(Boolean)
-      .reduce(
-        (acc, item) => ({
-          ...acc,
-          [item.id]: 'idle' as IntegrationConnectionState,
-        }),
-        {},
-      ),
+    (integrations || []).filter(Boolean).reduce(
+      (acc, item) => ({
+        ...acc,
+        [item.id]: 'idle' as IntegrationConnectionState,
+      }),
+      {}
+    )
   );
 
   // Local demo connectors & privacy settings – real state, żeby kliknięcia w settings/integrations coś robiły
   const [connectors, setConnectors] = useState<Record<string, boolean>>(() =>
     (integrations || [])
       .filter(Boolean)
-      .reduce(
-        (acc, item) => ({ ...acc, [item.id]: false }),
-        {} as Record<string, boolean>,
-      ),
+      .reduce((acc, item) => ({ ...acc, [item.id]: false }), {} as Record<string, boolean>)
   );
   const [retentionDays, setRetentionDays] = useState<number>(30);
   const [maskingEnabled, setMaskingEnabled] = useState<boolean>(true);
@@ -260,8 +244,7 @@ export const DashboardSection: React.FC = () => {
       (billingSummary.billingStatus === 'trialing' && !trialExpired)
     : true;
   const isReadOnly = !isDemo && !isAccountActive;
-  const isDataStale =
-    now.getTime() - lastUpdate.getTime() > 4 * 60 * 60 * 1000;
+  const isDataStale = now.getTime() - lastUpdate.getTime() > 4 * 60 * 60 * 1000;
 
   useEffect(() => {
     if (isDemo) {
@@ -271,8 +254,7 @@ export const DashboardSection: React.FC = () => {
     if (!billingSummary) return;
     const isActive =
       billingSummary.billingStatus === 'active' ||
-      (billingSummary.billingStatus === 'trialing' &&
-        !billingSummary.isTrialExpired);
+      (billingSummary.billingStatus === 'trialing' && !billingSummary.isTrialExpired);
     setAiMode(billingSummary.entitlements.features.ai && isActive);
   }, [billingSummary, isDemo]);
 
@@ -373,14 +355,9 @@ export const DashboardSection: React.FC = () => {
       professional: t.pricing.professional.name,
       enterprise: t.pricing.enterprise.name,
     }),
-    [
-      t.pricing.enterprise.name,
-      t.pricing.professional.name,
-      t.pricing.starter.name,
-    ],
+    [t.pricing.enterprise.name, t.pricing.professional.name, t.pricing.starter.name]
   );
-  const planLabel =
-    planLabels[planId as keyof typeof planLabels] ?? planLabels.professional;
+  const planLabel = planLabels[planId as keyof typeof planLabels] ?? planLabels.professional;
 
   const modeLabel = isDemo
     ? t.dashboard.demo_pill
@@ -389,18 +366,16 @@ export const DashboardSection: React.FC = () => {
       : t.dashboard.prod_pill;
 
   const trialLabel =
-    trialDays !== null
-      ? t.dashboard.trial_days_left.replace('{days}', String(trialDays))
-      : '';
+    trialDays !== null ? t.dashboard.trial_days_left.replace('{days}', String(trialDays)) : '';
 
   const trialDaysValue = typeof trialDays === 'number' ? trialDays : 0;
   const trialBannerOwner = t.dashboard.billing.trial_banner_owner.replace(
     '{days}',
-    String(trialDaysValue),
+    String(trialDaysValue)
   );
   const trialBannerMember = t.dashboard.billing.trial_banner_member.replace(
     '{days}',
-    String(trialDaysValue),
+    String(trialDaysValue)
   );
   const primaryBillingCta =
     billingStatus === 'past_due'
@@ -409,11 +384,7 @@ export const DashboardSection: React.FC = () => {
 
   const appModeResolved = isDemo ? 'demo' : isTrial ? 'trial' : 'prod';
   const planTier =
-    planId === 'starter'
-      ? 'Starter'
-      : planId === 'enterprise'
-        ? 'Enterprise'
-        : 'Professional';
+    planId === 'starter' ? 'Starter' : planId === 'enterprise' ? 'Enterprise' : 'Professional';
 
   const filterLabelMap = useMemo(
     () => ({
@@ -427,7 +398,7 @@ export const DashboardSection: React.FC = () => {
       t.dashboard.filter_country,
       t.dashboard.filter_device,
       t.dashboard.filter_store,
-    ],
+    ]
   );
 
   const resolveFilterValue = useCallback(
@@ -475,7 +446,7 @@ export const DashboardSection: React.FC = () => {
       t.dashboard.filter_option_tablet,
       t.dashboard.filter_option_tiktok,
       t.dashboard.filter_option_uk,
-    ],
+    ]
   );
 
   const activeFilters = useMemo(
@@ -491,7 +462,7 @@ export const DashboardSection: React.FC = () => {
           value,
           valueLabel: resolveFilterValue(key, value),
         })),
-    [filters, filterLabelMap, resolveFilterValue],
+    [filters, filterLabelMap, resolveFilterValue]
   );
 
   const clearFilters = useCallback(() => {
@@ -566,7 +537,7 @@ export const DashboardSection: React.FC = () => {
         onPrimary: handleUpgrade,
       });
     },
-    [handleUpgrade, openModal],
+    [handleUpgrade, openModal]
   );
 
   const openIntegrationModal = useCallback(
@@ -599,7 +570,7 @@ export const DashboardSection: React.FC = () => {
       openDemoNotice,
       openModal,
       t.integrations.items,
-    ],
+    ]
   );
 
   const menuItems = useMemo(
@@ -623,8 +594,18 @@ export const DashboardSection: React.FC = () => {
         label: t.dashboard.menu_analytics,
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"
+            />
           </svg>
         ),
       },
@@ -661,7 +642,12 @@ export const DashboardSection: React.FC = () => {
         label: t.dashboard.menu_products,
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+            />
           </svg>
         ),
       },
@@ -704,12 +690,17 @@ export const DashboardSection: React.FC = () => {
               strokeWidth={2}
               d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066 2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
             />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+            />
           </svg>
         ),
       },
     ],
-    [t],
+    [t]
   );
 
   const trustItems = useMemo(
@@ -719,7 +710,12 @@ export const DashboardSection: React.FC = () => {
         label: t.dashboard.menu_guardian,
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3l7 4v5c0 4.418-3.134 8.418-7 9-3.866-.582-7-4.582-7-9V7l7-4z" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 3l7 4v5c0 4.418-3.134 8.418-7 9-3.866-.582-7-4.582-7-9V7l7-4z"
+            />
           </svg>
         ),
       },
@@ -728,7 +724,12 @@ export const DashboardSection: React.FC = () => {
         label: t.dashboard.menu_alerts,
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20 10 10 0 000-20z" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20 10 10 0 000-20z"
+            />
           </svg>
         ),
       },
@@ -737,12 +738,17 @@ export const DashboardSection: React.FC = () => {
         label: t.dashboard.menu_pipeline,
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 7h6m-6 5h12m-6 5h6" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 7h6m-6 5h12m-6 5h6"
+            />
           </svg>
         ),
       },
     ],
-    [t],
+    [t]
   );
 
   // Kolejność (zaakceptowana): Overview → Trust → reszta
@@ -758,8 +764,7 @@ export const DashboardSection: React.FC = () => {
   }, [overviewItem, restMenuItems, trustItems]);
 
   const viewFromPath = location.pathname.split('/')[2] as string | undefined;
-  const activeViewId =
-    orderedMenu.find((it) => it.id === viewFromPath)?.id || 'overview';
+  const activeViewId = orderedMenu.find((it) => it.id === viewFromPath)?.id || 'overview';
 
   const handleNavigate = (view: string) => {
     setIsMobileSidebarOpen(false);
@@ -833,9 +838,7 @@ export const DashboardSection: React.FC = () => {
                 : 'opacity-0 -translate-x-10 pointer-events-none lg:hidden'
             }`}
           >
-            <span className="font-black text-lg tracking-tighter leading-none">
-              PapaData
-            </span>
+            <span className="font-black text-lg tracking-tighter leading-none">PapaData</span>
             <span className="text-4xs font-bold text-brand-start tracking-widest uppercase mt-1">
               Intelligence
             </span>
@@ -850,7 +853,12 @@ export const DashboardSection: React.FC = () => {
           aria-label={t.common.close ?? 'Close'}
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2.5}
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         </button>
       </div>
@@ -1132,14 +1140,21 @@ export const DashboardSection: React.FC = () => {
               aria-label={t.dashboard.nav_group_actions}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16M4 18h16" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2.5}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
               </svg>
             </button>
 
             <div className="hidden sm:flex flex-col gap-1">
               <div className="flex items-center gap-2">
                 <div className={`w-1.5 h-1.5 rounded-full ${sessionMeta.dot} animate-pulse`} />
-                <span className={`text-2xs md:text-xs font-black uppercase tracking-widest whitespace-nowrap ${sessionMeta.text}`}>
+                <span
+                  className={`text-2xs md:text-xs font-black uppercase tracking-widest whitespace-nowrap ${sessionMeta.text}`}
+                >
                   {t.dashboard.status_label}: {sessionMeta.label}
                 </span>
               </div>
@@ -1207,7 +1222,9 @@ export const DashboardSection: React.FC = () => {
               type="button"
               onClick={toggleTheme}
               className="hidden md:flex p-2.5 md:p-3 rounded-2xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/10 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-all"
-              aria-label={theme === 'light' ? t.common.toggle_theme_dark : t.common.toggle_theme_light}
+              aria-label={
+                theme === 'light' ? t.common.toggle_theme_dark : t.common.toggle_theme_light
+              }
             >
               {theme === 'dark' ? (
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1220,7 +1237,12 @@ export const DashboardSection: React.FC = () => {
                 </svg>
               ) : (
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"
+                  />
                 </svg>
               )}
             </button>
@@ -1237,7 +1259,12 @@ export const DashboardSection: React.FC = () => {
               aria-label="Papa AI"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 10V3L4 14h7v7l9-11h-7z"
+                />
               </svg>
             </button>
 
@@ -1318,7 +1345,12 @@ export const DashboardSection: React.FC = () => {
                   className="hover:scale-110 transition-transform"
                 >
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={3}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               </div>
@@ -1343,7 +1375,12 @@ export const DashboardSection: React.FC = () => {
                   className="hover:scale-110 transition-transform"
                 >
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={3}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               </div>

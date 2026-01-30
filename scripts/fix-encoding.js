@@ -5,35 +5,78 @@ const ROOT = process.cwd();
 const BACKUP_DIR = path.join(ROOT, 'docs', 'audits', 'backup');
 
 const EXCLUDED_DIRS = new Set([
-  'node_modules', '.next', 'dist', 'build', '.git', '.turbo', '.cache', 'coverage',
-  '.playwright', 'test-results', 'playwright-report', '.vscode'
+  'node_modules',
+  '.next',
+  'dist',
+  'build',
+  '.git',
+  '.turbo',
+  '.cache',
+  'coverage',
+  '.playwright',
+  'test-results',
+  'playwright-report',
+  '.vscode',
 ]);
 
-const EXCLUDED_PATH_PREFIXES = [
-  'docs/audits/backup/',
-];
+const EXCLUDED_PATH_PREFIXES = ['docs/audits/backup/'];
 
 const BINARY_EXTS = new Set([
-  '.png', '.jpg', '.jpeg', '.gif', '.webp', '.svgz', '.ico',
-  '.pdf', '.woff', '.woff2', '.ttf', '.eot', '.zip', '.gz',
-  '.tar', '.7z', '.rar', '.mp4', '.mp3', '.mov', '.avi',
-  '.exe', '.dll', '.bin'
+  '.png',
+  '.jpg',
+  '.jpeg',
+  '.gif',
+  '.webp',
+  '.svgz',
+  '.ico',
+  '.pdf',
+  '.woff',
+  '.woff2',
+  '.ttf',
+  '.eot',
+  '.zip',
+  '.gz',
+  '.tar',
+  '.7z',
+  '.rar',
+  '.mp4',
+  '.mp3',
+  '.mov',
+  '.avi',
+  '.exe',
+  '.dll',
+  '.bin',
 ]);
 
-const CONFIG_EXTS = new Set([
-  '.json', '.yml', '.yaml', '.env', '.ini', '.toml', '.properties'
-]);
+const CONFIG_EXTS = new Set(['.json', '.yml', '.yaml', '.env', '.ini', '.toml', '.properties']);
 
 const TEXT_EXT_HINTS = new Set([
-  '.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs', '.json', '.jsonc', '.yml', '.yaml',
-  '.md', '.txt', '.css', '.scss', '.html', '.sh', '.ps1', '.env', '.env.example'
+  '.ts',
+  '.tsx',
+  '.js',
+  '.jsx',
+  '.mjs',
+  '.cjs',
+  '.json',
+  '.jsonc',
+  '.yml',
+  '.yaml',
+  '.md',
+  '.txt',
+  '.css',
+  '.scss',
+  '.html',
+  '.sh',
+  '.ps1',
+  '.env',
+  '.env.example',
 ]);
 
 const SMART_QUOTES_MAP = {
   '\u2018': "'",
   '\u2019': "'",
   '\u201C': '"',
-  '\u201D': '"'
+  '\u201D': '"',
 };
 
 const isEnvFile = (filePath) => {
@@ -58,12 +101,14 @@ const hasNullByte = (buf) => {
   return false;
 };
 
-const detectUtf8Bom = (buf) => buf.length >= 3 && buf[0] === 0xef && buf[1] === 0xbb && buf[2] === 0xbf;
+const detectUtf8Bom = (buf) =>
+  buf.length >= 3 && buf[0] === 0xef && buf[1] === 0xbb && buf[2] === 0xbf;
 
 const normalizeSmartQuotes = (text) =>
   text.replace(/[\u2018\u2019\u201C\u201D]/g, (m) => SMART_QUOTES_MAP[m] || m);
 
-const stripHiddenChars = (text) => text.replace(/[\u00A0\u200B\uFEFF]/g, (m) => (m === '\u00A0' ? ' ' : ''));
+const stripHiddenChars = (text) =>
+  text.replace(/[\u00A0\u200B\uFEFF]/g, (m) => (m === '\u00A0' ? ' ' : ''));
 
 const normalizeEolForShell = (text) => text.replace(/\r\n/g, '\n');
 const normalizeEolForPs1 = (text) => text.replace(/\r?\n/g, '\r\n');

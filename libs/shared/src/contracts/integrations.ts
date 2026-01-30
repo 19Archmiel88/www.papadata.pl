@@ -5,12 +5,7 @@ export type IntegrationStatus =
   | 'error'
   | 'disabled';
 
-export type IntegrationAuthType =
-  | 'oauth2'
-  | 'api_key'
-  | 'webhook'
-  | 'service_account'
-  | 'partner';
+export type IntegrationAuthType = 'oauth2' | 'api_key' | 'webhook' | 'service_account' | 'partner';
 
 export interface IntegrationSummary {
   provider: string;

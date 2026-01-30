@@ -24,7 +24,11 @@ const emitError = (handlers: StreamChatHandlers, error: StreamChatError) => {
   throw new Error(error.message);
 };
 
-const parseEventChunk = (chunk: string, onToken: (token: string) => void, onDone?: () => void): boolean => {
+const parseEventChunk = (
+  chunk: string,
+  onToken: (token: string) => void,
+  onDone?: () => void
+): boolean => {
   const lines = chunk.split('\n');
   for (const line of lines) {
     const trimmed = line.trim();
@@ -45,18 +49,16 @@ const parseEventChunk = (chunk: string, onToken: (token: string) => void, onDone
   return false;
 };
 
-export const streamChat = async (payload: AIChatRequest, handlers: StreamChatHandlers): Promise<void> => {
+export const streamChat = async (
+  payload: AIChatRequest,
+  handlers: StreamChatHandlers
+): Promise<void> => {
   try {
-    const response = await apiRequestRaw(
-      'POST',
-      '/ai/chat?stream=1',
-      payload,
-      {
-        signal: handlers.signal,
-        timeoutMs: getWebConfig().api.aiTimeoutMs,
-        headers: { Accept: 'text/event-stream' },
-      },
-    );
+    const response = await apiRequestRaw('POST', '/ai/chat?stream=1', payload, {
+      signal: handlers.signal,
+      timeoutMs: getWebConfig().api.aiTimeoutMs,
+      headers: { Accept: 'text/event-stream' },
+    });
 
     const contentType = response.headers.get('content-type') ?? '';
 

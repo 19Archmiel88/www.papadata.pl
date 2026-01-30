@@ -112,9 +112,7 @@ const isStagingOrProduction = (): boolean => {
   }
 
   const baseUrl =
-    getEnvValue('PLAYWRIGHT_BASE_URL') ??
-    getEnvValue('BASE_URL') ??
-    getEnvValue('WEB_BASE_URL');
+    getEnvValue('PLAYWRIGHT_BASE_URL') ?? getEnvValue('BASE_URL') ?? getEnvValue('WEB_BASE_URL');
   if (!baseUrl) return false;
 
   try {
@@ -179,7 +177,7 @@ export const mockApi = async (page: Page, options: MockApiOptions = {}) => {
       authTenantId,
       authUserId,
       consentMode,
-    },
+    }
   );
 
   await page.route('**/api/**', async (route) => {

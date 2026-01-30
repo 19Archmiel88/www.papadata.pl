@@ -25,19 +25,23 @@ Dokument bazuje na: `dokumentacjaProdukcyjna/GCP.md`, `docs/runbooks/stg-release
 ## 1) Workflow release (nasz docelowy)
 
 ### Etap 1 — Lokalnie: zmiany + weryfikacja
+
 - Zmiany robisz lokalnie.
 - Odpalasz API + WEB lokalnie.
 - Uruchamiasz lint/testy i robisz smoke endpointów (JSON + SSE).
 
 ### Etap 2 — Push do Git → auto deploy na STG
+
 - Push do repo.
 - STG aktualizuje się automatycznie (Cloud Run / pipeline powiązany z repo).
 
 ### Etap 3 — STG: smoke + E2E
+
 - Smoke: health, AI chat (JSON + SSE), CORS.
 - E2E: rejestracja, płatności, integracje, limity/trial.
 
 ### Etap 4 — Promocja na PROD
+
 - Po przejściu STG: jeden krok wdrożenia na `papadata-platform-prod`.
 - Produkcyjny entrypoint: `https://www.papadata.pl`.
 
@@ -46,28 +50,34 @@ Dokument bazuje na: `dokumentacjaProdukcyjna/GCP.md`, `docs/runbooks/stg-release
 ## 2) Wymagania infrastrukturalne po stronie GCP (MUST)
 
 ### 2.1 Cloud Run — API
+
 - STG: serwis **`papadata-api-stg`** (deploy wg runbooka STG).
 - PROD: serwis **`papadata-api-v2`** (wg status/checklist).
 - Region: `europe-central2`.
 - Publiczny dostęp (allow-unauthenticated) + autoryzacja w aplikacji (JWT/IdP) zgodnie z konfiguracją.
 
 ### 2.2 Global HTTPS Load Balancer + NEG (edge)
+
 - HTTPS LB skonfigurowany z backend service → **serverless NEG** → Cloud Run.
 - Managed Certificate aktywny dla `www.papadata.pl` (PROD).
 
 ### 2.3 Cloud Armor (WAF)
+
 - Polityka `papadata-security-policy` podpięta do backend service dla API.
 
 ### 2.4 DNS (Cyber_Folks + Cloud DNS)
+
 - Rejestrator domeny: Cyber_Folks.
 - DNS zarządzany w Cloud DNS (NS ustawione w Cyber_Folks).
 - `www.papadata.pl` wskazuje na IP LB.
 
 ### 2.5 Identity Platform (Auth)
+
 - Włączone metody logowania: Email + Google + Microsoft.
 - Auth Domain (z notatek): `papadata-platform-prod.firebaseapp.com`.
 
 ### 2.6 Secret Manager
+
 - Sekrety (JWT, Stripe, itp.) trzymane w Secret Manager.
 - Brak sekretów w kodzie i w froncie.
 - Sekrety odseparowane per środowisko (STG/PROD) i docelowo per tenant.
@@ -79,6 +89,7 @@ Dokument bazuje na: `dokumentacjaProdukcyjna/GCP.md`, `docs/runbooks/stg-release
 Źródło: `apps/api/src/common/config.ts` i `apps/api/.env.example`.
 
 ### 3.1 Minimalny zestaw
+
 - `PORT=4000`
 - `APP_MODE=demo|prod`
 - `CORS_ALLOWED_ORIGINS=...` (dokładne originy WEB)
@@ -90,6 +101,7 @@ Dokument bazuje na: `dokumentacjaProdukcyjna/GCP.md`, `docs/runbooks/stg-release
   - `AI_TIMEOUT_MS`, `AI_RATE_LIMIT_MAX`, `AI_RATE_LIMIT_WINDOW_MS`
 
 ### 3.2 STG values (z runbooków)
+
 - `APP_MODE=demo`
 - `PORT=4000`
 - `VERTEX_PROJECT_ID=papadata-platform-stg`
@@ -104,6 +116,7 @@ Dokument bazuje na: `dokumentacjaProdukcyjna/GCP.md`, `docs/runbooks/stg-release
 - `CORS_ALLOWED_ORIGINS=https://stg.papadata.pl`
 
 ### 3.3 PROD values (wg założeń środowisk)
+
 - `APP_MODE=prod`
 - `PORT=4000`
 - `VERTEX_PROJECT_ID=papadata-platform-prod`
@@ -121,10 +134,12 @@ Dokument bazuje na: `dokumentacjaProdukcyjna/GCP.md`, `docs/runbooks/stg-release
 Źródło: `apps/web/config.ts` + `.env.example`.
 
 ### 4.1 Lokalne dev
+
 - `VITE_API_BASE_URL=/api`
 - `VITE_API_PROXY_TARGET=http://localhost:4000`
 
 ### 4.2 STG/PROD (wg runbooków testowych)
+
 - API w testach idzie po: `https://api.papadata.pl/api`
 - WEB:
   - STG: `https://stg.papadata.pl`
@@ -148,5 +163,7 @@ Dokument bazuje na: `dokumentacjaProdukcyjna/GCP.md`, `docs/runbooks/stg-release
 - `CORS_ALLOWED_ORIGINS` musi zawierać dokładny origin WEB.
 
 Przykład:
+
 ```bash
 CORS_ALLOWED_ORIGINS=https://www.papadata.pl,https://stg.papadata.pl
+```

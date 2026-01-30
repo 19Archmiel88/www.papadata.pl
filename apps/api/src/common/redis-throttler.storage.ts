@@ -1,7 +1,7 @@
-import { Injectable, OnModuleDestroy } from "@nestjs/common";
-import { ThrottlerStorage } from "@nestjs/throttler";
-import type { ThrottlerStorageRecord } from "@nestjs/throttler/dist/throttler-storage-record.interface";
-import type { Redis } from "ioredis";
+import { Injectable, OnModuleDestroy } from '@nestjs/common';
+import { ThrottlerStorage } from '@nestjs/throttler';
+import type { ThrottlerStorageRecord } from '@nestjs/throttler/dist/throttler-storage-record.interface';
+import type { Redis } from 'ioredis';
 
 const INCR_SCRIPT = `
 local current = redis.call("INCR", KEYS[1])
@@ -13,9 +13,7 @@ return {current, ttl}
 `;
 
 @Injectable()
-export class RedisThrottlerStorage
-  implements ThrottlerStorage, OnModuleDestroy
-{
+export class RedisThrottlerStorage implements ThrottlerStorage, OnModuleDestroy {
   constructor(private readonly redis: Redis) {}
 
   async onModuleDestroy() {
@@ -27,7 +25,7 @@ export class RedisThrottlerStorage
     ttl: number,
     limit: number,
     blockDuration: number,
-    throttlerName: string,
+    throttlerName: string
   ): Promise<ThrottlerStorageRecord> {
     const throttleKey = `throttle:${throttlerName}:${key}`;
     const blockKey = `throttle:${throttlerName}:block:${key}`;
@@ -46,12 +44,7 @@ export class RedisThrottlerStorage
     }
 
     // Normal rate-limit window increment
-    const result = (await this.redis.eval(
-      INCR_SCRIPT,
-      1,
-      throttleKey,
-      ttl,
-    )) as [number, number];
+    const result = (await this.redis.eval(INCR_SCRIPT, 1, throttleKey, ttl)) as [number, number];
     const totalHits = Number(result?.[0] ?? 0);
     const ttlRemaining = Number(result?.[1] ?? ttl);
     const timeToExpire = ttlRemaining > 0 ? ttlRemaining : ttl;
@@ -61,7 +54,7 @@ export class RedisThrottlerStorage
     let timeToBlockExpire = 0;
 
     if (totalHits > limit && blockDuration > 0) {
-      await this.redis.psetex(blockKey, blockDuration, "1");
+      await this.redis.psetex(blockKey, blockDuration, '1');
       isBlocked = true;
       timeToBlockExpire = blockDuration;
     }

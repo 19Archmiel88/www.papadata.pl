@@ -8,6 +8,9 @@ test.beforeEach(async ({ page }) => {
 });
 
 test('PricingModal renders', async ({ mount }) => {
-  const component = await mountWithProviders(mount, <PricingModal t={t} onClose={() => {}} isOpen />);
+  const component = await mountWithProviders(
+    mount,
+    <PricingModal t={t} onClose={() => {}} isOpen />
+  );
   await expect(component).toBeVisible();
 });

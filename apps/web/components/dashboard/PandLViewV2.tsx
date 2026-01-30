@@ -313,19 +313,110 @@ export const PandLViewV2: React.FC = () => {
       pctOfRevenue?: number | null;
       tone?: 'pos' | 'neg' | 'neutral';
     }> = [
-      { id: 'revenue', label: labels.revenue, value: pnl.revenue, isCost: false, pctOfRevenue: 1, tone: 'pos' },
-      { id: 'cogs', label: labels.cogs, value: pnl.cogs, isCost: true, pctOfRevenue: pnl.cogs / revenueSafe, tone: 'neg' },
-      { id: 'fees', label: labels.fees, value: pnl.fees, isCost: true, pctOfRevenue: pnl.fees / revenueSafe, tone: 'neg' },
-      { id: 'refunds', label: labels.refunds, value: pnl.refunds, isCost: true, pctOfRevenue: pnl.refunds / revenueSafe, tone: 'neg' },
-      { id: 'shipping', label: labels.shipping, value: pnl.shipping, isCost: true, pctOfRevenue: pnl.shipping / revenueSafe, tone: 'neg' },
-      { id: 'grossProfit', label: labels.grossProfit, value: pnl.grossProfit, isCost: false, pctOfRevenue: pnl.grossMargin, tone: 'pos' },
-      { id: 'adSpend', label: labels.adSpend, value: pnl.adSpend, isCost: true, pctOfRevenue: pnl.adSpend / revenueSafe, tone: 'neg' },
-      { id: 'contribution', label: 'Contribution', value: pnl.contribution, isCost: false, pctOfRevenue: pnl.contributionMargin, tone: 'pos' },
-      { id: 'payroll', label: labels.payroll, value: pnl.payroll, isCost: true, pctOfRevenue: pnl.payroll / revenueSafe, tone: 'neg' },
-      { id: 'tools', label: labels.tools, value: pnl.tools, isCost: true, pctOfRevenue: pnl.tools / revenueSafe, tone: 'neg' },
-      { id: 'ebitda', label: labels.ebitdaLabel, value: pnl.ebitda, isCost: false, pctOfRevenue: pnl.ebitda / revenueSafe, tone: pnl.ebitda >= 0 ? 'pos' : 'neg' },
-      { id: 'tax', label: 'Tax', value: pnl.tax, isCost: true, pctOfRevenue: pnl.tax / revenueSafe, tone: 'neg' },
-      { id: 'netProfit', label: labels.netProfit, value: pnl.netProfit, isCost: false, pctOfRevenue: pnl.netMargin, tone: pnl.netProfit >= 0 ? 'pos' : 'neg' },
+      {
+        id: 'revenue',
+        label: labels.revenue,
+        value: pnl.revenue,
+        isCost: false,
+        pctOfRevenue: 1,
+        tone: 'pos',
+      },
+      {
+        id: 'cogs',
+        label: labels.cogs,
+        value: pnl.cogs,
+        isCost: true,
+        pctOfRevenue: pnl.cogs / revenueSafe,
+        tone: 'neg',
+      },
+      {
+        id: 'fees',
+        label: labels.fees,
+        value: pnl.fees,
+        isCost: true,
+        pctOfRevenue: pnl.fees / revenueSafe,
+        tone: 'neg',
+      },
+      {
+        id: 'refunds',
+        label: labels.refunds,
+        value: pnl.refunds,
+        isCost: true,
+        pctOfRevenue: pnl.refunds / revenueSafe,
+        tone: 'neg',
+      },
+      {
+        id: 'shipping',
+        label: labels.shipping,
+        value: pnl.shipping,
+        isCost: true,
+        pctOfRevenue: pnl.shipping / revenueSafe,
+        tone: 'neg',
+      },
+      {
+        id: 'grossProfit',
+        label: labels.grossProfit,
+        value: pnl.grossProfit,
+        isCost: false,
+        pctOfRevenue: pnl.grossMargin,
+        tone: 'pos',
+      },
+      {
+        id: 'adSpend',
+        label: labels.adSpend,
+        value: pnl.adSpend,
+        isCost: true,
+        pctOfRevenue: pnl.adSpend / revenueSafe,
+        tone: 'neg',
+      },
+      {
+        id: 'contribution',
+        label: 'Contribution',
+        value: pnl.contribution,
+        isCost: false,
+        pctOfRevenue: pnl.contributionMargin,
+        tone: 'pos',
+      },
+      {
+        id: 'payroll',
+        label: labels.payroll,
+        value: pnl.payroll,
+        isCost: true,
+        pctOfRevenue: pnl.payroll / revenueSafe,
+        tone: 'neg',
+      },
+      {
+        id: 'tools',
+        label: labels.tools,
+        value: pnl.tools,
+        isCost: true,
+        pctOfRevenue: pnl.tools / revenueSafe,
+        tone: 'neg',
+      },
+      {
+        id: 'ebitda',
+        label: labels.ebitdaLabel,
+        value: pnl.ebitda,
+        isCost: false,
+        pctOfRevenue: pnl.ebitda / revenueSafe,
+        tone: pnl.ebitda >= 0 ? 'pos' : 'neg',
+      },
+      {
+        id: 'tax',
+        label: 'Tax',
+        value: pnl.tax,
+        isCost: true,
+        pctOfRevenue: pnl.tax / revenueSafe,
+        tone: 'neg',
+      },
+      {
+        id: 'netProfit',
+        label: labels.netProfit,
+        value: pnl.netProfit,
+        isCost: false,
+        pctOfRevenue: pnl.netMargin,
+        tone: pnl.netProfit >= 0 ? 'pos' : 'neg',
+      },
     ];
 
     return lines;
@@ -410,7 +501,11 @@ export const PandLViewV2: React.FC = () => {
         <div className="lg:col-span-8 space-y-8">
           <div className="glass p-10 rounded-[3rem] border border-black/10 dark:border-white/5 bg-white/50 dark:bg-black/30 relative overflow-hidden">
             <div className="flex flex-wrap items-center justify-between gap-6 mb-10">
-              <div className="flex p-1 bg-black/5 dark:bg-white/5 rounded-2xl border border-black/5 dark:border-white/10" role="tablist" aria-label="P&L tabs">
+              <div
+                className="flex p-1 bg-black/5 dark:bg-white/5 rounded-2xl border border-black/5 dark:border-white/10"
+                role="tablist"
+                aria-label="P&L tabs"
+              >
                 <button
                   type="button"
                   role="tab"
@@ -461,14 +556,20 @@ export const PandLViewV2: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
               {[
                 { label: labels.revenue, val: pnl.revenue, color: 'text-gray-900 dark:text-white' },
-                { label: labels.grossProfit, val: pnl.grossProfit, color: 'text-gray-900 dark:text-white' },
+                {
+                  label: labels.grossProfit,
+                  val: pnl.grossProfit,
+                  color: 'text-gray-900 dark:text-white',
+                },
                 { label: labels.netProfit, val: pnl.netProfit, color: 'text-brand-start' },
               ].map((kpi) => (
                 <div
                   key={kpi.label}
                   className="p-6 rounded-[2rem] border border-black/5 dark:border-white/5 bg-white/40 dark:bg-white/[0.02] group hover:border-brand-start/30 transition-all cursor-pointer"
                   onClick={() => handleExplain(kpi.label, fmtCurrency(kpi.val))}
-                  onKeyDown={(e) => handleRowKey(e, () => handleExplain(kpi.label, fmtCurrency(kpi.val)))}
+                  onKeyDown={(e) =>
+                    handleRowKey(e, () => handleExplain(kpi.label, fmtCurrency(kpi.val)))
+                  }
                   role="button"
                   tabIndex={0}
                 >
@@ -480,7 +581,10 @@ export const PandLViewV2: React.FC = () => {
                   </span>
                   <div className="mt-4 flex items-center gap-2">
                     <div className="h-1 flex-1 bg-black/5 dark:bg-white/10 rounded-full overflow-hidden">
-                      <div className="h-full brand-gradient-bg opacity-40" style={{ width: '70%' }} />
+                      <div
+                        className="h-full brand-gradient-bg opacity-40"
+                        style={{ width: '70%' }}
+                      />
                     </div>
                   </div>
                 </div>
@@ -513,7 +617,9 @@ export const PandLViewV2: React.FC = () => {
                         className="group/row relative grid grid-cols-12 items-center gap-4 cursor-pointer"
                         onClick={onActivate}
                         onKeyDown={(e) => handleRowKey(e, onActivate)}
-                        onContextMenu={(e) => openMenu(e, buildMenuItems(w.label, valueStr), w.label)}
+                        onContextMenu={(e) =>
+                          openMenu(e, buildMenuItems(w.label, valueStr), w.label)
+                        }
                         role="button"
                         tabIndex={0}
                       >
@@ -568,7 +674,8 @@ export const PandLViewV2: React.FC = () => {
                       {detailLines.map((line) => {
                         const valueStr = fmtCurrency(line.value);
                         const pctStr =
-                          typeof line.pctOfRevenue === 'number' && Number.isFinite(line.pctOfRevenue)
+                          typeof line.pctOfRevenue === 'number' &&
+                          Number.isFinite(line.pctOfRevenue)
                             ? fmtPercent(line.pctOfRevenue)
                             : '--';
 
@@ -576,10 +683,11 @@ export const PandLViewV2: React.FC = () => {
                           line.tone === 'pos'
                             ? 'text-emerald-500'
                             : line.tone === 'neg'
-                            ? 'text-rose-500'
-                            : 'text-gray-400';
+                              ? 'text-rose-500'
+                              : 'text-gray-400';
 
-                        const onActivate = () => handleExplain(line.label, `${valueStr} (${pctStr})`);
+                        const onActivate = () =>
+                          handleExplain(line.label, `${valueStr} (${pctStr})`);
 
                         return (
                           <tr
@@ -588,7 +696,11 @@ export const PandLViewV2: React.FC = () => {
                             onClick={onActivate}
                             onKeyDown={(e) => handleRowKey(e, onActivate)}
                             onContextMenu={(e) =>
-                              openMenu(e, buildMenuItems(line.label, `${valueStr} (${pctStr})`), line.label)
+                              openMenu(
+                                e,
+                                buildMenuItems(line.label, `${valueStr} (${pctStr})`),
+                                line.label
+                              )
                             }
                             role="button"
                             tabIndex={0}
@@ -601,7 +713,9 @@ export const PandLViewV2: React.FC = () => {
                                 {line.isCost ? 'COST' : 'RESULT'}
                               </div>
                             </td>
-                            <td className={`py-4 px-2 text-right font-mono text-sm2 font-black tabular-nums ${tone}`}>
+                            <td
+                              className={`py-4 px-2 text-right font-mono text-sm2 font-black tabular-nums ${tone}`}
+                            >
                               {line.isCost ? '-' : ''}
                               {valueStr}
                             </td>
@@ -618,7 +732,12 @@ export const PandLViewV2: React.FC = () => {
                                 className="p-2 rounded-xl bg-brand-start/10 text-brand-start hover:bg-brand-start hover:text-white transition-all"
                                 aria-label={labels.contextMenuExplain}
                               >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg
+                                  className="w-4 h-4"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
                                   <path
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
@@ -656,7 +775,9 @@ export const PandLViewV2: React.FC = () => {
                     <div className="text-2xs font-black text-gray-400 uppercase tracking-widest mb-1">
                       Net margin
                     </div>
-                    <div className="text-xl font-black text-brand-start">{fmtPercent(pnl.netMargin)}</div>
+                    <div className="text-xl font-black text-brand-start">
+                      {fmtPercent(pnl.netMargin)}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -669,7 +790,9 @@ export const PandLViewV2: React.FC = () => {
           <div className="glass p-10 rounded-[3rem] border border-black/10 dark:border-white/5 bg-white/50 dark:bg-black/30 flex flex-col h-full">
             <div className="mb-8">
               <h3 className="text-base font-black uppercase tracking-tight text-gray-900 dark:text-white mb-1">
-                {typeof labels.costBreakdown === 'string' ? labels.costBreakdown : String(labels.costBreakdown)}
+                {typeof labels.costBreakdown === 'string'
+                  ? labels.costBreakdown
+                  : String(labels.costBreakdown)}
               </h3>
               <span className="text-3xs font-mono font-black text-gray-500 tracking-[0.3em] uppercase">
                 {labels.dimCategory}

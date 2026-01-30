@@ -7,10 +7,7 @@ export const FaqSection: React.FC<{ t: Translation }> = ({ t }) => {
   const baseId = useId();
 
   return (
-    <section
-      id="faq"
-      className="py-24 md:py-32 px-6 max-w-5xl mx-auto relative overflow-hidden"
-    >
+    <section id="faq" className="py-24 md:py-32 px-6 max-w-5xl mx-auto relative overflow-hidden">
       <div className="absolute inset-0 -z-10 pointer-events-none">
         <div className="absolute -top-24 -right-24 w-[520px] h-[520px] bg-brand-start/10 blur-[120px] rounded-full" />
         <div className="absolute -bottom-24 -left-24 w-[520px] h-[520px] bg-emerald-500/10 blur-[120px] rounded-full" />
@@ -58,8 +55,19 @@ export const FaqSection: React.FC<{ t: Translation }> = ({ t }) => {
                 >
                   <div className="flex items-start gap-4">
                     <div className="mt-0.5 w-9 h-9 rounded-2xl bg-brand-start/10 border border-brand-start/15 flex items-center justify-center shrink-0">
-                      <svg className="w-4 h-4 text-brand-start" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 6v6l4 2" />
+                      <svg
+                        className="w-4 h-4 text-brand-start"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2.5}
+                          d="M12 6v6l4 2"
+                        />
                       </svg>
                     </div>
                     <span className="text-sm md:text-base font-black text-gray-900 dark:text-white tracking-tight">
@@ -69,12 +77,19 @@ export const FaqSection: React.FC<{ t: Translation }> = ({ t }) => {
 
                   <span
                     className={`w-10 h-10 rounded-2xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 flex items-center justify-center text-gray-700 dark:text-gray-200 transition-all ${
-                      isOpen ? 'rotate-180 border-brand-start/30' : 'rotate-0 group-hover:border-brand-start/20'
+                      isOpen
+                        ? 'rotate-180 border-brand-start/30'
+                        : 'rotate-0 group-hover:border-brand-start/20'
                     }`}
                     aria-hidden="true"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2.5}
+                        d="M19 9l-7 7-7-7"
+                      />
                     </svg>
                   </span>
                 </button>

@@ -71,25 +71,28 @@ export const SettingsOrgView: React.FC = () => {
 
   const [adminTenantId, setAdminTenantId] = useState<string>(activeTenantId ?? '');
 
-  const refreshAdmin = useCallback((overrideTenantId?: string) => {
-    if (!isAdmin || isDemo || isReadOnly) return;
-    const tenantId = overrideTenantId?.trim() || adminTenantId.trim() || activeTenantId;
-    setAdminState((prev) => ({ ...prev, status: 'loading', error: undefined }));
-    Promise.all([
-      fetchAdminAiUsage(tenantId),
-      fetchAdminSources(tenantId),
-      fetchAdminBilling(tenantId),
-    ])
-      .then(([usage, sources, billing]) => {
-        setAdminState({ status: 'ready', usage, sources, billing });
-      })
-      .catch((error) => {
-        setAdminState({
-          status: 'error',
-          error: error?.message || 'Failed to load admin data.',
+  const refreshAdmin = useCallback(
+    (overrideTenantId?: string) => {
+      if (!isAdmin || isDemo || isReadOnly) return;
+      const tenantId = overrideTenantId?.trim() || adminTenantId.trim() || activeTenantId;
+      setAdminState((prev) => ({ ...prev, status: 'loading', error: undefined }));
+      Promise.all([
+        fetchAdminAiUsage(tenantId),
+        fetchAdminSources(tenantId),
+        fetchAdminBilling(tenantId),
+      ])
+        .then(([usage, sources, billing]) => {
+          setAdminState({ status: 'ready', usage, sources, billing });
+        })
+        .catch((error) => {
+          setAdminState({
+            status: 'error',
+            error: error?.message || 'Failed to load admin data.',
+          });
         });
-      });
-  }, [adminTenantId, activeTenantId, isAdmin, isDemo, isReadOnly]);
+    },
+    [adminTenantId, activeTenantId, isAdmin, isDemo, isReadOnly]
+  );
 
   useEffect(() => {
     let active = true;
@@ -160,7 +163,7 @@ export const SettingsOrgView: React.FC = () => {
         day: '2-digit',
       }).format(new Date(ts));
     },
-    [locale],
+    [locale]
   );
 
   const safeInitials = (name: unknown) => {
@@ -170,7 +173,10 @@ export const SettingsOrgView: React.FC = () => {
       .split(' ')
       .map((p) => p.trim())
       .filter(Boolean);
-    const initials = parts.map((p) => p[0]).join('').slice(0, 2);
+    const initials = parts
+      .map((p) => p[0])
+      .join('')
+      .slice(0, 2);
     return initials || 'U';
   };
 
@@ -232,7 +238,7 @@ export const SettingsOrgView: React.FC = () => {
         label: string;
         value: string;
       }>,
-    [mock?.company_fields],
+    [mock?.company_fields]
   );
   const companyFields = useMemo(() => {
     if (!orgCompany) return baseCompanyFields;
@@ -257,7 +263,7 @@ export const SettingsOrgView: React.FC = () => {
         role: string;
         status: string;
       }>,
-    [mock?.team_members],
+    [mock?.team_members]
   );
   const teamMembers = useMemo<TeamMember[]>(() => {
     if (!orgUsers.length) {
@@ -276,11 +282,7 @@ export const SettingsOrgView: React.FC = () => {
             ? 'text-amber-500'
             : 'text-gray-400';
       const statusLabel =
-        statusKey === 'active'
-          ? 'Active'
-          : statusKey === 'invited'
-            ? 'Invited'
-            : 'Disabled';
+        statusKey === 'active' ? 'Active' : statusKey === 'invited' ? 'Invited' : 'Disabled';
       return {
         name: safeText(user.name, fallback?.name ?? '—'),
         email: safeText(fallback?.email, safeText(user.id, '—')),
@@ -333,7 +335,7 @@ export const SettingsOrgView: React.FC = () => {
   const statusCardValue = safeText(orgBilling?.status, safeText(mock?.status_card?.value));
   const statusCardDesc = safeText(
     formatDate(orgBilling?.renewalDate),
-    safeText(mock?.status_card?.desc),
+    safeText(mock?.status_card?.desc)
   );
 
   const payerLabel = safeText(mock?.payer?.label);
@@ -342,7 +344,7 @@ export const SettingsOrgView: React.FC = () => {
   const billingCycleLabel = safeText(mock?.billing_cycle?.label);
   const billingCycleValue = safeText(
     formatDate(orgBilling?.renewalDate),
-    safeText(mock?.billing_cycle?.value),
+    safeText(mock?.billing_cycle?.value)
   );
 
   const paymentStatusLabel = safeText(mock?.payment_status?.label);
@@ -371,10 +373,7 @@ export const SettingsOrgView: React.FC = () => {
   const mfaValue = safeText(mock?.mfa_value);
   const sessionsLabel = safeText(mock?.sessions_label);
 
-  const complianceTitle = safeText(
-    mock?.compliance?.title,
-    t.dashboard.settings_org_v2.title
-  );
+  const complianceTitle = safeText(mock?.compliance?.title, t.dashboard.settings_org_v2.title);
   const complianceDesc = safeText(mock?.compliance?.desc);
   const ctaDpa = safeText(mock?.compliance?.cta_dpa);
   const ctaRetention = safeText(mock?.compliance?.cta_retention);
@@ -507,9 +506,7 @@ export const SettingsOrgView: React.FC = () => {
                     <div className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tight group-hover:text-brand-start transition-colors">
                       {user.name}
                     </div>
-                    <div className="text-xs text-gray-500 font-medium">
-                      {user.email}
-                    </div>
+                    <div className="text-xs text-gray-500 font-medium">{user.email}</div>
                   </div>
                 </div>
                 <div className="text-right">
@@ -518,7 +515,8 @@ export const SettingsOrgView: React.FC = () => {
                   </div>
                   <div
                     className={`text-3xs font-black uppercase tracking-widest ${
-                      user.statusTone ?? (user.status === 'Online' ? 'text-emerald-500' : 'text-gray-400')
+                      user.statusTone ??
+                      (user.status === 'Online' ? 'text-emerald-500' : 'text-gray-400')
                     }`}
                   >
                     {user.status}
@@ -632,11 +630,7 @@ export const SettingsOrgView: React.FC = () => {
                 onClick={() => action(paymentFixCta, t.dashboard.settings_org_v2.billing.title)}
                 disabled={isLocked || !paymentIssue || !paymentFixCta}
                 title={
-                  isLocked
-                    ? lockTooltip
-                    : paymentIssue
-                    ? undefined
-                    : paymentOkTooltip || undefined
+                  isLocked ? lockTooltip : paymentIssue ? undefined : paymentOkTooltip || undefined
                 }
               >
                 {paymentFixCta || '—'}
@@ -767,9 +761,7 @@ export const SettingsOrgView: React.FC = () => {
               <div className="text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-tight">
                 {mfaLabel}
               </div>
-              <div className="text-xs font-mono font-black text-gray-500 uppercase">
-                {mfaValue}
-              </div>
+              <div className="text-xs font-mono font-black text-gray-500 uppercase">{mfaValue}</div>
             </div>
 
             <div className="p-4 rounded-2xl border border-black/5 dark:border-white/5 bg-black/[0.01] dark:bg-white/[0.01]">
@@ -854,8 +846,8 @@ export const SettingsOrgView: React.FC = () => {
               {adminState.status === 'loading'
                 ? 'Loading'
                 : adminState.status === 'ready'
-                ? 'Live'
-                : 'Idle'}
+                  ? 'Live'
+                  : 'Idle'}
             </div>
           </div>
 
@@ -1015,7 +1007,9 @@ export const SettingsOrgView: React.FC = () => {
                 void deleteOrg();
               }}
               className={`px-5 py-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs font-black uppercase tracking-widest text-rose-500 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#0b0b0f] ${
-                isLocked || !ctaDeleteOrg ? 'opacity-40 cursor-not-allowed' : 'hover:bg-rose-500 hover:text-white'
+                isLocked || !ctaDeleteOrg
+                  ? 'opacity-40 cursor-not-allowed'
+                  : 'hover:bg-rose-500 hover:text-white'
               }`}
               disabled={isLocked || !ctaDeleteOrg}
               title={isLocked ? lockTooltip : undefined}
@@ -1045,7 +1039,9 @@ export const SettingsOrgView: React.FC = () => {
           <InteractiveButton
             variant="primary"
             className="w-full sm:w-auto !px-16 !py-5 !text-xs-plus font-black uppercase tracking-[0.3em] rounded-2xl shadow-2xl"
-            onClick={() => action(t.dashboard.settings_org_v2.cta_save, t.dashboard.settings_org_v2.title)}
+            onClick={() =>
+              action(t.dashboard.settings_org_v2.cta_save, t.dashboard.settings_org_v2.title)
+            }
             disabled={isLocked}
             title={isLocked ? lockTooltip : undefined}
           >

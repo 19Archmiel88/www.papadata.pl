@@ -7,7 +7,10 @@ export type UseTenantStatusResult = {
   error: string | null;
 };
 
-export const useTenantStatus = (tenantId?: string | null, refreshMs = 45_000): UseTenantStatusResult => {
+export const useTenantStatus = (
+  tenantId?: string | null,
+  refreshMs = 45_000
+): UseTenantStatusResult => {
   const [status, setStatus] = useState<TenantStatusPayload | null>(null);
   const [loading, setLoading] = useState<boolean>(Boolean(tenantId));
   const [error, setError] = useState<string | null>(null);

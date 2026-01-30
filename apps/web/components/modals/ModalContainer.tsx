@@ -151,7 +151,10 @@ export const ModalContainer: React.FC = () => {
   const { activeModal, modalProps, closeModal } = useModal();
   const { t } = useUI();
 
-  const modalEntry = useMemo(() => (activeModal ? ModalRegistry[activeModal] : null), [activeModal]);
+  const modalEntry = useMemo(
+    () => (activeModal ? ModalRegistry[activeModal] : null),
+    [activeModal]
+  );
   const ModalComponent = modalEntry?.component ?? null;
   const meta = modalEntry?.meta ?? {};
 
@@ -171,10 +174,13 @@ export const ModalContainer: React.FC = () => {
   }, [modalProps]);
 
   const resolvedTitle = shell.title ?? meta.title ?? t.modals?.title ?? 'Dialog';
-  const resolvedDescription = shell.description ?? meta.description ?? t.modals?.desc ?? 'Modal window';
-  const resolvedSize = ((shell.size ?? meta.size ?? 'lg') as ModalSize) satisfies ModalSize;
+  const resolvedDescription =
+    shell.description ?? meta.description ?? t.modals?.desc ?? 'Modal window';
+  const resolvedSize = (shell.size ?? meta.size ?? 'lg') as ModalSize satisfies ModalSize;
   const resolvedDisableEsc = Boolean(shell.disableEsc ?? meta.disableEsc);
-  const resolvedDisableOverlayClose = Boolean(shell.disableOverlayClose ?? meta.disableOverlayClose);
+  const resolvedDisableOverlayClose = Boolean(
+    shell.disableOverlayClose ?? meta.disableOverlayClose
+  );
 
   const isOpen = Boolean(modalEntry && ModalComponent);
 

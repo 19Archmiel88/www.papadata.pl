@@ -149,8 +149,7 @@ export const IntegrationsViewV2: React.FC = () => {
       setRealtimeStatuses(data ?? {});
     } catch (err: unknown) {
       // jeżeli to abort (timeout/cleanup), nie pokazujemy błędu
-      const isAbort =
-        err instanceof DOMException && err.name === 'AbortError';
+      const isAbort = err instanceof DOMException && err.name === 'AbortError';
 
       if (err instanceof ApiRequestError && err.status === 404) {
         // brak endpointu / 404 -> fallback na logikę lokalną
@@ -197,74 +196,68 @@ export const IntegrationsViewV2: React.FC = () => {
   const list = useMemo(() => {
     const normalized = query.trim().toLowerCase();
 
-    let items: IntegrationListItem[] = (integrations || [])
-      .filter(Boolean)
-      .map((item, idx) => {
-        const meta = t.integrations.items[item.id];
-        const name = meta?.name ?? item.id;
-        const detail = meta?.detail ?? '';
+    let items: IntegrationListItem[] = (integrations || []).filter(Boolean).map((item, idx) => {
+      const meta = t.integrations.items[item.id];
+      const name = meta?.name ?? item.id;
+      const detail = meta?.detail ?? '';
 
-        const baseSeed = timeSeed + idx;
-        const s = seeded(idx, baseSeed);
+      const baseSeed = timeSeed + idx;
+      const s = seeded(idx, baseSeed);
 
-        const realtime = realtimeStatuses[item.id];
-        let statusTag: StatusTag =
-          (realtime as StatusTag) ||
-          (item.status === 'live'
-            ? 'active'
-            : item.status === 'beta'
-              ? 'attention'
-              : 'disabled');
+      const realtime = realtimeStatuses[item.id];
+      let statusTag: StatusTag =
+        (realtime as StatusTag) ||
+        (item.status === 'live' ? 'active' : item.status === 'beta' ? 'attention' : 'disabled');
 
-        // Fallback issue mocking if no API response
-        if (!realtime && item.status === 'live' && s > 0.88) {
-          statusTag = 'attention';
-        }
+      // Fallback issue mocking if no API response
+      if (!realtime && item.status === 'live' && s > 0.88) {
+        statusTag = 'attention';
+      }
 
-        const rawRecords = (12000 + seeded(idx, 11) * 88000) * timeMultiplier;
-        const recordsSynced = numberFormatter.format(Math.round(rawRecords));
+      const rawRecords = (12000 + seeded(idx, 11) * 88000) * timeMultiplier;
+      const recordsSynced = numberFormatter.format(Math.round(rawRecords));
 
-        let uptime: string;
-        if (statusTag === 'active') {
-          const uptimeVal = clamp(99.8 + seeded(idx, 22) * 0.2, 97.5, 100);
-          uptime = formatNumber(uptimeVal, locale, { maximumFractionDigits: 2 });
-        } else if (statusTag === 'attention') {
-          const uptimeVal = clamp(94.2 + seeded(idx, 22) * 3, 80, 99.9);
-          uptime = formatNumber(uptimeVal, locale, { maximumFractionDigits: 1 });
-        } else {
-          uptime = formatNumber(0, locale, { maximumFractionDigits: 1 });
-        }
+      let uptime: string;
+      if (statusTag === 'active') {
+        const uptimeVal = clamp(99.8 + seeded(idx, 22) * 0.2, 97.5, 100);
+        uptime = formatNumber(uptimeVal, locale, { maximumFractionDigits: 2 });
+      } else if (statusTag === 'attention') {
+        const uptimeVal = clamp(94.2 + seeded(idx, 22) * 3, 80, 99.9);
+        uptime = formatNumber(uptimeVal, locale, { maximumFractionDigits: 1 });
+      } else {
+        uptime = formatNumber(0, locale, { maximumFractionDigits: 1 });
+      }
 
-        const latency =
-          statusTag === 'active'
-            ? `${numberFormatter.format(Math.round(45 + seeded(idx, 33) * 120))}ms`
-            : statusTag === 'attention'
-              ? `${numberFormatter.format(Math.round(450 + seeded(idx, 33) * 800))}ms`
-              : '--';
+      const latency =
+        statusTag === 'active'
+          ? `${numberFormatter.format(Math.round(45 + seeded(idx, 33) * 120))}ms`
+          : statusTag === 'attention'
+            ? `${numberFormatter.format(Math.round(450 + seeded(idx, 33) * 800))}ms`
+            : '--';
 
-        const health =
-          statusTag === 'active'
-            ? 100
-            : statusTag === 'attention'
-              ? clamp(55 + seeded(idx, 44) * 20, 40, 90)
-              : 0;
+      const health =
+        statusTag === 'active'
+          ? 100
+          : statusTag === 'attention'
+            ? clamp(55 + seeded(idx, 44) * 20, 40, 90)
+            : 0;
 
-        return {
-          ...item,
-          name,
-          detail,
-          statusTag,
-          recordsSynced,
-          uptime,
-          latency,
-          health,
-          originalIndex: idx,
-        };
-      });
+      return {
+        ...item,
+        name,
+        detail,
+        statusTag,
+        recordsSynced,
+        uptime,
+        latency,
+        health,
+        originalIndex: idx,
+      };
+    });
 
     if (normalized) {
       items = items.filter((item) =>
-        `${item.name} ${item.detail} ${item.id}`.toLowerCase().includes(normalized),
+        `${item.name} ${item.detail} ${item.id}`.toLowerCase().includes(normalized)
       );
     }
 
@@ -281,11 +274,23 @@ export const IntegrationsViewV2: React.FC = () => {
         return order[a.statusTag] - order[b.statusTag];
       });
     } else if (sortId === 'recent') {
-      items = [...items].sort((a, b) => seeded(b.originalIndex, timeSeed) - seeded(a.originalIndex, timeSeed));
+      items = [...items].sort(
+        (a, b) => seeded(b.originalIndex, timeSeed) - seeded(a.originalIndex, timeSeed)
+      );
     }
 
     return items;
-  }, [locale, numberFormatter, query, realtimeStatuses, sortId, statusFilter, t, timeMultiplier, timeSeed]);
+  }, [
+    locale,
+    numberFormatter,
+    query,
+    realtimeStatuses,
+    sortId,
+    statusFilter,
+    t,
+    timeMultiplier,
+    timeSeed,
+  ]);
 
   const clearFilters = () => {
     setQuery('');
@@ -296,7 +301,7 @@ export const IntegrationsViewV2: React.FC = () => {
   const handleExplain = (context: string) => {
     setContextLabel?.(context);
     setAiDraft?.(
-      `${t.dashboard.context_menu.explain_ai}: ${context}. Przeanalizuj status połączenia i wydajność synchronizacji danych.`,
+      `${t.dashboard.context_menu.explain_ai}: ${context}. Przeanalizuj status połączenia i wydajność synchronizacji danych.`
     );
   };
 
@@ -304,7 +309,7 @@ export const IntegrationsViewV2: React.FC = () => {
     if (isLocked) return;
     setContextLabel?.(integrationsCopy.title);
     setAiDraft?.(
-      `${integrationsCopy.security_cta_sla}: ${integrationsCopy.title}. Przygotuj raport SLA i historię dostępności integracji.`,
+      `${integrationsCopy.security_cta_sla}: ${integrationsCopy.title}. Przygotuj raport SLA i historię dostępności integracji.`
     );
   };
 
@@ -342,7 +347,7 @@ export const IntegrationsViewV2: React.FC = () => {
         if (isLocked) return;
         setContextLabel?.(item.name);
         setAiDraft?.(
-          `${t.dashboard.context_menu.export}: ${item.name}. Przygotuj raport stanu integracji i historię synchronizacji.`,
+          `${t.dashboard.context_menu.export}: ${item.name}. Przygotuj raport stanu integracji i historię synchronizacji.`
         );
       },
       disabled: isLocked,
@@ -365,8 +370,7 @@ export const IntegrationsViewV2: React.FC = () => {
     if (status === 'attention') {
       return {
         label: integrationsCopy.status_attention,
-        tone:
-          'border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10 shadow-[0_0_15px_rgba(245,158,11,0.1)]',
+        tone: 'border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10 shadow-[0_0_15px_rgba(245,158,11,0.1)]',
       };
     }
     if (status === 'disabled') {
@@ -459,7 +463,10 @@ export const IntegrationsViewV2: React.FC = () => {
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-3">
               {isFetchingStatuses && (
-                <div className="flex items-center gap-2 mr-2" aria-label={integrationsCopy.status_connecting}>
+                <div
+                  className="flex items-center gap-2 mr-2"
+                  aria-label={integrationsCopy.status_connecting}
+                >
                   <div className="w-1 h-1 rounded-full bg-brand-start animate-bounce [animation-delay:-0.3s]" />
                   <div className="w-1 h-1 rounded-full bg-brand-start animate-bounce [animation-delay:-0.15s]" />
                   <div className="w-1 h-1 rounded-full bg-brand-start animate-bounce" />
@@ -575,7 +582,9 @@ export const IntegrationsViewV2: React.FC = () => {
                           <div
                             key={i}
                             className={`w-1 h-1 rounded-full ${
-                              item.statusTag === 'active' && i <= 2 ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-gray-800'
+                              item.statusTag === 'active' && i <= 2
+                                ? 'bg-emerald-500'
+                                : 'bg-gray-300 dark:bg-gray-800'
                             }`}
                           />
                         ))}
@@ -608,7 +617,11 @@ export const IntegrationsViewV2: React.FC = () => {
                       </div>
                       <div
                         className={`text-sm font-black tabular-nums ${
-                          item.statusTag === 'active' ? 'text-emerald-500' : item.statusTag === 'attention' ? 'text-amber-500' : 'text-gray-400'
+                          item.statusTag === 'active'
+                            ? 'text-emerald-500'
+                            : item.statusTag === 'attention'
+                              ? 'text-amber-500'
+                              : 'text-gray-400'
                         }`}
                       >
                         {item.uptime}%
@@ -619,7 +632,9 @@ export const IntegrationsViewV2: React.FC = () => {
                   <div className="mt-6 flex flex-wrap items-center gap-4 text-xs font-black uppercase tracking-widest text-gray-500">
                     <div className="flex items-center gap-2">
                       <span className="text-gray-400">{integrationsCopy.auth_prefix}:</span>
-                      <span className="text-gray-900 dark:text-gray-300">{authLabel(item.auth)}</span>
+                      <span className="text-gray-900 dark:text-gray-300">
+                        {authLabel(item.auth)}
+                      </span>
                     </div>
 
                     <div className="h-3 w-[1px] bg-black/10 dark:bg-white/10" />
@@ -628,7 +643,9 @@ export const IntegrationsViewV2: React.FC = () => {
                       <span className="text-gray-400">{integrationsCopy.sync_prefix}:</span>
                       <span
                         className={`${
-                          item.statusTag === 'attention' ? 'text-amber-500' : 'text-gray-900 dark:text-gray-300'
+                          item.statusTag === 'attention'
+                            ? 'text-amber-500'
+                            : 'text-gray-900 dark:text-gray-300'
                         }`}
                       >
                         {lastSyncLabel}
@@ -639,7 +656,9 @@ export const IntegrationsViewV2: React.FC = () => {
 
                     <div className="flex items-center gap-2">
                       <span className="text-gray-400">{integrationsCopy.latency_prefix}:</span>
-                      <span className="text-gray-900 dark:text-gray-300 tabular-nums">{item.latency}</span>
+                      <span className="text-gray-900 dark:text-gray-300 tabular-nums">
+                        {item.latency}
+                      </span>
                     </div>
                   </div>
 
@@ -676,8 +695,18 @@ export const IntegrationsViewV2: React.FC = () => {
                           : 'text-gray-500 hover:text-gray-900 dark:text-white'
                       }`}
                     >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6h.01M12 12h.01M12 18h.01" />
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 6h.01M12 12h.01M12 18h.01"
+                        />
                       </svg>
                     </button>
                   </div>
@@ -769,12 +798,22 @@ export const IntegrationsViewV2: React.FC = () => {
 
           <div className="hidden lg:flex justify-end gap-4 opacity-40 grayscale group-hover:grayscale-0 transition-all duration-1000">
             <div className="w-32 h-32 rounded-3xl border border-white/20 flex items-center justify-center p-6">
-              <svg className="w-full h-full" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <svg
+                className="w-full h-full"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
                 <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z" />
               </svg>
             </div>
             <div className="w-32 h-32 rounded-3xl border border-white/20 flex items-center justify-center p-6">
-              <svg className="w-full h-full" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <svg
+                className="w-full h-full"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z" />
               </svg>
             </div>

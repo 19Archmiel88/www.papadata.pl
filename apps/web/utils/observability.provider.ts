@@ -198,4 +198,3 @@ export const captureMessage = (
     Sentry.captureMessage(message, options as any);
   })();
 };
-

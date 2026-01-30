@@ -23,7 +23,7 @@ test('CheckoutCancel renders', async ({ mount }) => {
           </ModalProvider>
         </AuthProvider>
       </UIProvider>
-    </MemoryRouter>,
+    </MemoryRouter>
   );
   await expect(component).toBeVisible();
 });

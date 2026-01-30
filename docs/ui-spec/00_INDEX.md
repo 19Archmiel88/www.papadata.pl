@@ -4,11 +4,13 @@ Status: source of truth (UI as implemented in repo)
 Product/UX spec (high-level): `../../dokumentacjaProdukcyjna/docs/ux/ui-specs/*`
 
 Legenda statusów:
+
 - gotowe — opis komplet­ny wg kodu
 - mock/symulacja — dane i akcje symulowane w kodzie
 - nieuzywane — spec istnieje, ale sekcja/komponent nie jest renderowany w kodzie
 
 ## Screens
+
 - [screens/landing.md](screens/landing.md) — gotowe
 - [screens/legal-terms.md](screens/legal-terms.md) — gotowe
 - [screens/legal-privacy.md](screens/legal-privacy.md) — gotowe
@@ -34,6 +36,7 @@ Legenda statusów:
 - [screens/dashboard-settings-org.md](screens/dashboard-settings-org.md) — gotowe
 
 ## Sections
+
 - [sections/main-header-nav.md](sections/main-header-nav.md) — gotowe
 - [sections/main-footer.md](sections/main-footer.md) — gotowe
 - [sections/scroll-to-top.md](sections/scroll-to-top.md) — gotowe
@@ -49,6 +52,7 @@ Legenda statusów:
 - [sections/landing-final-cta.md](sections/landing-final-cta.md) — nieuzywane
 
 ## Modals
+
 - [modals/auth-modal.md](modals/auth-modal.md) — gotowe
 - [modals/video-modal.md](modals/video-modal.md) — gotowe
 - [modals/pricing-modal.md](modals/pricing-modal.md) — gotowe
@@ -64,6 +68,7 @@ Legenda statusów:
 - [modals/cookie-banner.md](modals/cookie-banner.md) — gotowe
 
 ## Components (behavioral)
+
 - [components/modal-container.md](components/modal-container.md) — gotowe
 - [components/interactive-button.md](components/interactive-button.md) — gotowe
 - [components/papa-ai-drawer.md](components/papa-ai-drawer.md) — gotowe
@@ -78,7 +83,9 @@ Legenda statusów:
 - [components/integration-callback.md](components/integration-callback.md) — gotowe
 
 ## Tests
+
 - [tests/00_TEST_INDEX.md](tests/00_TEST_INDEX.md)
 
 Uwagi:
+
 - Każdy slug jest zgodny z nazwą pliku i używany w testach.

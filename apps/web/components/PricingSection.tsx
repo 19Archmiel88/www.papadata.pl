@@ -350,4 +350,3 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ t, onCompare, on
     </section>
   );
 };
-

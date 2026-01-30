@@ -11,12 +11,15 @@ import {
 export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [stack, setStack] = useState<ModalStackItem[]>([]);
 
-  const openModal = useCallback((type: ModalType, props: ModalPayload = {}, options?: OpenModalOptions) => {
-    setStack((prev) => {
-      if (options?.stack) return [...prev, { type, props }];
-      return [{ type, props }];
-    });
-  }, []);
+  const openModal = useCallback(
+    (type: ModalType, props: ModalPayload = {}, options?: OpenModalOptions) => {
+      setStack((prev) => {
+        if (options?.stack) return [...prev, { type, props }];
+        return [{ type, props }];
+      });
+    },
+    []
+  );
 
   const closeModal = useCallback(() => {
     setStack((prev) => {
@@ -39,7 +42,7 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       closeModal,
       closeAll,
     }),
-    [top, openModal, closeModal, closeAll],
+    [top, openModal, closeModal, closeAll]
   );
 
   return <ModalContext.Provider value={value}>{children}</ModalContext.Provider>;

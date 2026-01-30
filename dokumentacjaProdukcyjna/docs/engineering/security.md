@@ -1,4 +1,3 @@
-
 ---
 
 ### `docs/engineering/security.md` :contentReference[oaicite:4]{index=4}
@@ -18,7 +17,9 @@ Powiązane:
 ---
 
 ## 1) Dane wrażliwe i PII
+
 Zasady:
+
 - Nie umieszczaj w promptach AI:
   - haseł, kluczy API, tokenów, sekretów webhooków,
   - danych szczególnych (RODO).
@@ -28,6 +29,7 @@ Zasady:
 ---
 
 ## 2) Klucze i sekrety
+
 - Sekrety tylko po stronie serwera (Secret Manager / KMS) — **nigdy w frontendzie**.
 - `.env.local` tylko lokalnie; repo zawiera `.env.example` bez sekretów.
 - Integracje:
@@ -36,7 +38,9 @@ Zasady:
 ---
 
 ## 3) Public DEMO — ryzyka i zabezpieczenia (wymagane)
+
 DEMO jest publiczne, więc wymagane:
+
 - rate limiting (AI i `/api/*`),
 - bot/abuse protection: Cloud Armor (policy `papadata-security-policy`) w środowiskach publicznych,
 - brak operacji z trwałymi skutkami (billing, invite, connect real) — tylko symulacje,
@@ -46,6 +50,7 @@ DEMO jest publiczne, więc wymagane:
 ---
 
 ## 4) AI security
+
 - Wywołania do Gemini/Vertex tylko przez backend proxy (klucz jako sekret).
 - Obsługa safety blocks z czytelnym komunikatem (bez ujawniania reguł filtrów).
 - Walidacja wejścia w DEMO: blokada PII/sekretów (regexy na email/tokeny/numery kart) w [apps/api/src/modules/ai/ai.service.ts](../../apps/api/src/modules/ai/ai.service.ts#L74-L126).
@@ -56,6 +61,7 @@ DEMO jest publiczne, więc wymagane:
 ---
 
 ## 5) Frontend security (baseline)
+
 - CSP i security headers: obowiązuje baseline z `deploy.md` (allowlist dla Sentry i assetów statycznych).
 - Zabezpieczenia XSS:
   - unikaj `dangerouslySetInnerHTML` bez sanitizacji,
@@ -65,7 +71,9 @@ DEMO jest publiczne, więc wymagane:
 ---
 
 ## 6) Auth / RBAC / SSO (produkcyjny wymóg)
+
 W produkcji obowiązuje:
+
 - Auth: email login/register + magic link (backend endpoints w `apps/api/src/modules/auth`).
 - SSO: OAuth start endpoint jest stubem w DEMO, a w PROD wymaga dostawców OAuth (konfiguracja poza repo).
 - RBAC: role pochodzą z tokenu (`papadata_user_roles` w localStorage) i są wymagane do dostępu do danych.
@@ -74,6 +82,7 @@ W produkcji obowiązuje:
 ---
 
 ## 7) Supply chain i podatności
+
 - pinowanie zależności przez lockfile,
 - skan podatności: `pnpm audit` przed release (minimum) oraz kwartalny przegląd zależności,
 - proces aktualizacji zależności: miesięczny przegląd + krytyczne CVE w 48h.
@@ -81,4 +90,5 @@ W produkcji obowiązuje:
 ---
 
 ## 8) Incident handling
+
 Zobacz: `../operations/incident-response.md` oraz `../../SECURITY.md`.

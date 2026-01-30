@@ -268,10 +268,6 @@ export const NeuralBackground: React.FC<{ theme: string }> = ({ theme }) => {
   }, []);
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="fixed inset-0 z-0 pointer-events-none"
-      aria-hidden="true"
-    />
+    <canvas ref={canvasRef} className="fixed inset-0 z-0 pointer-events-none" aria-hidden="true" />
   );
 };

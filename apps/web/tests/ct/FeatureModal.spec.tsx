@@ -17,7 +17,7 @@ test.beforeEach(async ({ page }) => {
 test('FeatureModal renders', async ({ mount }) => {
   const component = await mountWithProviders(
     mount,
-    <FeatureModal t={t} feature={feature} onClose={() => {}} isOpen />,
+    <FeatureModal t={t} feature={feature} onClose={() => {}} isOpen />
   );
   await expect(component).toBeVisible();
 });

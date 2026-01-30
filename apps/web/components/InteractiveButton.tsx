@@ -10,7 +10,7 @@ export type InteractiveButtonProps = React.ButtonHTMLAttributes<HTMLButtonElemen
 export const InteractiveButton = memo(
   forwardRef<HTMLButtonElement, InteractiveButtonProps>(function InteractiveButton(
     { children, className = '', variant = 'secondary', disabled, isLoading, type, ...rest },
-    ref,
+    ref
   ) {
     const baseStyle = useMemo(
       () =>
@@ -28,7 +28,7 @@ export const InteractiveButton = memo(
           'dark:focus-visible:ring-offset-[#0b0b0f]',
           'select-none',
         ].join(' '),
-      [],
+      []
     );
 
     const enabled = useMemo<Record<InteractiveButtonVariant, string>>(
@@ -51,7 +51,7 @@ export const InteractiveButton = memo(
           'hover:scale-[1.02] active:scale-[0.985]',
         ].join(' '),
       }),
-      [],
+      []
     );
 
     const disabledStyle = useMemo(
@@ -62,7 +62,7 @@ export const InteractiveButton = memo(
           'hover:scale-100 active:scale-100',
           'hover:brightness-100',
         ].join(' '),
-      [],
+      []
     );
 
     const isDisabled = disabled || isLoading;
@@ -117,7 +117,7 @@ export const InteractiveButton = memo(
         )}
       </button>
     );
-  }),
+  })
 );
 
 InteractiveButton.displayName = 'InteractiveButton';

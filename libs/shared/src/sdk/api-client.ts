@@ -37,7 +37,9 @@ const normalizeBaseUrl = (baseUrl: string) => baseUrl.replace(/\/+$/, '');
 
 const toQueryString = (params?: Record<string, string | number | undefined | null>) => {
   if (!params) return '';
-  const entries = Object.entries(params).filter(([, value]) => value !== undefined && value !== null);
+  const entries = Object.entries(params).filter(
+    ([, value]) => value !== undefined && value !== null
+  );
   if (!entries.length) return '';
   const search = new URLSearchParams();
   entries.forEach(([key, value]) => search.set(key, String(value)));
@@ -85,7 +87,8 @@ export const createApiClient = ({ baseUrl, fetcher }: ApiClientOptions) => {
     integrations: () => getJson<IntegrationSummary[]>('/integrations'),
     integrationByProvider: (provider: string) =>
       getJson<IntegrationSummary>(`/integrations/${provider}`),
-    aiChat: (payload: AIChatRequest) => postJson<AIChatResponse, AIChatRequest>('/ai/chat', payload),
+    aiChat: (payload: AIChatRequest) =>
+      postJson<AIChatResponse, AIChatRequest>('/ai/chat', payload),
     dashboardOverview: (params?: { timeRange?: string }) =>
       getJson<DashboardOverviewResponse>(`/dashboard/overview${toQueryString(params)}`),
     dashboardPandL: (params?: { timeRange?: string }) =>
@@ -108,6 +111,7 @@ export const createApiClient = ({ baseUrl, fetcher }: ApiClientOptions) => {
     supportContact: (payload: SupportContactRequest) =>
       postJson<SupportContactResponse, SupportContactRequest>('/support/contact', payload),
     billingSummary: () => getJson<BillingSummary>('/billing/summary'),
-    billingPortal: () => postJson<BillingPortalResponse, Record<string, never>>('/billing/portal', {}),
+    billingPortal: () =>
+      postJson<BillingPortalResponse, Record<string, never>>('/billing/portal', {}),
   };
 };

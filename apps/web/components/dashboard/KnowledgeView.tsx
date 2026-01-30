@@ -2,7 +2,12 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { DashboardOutletContext } from './DashboardContext';
 import { InteractiveButton } from '../InteractiveButton';
-import { ContextMenu, WidgetEmptyState, WidgetErrorState, WidgetOfflineState } from './DashboardPrimitives';
+import {
+  ContextMenu,
+  WidgetEmptyState,
+  WidgetErrorState,
+  WidgetOfflineState,
+} from './DashboardPrimitives';
 import { useContextMenu } from './DashboardPrimitives.hooks';
 import { motion, AnimatePresence } from 'framer-motion';
 import { fetchDashboardKnowledge } from '../../data/api';
@@ -131,7 +136,7 @@ export const KnowledgeView: React.FC = () => {
   // Ensure category value always exists in options (or fallback safely)
   useEffect(() => {
     const hasAll = categoryOptions.some((o) => o.id === 'all');
-    const initial = hasAll ? 'all' : categoryOptions[0]?.id ?? 'all';
+    const initial = hasAll ? 'all' : (categoryOptions[0]?.id ?? 'all');
 
     // only set when invalid/empty to avoid UI jitter
     if (!categoryOptions.length) return;
@@ -143,32 +148,30 @@ export const KnowledgeView: React.FC = () => {
   // Mocked enriched data for Knowledge Base
   const fallbackResources: Resource[] = useMemo(() => {
     const raw = (knowledge.resources as unknown as KnowledgeResourceInput[]) ?? [];
-    return raw
-      .filter(Boolean)
-      .map((r): Resource => {
-        const id = String(r.id ?? '');
-        const categoryId = String((r.categoryId ?? r.category ?? 'all') || 'all')
-          .toLowerCase()
-          .trim();
-        const categoryLabel = String(r.categoryLabel ?? r.category ?? categoryId)
-          .toUpperCase()
-          .trim();
+    return raw.filter(Boolean).map((r): Resource => {
+      const id = String(r.id ?? '');
+      const categoryId = String((r.categoryId ?? r.category ?? 'all') || 'all')
+        .toLowerCase()
+        .trim();
+      const categoryLabel = String(r.categoryLabel ?? r.category ?? categoryId)
+        .toUpperCase()
+        .trim();
 
-        return {
-          id: id || `${categoryId}-${String(r.title ?? '').slice(0, 12)}`,
-          categoryId,
-          categoryLabel,
-          title: String(r.title ?? ''),
-          desc: String(r.desc ?? ''),
-          longContent: String(r.longContent ?? r.desc ?? ''),
-          level: String(r.level ?? ''),
-          type: String(r.type ?? ''),
-          time: String(r.time ?? ''),
-          module: String(r.module ?? ''),
-          videoId: r.videoId ? String(r.videoId) : undefined,
-          author: String(r.author ?? ''),
-        };
-      });
+      return {
+        id: id || `${categoryId}-${String(r.title ?? '').slice(0, 12)}`,
+        categoryId,
+        categoryLabel,
+        title: String(r.title ?? ''),
+        desc: String(r.desc ?? ''),
+        longContent: String(r.longContent ?? r.desc ?? ''),
+        level: String(r.level ?? ''),
+        type: String(r.type ?? ''),
+        time: String(r.time ?? ''),
+        module: String(r.module ?? ''),
+        videoId: r.videoId ? String(r.videoId) : undefined,
+        author: String(r.author ?? ''),
+      };
+    });
   }, [knowledge.resources]);
 
   // Fetch data (but respect API availability if present)
@@ -226,8 +229,8 @@ export const KnowledgeView: React.FC = () => {
 
         const focusables = Array.from(
           root.querySelectorAll<HTMLElement>(
-            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
-          ),
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+          )
         ).filter((el) => !el.hasAttribute('disabled') && !el.getAttribute('aria-disabled'));
 
         if (!focusables.length) return;
@@ -268,55 +271,58 @@ export const KnowledgeView: React.FC = () => {
     if (!knowledgeData?.resources?.length) return fallbackResources;
 
     const apiResources = (knowledgeData?.resources ?? []) as KnowledgeResourceInput[];
-    return apiResources
-      .filter(Boolean)
-      .map((item, idx): Resource => {
-        const fallback = fallbackResources[idx] ?? fallbackResources[0];
+    return apiResources.filter(Boolean).map((item, idx): Resource => {
+      const fallback = fallbackResources[idx] ?? fallbackResources[0];
 
-        const id = String(item.id ?? fallback?.id ?? `${idx}`);
-        const categoryId = String(
-          (item.categoryId ?? item.category ?? fallback?.categoryId ?? 'all') || 'all',
-        )
-          .toLowerCase()
-          .trim();
+      const id = String(item.id ?? fallback?.id ?? `${idx}`);
+      const categoryId = String(
+        (item.categoryId ?? item.category ?? fallback?.categoryId ?? 'all') || 'all'
+      )
+        .toLowerCase()
+        .trim();
 
-        // If translations for categories exist, prefer label from select options
-        const optionLabel =
-          categoryOptions.find((o) => String(o.id).toLowerCase() === categoryId)?.label ?? '';
+      // If translations for categories exist, prefer label from select options
+      const optionLabel =
+        categoryOptions.find((o) => String(o.id).toLowerCase() === categoryId)?.label ?? '';
 
-        const categoryLabel = String(
-          optionLabel || item.categoryLabel || item.category || fallback?.categoryLabel || categoryId,
-        )
-          .toUpperCase()
-          .trim();
+      const categoryLabel = String(
+        optionLabel || item.categoryLabel || item.category || fallback?.categoryLabel || categoryId
+      )
+        .toUpperCase()
+        .trim();
 
-        return {
-          id,
-          categoryId,
-          categoryLabel,
-          title: String(item.title ?? fallback?.title ?? ''),
-          desc: String(item.summary ?? fallback?.desc ?? ''),
-          longContent: String(item.content ?? item.summary ?? fallback?.longContent ?? fallback?.desc ?? ''),
-          level: String(item.level ?? fallback?.level ?? ''),
-          type: String(item.type ?? fallback?.type ?? ''),
-          time: String(item.time ?? fallback?.time ?? ''),
-          module: String(item.module ?? fallback?.module ?? ''),
-          videoId: item.videoId ? String(item.videoId) : fallback?.videoId,
-          author: String(item.author ?? fallback?.author ?? ''),
-        };
-      });
+      return {
+        id,
+        categoryId,
+        categoryLabel,
+        title: String(item.title ?? fallback?.title ?? ''),
+        desc: String(item.summary ?? fallback?.desc ?? ''),
+        longContent: String(
+          item.content ?? item.summary ?? fallback?.longContent ?? fallback?.desc ?? ''
+        ),
+        level: String(item.level ?? fallback?.level ?? ''),
+        type: String(item.type ?? fallback?.type ?? ''),
+        time: String(item.time ?? fallback?.time ?? ''),
+        module: String(item.module ?? fallback?.module ?? ''),
+        videoId: item.videoId ? String(item.videoId) : fallback?.videoId,
+        author: String(item.author ?? fallback?.author ?? ''),
+      };
+    });
   }, [knowledgeData, fallbackResources, categoryOptions]);
 
   const filtered = useMemo(() => {
     const normalizedQuery = query.toLowerCase().trim();
-    const normalizedCategory = String(category || 'all').toLowerCase().trim();
+    const normalizedCategory = String(category || 'all')
+      .toLowerCase()
+      .trim();
 
     return resources.filter((item) => {
       const matchesQuery =
         item.title.toLowerCase().includes(normalizedQuery) ||
         item.desc.toLowerCase().includes(normalizedQuery);
 
-      const matchesCategory = normalizedCategory === 'all' || item.categoryId === normalizedCategory;
+      const matchesCategory =
+        normalizedCategory === 'all' || item.categoryId === normalizedCategory;
 
       return matchesQuery && matchesCategory;
     });
@@ -350,7 +356,7 @@ export const KnowledgeView: React.FC = () => {
   const clearFilters = () => {
     setQuery('');
     const hasAll = categoryOptions.some((o) => o.id === 'all');
-    setCategory(hasAll ? 'all' : categoryOptions[0]?.id ?? 'all');
+    setCategory(hasAll ? 'all' : (categoryOptions[0]?.id ?? 'all'));
   };
 
   const handleExplain = (title: string) => {
@@ -377,7 +383,7 @@ export const KnowledgeView: React.FC = () => {
         // Minimal meaningful behavior instead of no-op
         setContextLabel?.(resource.title);
         setAiDraft?.(
-          `${knowledge.actions.share_team}: ${resource.title}. Przygotuj krótką wiadomość do zespołu z kluczowymi punktami i rekomendowanymi next-steps.`,
+          `${knowledge.actions.share_team}: ${resource.title}. Przygotuj krótką wiadomość do zespołu z kluczowymi punktami i rekomendowanymi next-steps.`
         );
       },
       disabled: isDemo,
@@ -390,7 +396,7 @@ export const KnowledgeView: React.FC = () => {
         // Minimal meaningful behavior instead of no-op
         setContextLabel?.(resource.title);
         setAiDraft?.(
-          `${knowledge.actions.bookmark}: ${resource.title}. Zapisz do zakładek i zaproponuj kiedy wrócić do tego materiału (plan tygodniowy).`,
+          `${knowledge.actions.bookmark}: ${resource.title}. Zapisz do zakładek i zaproponuj kiedy wrócić do tego materiału (plan tygodniowy).`
         );
       },
       disabled: isDemo,
@@ -652,7 +658,9 @@ export const KnowledgeView: React.FC = () => {
                   <h1 className="text-3xl md:text-5xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-[0.95] mb-6">
                     {selectedResource.title}
                   </h1>
-                  <p className="text-lg text-gray-500 font-medium italic">{selectedResource.desc}</p>
+                  <p className="text-lg text-gray-500 font-medium italic">
+                    {selectedResource.desc}
+                  </p>
 
                   <div className="mt-4">
                     <button
@@ -732,7 +740,11 @@ export const KnowledgeView: React.FC = () => {
                       </button>
                     </div>
                     <div className="absolute right-0 top-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                      <svg className="w-24 h-24 text-brand-start" fill="currentColor" viewBox="0 0 24 24">
+                      <svg
+                        className="w-24 h-24 text-brand-start"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
                         <path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z" />
                       </svg>
                     </div>
@@ -807,9 +819,9 @@ export const KnowledgeView: React.FC = () => {
                       {knowledge.booking.budget_label}
                     </label>
                     <select className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-2xl py-4 px-6 text-sm outline-none focus:border-brand-start font-bold">
-                        {knowledge.booking.budget_options.map((option: string) => (
+                      {knowledge.booking.budget_options.map((option: string) => (
                         <option key={option}>{option}</option>
-                        ))}
+                      ))}
                     </select>
                   </div>
                 </div>

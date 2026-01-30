@@ -169,9 +169,15 @@ export const useIntegrations = (options?: {
         } catch (e) {
           // If the client doesn't accept an options object, try no-args.
           if (
-            String((e as any)?.message ?? '').toLowerCase().includes('signal') ||
-            String((e as any)?.message ?? '').toLowerCase().includes('argument') ||
-            String((e as any)?.message ?? '').toLowerCase().includes('options')
+            String((e as any)?.message ?? '')
+              .toLowerCase()
+              .includes('signal') ||
+            String((e as any)?.message ?? '')
+              .toLowerCase()
+              .includes('argument') ||
+            String((e as any)?.message ?? '')
+              .toLowerCase()
+              .includes('options')
           ) {
             result = await fn();
           } else {
@@ -216,7 +222,7 @@ export const useIntegrations = (options?: {
         setRefreshing(false);
       }
     },
-    [abortInFlight, api, cacheEntry, clearRetryTimer, maxRetries, swr, ttlMs],
+    [abortInFlight, api, cacheEntry, clearRetryTimer, maxRetries, swr, ttlMs]
   );
 
   useEffect(() => {

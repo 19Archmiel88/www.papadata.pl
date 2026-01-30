@@ -4,8 +4,8 @@ Ten arkusz służy do śledzenia wszystkich próśb o realizację praw osób (ud
 
 Każde zgłoszenie o dostęp do danych (DSAR) dokumentowane jest w tym arkuszu:
 
-| Data zgłoszenia | Kanał | Osoba kontaktowa | Zakres danych | Status | Komentarz | Odpowiedzialny |
-|-----------------|-------|------------------|---------------|--------|-----------|----------------|
-| 2026-01-19 | privacy@papadata.pl | Anna Kowalska | eksport logów + dane personalne | W realizacji | Weryfikacja tożsamości | DPO |
+| Data zgłoszenia | Kanał               | Osoba kontaktowa | Zakres danych                   | Status       | Komentarz              | Odpowiedzialny |
+| --------------- | ------------------- | ---------------- | ------------------------------- | ------------ | ---------------------- | -------------- |
+| 2026-01-19      | privacy@papadata.pl | Anna Kowalska    | eksport logów + dane personalne | W realizacji | Weryfikacja tożsamości | DPO            |
 
 Po zrealizowaniu zgłoszenia aktualizujemy status i wysyłamy kopię odpowiedzi do zespołu Legal/PO.

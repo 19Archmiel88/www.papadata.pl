@@ -103,7 +103,7 @@ export const normalizeApiError = (error: unknown, fallback: string): string => {
           isRecord(data) && isRecord((data as any).error) ? (data as any).error.message : undefined,
           // sometimes: { data: { ... } } directly
           isRecord(error.data) ? (error.data as any).message : undefined,
-          isRecord(error.data) ? (error.data as any).detail : undefined
+          isRecord(error.data) ? (error.data as any).detail : undefined,
         ]);
 
         return validation ?? message;
@@ -120,7 +120,8 @@ export const normalizeApiError = (error: unknown, fallback: string): string => {
 
     const validation = joinValidationErrors(
       (isRecord(data) && (data.errors ?? (data as any).validationErrors)) ??
-        (error.errors ?? (error as any).validationErrors)
+        error.errors ??
+        (error as any).validationErrors
     );
 
     const message = pickFirstMeaningful([
@@ -129,7 +130,7 @@ export const normalizeApiError = (error: unknown, fallback: string): string => {
       isRecord(data) ? (data.detail as unknown) : undefined,
       isRecord(data) ? (data.title as unknown) : undefined,
       isRecord(data) ? (data.error as unknown) : undefined,
-      isRecord(data) ? (data.reason as unknown) : undefined
+      isRecord(data) ? (data.reason as unknown) : undefined,
     ]);
 
     return validation ?? message ?? safeFallback;

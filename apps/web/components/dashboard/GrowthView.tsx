@@ -114,10 +114,7 @@ export const GrowthView: React.FC = () => {
   const growthCards = growth.cards;
   const growthBudget = growth.budget;
 
-  const cards = useMemo(
-    () => (growthCards.items as DashboardGrowthCard[] ?? []),
-    [growthCards],
-  );
+  const cards = useMemo(() => (growthCards.items as DashboardGrowthCard[]) ?? [], [growthCards]);
   const [cardStatus, setCardStatus] = useState<Record<string, GrowthStatus>>({});
   const [allocationMode, setAllocationMode] = useState<'channels' | 'campaigns'>('channels');
   const [aggressivenessIndex, setAggressivenessIndex] = useState(1);
@@ -128,20 +125,21 @@ export const GrowthView: React.FC = () => {
     [key: string]: string;
   }
 
-  const aggressivenessKey: keyof AggressivenessOptions | undefined =
-    growthBudget.aggressiveness_steps[aggressivenessIndex] as
-      | keyof AggressivenessOptions
-      | undefined;
+  const aggressivenessKey: keyof AggressivenessOptions | undefined = growthBudget
+    .aggressiveness_steps[aggressivenessIndex] as keyof AggressivenessOptions | undefined;
 
   const aggressivenessLabel =
     (growthBudget.aggressiveness_options as Record<string, string>)[aggressivenessKey ?? ''] ?? '';
 
   useEffect(() => {
     setCardStatus(
-      cards.reduce((acc, card) => {
-        acc[card.id] = card.status as GrowthStatus;
-        return acc;
-      }, {} as Record<string, GrowthStatus>),
+      cards.reduce(
+        (acc, card) => {
+          acc[card.id] = card.status as GrowthStatus;
+          return acc;
+        },
+        {} as Record<string, GrowthStatus>
+      )
     );
   }, [cards]);
 
@@ -263,17 +261,18 @@ export const GrowthView: React.FC = () => {
             <button
               type="button"
               onClick={(event) =>
-                openMenu(
-                  event,
-                  buildMenuItems(growth.title, '/dashboard/growth'),
-                  growth.title,
-                )
+                openMenu(event, buildMenuItems(growth.title, '/dashboard/growth'), growth.title)
               }
               aria-label={t.dashboard.context_menu.label}
               className="p-2 rounded-2xl border border-black/10 dark:border-white/10 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6h.01M12 12h.01M12 18h.01" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 6h.01M12 12h.01M12 18h.01"
+                />
               </svg>
             </button>
           </div>
@@ -307,14 +306,19 @@ export const GrowthView: React.FC = () => {
                 openMenu(
                   event,
                   buildMenuItems(growth.cards.title, '/dashboard/growth'),
-                  growth.cards.title,
+                  growth.cards.title
                 )
               }
               aria-label={t.dashboard.context_menu.label}
               className="p-2 rounded-2xl border border-black/10 dark:border-white/10 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6h.01M12 12h.01M12 18h.01" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 6h.01M12 12h.01M12 18h.01"
+                />
               </svg>
             </button>
           </div>
@@ -327,7 +331,9 @@ export const GrowthView: React.FC = () => {
             return (
               <div
                 key={card.id}
-                onContextMenu={(event) => openMenu(event, buildMenuItems(card.context, card.route, card.prompt), card.title)}
+                onContextMenu={(event) =>
+                  openMenu(event, buildMenuItems(card.context, card.route, card.prompt), card.title)
+                }
                 className="rounded-[2rem] border border-black/10 dark:border-white/10 bg-white/90 dark:bg-[#0b0b0f] p-5 space-y-4 shadow-xl"
               >
                 <div className="flex items-start justify-between gap-4">
@@ -343,7 +349,7 @@ export const GrowthView: React.FC = () => {
                   <div className="flex items-center gap-2">
                     <span
                       className={`px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-widest border ${levelClass(
-                        card.priority as Level,
+                        card.priority as Level
                       )}`}
                     >
                       {growth.cards.priorities[card.priority as Level]}
@@ -351,12 +357,28 @@ export const GrowthView: React.FC = () => {
 
                     <button
                       type="button"
-                      onClick={(event) => openMenu(event, buildMenuItems(card.context, card.route, card.prompt), card.title)}
+                      onClick={(event) =>
+                        openMenu(
+                          event,
+                          buildMenuItems(card.context, card.route, card.prompt),
+                          card.title
+                        )
+                      }
                       aria-label={t.dashboard.context_menu.label}
                       className="p-2 rounded-2xl border border-black/10 dark:border-white/10 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6h.01M12 12h.01M12 18h.01" />
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 6h.01M12 12h.01M12 18h.01"
+                        />
                       </svg>
                     </button>
                   </div>
@@ -389,7 +411,7 @@ export const GrowthView: React.FC = () => {
                     </div>
                     <span
                       className={`inline-flex px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-widest border ${levelClass(
-                        card.confidence as Level,
+                        card.confidence as Level
                       )}`}
                     >
                       {growth.cards.values[card.confidence as Level]}
@@ -402,7 +424,7 @@ export const GrowthView: React.FC = () => {
                     </div>
                     <span
                       className={`inline-flex px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-widest border ${levelClass(
-                        card.effort as Level,
+                        card.effort as Level
                       )}`}
                     >
                       {growth.cards.values[card.effort as Level]}
@@ -415,7 +437,7 @@ export const GrowthView: React.FC = () => {
                     </div>
                     <span
                       className={`inline-flex px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-widest border ${levelClass(
-                        card.risk as Level,
+                        card.risk as Level
                       )}`}
                     >
                       {growth.cards.values[card.risk as Level]}
@@ -501,7 +523,7 @@ export const GrowthView: React.FC = () => {
 
                     <div
                       className={`mt-2 inline-flex px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-widest border ${statusClass(
-                        status,
+                        status
                       )}`}
                     >
                       {growth.cards.statuses[status]}
@@ -544,7 +566,9 @@ export const GrowthView: React.FC = () => {
                     onClick={() => {
                       if (isDemo) return;
                       setContextLabel?.(`${growth.cards.ctas.save_task}: ${card.title}`);
-                      setAiDraft?.(`Przygotuj zadanie do backlogu dla inicjatywy wzrostu: "${card.title}".`);
+                      setAiDraft?.(
+                        `Przygotuj zadanie do backlogu dla inicjatywy wzrostu: "${card.title}".`
+                      );
                     }}
                     className="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest border border-black/10 dark:border-white/10 bg-white dark:bg-white/5 hover:bg-brand-start hover:text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     disabled={isDemo}
@@ -621,13 +645,22 @@ export const GrowthView: React.FC = () => {
             <button
               type="button"
               onClick={(event) =>
-                openMenu(event, buildMenuItems(growth.budget.title, '/dashboard/growth'), growth.budget.title)
+                openMenu(
+                  event,
+                  buildMenuItems(growth.budget.title, '/dashboard/growth'),
+                  growth.budget.title
+                )
               }
               aria-label={t.dashboard.context_menu.label}
               className="p-2 rounded-2xl border border-black/10 dark:border-white/10 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6h.01M12 12h.01M12 18h.01" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 6h.01M12 12h.01M12 18h.01"
+                />
               </svg>
             </button>
           </div>
@@ -672,7 +705,9 @@ export const GrowthView: React.FC = () => {
             <div
               key={item.id}
               className="space-y-2"
-              onContextMenu={(event) => openMenu(event, buildMenuItems(item.label, '/dashboard/growth'), item.label)}
+              onContextMenu={(event) =>
+                openMenu(event, buildMenuItems(item.label, '/dashboard/growth'), item.label)
+              }
             >
               <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
                 <span className="font-bold text-gray-700 dark:text-gray-200">{item.label}</span>
@@ -681,11 +716,17 @@ export const GrowthView: React.FC = () => {
 
               <div className="space-y-2">
                 <div className="h-2 rounded-full bg-gray-100 dark:bg-white/10 overflow-hidden">
-                  <div className="h-full bg-gray-400/70" style={{ width: `${item.current * 100}%` }} />
+                  <div
+                    className="h-full bg-gray-400/70"
+                    style={{ width: `${item.current * 100}%` }}
+                  />
                 </div>
 
                 <div className="h-2 rounded-full bg-gray-100 dark:bg-white/10 overflow-hidden">
-                  <div className="h-full bg-brand-start" style={{ width: `${item.suggested * 100}%` }} />
+                  <div
+                    className="h-full bg-brand-start"
+                    style={{ width: `${item.suggested * 100}%` }}
+                  />
                 </div>
               </div>
             </div>

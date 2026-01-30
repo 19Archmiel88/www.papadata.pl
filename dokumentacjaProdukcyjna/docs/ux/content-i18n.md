@@ -1,13 +1,16 @@
 # UX — Content & i18n (PL/EN)
 
 ## Hard rule
+
 Wszystkie teksty UI muszą pochodzić z i18n (zero hard-coded stringów w komponentach).
 
 ## Języki
+
 - PL (domyślny)
 - EN
 
 ## Struktura kluczy (zalecana)
+
 - `common.*`
 - `nav.*`
 - `landing.*`
@@ -41,6 +44,7 @@ Wszystkie teksty UI muszą pochodzić z i18n (zero hard-coded stringów w kompon
 Poniżej lista treści do implementacji w `src/i18n/pl.ts` i `src/i18n/en.ts`. (Możesz je przenieść 1:1 do słownika.)
 
 ### Nawigacja / Header
+
 - Label sekcji: PL "Funkcje", EN "Features".
 - Pozycje funkcji:
   - "Papa Guardian" (PL "Twój osobisty analityk AI pracujący 24/7.", EN "Your personal AI analyst on call 24/7.")
@@ -68,6 +72,7 @@ Poniżej lista treści do implementacji w `src/i18n/pl.ts` i `src/i18n/en.ts`. (
   - "Wypróbuj w Demo" / "Try in Demo"
 
 ### Hero
+
 - Tytuł:
   - PL "[AI], która nie tylko analizuje, ale [rekomenduje]. Zobacz, skąd naprawdę pochodzi Twój [zysk]."
   - EN "[AI] that not only analyzes, but [recommends]. See where your [profit] really comes from."
@@ -84,6 +89,7 @@ Poniżej lista treści do implementacji w `src/i18n/pl.ts` i `src/i18n/en.ts`. (
   - EN "No credit card", "14 days free"
 
 ### Vertex Player (Hero)
+
 - Badge: PL "SYMULACJA NA ŻYWO", EN "LIVE SIMULATION".
 - Taby:
   - PL: "PAPA CHAT", "DATA PIPELINE", "WIDOK ZARZĄDU"
@@ -109,6 +115,7 @@ Poniżej lista treści do implementacji w `src/i18n/pl.ts` i `src/i18n/en.ts`. (
 - Briefing: PL/EN o wzroście przychodu/marży/spadku CAC
 
 ### Features
+
 - Badge: PL "Możliwości systemu", EN "Platform capabilities".
 - Tytuł:
   - PL "Możliwości platformy"
@@ -122,9 +129,10 @@ Poniżej lista treści do implementacji w `src/i18n/pl.ts` i `src/i18n/en.ts`. (
   - "Real-time KPI" / "Real-time KPI"
   - "Bezpieczeństwo" / "Security"
   - "Szybkie wdrożenie" / "Fast onboarding"
-  - + opisy PL/EN
+  - - opisy PL/EN
 
 ### Pipeline
+
 - Badge: PL "Architektura danych", EN "Data architecture".
 - Step label: PL "Krok", EN "Step".
 - Tytuł:
@@ -137,6 +145,7 @@ Poniżej lista treści do implementacji w `src/i18n/pl.ts` i `src/i18n/en.ts`. (
   - "Papa AI Agent" / "Papa AI Agent"
 
 ### Integrations
+
 - Tytuł: PL "Integracje", EN "Integrations".
 - Podtytuł:
   - PL "Połącz PapaData ze swoim stosem."
@@ -154,6 +163,7 @@ Poniżej lista treści do implementacji w `src/i18n/pl.ts` i `src/i18n/en.ts`. (
   - opis: PL/EN “Connect your data in one click…”
 
 ### Social Proof
+
 - Badge: PL "Opinie klientów", EN "Customer voices".
 - Tytuł: PL "Zaufali liderzy", EN "Trusted by leaders".
 - Badge kart:
@@ -167,6 +177,7 @@ Poniżej lista treści do implementacji w `src/i18n/pl.ts` i `src/i18n/en.ts`. (
 - Omnibus adnotacja: PL/EN “Opinie są zweryfikowane…”
 
 ### ROI Calculator
+
 - Tytuł: PL "Kalkulator ROI", EN "ROI calculator".
 - Opis: PL/EN “Compare spreadsheet analysis with PapaData.”
 - Slidery:
@@ -178,6 +189,7 @@ Poniżej lista treści do implementacji w `src/i18n/pl.ts` i `src/i18n/en.ts`. (
 - Label: PL "Silnik Symulacji v2.4", EN "Simulation Engine v2.4"
 
 ### Security
+
 - Badge: PL "Bezpieczeństwo", EN "Security".
 - Tytuł:
   - PL "Twoje dane są bezpieczne — standardy bankowe i RODO"
@@ -191,6 +203,7 @@ Poniżej lista treści do implementacji w `src/i18n/pl.ts` i `src/i18n/en.ts`. (
   - Monitoring 24/7
 
 ### Pricing
+
 - Tytuł:
   - PL "Prosty cennik dla zespołów data-driven"
   - EN "Simple pricing for data-driven teams"
@@ -212,15 +225,18 @@ Poniżej lista treści do implementacji w `src/i18n/pl.ts` i `src/i18n/en.ts`. (
 - Omnibus: jeśli promo -> “najniższa cena z 30 dni”
 
 ### FAQ
+
 - Tytuł: PL "Częste pytania", EN "Frequently asked questions".
 - Pytania/odpowiedzi: potrzeba programisty, trial, rezygnacja, integracje, bezpieczeństwo (PL/EN)
 
 ### Final CTA
+
 - Tytuł: PL "Gotowy na rewolucję?", EN "Ready for a change?"
 - Podtytuł: PL/EN
 - Przyciski: Trial / Demo
 
 ### Chat (widget i kontekst)
+
 - Tytuł: PL "Papa AI", EN "Papa AI"
 - Tekst domyślny: PL "Zapytaj o wyniki sprzedaży...", EN "Ask about sales performance..."
 - Welcome: PL "Cześć! W czym mogę pomóc?", EN "Hi! How can I help?"
@@ -229,6 +245,7 @@ Poniżej lista treści do implementacji w `src/i18n/pl.ts` i `src/i18n/en.ts`. (
 - SAFETY: komunikat “Odpowiedź zablokowana…”
 
 ### Footer
+
 - Opis: PL/EN
 - Kolumny: Product / Company / Resources
 - Dolne linki: Terms / Privacy / Cookies / DPA / AI Disclaimer / Accessibility
@@ -237,6 +254,7 @@ Poniżej lista treści do implementacji w `src/i18n/pl.ts` i `src/i18n/en.ts`. (
 - Modal kontaktu: pola PL/EN “Imię i nazwisko / Full name”, “E‑mail / Email”, “Wiadomość / Message”, kontakt: support@papadata.pl
 
 ### Dashboard
+
 - Sidebar: PL/EN nazwy widoków
 - Badge: demo mode
 - Alert demo: PL/EN

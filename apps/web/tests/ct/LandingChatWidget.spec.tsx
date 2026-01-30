@@ -10,7 +10,7 @@ test.beforeEach(async ({ page }) => {
 test('LandingChatWidget renders', async ({ mount }) => {
   const component = await mountWithProviders(
     mount,
-    <LandingChatWidget lang="pl" onStartTrial={() => {}} />,
+    <LandingChatWidget lang="pl" onStartTrial={() => {}} />
   );
   await expect(component).toBeVisible();
 });

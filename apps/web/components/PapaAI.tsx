@@ -674,4 +674,3 @@ export const PapaAI: React.FC<PapaAIProps> = memo(
 );
 
 PapaAI.displayName = 'PapaAI';
-

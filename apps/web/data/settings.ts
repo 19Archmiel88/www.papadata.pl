@@ -10,7 +10,7 @@ export type DeleteOrganizationResponse = {
 };
 
 export const deleteOrganization = async (
-  payload: DeleteOrganizationRequest,
+  payload: DeleteOrganizationRequest
 ): Promise<DeleteOrganizationResponse> => {
   return apiPost<DeleteOrganizationResponse>('/settings/org/delete', payload);
 };

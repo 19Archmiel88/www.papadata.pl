@@ -41,7 +41,13 @@ const isAllowedEmbedUrl = (raw?: string) => {
   }
 };
 
-export const VideoModal: React.FC<VideoModalProps> = ({ src, title, t, isOpen = true, onClose }) => {
+export const VideoModal: React.FC<VideoModalProps> = ({
+  src,
+  title,
+  t,
+  isOpen = true,
+  onClose,
+}) => {
   const modalTitle = title || t.videoModal.title;
 
   if (!isOpen) return null;
@@ -50,9 +56,7 @@ export const VideoModal: React.FC<VideoModalProps> = ({ src, title, t, isOpen = 
 
   return (
     <div className="w-full">
-      <div
-        className="relative w-full max-w-5xl mx-auto aspect-video glass rounded-[1.5rem] md:rounded-[2rem] border border-brand-start/30 shadow-[0_0_100px_rgba(78,38,226,0.3)] overflow-hidden"
-      >
+      <div className="relative w-full max-w-5xl mx-auto aspect-video glass rounded-[1.5rem] md:rounded-[2rem] border border-brand-start/30 shadow-[0_0_100px_rgba(78,38,226,0.3)] overflow-hidden">
         <button
           onClick={onClose}
           className="absolute top-[max(0.5rem,env(safe-area-inset-top))] right-[max(0.5rem,env(safe-area-inset-right))] md:top-6 md:right-6 z-10 p-2 rounded-full bg-black/40 hover:bg-brand-start transition-all duration-300 text-white group focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-start/60"
@@ -66,7 +70,12 @@ export const VideoModal: React.FC<VideoModalProps> = ({ src, title, t, isOpen = 
             viewBox="0 0 24 24"
             aria-hidden="true"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2.5}
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         </button>
 
@@ -90,7 +99,10 @@ export const VideoModal: React.FC<VideoModalProps> = ({ src, title, t, isOpen = 
           )}
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 h-1 brand-gradient-bg opacity-60" aria-hidden="true" />
+        <div
+          className="absolute bottom-0 left-0 right-0 h-1 brand-gradient-bg opacity-60"
+          aria-hidden="true"
+        />
       </div>
     </div>
   );

@@ -1,24 +1,21 @@
-import { setTimeout as delay } from "node:timers/promises";
-import { fileURLToPath } from "node:url";
-import path from "node:path";
+import { setTimeout as delay } from 'node:timers/promises';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
 
-const defaultPrompt =
-  "Sprawdz prosze dane sprzedazy za ostatni tydzien.";
+const defaultPrompt = 'Sprawdz prosze dane sprzedazy za ostatni tydzien.';
 
 const isTruthy = (value) =>
   value !== undefined && value !== null && String(value).trim().length > 0;
 
 const assertOk = async (response, label) => {
   if (response.ok) return;
-  const body = await response.text().catch(() => "");
-  throw new Error(
-    `${label} failed with status ${response.status}. Body: ${body}`,
-  );
+  const body = await response.text().catch(() => '');
+  throw new Error(`${label} failed with status ${response.status}. Body: ${body}`);
 };
 
 const assertJsonResponse = (payload) => {
-  if (!payload || typeof payload !== "object") {
-    throw new Error("AI chat JSON response is not an object.");
+  if (!payload || typeof payload !== 'object') {
+    throw new Error('AI chat JSON response is not an object.');
   }
   if (!isTruthy(payload.text)) {
     throw new Error("AI chat JSON response missing 'text'.");
@@ -27,18 +24,18 @@ const assertJsonResponse = (payload) => {
 
 const parseSse = (chunk, state) => {
   state.buffer += chunk;
-  let idx = state.buffer.indexOf("\n");
+  let idx = state.buffer.indexOf('\n');
   while (idx !== -1) {
     const line = state.buffer.slice(0, idx).trimEnd();
     state.buffer = state.buffer.slice(idx + 1);
     const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith(":")) {
-      idx = state.buffer.indexOf("\n");
+    if (!trimmed || trimmed.startsWith(':')) {
+      idx = state.buffer.indexOf('\n');
       continue;
     }
-    if (trimmed.startsWith("data:")) {
+    if (trimmed.startsWith('data:')) {
       const data = trimmed.slice(5).trim();
-      if (data === "[DONE]") {
+      if (data === '[DONE]') {
         state.sawDone = true;
       } else {
         state.sawData = true;
@@ -48,30 +45,28 @@ const parseSse = (chunk, state) => {
             throw new Error("SSE data chunk missing 'text'.");
           }
         } catch (error) {
-          state.errors.push(
-            error instanceof Error ? error.message : String(error),
-          );
+          state.errors.push(error instanceof Error ? error.message : String(error));
         }
       }
     }
-    idx = state.buffer.indexOf("\n");
+    idx = state.buffer.indexOf('\n');
   }
 };
 
 const jsonRequest = async ({ baseUrl, prompt }) => {
   const response = await fetch(`${baseUrl}/api/ai/chat?stream=0`, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
     },
     body: JSON.stringify({ prompt }),
   });
 
-  await assertOk(response, "AI chat JSON");
+  await assertOk(response, 'AI chat JSON');
 
-  const contentType = response.headers.get("content-type") ?? "";
-  if (!contentType.toLowerCase().includes("application/json")) {
+  const contentType = response.headers.get('content-type') ?? '';
+  if (!contentType.toLowerCase().includes('application/json')) {
     throw new Error(`Unexpected JSON content-type: ${contentType}`);
   }
 
@@ -82,29 +77,29 @@ const jsonRequest = async ({ baseUrl, prompt }) => {
 
 const sseRequest = async ({ baseUrl, prompt }) => {
   const response = await fetch(`${baseUrl}/api/ai/chat?stream=1`, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
-      Accept: "text/event-stream",
+      'Content-Type': 'application/json',
+      Accept: 'text/event-stream',
     },
     body: JSON.stringify({ prompt }),
   });
 
-  await assertOk(response, "AI chat SSE");
+  await assertOk(response, 'AI chat SSE');
 
-  const contentType = response.headers.get("content-type") ?? "";
-  if (!contentType.toLowerCase().includes("text/event-stream")) {
+  const contentType = response.headers.get('content-type') ?? '';
+  if (!contentType.toLowerCase().includes('text/event-stream')) {
     throw new Error(`Unexpected SSE content-type: ${contentType}`);
   }
 
   if (!response.body) {
-    throw new Error("AI chat SSE response has no body stream.");
+    throw new Error('AI chat SSE response has no body stream.');
   }
 
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   const state = {
-    buffer: "",
+    buffer: '',
     sawData: false,
     sawDone: false,
     errors: [],
@@ -120,14 +115,14 @@ const sseRequest = async ({ baseUrl, prompt }) => {
   }
 
   if (state.errors.length > 0) {
-    throw new Error(`SSE parse errors: ${state.errors.join("; ")}`);
+    throw new Error(`SSE parse errors: ${state.errors.join('; ')}`);
   }
 
   if (!state.sawData) {
-    throw new Error("SSE stream did not emit any data messages.");
+    throw new Error('SSE stream did not emit any data messages.');
   }
   if (!state.sawDone) {
-    throw new Error("SSE stream missing [DONE] terminator.");
+    throw new Error('SSE stream missing [DONE] terminator.');
   }
 
   await delay(0);
@@ -135,9 +130,8 @@ const sseRequest = async ({ baseUrl, prompt }) => {
 
 export const runAiChatChecks = async ({ baseUrl, prompt } = {}) => {
   const resolvedBaseUrl =
-    baseUrl || process.env.API_URL || process.env.API || "http://localhost:4000";
-  const resolvedPrompt =
-    prompt || process.env.AI_PROMPT || defaultPrompt;
+    baseUrl || process.env.API_URL || process.env.API || 'http://localhost:4000';
+  const resolvedPrompt = prompt || process.env.AI_PROMPT || defaultPrompt;
 
   const jsonResponse = await jsonRequest({
     baseUrl: resolvedBaseUrl,
@@ -158,10 +152,10 @@ const isMain = () => {
 if (isMain()) {
   runAiChatChecks()
     .then(() => {
-      console.log("AI chat checks passed.");
+      console.log('AI chat checks passed.');
     })
     .catch((error) => {
-      console.error("AI chat checks failed.", error);
+      console.error('AI chat checks failed.', error);
       process.exitCode = 1;
     });
 }

@@ -47,7 +47,10 @@ export const AboutModal: React.FC<AboutModalProps> = ({ t, isOpen = true, onClos
       <div className="absolute top-0 left-0 right-0 h-1 brand-gradient-bg z-30" />
 
       <div className="p-8 sm:p-12 md:p-16 border-b border-black/5 dark:border-white/5 relative overflow-hidden bg-black/[0.02] dark:bg-black/20">
-        <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.07] pointer-events-none -z-10" aria-hidden="true">
+        <div
+          className="absolute inset-0 opacity-[0.03] dark:opacity-[0.07] pointer-events-none -z-10"
+          aria-hidden="true"
+        >
           <div className="absolute inset-0 bg-[linear-gradient(rgba(78,38,226,1)_1px,transparent_1px),linear-gradient(90deg,rgba(78,38,226,1)_1px,transparent_1px)] bg-[size:40px_40px]" />
         </div>
 
@@ -90,7 +93,12 @@ export const AboutModal: React.FC<AboutModalProps> = ({ t, isOpen = true, onClos
               viewBox="0 0 24 24"
               aria-hidden="true"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2.5}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>

@@ -10,7 +10,7 @@ test.beforeEach(async ({ page }) => {
 test('PapaAI renders', async ({ mount }) => {
   const component = await mountWithProviders(
     mount,
-    <PapaAI t={t} isOpen onOpenChange={() => {}} aiMode />,
+    <PapaAI t={t} isOpen onOpenChange={() => {}} aiMode />
   );
   await expect(component).toBeVisible();
 });

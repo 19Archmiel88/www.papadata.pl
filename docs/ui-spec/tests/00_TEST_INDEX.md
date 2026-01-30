@@ -1,6 +1,7 @@
 # Test Index
 
 ## Screen specs
+
 - [tests/screens/landing.spec.md](screens/landing.spec.md)
 - [tests/screens/legal-terms.spec.md](screens/legal-terms.spec.md)
 - [tests/screens/legal-privacy.spec.md](screens/legal-privacy.spec.md)
@@ -26,6 +27,7 @@
 - [tests/screens/dashboard-settings-org.spec.md](screens/dashboard-settings-org.spec.md)
 
 ## Modal specs
+
 - [tests/modals/auth-modal.spec.md](modals/auth-modal.spec.md)
 - [tests/modals/video-modal.spec.md](modals/video-modal.spec.md)
 - [tests/modals/pricing-modal.spec.md](modals/pricing-modal.spec.md)
@@ -41,9 +43,11 @@
 - [tests/modals/cookie-banner.spec.md](modals/cookie-banner.spec.md)
 
 ## Flow specs
+
 - [tests/flows/landing-to-auth-to-dashboard.spec.md](flows/landing-to-auth-to-dashboard.spec.md)
 - [tests/flows/pricing-trial-upsell.spec.md](flows/pricing-trial-upsell.spec.md)
 - [tests/flows/cookie-consent-tracking.spec.md](flows/cookie-consent-tracking.spec.md)
 
 Uwagi:
+
 - Wszystkie specy mają sekcje Gherkin + manual checklist.

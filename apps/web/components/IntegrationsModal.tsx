@@ -48,18 +48,16 @@ export const IntegrationsModal: React.FC<IntegrationsModalProps> = ({
   const filteredConnectors = useMemo(() => {
     const q = searchTerm.trim().toLowerCase();
 
-    return (integrations || [])
-      .filter(Boolean)
-      .filter((item) => {
-        const meta = t.integrations.items[item.id];
-        const name = (meta?.name ?? item.id).toLowerCase();
-        const detail = (meta?.detail ?? '').toLowerCase();
+    return (integrations || []).filter(Boolean).filter((item) => {
+      const meta = t.integrations.items[item.id];
+      const name = (meta?.name ?? item.id).toLowerCase();
+      const detail = (meta?.detail ?? '').toLowerCase();
 
-        const matchesSearch = q.length === 0 || name.includes(q) || detail.includes(q);
-        const matchesCategory = activeTab === 'all' || item.category === activeTab;
+      const matchesSearch = q.length === 0 || name.includes(q) || detail.includes(q);
+      const matchesCategory = activeTab === 'all' || item.category === activeTab;
 
-        return matchesSearch && matchesCategory;
-      });
+      return matchesSearch && matchesCategory;
+    });
   }, [searchTerm, activeTab, t]);
 
   const getStatusBadge = (status: IntegrationStatus) => {
@@ -115,7 +113,7 @@ export const IntegrationsModal: React.FC<IntegrationsModalProps> = ({
       // fallback: bez callbacka po prostu zamknij (nie zakładamy ModalContext)
       handleClose();
     },
-    [handleClose, onSelectIntegration],
+    [handleClose, onSelectIntegration]
   );
 
   if (!isOpen) return null;
@@ -146,7 +144,10 @@ export const IntegrationsModal: React.FC<IntegrationsModalProps> = ({
               {t.integrations.modal_title}
             </h3>
 
-            <p id={descId} className="text-sm md:text-base text-gray-500 dark:text-gray-400 font-medium max-w-xl">
+            <p
+              id={descId}
+              className="text-sm md:text-base text-gray-500 dark:text-gray-400 font-medium max-w-xl"
+            >
               {t.integrations.modal_desc}
             </p>
           </div>
@@ -157,8 +158,19 @@ export const IntegrationsModal: React.FC<IntegrationsModalProps> = ({
             aria-label={t.common.close}
             type="button"
           >
-            <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+            <svg
+              className="w-7 h-7"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2.5}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -166,7 +178,13 @@ export const IntegrationsModal: React.FC<IntegrationsModalProps> = ({
         <div className="flex flex-col md:flex-row gap-3 md:gap-4 items-stretch md:items-center">
           <div className="relative w-full md:w-[420px] group">
             <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-gray-500 group-focus-within:text-brand-start transition-colors">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -246,8 +264,19 @@ export const IntegrationsModal: React.FC<IntegrationsModalProps> = ({
                   <div className="absolute top-4 right-4">{getStatusBadge(item.status)}</div>
 
                   <div className="w-16 h-16 rounded-2xl bg-black/5 dark:bg-black/35 flex items-center justify-center text-brand-start group-hover:text-white transition-all duration-300 border border-gray-200 dark:border-white/5 group-hover:border-brand-start/25 group-hover:shadow-[0_0_34px_rgba(78,38,226,0.18)]">
-                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 3v18m9-9H3" />
+                    <svg
+                      className="w-8 h-8"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={1.8}
+                        d="M12 3v18m9-9H3"
+                      />
                     </svg>
                   </div>
 
@@ -273,9 +302,18 @@ export const IntegrationsModal: React.FC<IntegrationsModalProps> = ({
             })}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-16 text-center" aria-live="polite">
+          <div
+            className="flex flex-col items-center justify-center py-16 text-center"
+            aria-live="polite"
+          >
             <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-5 border border-white/5">
-              <svg className="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <svg
+                className="w-8 h-8 text-gray-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -284,8 +322,12 @@ export const IntegrationsModal: React.FC<IntegrationsModalProps> = ({
                 />
               </svg>
             </div>
-            <p className="text-lg md:text-xl font-black text-gray-900 dark:text-white">{t.integrations.empty_state}</p>
-            <p className="text-sm mt-2 text-gray-500 font-medium">{t.integrations.empty_state_sub}</p>
+            <p className="text-lg md:text-xl font-black text-gray-900 dark:text-white">
+              {t.integrations.empty_state}
+            </p>
+            <p className="text-sm mt-2 text-gray-500 font-medium">
+              {t.integrations.empty_state_sub}
+            </p>
           </div>
         )}
       </div>

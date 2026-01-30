@@ -313,4 +313,3 @@ export const applyConsentTags = (settings: ConsentSettings): void => {
     }
   }
 };
-

@@ -51,10 +51,14 @@ export const useRoiCalculator = ({
 }: UseRoiCalculatorProps) => {
   const [segment, setSegment] = useState<Segment>(defaultSegment);
   const [analysts, setAnalysts] = useState(() =>
-    clamp(Math.floor(defaultAnalysts), LIMITS.analysts.min, LIMITS.analysts.max),
+    clamp(Math.floor(defaultAnalysts), LIMITS.analysts.min, LIMITS.analysts.max)
   );
   const [hoursPerAnalystPerWeek, setHoursPerAnalystPerWeek] = useState(() =>
-    clamp(defaultHoursPerAnalystPerWeek, LIMITS.hoursPerAnalystPerWeek.min, LIMITS.hoursPerAnalystPerWeek.max),
+    clamp(
+      defaultHoursPerAnalystPerWeek,
+      LIMITS.hoursPerAnalystPerWeek.min,
+      LIMITS.hoursPerAnalystPerWeek.max
+    )
   );
 
   // Determine current hourly rate based on segment

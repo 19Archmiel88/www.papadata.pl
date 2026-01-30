@@ -5,21 +5,25 @@
 Ten dokument opisuje **layout, komponenty globalne i wygląd ekranów** dashboardu PapaData — w formie specyfikacji, którą można bezpośrednio implementować.
 
 ## Cel dokumentu
+
 - Ustalić **spójny wygląd i strukturę ekranów** (Sidebar/Topbar/Bannery/Screen patterns).
 - Zapewnić **DEMO = PROD 1:1** na poziomie UI (różnice wyłącznie w danych, auth/RBAC i write-actions).
 - Dać QA listę elementów do weryfikacji (np. stany, copy, badge, nawigacja).
 
 ## Odbiorcy
+
 - UX/Product
 - Frontend/Design System
 - QA
 
 ## Powiązane dokumenty
+
 - Spec funkcjonalna dashboardu: `DASHBOARD.md`
 - Interakcje (hover/click/selection, overlay): `INTERAKCJE.md`
 - Integracje i katalog: `INTEGRACJE.md`
 
 ## Normatywne słowa
+
 - **MUST** — wymagane w MVP.
 - **SHOULD** — zalecane.
 - **MAY** — opcjonalne.
@@ -29,12 +33,14 @@ Ten dokument opisuje **layout, komponenty globalne i wygląd ekranów** dashboar
 ## 0) Tryby: Demo i Produkcja (kontrakt wyglądu 1:1)
 
 Produkt udostępnia publiczny tryb DEMO (dla niezalogowanego użytkownika) oraz dashboard produkcyjny (po logowaniu). Wymóg: **DEMO = PROD 1:1** na poziomie:
+
 - layoutu (Sidebar/Topbar, spacing, komponenty),
 - stanów UI (loading/empty/error/offline),
 - copy i mikrocopy,
 - a11y (focus, kontrast, semantyka).
 
 Różnice DEMO mogą dotyczyć wyłącznie:
+
 - źródła danych (mock/syntetyczne),
 - braku dostępu do danych klienta (RBAC/auth),
 - blokady write-actions,
@@ -45,6 +51,7 @@ Różnice DEMO mogą dotyczyć wyłącznie:
 ## 1) Globalny layout aplikacji
 
 ### 1.1 Sidebar (lewy)
+
 - Logo + nazwa produktu + klikniecię przechodzi na stronę główną
 - Sekcje:
   - Overview
@@ -59,9 +66,11 @@ Różnice DEMO mogą dotyczyć wyłącznie:
 - Collapsed mode (MAY): ikony + tooltip.
 
 ### 1.2 Topbar (zawsze widoczny)
+
 Topbar jest “centrum sterowania” dla całej aplikacji: stan danych, tryb pracy, globalne filtry, szybkie akcje i skróty.
 
 #### Lewa strona
+
 - Chip statusu sesji:
   - `Sesja: gotowa`
   - `Przetwarzanie…`
@@ -71,9 +80,11 @@ Topbar jest “centrum sterowania” dla całej aplikacji: stan danych, tryb pra
   - badge “Data stale” gdy >X godzin.
 
 #### Środek
+
 - Zakres dat (preset + custom)
 
 #### Prawa strona
+
 - Badge trybu: `DEMO` / `TRIAL` / `PROD`
 - Badge planu: `Starter / Professional / Enterprise` + (trial) “Trial: X dni”
 - Ikona AI (otwiera Papa AI Panel)
@@ -99,6 +110,7 @@ Topbar jest “centrum sterowania” dla całej aplikacji: stan danych, tryb pra
 ## 3) Widok Overview (Start)
 
 ### 3.1 Alerty (Papa Guardian)
+
 - Lista 3–6 alertów:
   - spadek sprzedaży
   - odchylenia ROAS/MER/CPA
@@ -110,6 +122,7 @@ Topbar jest “centrum sterowania” dla całej aplikacji: stan danych, tryb pra
   - CTA: `Wyjaśnij w AI` / `Otwórz`
 
 ### 3.2 KPI Grid
+
 - 6–8 kart KPI z tooltip definicji i trendem.
 
 ---
@@ -159,6 +172,7 @@ Topbar jest “centrum sterowania” dla całej aplikacji: stan danych, tryb pra
 ## 9) Ustawienia przestrzeni roboczej (Workspace/Tenant) — zawartość
 
 ### 9.1 Dane i przetwarzanie
+
 ### Retencja danych a Trial i plany
 
 - Trial: **14 dni** (okres testu funkcji), domyślna retencja w trialu: **30 dni**.
@@ -167,27 +181,32 @@ Topbar jest “centrum sterowania” dla całej aplikacji: stan danych, tryb pra
 - Plan Enterprise: retencja **konfigurowalna** (zgodnie z DPA/umową).
 
 **Zasady zmiany retencji:**
+
 - Upgrade (30 → 60): natychmiastowo, dane zostają.
 - Downgrade (60 → 30): UI pokazuje ostrzeżenie i umożliwia **eksport** danych przed obcięciem.
 - Po zakończeniu triala bez płatności: funkcje wstrzymane, usunięcie danych do **30 dni**.
 
 ### 9.4 Atrybucja i metryki
+
 - Domyślny model atrybucji (globalny dla workspace)
 - Definicje KPI (ROAS/MER/CPA/Profit/LTV)
 - Słowniki i mapowania (UTM/channel_group, kampanie, SKU, koszty, COGS/marża)
 
 ### 9.5 AI i RAG
+
 - Zakres indeksu (jakie tabele/kolumny)
 - Status indeksowania + last update
 - Reguły odpowiedzi (np. “zawsze pokazuj dowód + źródła”)
 
 ### 9.6 Alerty i raporty
+
 - Kanały powiadomień: **e-mail** (MUST) — wysyłane przez Papa Guardian wg planu.
 - Harmonogram raportów (MUST): Starter: **tygodniowo**, Professional: **codziennie**, Enterprise: **real-time/konfigurowalne**.
 - Eksport raportów (MUST): **PDF / CSV / JSON** + historia eksportów + signed URL (krótki TTL).
 - Preferencje alertów: progi, odbiorcy, “quiet hours”, kanał (email).
 
 **CTA na dole:**
+
 - Primary: **Wdróż w trybie produkcyjnym**
 - Secondary: **Zapisz zmiany**
 
@@ -198,12 +217,14 @@ Topbar jest “centrum sterowania” dla całej aplikacji: stan danych, tryb pra
 Ustawienia organizacji dotyczą **płatności, planu, użytkowników, bezpieczeństwa** oraz zgodności i bezpieczeństwa na poziomie organizacji. Są wspólne dla wszystkich przestrzeni roboczych w organizacji.
 
 ### 10.1 Ogólne (firma)
+
 - **Nazwa organizacji**
 - **Dane do faktury**:
   - NIP / VAT UE
   - adres
 
 ### 10.2 Użytkownicy i dostęp (RBAC)
+
 - **Lista użytkowników**:
   - imię/nazwa, e-mail, rola, status (aktywny/zaproszony)
   - ostatnie logowanie (opcjonalnie)
@@ -212,16 +233,19 @@ Ustawienia organizacji dotyczą **płatności, planu, użytkowników, bezpiecze�
   - e-mail + wybór roli
 
 ### 10.3 Plan i rozliczenia (Billing)
+
 - **Aktualny plan** + CTA: `Zmień plan`
 - **Okres rozliczeniowy** (np. miesięczny)
 - **Płatność kartą** (miejsce do wprowadzenia płatnośći)
 
 **Plany (MUST, v2):**
+
 - **Starter**: 159 PLN/mies. (subskrypcja roczna, płatne co miesiąc) lub 199 PLN/mies. (miesięcznie); do **3 źródeł**, **raport tygodniowy**, wsparcie e-mail, podstawowe wglądy AI.
 - **Professional**: 399 PLN/mies. (subskrypcja roczna, płatne co miesiąc) lub 499 PLN/mies. (miesięcznie); do **15 źródeł**, **raport dzienny**, priorytetowe wsparcie, priorytetowe AI.
 - **Enterprise**: wycena indywidualna; nielimitowane źródła, raporty w czasie rzeczywistym, dedykowany opiekun, pełny dostęp AI.
 
 **Trial (MUST):**
+
 - Po rejestracji: **14 dni trial** z pełnymi funkcjami **Professional**.
 - Po trialu bez płatności: UI pokazuje banner “Trial zakończony” + CTA do płatności; funkcje produkcyjne są wstrzymane (bez utraty konfiguracji).
 
@@ -233,10 +257,12 @@ Ustawienia organizacji dotyczą **płatności, planu, użytkowników, bezpiecze�
   - pobierz PDF
 
 **UX wymagany:**
+
 - Informacja “kto jest płatnikiem” (Owner/Finance).
 - Komunikaty błędów płatności z jednym CTA naprawy.
 
 ### 10.5 Bezpieczeństwo
+
 - **Logowanie (MUST):**
   - Google
   - Microsoft
@@ -254,9 +280,11 @@ Ustawienia organizacji dotyczą **płatności, planu, użytkowników, bezpiecze�
   - (roadmap) automatyczne provisioning/deprovisioning użytkowników
 
 **UX wymagany:**
+
 - Widoczne “last security change” (opcjonalnie).
 
 ### 10.6 Audyt i zgodność
+
 - Log zdarzeń:
   - zmiany ustawień organizacji
   - zmiany integracji (kluczowe zdarzenia)
@@ -272,10 +300,12 @@ Ustawienia organizacji dotyczą **płatności, planu, użytkowników, bezpiecze�
 ## 11) Stopka (public + produkt)
 
 Stopka jest widoczna:
+
 - na ekranach publicznych (DEMO),
 - po zalogowaniu (opcjonalnie, w panelu info).
 
 ### 11.1 Linki prawne (MUST)
+
 - Terms
 - Privacy Policy
 - Cookies

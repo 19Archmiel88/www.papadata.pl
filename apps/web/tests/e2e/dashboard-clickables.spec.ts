@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+﻿import { test, expect } from '@playwright/test';
 import { mockApi } from './mockApi';
 
 test.beforeEach(async ({ page }) => {
@@ -17,7 +17,7 @@ test.describe('dashboard clickables', () => {
     const sidebar = page.locator('aside');
 
     const items = [
-      { name: /Overview|Przegląd/i, url: /dashboard\/overview/i },
+      { name: /Overview|PrzeglÄ…d/i, url: /dashboard\/overview/i },
       { name: /Analytics|Analityka/i, url: /dashboard\/ads/i },
       { name: /Reports|Raporty/i, url: /dashboard\/reports/i },
       { name: /Customers|Klienci|Klient/i, url: /dashboard\/customers/i },
@@ -39,11 +39,14 @@ test.describe('dashboard clickables', () => {
   test('overview actions and AI input respond', async ({ page }) => {
     await gotoDashboard(page, 'overview');
 
-    await page.getByRole('button', { name: /See All|Zobacz Wszystkie/i }).first().click();
+    await page
+      .getByRole('button', { name: /See All|Zobacz Wszystkie/i })
+      .first()
+      .click();
     await expect(page).toHaveURL(/dashboard\/alerts/i);
 
     await gotoDashboard(page, 'overview');
-    await page.getByRole('button', { name: /View All Ads/i }).click();
+    await page.getByRole('button', { name: /View All Ads/i }).first().click();
     await expect(page).toHaveURL(/dashboard\/ads/i);
 
     await gotoDashboard(page, 'overview');
@@ -175,12 +178,12 @@ test.describe('dashboard clickables', () => {
     const demoSelects = page.locator('select[title="To jest DEMO"]');
     await expect(demoSelects).toHaveCount(1);
     await expect(demoSelects.first()).toBeDisabled();
-    await expect(page.getByRole('button', { name: /Wdróż w trybie produkcyjnym/i })).toBeDisabled();
+    await expect(page.getByRole('button', { name: /WdrĂłĹĽ w trybie produkcyjnym/i })).toBeDisabled();
 
     await gotoDashboard(page, 'settings/org');
-    await expect(page.getByRole('button', { name: /Zaproś/i })).toBeDisabled();
-    await expect(page.getByRole('button', { name: /Zatwierdź Plan Subskrypcji/i })).toBeDisabled();
-    await expect(page.getByRole('button', { name: /Usuń Organizację/i })).toBeDisabled();
+    await expect(page.getByRole('button', { name: /ZaproĹ›/i })).toBeDisabled();
+    await expect(page.getByRole('button', { name: /ZatwierdĹş Plan Subskrypcji/i })).toBeDisabled();
+    await expect(page.getByRole('button', { name: /UsuĹ„ OrganizacjÄ™/i })).toBeDisabled();
     await expect(page.getByRole('button', { name: /Zapisz zmiany/i })).toBeDisabled();
   });
 });

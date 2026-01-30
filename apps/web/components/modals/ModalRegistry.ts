@@ -31,51 +31,53 @@ export type ModalEntry = {
 };
 
 const AuthModal = React.lazy(() =>
-  import('../AuthSection').then((m: any) => ({ default: m.AuthSection ?? m.default })),
+  import('../AuthSection').then((m: any) => ({ default: m.AuthSection ?? m.default }))
 );
 
 const AboutModal = React.lazy(() =>
-  import('../AboutModal').then((m: any) => ({ default: m.AboutModal ?? m.default })),
+  import('../AboutModal').then((m: any) => ({ default: m.AboutModal ?? m.default }))
 );
 
 const ComingSoonModal = React.lazy(() =>
-  import('../ComingSoonModal').then((m: any) => ({ default: m.ComingSoonModal ?? m.default })),
+  import('../ComingSoonModal').then((m: any) => ({ default: m.ComingSoonModal ?? m.default }))
 );
 
 const ContactModal = React.lazy(() =>
-  import('../ContactModal').then((m: any) => ({ default: m.ContactModal ?? m.default })),
+  import('../ContactModal').then((m: any) => ({ default: m.ContactModal ?? m.default }))
 );
 
 const PricingModal = React.lazy(() =>
-  import('../PricingModal').then((m: any) => ({ default: m.PricingModal ?? m.default })),
+  import('../PricingModal').then((m: any) => ({ default: m.PricingModal ?? m.default }))
 );
 
 const IntegrationsModal = React.lazy(() =>
-  import('../IntegrationsModal').then((m: any) => ({ default: m.IntegrationsModal ?? m.default })),
+  import('../IntegrationsModal').then((m: any) => ({ default: m.IntegrationsModal ?? m.default }))
 );
 
 const IntegrationConnectModal = React.lazy(() =>
-  import('../IntegrationConnectModal').then((m: any) => ({ default: m.IntegrationConnectModal ?? m.default })),
+  import('../IntegrationConnectModal').then((m: any) => ({
+    default: m.IntegrationConnectModal ?? m.default,
+  }))
 );
 
 const FeatureModal = React.lazy(() =>
-  import('../FeatureModal').then((m: any) => ({ default: m.FeatureModal ?? m.default })),
+  import('../FeatureModal').then((m: any) => ({ default: m.FeatureModal ?? m.default }))
 );
 
 const DemoNoticeModal = React.lazy(() =>
-  import('../DemoNoticeModal').then((m: any) => ({ default: m.DemoNoticeModal ?? m.default })),
+  import('../DemoNoticeModal').then((m: any) => ({ default: m.DemoNoticeModal ?? m.default }))
 );
 
 const TrialNoticeModal = React.lazy(() =>
-  import('../TrialNoticeModal').then((m: any) => ({ default: m.TrialNoticeModal ?? m.default })),
+  import('../TrialNoticeModal').then((m: any) => ({ default: m.TrialNoticeModal ?? m.default }))
 );
 
 const VideoModal = React.lazy(() =>
-  import('../VideoModal').then((m: any) => ({ default: m.VideoModal ?? m.default })),
+  import('../VideoModal').then((m: any) => ({ default: m.VideoModal ?? m.default }))
 );
 
 const PromoModal = React.lazy(() =>
-  import('../PromoModal').then((m: any) => ({ default: m.PromoModal ?? m.default })),
+  import('../PromoModal').then((m: any) => ({ default: m.PromoModal ?? m.default }))
 );
 
 export const ModalRegistry: Record<ModalId, ModalEntry> = {

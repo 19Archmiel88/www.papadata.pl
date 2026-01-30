@@ -80,9 +80,7 @@ describe('api client', () => {
   });
 
   it('handles 4xx errors with ApiRequestError', async () => {
-    const fetchSpy = vi
-      .fn()
-      .mockResolvedValue(createJsonResponse({ message: 'Not found' }, 404));
+    const fetchSpy = vi.fn().mockResolvedValue(createJsonResponse({ message: 'Not found' }, 404));
     vi.stubGlobal('fetch', fetchSpy);
 
     await expect(apiGet('/missing')).rejects.toBeInstanceOf(ApiRequestError);
@@ -112,7 +110,7 @@ describe('api client', () => {
         onDone: () => {
           done = true;
         },
-      },
+      }
     );
 
     expect(tokens.join('')).toContain('OK');

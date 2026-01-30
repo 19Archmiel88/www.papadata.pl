@@ -310,4 +310,3 @@ export const IntegrationConnectModal: React.FC<IntegrationConnectModalProps> = (
     </div>
   );
 };
-

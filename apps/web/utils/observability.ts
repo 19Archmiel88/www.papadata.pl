@@ -20,7 +20,11 @@ export const getObservabilityConfig = (): ObservabilityConfig => {
   const config = getWebConfig();
   const { provider, dsn, environment, release } = config.observability;
 
-  if (provider !== 'none' && dsn.length === 0 && String(import.meta.env.MODE).trim() !== 'production') {
+  if (
+    provider !== 'none' &&
+    dsn.length === 0 &&
+    String(import.meta.env.MODE).trim() !== 'production'
+  ) {
     devLog(
       'warn',
       '[observability] Provider requested but DSN is missing; falling back to provider="none".'

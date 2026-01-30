@@ -13,7 +13,7 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
         ref={ref}
         className={cn(
           'rounded-3xl border border-black/5 dark:border-white/10 bg-white/80 dark:bg-[#0b0b0f]/80 shadow-[0_20px_70px_rgba(0,0,0,0.25)] backdrop-blur-xl p-6 space-y-4',
-          className,
+          className
         )}
         {...props}
       >
@@ -32,7 +32,7 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
         {children}
       </div>
     );
-  },
+  }
 );
 Card.displayName = 'Card';
 
@@ -45,6 +45,6 @@ export const CardContent = React.forwardRef<HTMLDivElement, CardContentProps>(
       className={cn('text-sm text-gray-700 dark:text-gray-200 space-y-3', className)}
       {...props}
     />
-  ),
+  )
 );
 CardContent.displayName = 'CardContent';

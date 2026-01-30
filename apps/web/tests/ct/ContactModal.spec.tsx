@@ -8,6 +8,9 @@ test.beforeEach(async ({ page }) => {
 });
 
 test('ContactModal renders', async ({ mount }) => {
-  const component = await mountWithProviders(mount, <ContactModal t={t} isOpen onClose={() => {}} />);
+  const component = await mountWithProviders(
+    mount,
+    <ContactModal t={t} isOpen onClose={() => {}} />
+  );
   await expect(component).toBeVisible();
 });

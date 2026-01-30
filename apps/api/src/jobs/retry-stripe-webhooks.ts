@@ -1,52 +1,47 @@
-import Stripe from "stripe";
-import { Client } from "pg";
+import Stripe from 'stripe';
+import { Client } from 'pg';
 
-const getEnv = (key: string, fallback = ""): string =>
-  (process.env[key] ?? fallback).trim();
+const getEnv = (key: string, fallback = ''): string => (process.env[key] ?? fallback).trim();
 
 const mapStatus = (
   status: Stripe.Subscription.Status,
   trialEndsAt: string | null | undefined,
-  nowMs: number,
+  nowMs: number
 ) => {
-  if (status === "active") return "active";
-  if (status === "trialing") {
+  if (status === 'active') return 'active';
+  if (status === 'trialing') {
     if (trialEndsAt && nowMs > Date.parse(trialEndsAt)) {
-      return "trial_expired";
+      return 'trial_expired';
     }
-    return "trialing";
+    return 'trialing';
   }
-  if (status === "past_due" || status === "unpaid") return "past_due";
-  if (status === "canceled") return "canceled";
-  if (
-    status === "incomplete" ||
-    status === "incomplete_expired" ||
-    status === "paused"
-  ) {
-    return "past_due";
+  if (status === 'past_due' || status === 'unpaid') return 'past_due';
+  if (status === 'canceled') return 'canceled';
+  if (status === 'incomplete' || status === 'incomplete_expired' || status === 'paused') {
+    return 'past_due';
   }
-  return "canceled";
+  return 'canceled';
 };
 
 const mapPlanFromPriceIds = (priceIds: string[]) => {
-  const priceStarter = getEnv("STRIPE_PRICE_STARTER");
-  const priceProfessional = getEnv("STRIPE_PRICE_PROFESSIONAL");
-  const priceEnterprise = getEnv("STRIPE_PRICE_ENTERPRISE");
+  const priceStarter = getEnv('STRIPE_PRICE_STARTER');
+  const priceProfessional = getEnv('STRIPE_PRICE_PROFESSIONAL');
+  const priceEnterprise = getEnv('STRIPE_PRICE_ENTERPRISE');
   if (priceStarter && priceIds.includes(priceStarter)) {
-    return "starter";
+    return 'starter';
   }
   if (priceEnterprise && priceIds.includes(priceEnterprise)) {
-    return "enterprise";
+    return 'enterprise';
   }
   if (priceProfessional && priceIds.includes(priceProfessional)) {
-    return "professional";
+    return 'professional';
   }
-  return "starter";
+  return 'starter';
 };
 
 const resolveTenantIdFromCustomer = async (
   stripe: Stripe,
-  customerId: string,
+  customerId: string
 ): Promise<string | null> => {
   try {
     const customer = await stripe.customers.retrieve(customerId);
@@ -73,7 +68,7 @@ const upsertTenantBilling = async (
     billingStatus: string;
     trialEndsAt: string | null;
     currentPeriodEnd: string | null;
-  },
+  }
 ) => {
   await client.query(
     `INSERT INTO tenant_billing (
@@ -102,7 +97,7 @@ const upsertTenantBilling = async (
       input.billingStatus,
       input.trialEndsAt,
       input.currentPeriodEnd,
-    ],
+    ]
   );
 };
 
@@ -110,19 +105,15 @@ const handleSubscription = async (
   client: Client,
   stripe: Stripe,
   subscription: Stripe.Subscription,
-  nowMs: number,
+  nowMs: number
 ): Promise<void> => {
   const customerId =
-    typeof subscription.customer === "string"
-      ? subscription.customer
-      : subscription.customer?.id;
+    typeof subscription.customer === 'string' ? subscription.customer : subscription.customer?.id;
   if (!customerId) return;
 
   const meta = subscription.metadata || {};
   const tenantId =
-    meta.tenant_id ||
-    meta.tenantId ||
-    (await resolveTenantIdFromCustomer(stripe, customerId));
+    meta.tenant_id || meta.tenantId || (await resolveTenantIdFromCustomer(stripe, customerId));
   if (!tenantId) return;
 
   const trialEndsAt = subscription.trial_end
@@ -134,8 +125,8 @@ const handleSubscription = async (
     .map((item) => item.price?.id)
     .filter(Boolean) as string[];
   let plan = mapPlanFromPriceIds(priceIds);
-  if (billingStatus === "trialing") {
-    plan = "professional";
+  if (billingStatus === 'trialing') {
+    plan = 'professional';
   }
 
   await upsertTenantBilling(client, {
@@ -154,12 +145,9 @@ const handleSubscription = async (
 const handleInvoice = async (
   client: Client,
   stripe: Stripe,
-  invoice: Stripe.Invoice,
+  invoice: Stripe.Invoice
 ): Promise<void> => {
-  const customerId =
-    typeof invoice.customer === "string"
-      ? invoice.customer
-      : invoice.customer?.id;
+  const customerId = typeof invoice.customer === 'string' ? invoice.customer : invoice.customer?.id;
   if (!customerId) return;
 
   const tenantId = await resolveTenantIdFromCustomer(stripe, customerId);
@@ -169,20 +157,18 @@ const handleInvoice = async (
     .map((line) => line.price?.id)
     .filter(Boolean) as string[];
   const plan = mapPlanFromPriceIds(priceIds);
-  const status = invoice.paid ? "active" : "past_due";
+  const status = invoice.paid ? 'active' : 'past_due';
   await upsertTenantBilling(client, {
     tenantId,
     stripeCustomerId: customerId,
     stripeSubscriptionId:
-      typeof invoice.subscription === "string"
+      typeof invoice.subscription === 'string'
         ? invoice.subscription
         : (invoice.subscription?.id ?? null),
     plan,
     billingStatus: status,
     trialEndsAt: null,
-    currentPeriodEnd: invoice.period_end
-      ? new Date(invoice.period_end * 1000).toISOString()
-      : null,
+    currentPeriodEnd: invoice.period_end ? new Date(invoice.period_end * 1000).toISOString() : null,
   });
 };
 
@@ -190,21 +176,16 @@ const handleStripeEvent = async (
   client: Client,
   stripe: Stripe,
   event: Stripe.Event,
-  nowMs: number,
+  nowMs: number
 ): Promise<void> => {
   switch (event.type) {
-    case "customer.subscription.created":
-    case "customer.subscription.updated":
-    case "customer.subscription.deleted":
-      await handleSubscription(
-        client,
-        stripe,
-        event.data.object as Stripe.Subscription,
-        nowMs,
-      );
+    case 'customer.subscription.created':
+    case 'customer.subscription.updated':
+    case 'customer.subscription.deleted':
+      await handleSubscription(client, stripe, event.data.object as Stripe.Subscription, nowMs);
       return;
-    case "invoice.paid":
-    case "invoice.payment_failed":
+    case 'invoice.paid':
+    case 'invoice.payment_failed':
       await handleInvoice(client, stripe, event.data.object as Stripe.Invoice);
       return;
     default:
@@ -213,15 +194,15 @@ const handleStripeEvent = async (
 };
 
 const main = async () => {
-  const apiKey = getEnv("STRIPE_SECRET_KEY");
-  const databaseUrl = getEnv("DATABASE_URL");
-  const alertUrl = getEnv("ALERT_WEBHOOK_URL");
-  const maxAttempts = Number(getEnv("WEBHOOK_RETRY_MAX", "5"));
+  const apiKey = getEnv('STRIPE_SECRET_KEY');
+  const databaseUrl = getEnv('DATABASE_URL');
+  const alertUrl = getEnv('ALERT_WEBHOOK_URL');
+  const maxAttempts = Number(getEnv('WEBHOOK_RETRY_MAX', '5'));
 
-  if (!apiKey) throw new Error("Missing STRIPE_SECRET_KEY");
-  if (!databaseUrl) throw new Error("Missing DATABASE_URL");
+  if (!apiKey) throw new Error('Missing STRIPE_SECRET_KEY');
+  if (!databaseUrl) throw new Error('Missing DATABASE_URL');
 
-  const stripe = new Stripe(apiKey, { apiVersion: "2023-10-16" });
+  const stripe = new Stripe(apiKey, { apiVersion: '2023-10-16' });
   const client = new Client({ connectionString: databaseUrl });
   await client.connect();
 
@@ -234,7 +215,7 @@ const main = async () => {
      WHERE status = 'failed' AND attempts < $1
      ORDER BY updated_at ASC
      LIMIT 20`,
-    [maxAttempts],
+    [maxAttempts]
   );
 
   const failures: string[] = [];
@@ -248,7 +229,7 @@ const main = async () => {
         `UPDATE stripe_webhook_events
          SET status = 'processed', attempts = attempts + 1, last_error = NULL, updated_at = now()
          WHERE event_id = $1`,
-        [row.event_id],
+        [row.event_id]
       );
       // eslint-disable-next-line no-console
       console.log(`Processed ${row.event_id} (${event.type})`);
@@ -258,7 +239,7 @@ const main = async () => {
         `UPDATE stripe_webhook_events
          SET status = 'failed', attempts = attempts + 1, last_error = $2, updated_at = now()
          WHERE event_id = $1`,
-        [row.event_id, err?.message ?? "unknown error"],
+        [row.event_id, err?.message ?? 'unknown error']
       );
     }
   }
@@ -267,10 +248,10 @@ const main = async () => {
 
   if (alertUrl && failures.length > 0) {
     await fetch(alertUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        title: "Stripe webhook retry failures",
+        title: 'Stripe webhook retry failures',
         failures,
         count: failures.length,
       }),

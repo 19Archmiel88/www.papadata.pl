@@ -7,6 +7,4 @@ const compat = new FlatCompat({
   allConfig: js.configs.all,
 });
 
-module.exports = [
-  ...compat.config(require('./.eslintrc.cjs')),
-];
+module.exports = [...compat.config(require('./.eslintrc.cjs'))];

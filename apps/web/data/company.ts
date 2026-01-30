@@ -8,7 +8,7 @@ export type CompanyLookupError = {
 
 export const lookupCompanyByNip = async (
   nip: string,
-  options?: { signal?: AbortSignal },
+  options?: { signal?: AbortSignal }
 ): Promise<CompanyLookupResponse> => {
   const normalized = nip.trim();
   return apiGet<CompanyLookupResponse>(`/public/company?nip=${encodeURIComponent(normalized)}`, {

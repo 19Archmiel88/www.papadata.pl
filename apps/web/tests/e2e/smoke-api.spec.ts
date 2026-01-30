@@ -4,7 +4,7 @@ const waitForApi = async (
   request: APIRequestContext,
   apiBase: string,
   retries = 10,
-  delayMs = 1000,
+  delayMs = 1000
 ) => {
   for (let attempt = 0; attempt < retries; attempt += 1) {
     try {
@@ -57,19 +57,22 @@ test('smoke: contact form handles API error @smoke', async ({ page }) => {
   }
 
   // Handle Demo/Promo modal if present
-  const closePromo = page.locator('button[aria-label="Close"], button.absolute.top-4.right-4').filter({ hasText: '' }).first();
+  const closePromo = page
+    .locator('button[aria-label="Close"], button.absolute.top-4.right-4')
+    .filter({ hasText: '' })
+    .first();
   if (await closePromo.isVisible()) {
-      try {
-          await closePromo.click({ timeout: 2000 });
-      } catch {
-          // ignore if it disappeared
-      }
+    try {
+      await closePromo.click({ timeout: 2000 });
+    } catch {
+      // ignore if it disappeared
+    }
   }
-  
+
   // Handle "Ustawienia" (Settings) button if it's intercepting (likely Cookie Settings Modal still open or animating)
   const saveSettings = page.getByRole('button', { name: /Save settings|Zapisz ustawienia/i });
   if (await saveSettings.isVisible()) {
-      await saveSettings.click();
+    await saveSettings.click();
   }
 
   const footer = page.locator('footer');
@@ -80,7 +83,9 @@ test('smoke: contact form handles API error @smoke', async ({ page }) => {
 
   await page.getByPlaceholder(/Full name|Imię i nazwisko/i).fill('Test User');
   await page.getByPlaceholder(/Work email|E-mail firmowy/i).fill('test@example.com');
-  await page.getByPlaceholder(/How can we help\?|W czym możemy pomóc\?/i).fill('Test message for API error.');
+  await page
+    .getByPlaceholder(/How can we help\?|W czym możemy pomóc\?/i)
+    .fill('Test message for API error.');
 
   const submitButton = page.getByRole('button', { name: /Send request|Wyślij zapytanie/i });
   await submitButton.click();

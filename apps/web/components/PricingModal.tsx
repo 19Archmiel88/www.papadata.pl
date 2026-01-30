@@ -15,21 +15,36 @@ export const PricingModal: React.FC<PricingModalProps> = ({ t, isOpen = true, on
 
   const checkIcon = useMemo(
     () => (
-      <svg className="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <svg
+        className="w-4 h-4 text-emerald-500"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+      >
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
       </svg>
     ),
-    [],
+    []
   );
 
   const dashIcon = useMemo(
-    () => <span className="text-gray-300 dark:text-gray-700" aria-hidden="true">—</span>,
-    [],
+    () => (
+      <span className="text-gray-300 dark:text-gray-700" aria-hidden="true">
+        —
+      </span>
+    ),
+    []
   );
 
   const comparisonData = useMemo(
     () => [
-      { label: t.pricing.comparison.protocol_label, starter: 'S-1 Shared', pro: 'P-1 Dedicated', ent: 'E-1 Isolated' },
+      {
+        label: t.pricing.comparison.protocol_label,
+        starter: 'S-1 Shared',
+        pro: 'P-1 Dedicated',
+        ent: 'E-1 Isolated',
+      },
       {
         label: t.pricing.comparison.data_retention,
         starter: `30 ${t.pricing.comparison.data_retention_unit}`,
@@ -60,11 +75,26 @@ export const PricingModal: React.FC<PricingModalProps> = ({ t, isOpen = true, on
         pro: t.pricing.comparison.ai_semantic_pro,
         ent: t.pricing.comparison.unlimited,
       },
-      { label: t.pricing.comparison.custom_etl_label, starter: dashIcon, pro: dashIcon, ent: checkIcon },
-      { label: t.pricing.comparison.bigquery_export_label, starter: dashIcon, pro: checkIcon, ent: checkIcon },
-      { label: t.pricing.comparison.uptime_sla_label, starter: dashIcon, pro: '99.9%', ent: '99.99%' },
+      {
+        label: t.pricing.comparison.custom_etl_label,
+        starter: dashIcon,
+        pro: dashIcon,
+        ent: checkIcon,
+      },
+      {
+        label: t.pricing.comparison.bigquery_export_label,
+        starter: dashIcon,
+        pro: checkIcon,
+        ent: checkIcon,
+      },
+      {
+        label: t.pricing.comparison.uptime_sla_label,
+        starter: dashIcon,
+        pro: '99.9%',
+        ent: '99.99%',
+      },
     ],
-    [t, checkIcon, dashIcon],
+    [t, checkIcon, dashIcon]
   );
 
   if (!isOpen) return null;
@@ -106,7 +136,12 @@ export const PricingModal: React.FC<PricingModalProps> = ({ t, isOpen = true, on
             viewBox="0 0 24 24"
             aria-hidden="true"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2.5}
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         </button>
       </div>
@@ -130,7 +165,10 @@ export const PricingModal: React.FC<PricingModalProps> = ({ t, isOpen = true, on
                 >
                   {t.pricing.starter.name}
                 </th>
-                <th scope="col" className="py-6 px-4 text-xl font-black text-brand-start uppercase tracking-tighter">
+                <th
+                  scope="col"
+                  className="py-6 px-4 text-xl font-black text-brand-start uppercase tracking-tighter"
+                >
                   {t.pricing.professional.name}
                 </th>
                 <th
@@ -154,9 +192,13 @@ export const PricingModal: React.FC<PricingModalProps> = ({ t, isOpen = true, on
                   >
                     {row.label}
                   </th>
-                  <td className="py-5 px-4 text-sm font-black text-gray-900 dark:text-white">{row.starter}</td>
+                  <td className="py-5 px-4 text-sm font-black text-gray-900 dark:text-white">
+                    {row.starter}
+                  </td>
                   <td className="py-5 px-4 text-sm font-black text-brand-start">{row.pro}</td>
-                  <td className="py-5 px-4 text-sm font-black text-gray-900 dark:text-white">{row.ent}</td>
+                  <td className="py-5 px-4 text-sm font-black text-gray-900 dark:text-white">
+                    {row.ent}
+                  </td>
                 </tr>
               ))}
             </tbody>

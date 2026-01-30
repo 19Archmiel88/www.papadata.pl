@@ -11,18 +11,22 @@ type CacheEntry<T> = {
 const DEFAULT_TTL_MS = 60_000;
 const cache: CacheEntry<TenantSummary[]> = { data: null, timestamp: 0 };
 
-export const useTenants = (options?: { ttlMs?: number; maxRetries?: number; enabled?: boolean }) => {
+export const useTenants = (options?: {
+  ttlMs?: number;
+  maxRetries?: number;
+  enabled?: boolean;
+}) => {
   const api = useApi();
   const ttlMs = options?.ttlMs ?? DEFAULT_TTL_MS;
   const maxRetries = options?.maxRetries ?? 2;
   const enabled = options?.enabled ?? true;
 
-  const [data, setData] = useState<TenantSummary[]>(() => (enabled ? cache.data ?? [] : []));
+  const [data, setData] = useState<TenantSummary[]>(() => (enabled ? (cache.data ?? []) : []));
   const [loading, setLoading] = useState(enabled && cache.data === null);
   const [retrying, setRetrying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastSync, setLastSync] = useState<string | null>(
-    cache.timestamp ? new Date(cache.timestamp).toISOString() : null,
+    cache.timestamp ? new Date(cache.timestamp).toISOString() : null
   );
 
   const activeRef = useRef(true);
@@ -105,7 +109,7 @@ export const useTenants = (options?: { ttlMs?: number; maxRetries?: number; enab
         }
       }
     },
-    [api, clearRetryTimer, maxRetries, ttlMs],
+    [api, clearRetryTimer, maxRetries, ttlMs]
   );
 
   useEffect(() => {

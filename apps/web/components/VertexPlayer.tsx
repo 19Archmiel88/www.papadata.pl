@@ -215,47 +215,59 @@ const ConfidenceTag = memo(({ value }: { value?: ChatMessage['confidence'] }) =>
   );
 });
 
-const ChatBubble = memo(({ msg, isLast, reducedMotion }: { msg: ChatMessage; isLast: boolean; reducedMotion: boolean }) => {
-  const isSystem = msg.role === 'system';
-  const isAssistant = msg.role === 'assistant';
+const ChatBubble = memo(
+  ({
+    msg,
+    isLast,
+    reducedMotion,
+  }: {
+    msg: ChatMessage;
+    isLast: boolean;
+    reducedMotion: boolean;
+  }) => {
+    const isSystem = msg.role === 'system';
+    const isAssistant = msg.role === 'assistant';
 
-  return (
-    <motion.div
-      initial={reducedMotion ? false : { opacity: 0, x: -10, y: 10 }}
-      animate={reducedMotion ? { opacity: 1 } : { opacity: 1, x: 0, y: 0 }}
-      exit={reducedMotion ? { opacity: 0 } : { opacity: 0, y: 6 }}
-      className={`flex flex-col gap-1.5 mb-4 ${isSystem ? 'items-center' : 'items-start'}`}
-    >
-      {!isSystem && (
-        <div className="flex items-center gap-2.5 px-1">
-          <span className="text-3xs font-mono font-bold text-gray-500 uppercase tracking-widest">{msg.role}</span>
-          <span className="text-3xs font-mono text-gray-400 opacity-50">{msg.timestamp}</span>
-          <ConfidenceTag value={msg.confidence} />
-        </div>
-      )}
-
-      <div
-        className={`relative p-3.5 md:p-4 rounded-2xl text-sm-plus md:text-sm font-medium leading-relaxed max-w-[95%] md:max-w-[90%] border shadow-sm ${
-          isSystem
-            ? 'bg-black/5 dark:bg-white/5 border-black/5 dark:border-white/5 text-gray-500 italic text-center text-2xs md:text-xs font-mono uppercase tracking-widest'
-            : isAssistant
-              ? 'bg-white dark:bg-[#0F1117] border-black/5 dark:border-white/10 text-gray-800 dark:text-gray-200 rounded-tl-none'
-              : 'brand-gradient-bg text-white border-transparent rounded-tr-none'
-        }`}
+    return (
+      <motion.div
+        initial={reducedMotion ? false : { opacity: 0, x: -10, y: 10 }}
+        animate={reducedMotion ? { opacity: 1 } : { opacity: 1, x: 0, y: 0 }}
+        exit={reducedMotion ? { opacity: 0 } : { opacity: 0, y: 6 }}
+        className={`flex flex-col gap-1.5 mb-4 ${isSystem ? 'items-center' : 'items-start'}`}
       >
-        {msg.text}
-        {msg.meta && <div className="mt-3">{msg.meta}</div>}
-        {isAssistant && isLast && !reducedMotion && (
-          <motion.span
-            animate={{ opacity: [0, 1, 0] }}
-            transition={{ duration: 0.8, repeat: Infinity }}
-            className="inline-block w-1.5 h-3 ml-1 bg-brand-start translate-y-0.5"
-          />
+        {!isSystem && (
+          <div className="flex items-center gap-2.5 px-1">
+            <span className="text-3xs font-mono font-bold text-gray-500 uppercase tracking-widest">
+              {msg.role}
+            </span>
+            <span className="text-3xs font-mono text-gray-400 opacity-50">{msg.timestamp}</span>
+            <ConfidenceTag value={msg.confidence} />
+          </div>
         )}
-      </div>
-    </motion.div>
-  );
-});
+
+        <div
+          className={`relative p-3.5 md:p-4 rounded-2xl text-sm-plus md:text-sm font-medium leading-relaxed max-w-[95%] md:max-w-[90%] border shadow-sm ${
+            isSystem
+              ? 'bg-black/5 dark:bg-white/5 border-black/5 dark:border-white/5 text-gray-500 italic text-center text-2xs md:text-xs font-mono uppercase tracking-widest'
+              : isAssistant
+                ? 'bg-white dark:bg-[#0F1117] border-black/5 dark:border-white/10 text-gray-800 dark:text-gray-200 rounded-tl-none'
+                : 'brand-gradient-bg text-white border-transparent rounded-tr-none'
+          }`}
+        >
+          {msg.text}
+          {msg.meta && <div className="mt-3">{msg.meta}</div>}
+          {isAssistant && isLast && !reducedMotion && (
+            <motion.span
+              animate={{ opacity: [0, 1, 0] }}
+              transition={{ duration: 0.8, repeat: Infinity }}
+              className="inline-block w-1.5 h-3 ml-1 bg-brand-start translate-y-0.5"
+            />
+          )}
+        </div>
+      </motion.div>
+    );
+  }
+);
 
 function buildSequences(args: {
   active: VertexTab;
@@ -282,7 +294,11 @@ function buildSequences(args: {
     timestamp: now,
   });
 
-  const asst = (text: string, confidence?: ChatMessage['confidence'], meta?: React.ReactNode): ChatMessage => ({
+  const asst = (
+    text: string,
+    confidence?: ChatMessage['confidence'],
+    meta?: React.ReactNode
+  ): ChatMessage => ({
     id: `a_${Math.random().toString(16).slice(2)}`,
     role: 'assistant',
     text,
@@ -306,7 +322,7 @@ function buildSequences(args: {
           asst(`Największa zmiana: spadek CVR w checkout (-${narrative.cvrDropPp} pp)`, 'high'),
           asst(
             `Rekomendacja: sprawdź płatności / dostawy / błędy mobile → raport diagnostyczny gotowy (kategoria: „${hero}”)`,
-            'review',
+            'review'
           ),
         ]
       : [
@@ -315,7 +331,7 @@ function buildSequences(args: {
           asst(`Primary driver: Checkout CVR drop (-${narrative.cvrDropPp} pp)`, 'high'),
           asst(
             `Recommendation: Check payments / deliveries / mobile errors → diagnostic report ready (category: “${hero}”)`,
-            'review',
+            'review'
           ),
         ];
   }
@@ -340,11 +356,11 @@ function buildSequences(args: {
           asst('Generowanie raportu P&L (wczoraj)…', 'high', meta),
           asst(
             `Marża netto ↓ głównie przez: rabaty + zwroty (korelacja z ROAS -${narrative.roasDropPct}% w “${hero}”)`,
-            'review',
+            'review'
           ),
           asst(
             `Rekomendacja: lista SKU z ujemnym zyskiem + alerty progowe ustawione (stock-outs: ${narrative.stockoutsCount})`,
-            'review',
+            'review'
           ),
         ]
       : [
@@ -352,11 +368,11 @@ function buildSequences(args: {
           asst('Generating P&L matrix (yesterday)…', 'high', meta),
           asst(
             `Net margin ↓ mainly due to: discounts + returns (correlates with ROAS -${narrative.roasDropPct}% in “${hero}”)`,
-            'review',
+            'review'
           ),
           asst(
             `Recommendation: SKU list with negative profit + threshold alerts set (stock-outs: ${narrative.stockoutsCount})`,
-            'review',
+            'review'
           ),
         ];
   }
@@ -368,20 +384,32 @@ function buildSequences(args: {
         user('dlaczego nie osiągnąłem celu sprzedażowego w poprzednim miesiącu?'),
         asst(
           `1) Spadek ROAS o ${narrative.roasDropPct}% w kampaniach (najmocniej: “${hero}”, kanał: ${channel}).`,
-          'high',
+          'high'
         ),
-        asst(`2) Problemy z dostępnością (stock-outs) dla ${narrative.stockoutsCount} kluczowych SKU.`, 'high'),
-        asst(`3) Niedoszacowanie budżetu na najlepsze kampanie (underspend ~${narrative.underspendPct}%).`, 'review'),
+        asst(
+          `2) Problemy z dostępnością (stock-outs) dla ${narrative.stockoutsCount} kluczowych SKU.`,
+          'high'
+        ),
+        asst(
+          `3) Niedoszacowanie budżetu na najlepsze kampanie (underspend ~${narrative.underspendPct}%).`,
+          'review'
+        ),
       ]
     : [
         sys('DATA INGESTION • SEMANTIC ANALYSIS'),
         user('Why did I miss my sales target last month?'),
         asst(
           `1) ROAS dropped by ${narrative.roasDropPct}% (strongest: “${hero}”, channel: ${channel}).`,
-          'high',
+          'high'
         ),
-        asst(`2) Availability issues (stock-outs) for ${narrative.stockoutsCount} key SKUs.`, 'high'),
-        asst(`3) Underspending on top-performing campaigns (~${narrative.underspendPct}%).`, 'review'),
+        asst(
+          `2) Availability issues (stock-outs) for ${narrative.stockoutsCount} key SKUs.`,
+          'high'
+        ),
+        asst(
+          `3) Underspending on top-performing campaigns (~${narrative.underspendPct}%).`,
+          'review'
+        ),
       ];
 }
 
@@ -394,7 +422,7 @@ const NetworkStatus = memo(({ reducedMotion }: { reducedMotion: boolean }) => {
       { label: 'AI: OK', dot: 'bg-emerald-500' },
       { label: 'ALERTS: LIVE', dot: 'bg-brand-start' },
     ],
-    [],
+    []
   );
 
   useEffect(() => {
@@ -406,7 +434,9 @@ const NetworkStatus = memo(({ reducedMotion }: { reducedMotion: boolean }) => {
   const current = items[idx] ?? items[0];
   return (
     <div className="flex items-center gap-2">
-      <span className={`w-1.5 h-1.5 rounded-full ${current.dot} ${reducedMotion ? '' : 'animate-pulse'}`} />
+      <span
+        className={`w-1.5 h-1.5 rounded-full ${current.dot} ${reducedMotion ? '' : 'animate-pulse'}`}
+      />
       <span className="text-3xs md:text-2xs font-black tracking-[0.25em] uppercase text-gray-500">
         {current.label}
       </span>
@@ -524,23 +554,15 @@ export const VertexPlayer = ({ t }: { t: Translation }) => {
       typeof (m as any).id === 'string' &&
       typeof (m as any).role === 'string' &&
       typeof (m as any).text === 'string' &&
-      typeof (m as any).timestamp === 'string',
+      typeof (m as any).timestamp === 'string'
   );
 
   // Quick prompts (AI)
   const quickPrompts = useMemo(() => {
     if (isPL) {
-      return [
-        'Dlaczego spadł ROAS?',
-        'Pokaż SKU z ujemnym zyskiem',
-        'Co mam zrobić dziś?',
-      ];
+      return ['Dlaczego spadł ROAS?', 'Pokaż SKU z ujemnym zyskiem', 'Co mam zrobić dziś?'];
     }
-    return [
-      'Why did ROAS drop?',
-      'Show negative-profit SKUs',
-      'What should I do today?',
-    ];
+    return ['Why did ROAS drop?', 'Show negative-profit SKUs', 'What should I do today?'];
   }, [isPL]);
 
   const [aiInput, setAiInput] = useState('');
@@ -617,7 +639,7 @@ export const VertexPlayer = ({ t }: { t: Translation }) => {
       window.setTimeout(() => appendToAI([replies[0]]), 650);
       window.setTimeout(() => appendToAI([replies[1]]), 1400);
     },
-    [appendToAI, isPL, narrative, reducedMotion],
+    [appendToAI, isPL, narrative, reducedMotion]
   );
 
   const onSendAI = useCallback(() => {
@@ -691,17 +713,28 @@ export const VertexPlayer = ({ t }: { t: Translation }) => {
                   : 'border-amber-300/25 bg-amber-300/10 text-amber-300 hover:bg-amber-300/15'
             }`}
             aria-label={isPL ? 'Tryb odtwarzania' : 'Playback mode'}
-            title={reducedMotion ? (isPL ? 'Preferencje systemu: reduced motion' : 'System preference: reduced motion') : undefined}
+            title={
+              reducedMotion
+                ? isPL
+                  ? 'Preferencje systemu: reduced motion'
+                  : 'System preference: reduced motion'
+                : undefined
+            }
           >
             {playbackLabel}
           </button>
 
-          <div className={`w-1.5 h-1.5 rounded-full ${paused ? 'bg-amber-400' : 'bg-emerald-500'} ${reducedMotion ? '' : 'animate-pulse'}`} />
+          <div
+            className={`w-1.5 h-1.5 rounded-full ${paused ? 'bg-amber-400' : 'bg-emerald-500'} ${reducedMotion ? '' : 'animate-pulse'}`}
+          />
         </div>
       </div>
 
       {/* Body */}
-      <div ref={scrollRef} className="h-[340px] md:h-[420px] overflow-y-auto p-5 md:p-8 no-scrollbar scroll-smooth flex flex-col">
+      <div
+        ref={scrollRef}
+        className="h-[340px] md:h-[420px] overflow-y-auto p-5 md:p-8 no-scrollbar scroll-smooth flex flex-col"
+      >
         <AnimatePresence initial={false} mode="popLayout">
           {safeHistory.map((msg, idx) => (
             <ChatBubble
@@ -777,10 +810,16 @@ export const VertexPlayer = ({ t }: { t: Translation }) => {
             <span className="text-brand-start font-black text-xs">&gt;</span>
             <span className="text-xs md:text-xs-plus font-medium text-gray-400 italic">
               {reducedMotion
-                ? (isPL ? 'Podgląd statyczny (reduced motion)' : 'Static preview (reduced motion)')
+                ? isPL
+                  ? 'Podgląd statyczny (reduced motion)'
+                  : 'Static preview (reduced motion)'
                 : paused
-                  ? (isPL ? 'Pauza…' : 'Paused…')
-                  : (isPL ? 'Przetwarzanie danych…' : 'Processing data…')}
+                  ? isPL
+                    ? 'Pauza…'
+                    : 'Paused…'
+                  : isPL
+                    ? 'Przetwarzanie danych…'
+                    : 'Processing data…'}
             </span>
           </div>
 

@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+﻿import { test, expect } from '@playwright/test';
 import { mockApi } from './mockApi';
 
 test.beforeEach(async ({ page }) => {
@@ -9,7 +9,10 @@ test('dashboard opens integrations and settings views', async ({ page }) => {
   await page.goto('/#/dashboard/overview?mode=demo');
   await expect(page.getByTestId('dashboard-shell')).toBeVisible();
 
-  await page.getByRole('button', { name: /Integrations|Integracje/i }).first().click();
+  await page
+    .getByRole('button', { name: /Integrations|Integracje/i })
+    .first()
+    .click();
   await expect(page).toHaveURL(/\/dashboard\/integrations/i);
 
   await page.getByRole('button', { name: /Settings|Ustawienia/i }).click();

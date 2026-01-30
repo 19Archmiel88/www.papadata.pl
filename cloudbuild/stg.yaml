@@ -1,9 +1,9 @@
 ﻿steps:
-  - id: "install-build-test"
-    name: "node:22-slim"
-    entrypoint: "bash"
+  - id: 'install-build-test'
+    name: 'node:22-slim'
+    entrypoint: 'bash'
     args:
-      - "-c"
+      - '-c'
       - |
         set -euo pipefail
         corepack enable
@@ -16,85 +16,85 @@
         pnpm run test:api:e2e
         pnpm run test:web:unit
 
-  - id: "build-api-image"
-    name: "gcr.io/cloud-builders/docker"
+  - id: 'build-api-image'
+    name: 'gcr.io/cloud-builders/docker'
     args:
-      - "build"
-      - "-f"
-      - "apps/api/Dockerfile"
-      - "-t"
-      - "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/papadata-api:${COMMIT_SHA}"
-      - "."
+      - 'build'
+      - '-f'
+      - 'apps/api/Dockerfile'
+      - '-t'
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/papadata-api:${COMMIT_SHA}'
+      - '.'
 
-  - id: "build-web-image"
-    name: "gcr.io/cloud-builders/docker"
+  - id: 'build-web-image'
+    name: 'gcr.io/cloud-builders/docker'
     args:
-      - "build"
-      - "-f"
-      - "apps/web/Dockerfile"
-      - "-t"
-      - "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/papadata-web:${COMMIT_SHA}"
-      - "--build-arg"
-      - "VITE_APP_ENV=${_APP_ENV}"
-      - "--build-arg"
-      - "VITE_API_BASE_URL=${_API_BASE_URL}"
-      - "--build-arg"
-      - "VITE_LEGAL_DOCS_BASE_URL=${_LEGAL_DOCS_BASE_URL}"
-      - "--build-arg"
-      - "VITE_OBSERVABILITY_PROVIDER=${_OBSERVABILITY_PROVIDER}"
-      - "--build-arg"
-      - "VITE_OBSERVABILITY_DSN=${_OBSERVABILITY_DSN}"
-      - "."
+      - 'build'
+      - '-f'
+      - 'apps/web/Dockerfile'
+      - '-t'
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/papadata-web:${COMMIT_SHA}'
+      - '--build-arg'
+      - 'VITE_APP_ENV=${_APP_ENV}'
+      - '--build-arg'
+      - 'VITE_API_BASE_URL=${_API_BASE_URL}'
+      - '--build-arg'
+      - 'VITE_LEGAL_DOCS_BASE_URL=${_LEGAL_DOCS_BASE_URL}'
+      - '--build-arg'
+      - 'VITE_OBSERVABILITY_PROVIDER=${_OBSERVABILITY_PROVIDER}'
+      - '--build-arg'
+      - 'VITE_OBSERVABILITY_DSN=${_OBSERVABILITY_DSN}'
+      - '.'
 
-  - id: "push-api-image"
-    name: "gcr.io/cloud-builders/docker"
+  - id: 'push-api-image'
+    name: 'gcr.io/cloud-builders/docker'
     args:
-      - "push"
-      - "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/papadata-api:${COMMIT_SHA}"
+      - 'push'
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/papadata-api:${COMMIT_SHA}'
 
-  - id: "push-web-image"
-    name: "gcr.io/cloud-builders/docker"
+  - id: 'push-web-image'
+    name: 'gcr.io/cloud-builders/docker'
     args:
-      - "push"
-      - "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/papadata-web:${COMMIT_SHA}"
+      - 'push'
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/papadata-web:${COMMIT_SHA}'
 
-  - id: "deploy-api"
-    name: "gcr.io/cloud-builders/gcloud"
+  - id: 'deploy-api'
+    name: 'gcr.io/cloud-builders/gcloud'
     args:
-      - "run"
-      - "deploy"
-      - "${_SERVICE_API}"
-      - "--image"
-      - "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/papadata-api:${COMMIT_SHA}"
-      - "--region"
-      - "${_REGION}"
-      - "--platform"
-      - "managed"
-      - "--allow-unauthenticated"
-      - "--set-secrets"
-      - "DATABASE_URL=DATABASE_URL:latest,JWT_SECRET=JWT_SECRET:latest,STRIPE_SECRET_KEY=STRIPE_SECRET_KEY:latest,STRIPE_WEBHOOK_SECRET=STRIPE_WEBHOOK_SECRET:latest"
-      - "--set-env-vars"
-      - "APP_MODE=demo,NODE_ENV=production,CORS_ALLOWED_ORIGINS=${_CORS_ALLOWED_ORIGINS},VERTEX_PROJECT_ID=${_VERTEX_PROJECT_ID},VERTEX_LOCATION=${_VERTEX_LOCATION},VERTEX_MODEL=${_VERTEX_MODEL},AI_ENABLED=${_AI_ENABLED},AI_ENABLED_DEMO=${_AI_ENABLED_DEMO},AI_ENABLED_PROD=${_AI_ENABLED_PROD},AI_RATE_LIMIT_MAX=${_AI_RATE_LIMIT_MAX},AI_RATE_LIMIT_WINDOW_MS=${_AI_RATE_LIMIT_WINDOW_MS},AI_TIMEOUT_MS=${_AI_TIMEOUT_MS},AI_USAGE_LIMIT_BASIC=${_AI_USAGE_LIMIT_BASIC},AI_USAGE_LIMIT_PRIORITY=${_AI_USAGE_LIMIT_PRIORITY},AI_USAGE_LIMIT_FULL=${_AI_USAGE_LIMIT_FULL},OBSERVABILITY_PROVIDER=${_OBSERVABILITY_PROVIDER},OBSERVABILITY_DSN=${_OBSERVABILITY_DSN},FIREBASE_PROJECT_ID=${_FIREBASE_PROJECT_ID},ENTITLEMENTS_BILLING_STATUS=active"
+      - 'run'
+      - 'deploy'
+      - '${_SERVICE_API}'
+      - '--image'
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/papadata-api:${COMMIT_SHA}'
+      - '--region'
+      - '${_REGION}'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--set-secrets'
+      - 'DATABASE_URL=DATABASE_URL:latest,JWT_SECRET=JWT_SECRET:latest,STRIPE_SECRET_KEY=STRIPE_SECRET_KEY:latest,STRIPE_WEBHOOK_SECRET=STRIPE_WEBHOOK_SECRET:latest'
+      - '--set-env-vars'
+      - 'APP_MODE=demo,NODE_ENV=production,CORS_ALLOWED_ORIGINS=${_CORS_ALLOWED_ORIGINS},VERTEX_PROJECT_ID=${_VERTEX_PROJECT_ID},VERTEX_LOCATION=${_VERTEX_LOCATION},VERTEX_MODEL=${_VERTEX_MODEL},AI_ENABLED=${_AI_ENABLED},AI_ENABLED_DEMO=${_AI_ENABLED_DEMO},AI_ENABLED_PROD=${_AI_ENABLED_PROD},AI_RATE_LIMIT_MAX=${_AI_RATE_LIMIT_MAX},AI_RATE_LIMIT_WINDOW_MS=${_AI_RATE_LIMIT_WINDOW_MS},AI_TIMEOUT_MS=${_AI_TIMEOUT_MS},AI_USAGE_LIMIT_BASIC=${_AI_USAGE_LIMIT_BASIC},AI_USAGE_LIMIT_PRIORITY=${_AI_USAGE_LIMIT_PRIORITY},AI_USAGE_LIMIT_FULL=${_AI_USAGE_LIMIT_FULL},OBSERVABILITY_PROVIDER=${_OBSERVABILITY_PROVIDER},OBSERVABILITY_DSN=${_OBSERVABILITY_DSN},FIREBASE_PROJECT_ID=${_FIREBASE_PROJECT_ID},ENTITLEMENTS_BILLING_STATUS=active'
 
-  - id: "deploy-web"
-    name: "gcr.io/cloud-builders/gcloud"
+  - id: 'deploy-web'
+    name: 'gcr.io/cloud-builders/gcloud'
     args:
-      - "run"
-      - "deploy"
-      - "${_SERVICE_WEB}"
-      - "--image"
-      - "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/papadata-web:${COMMIT_SHA}"
-      - "--region"
-      - "${_REGION}"
-      - "--platform"
-      - "managed"
-      - "--allow-unauthenticated"
+      - 'run'
+      - 'deploy'
+      - '${_SERVICE_WEB}'
+      - '--image'
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/papadata-web:${COMMIT_SHA}'
+      - '--region'
+      - '${_REGION}'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
 
-  - id: "smoke-stg"
-    name: "node:22-slim"
-    entrypoint: "bash"
+  - id: 'smoke-stg'
+    name: 'node:22-slim'
+    entrypoint: 'bash'
     args:
-      - "-c"
+      - '-c'
       - |
         set -euo pipefail
         API_BASE="${_API_SMOKE_URL}" WEB_BASE="${_WEB_SMOKE_URL}" node tools/verify-stg.mjs
@@ -103,32 +103,30 @@ options:
   logging: CLOUD_LOGGING_ONLY
 
 substitutions:
-  _REGION: "europe-central2"
-  _ARTIFACT_REPO: "papadata-platform"
-  _SERVICE_API: "papadata-api-stg"
-  _SERVICE_WEB: "papadata-web-stg"
-  _APP_ENV: "stg"
-  _API_BASE_URL: "https://papadata-api-stg-d6hyksf2xq-lm.a.run.app/api"
-  _LEGAL_DOCS_BASE_URL: ""
-  _OBSERVABILITY_PROVIDER: "none"
-  _OBSERVABILITY_DSN: ""
-  _CORS_ALLOWED_ORIGINS: "https://papadata-web-stg-d6hyksf2xq-lm.a.run.app"
-  _API_SMOKE_URL: "https://papadata-api-stg-d6hyksf2xq-lm.a.run.app/api"
-  _WEB_SMOKE_URL: "https://papadata-web-stg-d6hyksf2xq-lm.a.run.app"
-  _VERTEX_PROJECT_ID: "papadata-platform-stg"
-  _VERTEX_LOCATION: "europe-central2"
-  _VERTEX_MODEL: "gemini-2.5-flash-lite"
-  _AI_ENABLED: "true"
-  _AI_ENABLED_DEMO: "true"
-  _AI_ENABLED_PROD: "false"
-  _AI_RATE_LIMIT_MAX: "30"
-  _AI_RATE_LIMIT_WINDOW_MS: "60000"
-  _AI_TIMEOUT_MS: "12000"
-  _AI_USAGE_LIMIT_BASIC: "50"
-  _AI_USAGE_LIMIT_PRIORITY: "500"
-  _AI_USAGE_LIMIT_FULL: "2000"
-  _FIREBASE_PROJECT_ID: ""
+  _REGION: 'europe-central2'
+  _ARTIFACT_REPO: 'papadata-platform'
+  _SERVICE_API: 'papadata-api-stg'
+  _SERVICE_WEB: 'papadata-web-stg'
+  _APP_ENV: 'stg'
+  _API_BASE_URL: 'https://papadata-api-stg-d6hyksf2xq-lm.a.run.app/api'
+  _LEGAL_DOCS_BASE_URL: ''
+  _OBSERVABILITY_PROVIDER: 'none'
+  _OBSERVABILITY_DSN: ''
+  _CORS_ALLOWED_ORIGINS: 'https://papadata-web-stg-d6hyksf2xq-lm.a.run.app'
+  _API_SMOKE_URL: 'https://papadata-api-stg-d6hyksf2xq-lm.a.run.app/api'
+  _WEB_SMOKE_URL: 'https://papadata-web-stg-d6hyksf2xq-lm.a.run.app'
+  _VERTEX_PROJECT_ID: 'papadata-platform-stg'
+  _VERTEX_LOCATION: 'europe-central2'
+  _VERTEX_MODEL: 'gemini-2.5-flash-lite'
+  _AI_ENABLED: 'true'
+  _AI_ENABLED_DEMO: 'true'
+  _AI_ENABLED_PROD: 'false'
+  _AI_RATE_LIMIT_MAX: '30'
+  _AI_RATE_LIMIT_WINDOW_MS: '60000'
+  _AI_TIMEOUT_MS: '12000'
+  _AI_USAGE_LIMIT_BASIC: '50'
+  _AI_USAGE_LIMIT_PRIORITY: '500'
+  _AI_USAGE_LIMIT_FULL: '2000'
+  _FIREBASE_PROJECT_ID: ''
 
-timeout: "1200s"
-
-
+timeout: '1200s'

@@ -1,4 +1,3 @@
-
 import { defineConfig, devices } from '@playwright/experimental-ct-react';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -36,8 +35,5 @@ export default defineConfig({
       'import.meta.env.VITE_API_TIMEOUT_MS': JSON.stringify('25000'),
     },
   },
-  reporter: [
-    ['html', { outputFolder: 'playwright-report', open: 'never' }],
-    ['list'],
-  ],
+  reporter: [['html', { outputFolder: 'playwright-report', open: 'never' }], ['list']],
 });

@@ -3,6 +3,7 @@
 Runbook opisuje operacje i procedury utrzymania środowisk **staging/prod**, w tym publicznego trybu **DEMO (1:1)**.
 
 Powiązane dokumenty:
+
 - Incident response: `incident-response.md`
 - Backups & retention: `backups-and-retention.md`
 - Deploy (SPA rewrites/cache/rollback): `../engineering/deploy.md`
@@ -15,13 +16,16 @@ Powiązane dokumenty:
 ## 1) Zakres i zasady
 
 ### 1.1 Środowiska objęte runbookiem
+
 - **local (dev)**: uruchomienie developerskie.
 - **staging**: środowisko testów przed wdrożeniem.
 - **prod**: środowisko produkcyjne.
 - **public demo**: publiczny dostęp do dashboardu (tryb demo), utrzymywany “produkcyjnie”.
 
 ### 1.2 DEMO = PROD 1:1 (operacyjnie)
+
 DEMO jest uznane za 1:1 jeśli:
+
 - ma te same ścieżki i layout co aplikacja po zalogowaniu,
 - różni się tylko providerami danych/AI/persystencji,
 - nie pokazuje PII ani danych realnych klientów,
@@ -56,6 +60,7 @@ DEMO jest uznane za 1:1 jeśli:
 > Zasada: least privilege.
 
 ### 3.1 Role
+
 - On-call / Incident Commander: On-call Lead
 - Frontend owner: Frontend Lead
 - Backend/API owner: Backend Lead
@@ -63,6 +68,7 @@ DEMO jest uznane za 1:1 jeśli:
 - Support contact: support@papadata.pl
 
 ### 3.2 Dostępy (minimum)
+
 - Hosting/CDN (statyczne pliki): Cloud Run / Cloud Storage + CDN
 - Konfiguracja rewrites/headers/cache: Cloud Run (frontend) / LB rules
 - Observability (error tracking/metryki/logi): Sentry, Cloud Logging, Cloud Monitoring
@@ -80,3 +86,4 @@ pnpm install
 pnpm run dev
 pnpm run build
 pnpm run preview
+```

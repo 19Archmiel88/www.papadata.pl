@@ -75,7 +75,10 @@ export const CustomersViewV2: React.FC = () => {
   const cohortLoading = useWidgetLoading([mode, timeRange, retryToken], 420);
 
   const locale = t.langCode ?? 'pl-PL';
-  const formatCurrencyValue = useMemo(() => (value: number) => formatCurrency(value, locale), [locale]);
+  const formatCurrencyValue = useMemo(
+    () => (value: number) => formatCurrency(value, locale),
+    [locale]
+  );
 
   // Time range logic for responsive mocking
   const timeMultiplier = useMemo(() => {
@@ -127,7 +130,7 @@ export const CustomersViewV2: React.FC = () => {
     return Array.from({ length: rows }).map((_, row) =>
       Array.from({ length: cols }).map((__, col) => {
         // Future cohorts (uogólnione)
-        if (col > (cols - 1) - row) return null;
+        if (col > cols - 1 - row) return null;
 
         const baseRow = customersData?.cohorts?.[row];
         const rowBase = baseRow
@@ -143,7 +146,7 @@ export const CustomersViewV2: React.FC = () => {
 
         const size = Math.round(baseSize * (1 - col * 0.08));
         return { value, size };
-      }),
+      })
     );
   }, [customersData, timeSeed, timeMultiplier, mode]);
 
@@ -172,7 +175,7 @@ export const CustomersViewV2: React.FC = () => {
     const vipSegment = customersData?.segments?.find(
       (segment) =>
         getDimensionValue(segment, 'name', segment.id).toLowerCase() === 'vip' ||
-        segment.id.toLowerCase() === 'vip',
+        segment.id.toLowerCase() === 'vip'
     );
 
     const vipOrders = getMetricValue(vipSegment, 'orders', NaN);
@@ -211,7 +214,8 @@ export const CustomersViewV2: React.FC = () => {
     ];
 
     const apiSegments = customersData?.segments ?? [];
-    const totalOrders = apiSegments.reduce((acc, row) => acc + getMetricValue(row, 'orders', 0), 0) || 1;
+    const totalOrders =
+      apiSegments.reduce((acc, row) => acc + getMetricValue(row, 'orders', 0), 0) || 1;
 
     const vip = apiSegments.length
       ? apiSegments.map((row, idx) => {
@@ -283,7 +287,7 @@ export const CustomersViewV2: React.FC = () => {
     if (isDemo) return;
     setContextLabel?.(label);
     setAiDraft?.(
-      `${t.dashboard.context_menu.set_alert}: ${t.dashboard.customers_v2.ai_prompt.replace('{name}', label)}`,
+      `${t.dashboard.context_menu.set_alert}: ${t.dashboard.customers_v2.ai_prompt.replace('{name}', label)}`
     );
   };
 
@@ -332,7 +336,9 @@ export const CustomersViewV2: React.FC = () => {
             <h2 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
               {t.dashboard.customers_v2.title}
             </h2>
-            <p className="text-base text-gray-500 dark:text-gray-400 font-medium">{t.dashboard.customers_v2.desc}</p>
+            <p className="text-base text-gray-500 dark:text-gray-400 font-medium">
+              {t.dashboard.customers_v2.desc}
+            </p>
           </div>
 
           <div className="grid grid-cols-2 sm:flex gap-4">
@@ -440,7 +446,10 @@ export const CustomersViewV2: React.FC = () => {
               <>
                 <div className="overflow-x-auto no-scrollbar scroll-hint">
                   <div className="min-w-[600px]">
-                    <div className="grid gap-2 mb-4" style={{ gridTemplateColumns: `120px repeat(${colsCount}, minmax(0, 1fr))` }}>
+                    <div
+                      className="grid gap-2 mb-4"
+                      style={{ gridTemplateColumns: `120px repeat(${colsCount}, minmax(0, 1fr))` }}
+                    >
                       <div className="text-xs font-black text-gray-400 uppercase tracking-widest flex items-end pb-2">
                         {t.dashboard.customers_v2.cohorts.row_label}
                       </div>
@@ -460,7 +469,9 @@ export const CustomersViewV2: React.FC = () => {
                         <div
                           key={rIdx}
                           className="grid gap-2"
-                          style={{ gridTemplateColumns: `120px repeat(${colsCount}, minmax(0, 1fr))` }}
+                          style={{
+                            gridTemplateColumns: `120px repeat(${colsCount}, minmax(0, 1fr))`,
+                          }}
                         >
                           <div className="flex items-center text-xs-plus font-bold text-gray-500 uppercase tracking-tight">
                             {cohortRowPrefix}
@@ -470,16 +481,23 @@ export const CustomersViewV2: React.FC = () => {
                           {row.map((cell, cIdx) => {
                             if (!cell) return <div key={cIdx} className="h-14" />;
 
-                            const isSelected = selectedCell?.row === rIdx && selectedCell?.col === cIdx;
+                            const isSelected =
+                              selectedCell?.row === rIdx && selectedCell?.col === cIdx;
                             const opacity = 0.1 + (cell.value / 100) * 0.9;
 
                             return (
                               <button
                                 key={cIdx}
                                 type="button"
-                                onClick={() => handleCohortSelect(rIdx, cIdx, cell.value, cell.size)}
+                                onClick={() =>
+                                  handleCohortSelect(rIdx, cIdx, cell.value, cell.size)
+                                }
                                 onContextMenu={(e) =>
-                                  openMenu(e, buildMenuItems(cohortLabel(rIdx, cIdx)), `Cohort ${rIdx + 1}`)
+                                  openMenu(
+                                    e,
+                                    buildMenuItems(cohortLabel(rIdx, cIdx)),
+                                    `Cohort ${rIdx + 1}`
+                                  )
                                 }
                                 className={`h-14 rounded-xl border transition-all flex flex-col items-center justify-center relative group/cell focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-start/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#0b0b0f] ${
                                   isSelected
@@ -493,7 +511,9 @@ export const CustomersViewV2: React.FC = () => {
                                 }
                                 aria-pressed={isSelected}
                               >
-                                <span className="text-sm font-black">{Math.round(cell.value)}%</span>
+                                <span className="text-sm font-black">
+                                  {Math.round(cell.value)}%
+                                </span>
                               </button>
                             );
                           })}
@@ -511,7 +531,9 @@ export const CustomersViewV2: React.FC = () => {
                     </span>
                   </div>
                   <div className="ml-auto flex items-center gap-3">
-                    <span className="text-2xs font-mono font-bold tracking-[0.2em] uppercase">COHORT_VAL_SYNC_READY</span>
+                    <span className="text-2xs font-mono font-bold tracking-[0.2em] uppercase">
+                      COHORT_VAL_SYNC_READY
+                    </span>
                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                   </div>
                 </div>
@@ -568,15 +590,27 @@ export const CustomersViewV2: React.FC = () => {
               <div className="rounded-[2.5rem] brand-gradient-bg p-8 text-white shadow-2xl animate-reveal relative overflow-hidden">
                 <div className="relative z-10 space-y-6">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-black uppercase tracking-[0.2em] opacity-70">Cohort Detail</span>
+                    <span className="text-xs font-black uppercase tracking-[0.2em] opacity-70">
+                      Cohort Detail
+                    </span>
                     <button
                       type="button"
                       onClick={() => setSelectedCell(null)}
                       className="p-1 hover:scale-110 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
                       aria-label={t.common.close ?? 'Close'}
                     >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={3}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
                       </svg>
                     </button>
                   </div>
@@ -592,11 +626,15 @@ export const CustomersViewV2: React.FC = () => {
 
                   <div className="grid grid-cols-2 gap-6 pt-4 border-t border-white/20">
                     <div>
-                      <div className="text-xs font-black uppercase tracking-widest opacity-60">Retention</div>
+                      <div className="text-xs font-black uppercase tracking-widest opacity-60">
+                        Retention
+                      </div>
                       <div className="text-2xl font-black">{Math.round(selectedCell.value)}%</div>
                     </div>
                     <div>
-                      <div className="text-xs font-black uppercase tracking-widest opacity-60">Avg. Spend</div>
+                      <div className="text-xs font-black uppercase tracking-widest opacity-60">
+                        Avg. Spend
+                      </div>
                       <div className="text-2xl font-black">
                         {formatCurrencyValue(ltvData[selectedCell.col]?.val ?? 0)}
                       </div>
@@ -634,7 +672,9 @@ export const CustomersViewV2: React.FC = () => {
                 <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
                   {t.dashboard.customers_v2.churn.title}
                 </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">{t.dashboard.customers_v2.churn.desc}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                  {t.dashboard.customers_v2.churn.desc}
+                </p>
               </div>
 
               <button
@@ -647,7 +687,12 @@ export const CustomersViewV2: React.FC = () => {
 
               <div className="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-500">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m-8-4h8m-8-4h8m-8-4h8M2 6l10 10V6L2 16V6z" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 17h8m-8-4h8m-8-4h8m-8-4h8M2 6l10 10V6L2 16V6z"
+                  />
                 </svg>
               </div>
             </div>
@@ -694,7 +739,9 @@ export const CustomersViewV2: React.FC = () => {
                 <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
                   {t.dashboard.customers_v2.vip.title}
                 </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">{t.dashboard.customers_v2.vip.desc}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                  {t.dashboard.customers_v2.vip.desc}
+                </p>
               </div>
 
               <button
@@ -732,7 +779,9 @@ export const CustomersViewV2: React.FC = () => {
                     <span className="text-sm font-black uppercase tracking-tight text-gray-900 dark:text-white group-hover/segment:text-emerald-500 transition-colors">
                       {s.label}
                     </span>
-                    <span className="text-xs font-black text-emerald-500 uppercase tracking-widest">{s.trend} YoY</span>
+                    <span className="text-xs font-black text-emerald-500 uppercase tracking-widest">
+                      {s.trend} YoY
+                    </span>
                   </div>
 
                   <div className="flex items-center justify-between">

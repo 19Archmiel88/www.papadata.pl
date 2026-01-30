@@ -597,4 +597,3 @@ export const CookieBanner: React.FC<CookieBannerProps> = ({ onResolution, t }) =
     </AnimatePresence>
   );
 };
-

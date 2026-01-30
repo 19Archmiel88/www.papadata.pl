@@ -82,11 +82,11 @@ export const AlertsViewV2: React.FC = () => {
   // Time-based seeding and scaling
   const timeSeed = useMemo(
     () => (timeRange === '1d' ? 12 : timeRange === '7d' ? 42 : 92),
-    [timeRange],
+    [timeRange]
   );
   const alertCount = useMemo(
     () => (timeRange === '1d' ? 6 : timeRange === '7d' ? 12 : 20),
-    [timeRange],
+    [timeRange]
   );
 
   useEffect(() => {
@@ -156,7 +156,9 @@ export const AlertsViewV2: React.FC = () => {
       const s = seeded(i, timeSeed);
       const minutesAgo = Math.round(i * 1.5 + s * 10);
       const timeAgo =
-        i === 0 ? t.common.time_now : t.common.time_minutes_ago.replace('{minutes}', String(minutesAgo));
+        i === 0
+          ? t.common.time_now
+          : t.common.time_minutes_ago.replace('{minutes}', String(minutesAgo));
       const impactValue =
         s > 0.5
           ? formatSignedPercentValue(-(s * 20), locale, 1)
@@ -187,7 +189,9 @@ export const AlertsViewV2: React.FC = () => {
         impact: alert.impact,
         time: alert.time,
         context,
-        prompt: t.dashboard.alerts_v2.prompt_template.replace('{title}', alert.title).replace('{context}', context),
+        prompt: t.dashboard.alerts_v2.prompt_template
+          .replace('{title}', alert.title)
+          .replace('{context}', context),
         target: alert.target ?? 'overview',
         severity: alert.severity as AlertSeverity,
       };
@@ -198,9 +202,10 @@ export const AlertsViewV2: React.FC = () => {
     () =>
       alertItems.filter(
         (alert) =>
-          (severityFilter === 'all' || alert.severity === severityFilter) && !mutedContexts.has(alert.context),
+          (severityFilter === 'all' || alert.severity === severityFilter) &&
+          !mutedContexts.has(alert.context)
       ),
-    [alertItems, severityFilter, mutedContexts],
+    [alertItems, severityFilter, mutedContexts]
   );
 
   const toggleAck = (id: string) => {
@@ -291,7 +296,9 @@ export const AlertsViewV2: React.FC = () => {
             <h2 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
               {t.dashboard.alerts_v2.title}
             </h2>
-            <p className="text-base text-gray-500 dark:text-gray-400 font-medium">{t.dashboard.alerts_v2.desc}</p>
+            <p className="text-base text-gray-500 dark:text-gray-400 font-medium">
+              {t.dashboard.alerts_v2.desc}
+            </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2 p-1.5 bg-black/5 dark:bg-white/5 rounded-2xl border border-black/5 dark:border-white/5">
@@ -384,7 +391,12 @@ export const AlertsViewV2: React.FC = () => {
             <div className="py-20 text-center rounded-[2.5rem] border border-dashed border-black/10 dark:border-white/10">
               <div className="w-16 h-16 rounded-full bg-emerald-500/5 flex items-center justify-center mx-auto text-emerald-500 mb-4 opacity-40">
                 <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
               </div>
               <p className="text-sm font-black text-gray-400 uppercase tracking-widest">
@@ -410,8 +422,8 @@ export const AlertsViewV2: React.FC = () => {
                         alert.severity === 'critical'
                           ? 'bg-rose-500 animate-pulse'
                           : alert.severity === 'warning'
-                          ? 'bg-amber-500'
-                          : 'bg-blue-500'
+                            ? 'bg-amber-500'
+                            : 'bg-blue-500'
                       }`}
                     />
 
@@ -461,7 +473,7 @@ export const AlertsViewV2: React.FC = () => {
                   <div className="flex items-center gap-4 w-full md:w-auto">
                     <div
                       className={`px-4 py-1.5 rounded-xl border text-xs font-black uppercase tracking-widest ${severityStyles(
-                        alert.severity,
+                        alert.severity
                       )}`}
                     >
                       {alert.severity}
@@ -483,8 +495,18 @@ export const AlertsViewV2: React.FC = () => {
                         } ${isDemo ? 'opacity-40 cursor-not-allowed' : ''}`}
                         aria-label={ackedAlerts.has(alert.id) ? unackLabel : ackLabel}
                       >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2.5}
+                            d="M5 13l4 4L19 7"
+                          />
                         </svg>
                       </button>
 
@@ -494,8 +516,18 @@ export const AlertsViewV2: React.FC = () => {
                         className="p-3 rounded-2xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/10 text-gray-500 hover:text-gray-900 dark:text-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-start/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#0b0b0f]"
                         aria-label={t.dashboard.context_menu.label}
                       >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 6h.01M12 12h.01M12 18h.01" />
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2.5}
+                            d="M12 6h.01M12 12h.01M12 18h.01"
+                          />
                         </svg>
                       </button>
                     </div>
@@ -509,8 +541,18 @@ export const AlertsViewV2: React.FC = () => {
                     onClick={() => handleExplain(alert)}
                     className="text-xs font-black uppercase tracking-widest text-brand-start flex items-center gap-2 hover:underline"
                   >
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    <svg
+                      className="w-3.5 h-3.5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2.5}
+                        d="M13 10V3L4 14h7v7l9-11h-7z"
+                      />
                     </svg>
                     {t.dashboard.alerts_v2.actions.explain_ai}
                   </button>
@@ -520,9 +562,24 @@ export const AlertsViewV2: React.FC = () => {
                     onClick={() => handleDrill(alert.target, alert.context)}
                     className="text-xs font-black uppercase tracking-widest text-gray-500 flex items-center gap-2 hover:text-gray-900 dark:hover:text-white transition-colors"
                   >
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    <svg
+                      className="w-3.5 h-3.5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2.5}
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2.5}
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                      />
                     </svg>
                     {t.dashboard.alerts_v2.actions.open_view}
                   </button>

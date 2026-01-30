@@ -94,12 +94,13 @@ export const ContextMenu: React.FC<{
           if (!item?.id) return null;
 
           const isDisabled = Boolean(item.disabled);
-          const toneClass = item.tone === 'primary' ? 'text-brand-start' : 'text-gray-600 dark:text-gray-300';
+          const toneClass =
+            item.tone === 'primary' ? 'text-brand-start' : 'text-gray-600 dark:text-gray-300';
           const hoverClass = isDisabled
             ? ''
             : item.tone === 'primary'
-            ? 'hover:bg-brand-start/5'
-            : 'hover:bg-black/5 dark:hover:bg-white/5';
+              ? 'hover:bg-brand-start/5'
+              : 'hover:bg-black/5 dark:hover:bg-white/5';
 
           return (
             <button
@@ -124,7 +125,7 @@ export const ContextMenu: React.FC<{
         })}
       </div>
     </>,
-    portal,
+    portal
   );
 };
 
@@ -254,17 +255,22 @@ export const TrendChartCard: React.FC<TrendChartCardProps> = ({
   className,
   ...rest
 }) => {
-  const safeSeries = useMemo(() => (series || []).filter((s): s is TrendSeries => Boolean(s && s.id)), [series]);
+  const safeSeries = useMemo(
+    () => (series || []).filter((s): s is TrendSeries => Boolean(s && s.id)),
+    [series]
+  );
 
   // jeśli brak dates, budujemy oś po najdłuższej serii
   const inferredLen = safeSeries.reduce((m, s) => Math.max(m, s.values?.length ?? 0), 0);
   const axis = useMemo<(string | number)[]>(
     () => (dates?.length ? dates : Array.from({ length: inferredLen }).map((_, i) => i)),
-    [dates, inferredLen],
+    [dates, inferredLen]
   );
 
   const allValues = safeSeries.flatMap((s) => s.values ?? []);
-  const maxVal = allValues.length ? Math.max(1, ...allValues.filter((v) => Number.isFinite(v))) : 100;
+  const maxVal = allValues.length
+    ? Math.max(1, ...allValues.filter((v) => Number.isFinite(v)))
+    : 100;
 
   const firstLabel = axis[0];
   const midLabel = axis[Math.floor((axis.length || 1) / 2)];
@@ -279,7 +285,9 @@ export const TrendChartCard: React.FC<TrendChartCardProps> = ({
     >
       <div className="flex justify-between items-start">
         <div>
-          <h3 className="text-sm font-black uppercase tracking-tight text-gray-900 dark:text-white">{title}</h3>
+          <h3 className="text-sm font-black uppercase tracking-tight text-gray-900 dark:text-white">
+            {title}
+          </h3>
           <p className="text-xs text-gray-500">{desc}</p>
         </div>
 
@@ -291,7 +299,12 @@ export const TrendChartCard: React.FC<TrendChartCardProps> = ({
             className="p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-xl text-gray-400"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6h.01M12 12h.01M12 18h.01" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 6h.01M12 12h.01M12 18h.01"
+              />
             </svg>
           </button>
         )}
@@ -299,7 +312,10 @@ export const TrendChartCard: React.FC<TrendChartCardProps> = ({
 
       <div className="h-44 flex items-end justify-between gap-1 group/chart pt-4">
         {axis.map((d, i) => (
-          <div key={String(d)} className="flex-1 flex flex-col justify-end h-full gap-0.5 relative group/bar">
+          <div
+            key={String(d)}
+            className="flex-1 flex flex-col justify-end h-full gap-0.5 relative group/bar"
+          >
             {safeSeries.map((s) => {
               const value = s.values?.[i] ?? 0;
               const safeValue = Number.isFinite(value) ? value : 0;

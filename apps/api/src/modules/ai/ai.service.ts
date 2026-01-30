@@ -1,18 +1,18 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable } from '@nestjs/common';
 import type {
   AIChatMessage,
   AIChatRequest,
   AIChatResponse,
   AIFinishReason,
   AppMode,
-} from "@papadata/shared";
-import { getAppMode } from "../../common/app-mode";
-import { VertexAI } from "@google-cloud/vertexai";
-import { getDemoResponse } from "./demo-responses";
-import { getLogger } from "../../common/logger";
-import { getApiConfig } from "../../common/config";
+} from '@papadata/shared';
+import { getAppMode } from '../../common/app-mode';
+import { VertexAI } from '@google-cloud/vertexai';
+import { getDemoResponse } from './demo-responses';
+import { getLogger } from '../../common/logger';
+import { getApiConfig } from '../../common/config';
 
-const DEFAULT_MODEL = "gemini-2.5-flash-lite";
+const DEFAULT_MODEL = 'gemini-2.5-flash-lite';
 
 const SYSTEM_INSTRUCTION = `You are Papa AI, a world-class e-commerce data scientist and strategic consultant.
 Your goal is to analyze e-commerce data (provided in the context) to detect anomalies, inefficiencies, and hidden growth opportunities.
@@ -31,37 +31,30 @@ EN:
 If the user provides a "DATA SNAPSHOT", treat it as the ground truth for your analysis.`;
 
 const SMOKE_SYSTEM_INSTRUCTION =
-  "Return exactly two sections only:\nPL:\nEN:\nKeep the answer extremely short.";
+  'Return exactly two sections only:\nPL:\nEN:\nKeep the answer extremely short.';
 
-const parseEnvFlag = (
-  value: string | undefined,
-  fallback: boolean,
-): boolean => {
+const parseEnvFlag = (value: string | undefined, fallback: boolean): boolean => {
   if (value === undefined) return fallback;
   const normalized = value.trim().toLowerCase();
-  if (["false", "0", "no", "off"].includes(normalized)) return false;
-  if (["true", "1", "yes", "on"].includes(normalized)) return true;
+  if (['false', '0', 'no', 'off'].includes(normalized)) return false;
+  if (['true', '1', 'yes', 'on'].includes(normalized)) return true;
   return fallback;
 };
 
 const isAiEnabledForMode = (mode: AppMode): boolean => {
   const config = getApiConfig().ai;
   const globalEnabled = parseEnvFlag(String(config.enabled), true);
-  const perModeEnabled =
-    mode === "demo" ? config.enabledDemo : config.enabledProd;
+  const perModeEnabled = mode === 'demo' ? config.enabledDemo : config.enabledProd;
   return globalEnabled && perModeEnabled;
 };
 
 const getTimeoutMs = (): number => getApiConfig().ai.timeoutMs;
 
-const withTimeout = async <T>(
-  promise: Promise<T>,
-  timeoutMs: number,
-): Promise<T> => {
+const withTimeout = async <T>(promise: Promise<T>, timeoutMs: number): Promise<T> => {
   if (!timeoutMs || timeoutMs <= 0) return promise;
   let timer: NodeJS.Timeout | undefined;
   const timeoutPromise = new Promise<T>((_, reject) => {
-    timer = setTimeout(() => reject(new Error("timeout")), timeoutMs);
+    timer = setTimeout(() => reject(new Error('timeout')), timeoutMs);
   });
   try {
     return await Promise.race([promise, timeoutPromise]);
@@ -73,14 +66,14 @@ const withTimeout = async <T>(
 const mapFinishReason = (reason?: string): AIFinishReason | undefined => {
   if (!reason) return undefined;
   const normalized = reason.toUpperCase();
-  if (normalized === "STOP") return "stop";
-  if (normalized === "SAFETY") return "safety";
-  if (normalized === "MAX_TOKENS") return "timeout";
-  return "error";
+  if (normalized === 'STOP') return 'stop';
+  if (normalized === 'SAFETY') return 'safety';
+  if (normalized === 'MAX_TOKENS') return 'timeout';
+  return 'error';
 };
 
 const formatBilingual = (pl: string, en: string): string =>
-  ["PL:", pl.trim(), "", "EN:", en.trim()].join("\n");
+  ['PL:', pl.trim(), '', 'EN:', en.trim()].join('\n');
 
 const hasBilingualSections = (text: string): boolean => {
   const hasPl = /(^|\n)PL:\s*/i.test(text);
@@ -97,12 +90,12 @@ const buildContextPrompt = (payload: AIChatRequest): string => {
   if (prompt) {
     sections.push(`USER QUESTION:\n${prompt}`);
   }
-  return sections.join("\n\n").trim();
+  return sections.join('\n\n').trim();
 };
 
-const mapMessageRole = (role: AIChatMessage["role"]): "user" | "model" => {
-  if (role === "assistant") return "model";
-  return "user";
+const mapMessageRole = (role: AIChatMessage['role']): 'user' | 'model' => {
+  if (role === 'assistant') return 'model';
+  return 'user';
 };
 
 const collectUserInput = (payload: AIChatRequest): string => {
@@ -111,11 +104,11 @@ const collectUserInput = (payload: AIChatRequest): string => {
   if (payload.messages) {
     parts.push(
       ...payload.messages
-        .filter((message) => message.role === "user")
-        .map((message) => message.content),
+        .filter((message) => message.role === 'user')
+        .map((message) => message.content)
     );
   }
-  return parts.join("\n");
+  return parts.join('\n');
 };
 
 const hasSensitiveInput = (text: string): boolean => {
@@ -136,67 +129,59 @@ const hasSensitiveInput = (text: string): boolean => {
 @Injectable()
 export class AiService {
   private readonly logger = getLogger(AiService.name);
-  private readonly projectId = getApiConfig().ai.vertexProjectId ?? "";
-  private readonly location = getApiConfig().ai.vertexLocation ?? "";
+  private readonly projectId = getApiConfig().ai.vertexProjectId ?? '';
+  private readonly location = getApiConfig().ai.vertexLocation ?? '';
   private readonly modelName = getApiConfig().ai.vertexModel ?? DEFAULT_MODEL;
 
-  async respond(
-    payload: AIChatRequest & { smoke?: boolean },
-  ): Promise<AIChatResponse> {
+  async respond(payload: AIChatRequest & { smoke?: boolean }): Promise<AIChatResponse> {
     const mode = payload.mode ?? getAppMode();
     const isSmoke = Boolean((payload as any)?.smoke);
 
     if (!isAiEnabledForMode(mode)) {
       return {
-        text: formatBilingual(
-          "Funkcja AI jest obecnie wyłączona.",
-          "AI is currently disabled.",
-        ),
-        finishReason: "error",
+        text: formatBilingual('Funkcja AI jest obecnie wyłączona.', 'AI is currently disabled.'),
+        finishReason: 'error',
       };
     }
 
     // DEMO: zawsze blokuj sensitive. Bez smoke -> demo response. Smoke -> Vertex.
-    if (mode === "demo") {
+    if (mode === 'demo') {
       const userInput = collectUserInput(payload);
       if (hasSensitiveInput(userInput)) {
         return {
           text: formatBilingual(
-            "W trybie DEMO nie wolno przesylac danych wrazliwych.",
-            "Sensitive data is not allowed in DEMO mode.",
+            'W trybie DEMO nie wolno przesylac danych wrazliwych.',
+            'Sensitive data is not allowed in DEMO mode.'
           ),
-          finishReason: "safety",
+          finishReason: 'safety',
         };
       }
       if (!isSmoke) {
         return {
-          text: getDemoResponse(payload.prompt || ""),
-          finishReason: "stop",
+          text: getDemoResponse(payload.prompt || ''),
+          finishReason: 'stop',
         };
       }
     }
 
     if (!this.projectId || !this.location) {
       return {
-        text: formatBilingual(
-          "Proxy AI nie jest skonfigurowane.",
-          "AI proxy not configured.",
-        ),
-        finishReason: "error",
+        text: formatBilingual('Proxy AI nie jest skonfigurowane.', 'AI proxy not configured.'),
+        finishReason: 'error',
       };
     }
 
     const systemExtras = (payload.messages || [])
-      .filter((message) => message.role === "system")
+      .filter((message) => message.role === 'system')
       .map((message) => message.content.trim())
       .filter(Boolean);
 
     const systemInstruction = isSmoke
       ? SMOKE_SYSTEM_INSTRUCTION
-      : [SYSTEM_INSTRUCTION, ...systemExtras].join("\n\n").trim();
+      : [SYSTEM_INSTRUCTION, ...systemExtras].join('\n\n').trim();
 
     const contents = (payload.messages || [])
-      .filter((message) => message.role !== "system")
+      .filter((message) => message.role !== 'system')
       .map((message) => ({
         role: mapMessageRole(message.role),
         parts: [{ text: message.content }],
@@ -204,16 +189,14 @@ export class AiService {
 
     const prompt = buildContextPrompt(payload);
     if (prompt) {
-      const finalPrompt = isSmoke
-        ? `SMOKE CHECK (keep response short).\n${prompt}`
-        : prompt;
-      contents.push({ role: "user", parts: [{ text: finalPrompt }] });
+      const finalPrompt = isSmoke ? `SMOKE CHECK (keep response short).\n${prompt}` : prompt;
+      contents.push({ role: 'user', parts: [{ text: finalPrompt }] });
     }
 
     if (contents.length === 0) {
       return {
-        text: formatBilingual("Brak treści zapytania.", "Missing prompt."),
-        finishReason: "error",
+        text: formatBilingual('Brak treści zapytania.', 'Missing prompt.'),
+        finishReason: 'error',
       };
     }
 
@@ -228,30 +211,24 @@ export class AiService {
       const model = vertex.getGenerativeModel({
         model: this.modelName,
         systemInstruction: {
-          role: "system",
+          role: 'system',
           parts: [{ text: systemInstruction }],
         },
       });
 
-      const result = await withTimeout(
-        model.generateContent({ contents }),
-        timeoutMs,
-      );
+      const result = await withTimeout(model.generateContent({ contents }), timeoutMs);
 
       const response = result.response;
       const candidate = response.candidates?.[0];
       const text = (candidate?.content?.parts || [])
-        .map((part) => (typeof part.text === "string" ? part.text : ""))
-        .join("")
+        .map((part) => (typeof part.text === 'string' ? part.text : ''))
+        .join('')
         .trim();
 
       if (!text) {
         return {
-          text: formatBilingual(
-            "Odpowiedź AI była pusta.",
-            "AI response was empty.",
-          ),
-          finishReason: "error",
+          text: formatBilingual('Odpowiedź AI była pusta.', 'AI response was empty.'),
+          finishReason: 'error',
         };
       }
 
@@ -271,28 +248,28 @@ export class AiService {
       }
 
       const repairPrompt = [
-        "Rewrite the following response into the required bilingual format.",
-        "Return only two sections labeled exactly as:",
-        "PL:",
-        "[Polish version]",
-        "EN:",
-        "[English version]",
-        "",
-        "Original response:",
+        'Rewrite the following response into the required bilingual format.',
+        'Return only two sections labeled exactly as:',
+        'PL:',
+        '[Polish version]',
+        'EN:',
+        '[English version]',
+        '',
+        'Original response:',
         text,
-      ].join("\n");
+      ].join('\n');
 
       const repair = await withTimeout(
         model.generateContent({
-          contents: [{ role: "user", parts: [{ text: repairPrompt }] }],
+          contents: [{ role: 'user', parts: [{ text: repairPrompt }] }],
         }),
-        timeoutMs,
+        timeoutMs
       );
 
       const repairCandidate = repair.response.candidates?.[0];
       const repairedText = (repairCandidate?.content?.parts || [])
-        .map((part) => (typeof part.text === "string" ? part.text : ""))
-        .join("")
+        .map((part) => (typeof part.text === 'string' ? part.text : ''))
+        .join('')
         .trim();
 
       if (repairedText && hasBilingualSections(repairedText)) {
@@ -302,41 +279,27 @@ export class AiService {
         };
       }
 
-      this.logger.warn("Vertex AI response missing bilingual sections");
+      this.logger.warn('Vertex AI response missing bilingual sections');
       return {
-        text: formatBilingual(
-          `Tlumaczenie niedostepne. Ponizej wersja robocza:\n${text}`,
-          text,
-        ),
-        finishReason: "error",
+        text: formatBilingual(`Tlumaczenie niedostepne. Ponizej wersja robocza:\n${text}`, text),
+        finishReason: 'error',
       };
     } catch (error: unknown) {
       const message =
-        error instanceof Error
-          ? error.message
-          : (error as { message?: string }).message;
+        error instanceof Error ? error.message : (error as { message?: string }).message;
 
-      if (message === "timeout") {
+      if (message === 'timeout') {
         return {
-          text: formatBilingual(
-            "Limit czasu dla AI zostal przekroczony.",
-            "AI request timed out.",
-          ),
-          finishReason: "timeout",
+          text: formatBilingual('Limit czasu dla AI zostal przekroczony.', 'AI request timed out.'),
+          finishReason: 'timeout',
         };
       }
 
-      this.logger.warn(
-        { errorMessage: message ?? "unknown" },
-        "Vertex AI request failed",
-      );
+      this.logger.warn({ errorMessage: message ?? 'unknown' }, 'Vertex AI request failed');
 
       return {
-        text: formatBilingual(
-          "Zadanie AI nie powiodlo sie.",
-          "AI request failed.",
-        ),
-        finishReason: "error",
+        text: formatBilingual('Zadanie AI nie powiodlo sie.', 'AI request failed.'),
+        finishReason: 'error',
       };
     }
   }

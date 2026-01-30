@@ -186,39 +186,39 @@ export const GuardianViewV2: React.FC = () => {
     }
   }, [guardianError]);
 
-  const formatRelativeTime = useCallback((iso?: string) => {
-    if (!iso) return t.common.time_now;
-    const ts = Date.parse(iso);
-    if (Number.isNaN(ts)) return t.common.time_now;
+  const formatRelativeTime = useCallback(
+    (iso?: string) => {
+      if (!iso) return t.common.time_now;
+      const ts = Date.parse(iso);
+      if (Number.isNaN(ts)) return t.common.time_now;
 
-    // jeśli timestamp jest z przyszłości, traktujemy jako "now"
-    const diffMs = Math.max(0, Date.now() - ts);
-    const diffMin = Math.max(0, Math.round(diffMs / 60000));
+      // jeśli timestamp jest z przyszłości, traktujemy jako "now"
+      const diffMs = Math.max(0, Date.now() - ts);
+      const diffMin = Math.max(0, Math.round(diffMs / 60000));
 
-    if (diffMin < 1) return t.common.time_now;
-    if (diffMin < 60) {
-      return t.common.time_minutes_ago.replace('{minutes}', String(diffMin));
-    }
-    const diffH = Math.round(diffMin / 60);
-    return t.common.time_hours_ago.replace('{hours}', String(diffH));
-  }, [t]);
+      if (diffMin < 1) return t.common.time_now;
+      if (diffMin < 60) {
+        return t.common.time_minutes_ago.replace('{minutes}', String(diffMin));
+      }
+      const diffH = Math.round(diffMin / 60);
+      return t.common.time_hours_ago.replace('{hours}', String(diffH));
+    },
+    [t]
+  );
 
   // Sync Monitor Data (API first, fallback to mock)
   const syncItems = useMemo<GuardianSyncItem[]>(() => {
     const apiSources = (guardianData?.sources ?? []) as GuardianApiSource[];
     if (apiSources.length) {
       return apiSources.map((source) => {
-        const status =
-          source.status === 'ok'
-            ? guardian.status_healthy
-            : guardian.status_delayed;
+        const status = source.status === 'ok' ? guardian.status_healthy : guardian.status_delayed;
 
         const delay =
           typeof source.delayMinutes === 'number'
             ? `${source.delayMinutes} min`
             : status === guardian.status_healthy
-            ? guardian.delay_under_2_min
-            : guardian.delay_na;
+              ? guardian.delay_under_2_min
+              : guardian.delay_na;
 
         return {
           id: source.source,
@@ -227,9 +227,7 @@ export const GuardianViewV2: React.FC = () => {
           last_sync: formatRelativeTime(source.lastSync),
           delay,
           records:
-            typeof source.records === 'number'
-              ? numberFormatter.format(source.records)
-              : '0',
+            typeof source.records === 'number' ? numberFormatter.format(source.records) : '0',
         };
       });
     }
@@ -246,9 +244,7 @@ export const GuardianViewV2: React.FC = () => {
 
       return {
         ...s,
-        status: isDelayed
-          ? guardian.status_delayed
-          : guardian.status_healthy,
+        status: isDelayed ? guardian.status_delayed : guardian.status_healthy,
         last_sync: isDelayed
           ? t.common.time_minutes_ago.replace('{minutes}', '14')
           : t.common.time_now,
@@ -270,8 +266,8 @@ export const GuardianViewV2: React.FC = () => {
           issue.severity === 'critical'
             ? guardian.severity_critical
             : issue.severity === 'warning'
-            ? guardian.severity_warning
-            : guardian.severity_info,
+              ? guardian.severity_warning
+              : guardian.severity_info,
       }));
     }
 
@@ -447,14 +443,19 @@ export const GuardianViewV2: React.FC = () => {
                     openMenu(
                       event,
                       buildMenuItems(guardian.freshness.title),
-                      guardian.freshness.menu_label,
+                      guardian.freshness.menu_label
                     )
                   }
                   className="p-2.5 rounded-xl border border-black/10 dark:border-white/10 text-gray-500 hover:text-gray-900 dark:hover:text-white"
                   aria-label={t.dashboard.context_menu.label}
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6h.01M12 12h.01M12 18h.01" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 6h.01M12 12h.01M12 18h.01"
+                    />
                   </svg>
                 </button>
               </div>
@@ -466,10 +467,18 @@ export const GuardianViewV2: React.FC = () => {
                 <thead className="text-2xs xs:text-xs font-black text-gray-400 uppercase tracking-widest border-b border-black/5 dark:border-white/5">
                   <tr>
                     <th className="py-3.5 md:py-4 px-2">{guardian.freshness.columns.source}</th>
-                    <th className="py-3.5 md:py-4 px-2 text-center whitespace-nowrap">{guardian.freshness.columns.status}</th>
-                    <th className="py-3.5 md:py-4 px-2 text-right whitespace-nowrap">{guardian.freshness.columns.last_sync}</th>
-                    <th className="py-3.5 md:py-4 px-2 text-right whitespace-nowrap">{guardian.freshness.columns.delay}</th>
-                    <th className="py-3.5 md:py-4 px-2 text-right whitespace-nowrap">{guardian.freshness.columns.records}</th>
+                    <th className="py-3.5 md:py-4 px-2 text-center whitespace-nowrap">
+                      {guardian.freshness.columns.status}
+                    </th>
+                    <th className="py-3.5 md:py-4 px-2 text-right whitespace-nowrap">
+                      {guardian.freshness.columns.last_sync}
+                    </th>
+                    <th className="py-3.5 md:py-4 px-2 text-right whitespace-nowrap">
+                      {guardian.freshness.columns.delay}
+                    </th>
+                    <th className="py-3.5 md:py-4 px-2 text-right whitespace-nowrap">
+                      {guardian.freshness.columns.records}
+                    </th>
                     <th className="py-4 px-2" />
                   </tr>
                 </thead>
@@ -478,14 +487,18 @@ export const GuardianViewV2: React.FC = () => {
                   {syncItems.map((item) => (
                     <tr
                       key={item.id}
-                      onContextMenu={(event) => openMenu(event, buildMenuItems(item.name), item.name)}
+                      onContextMenu={(event) =>
+                        openMenu(event, buildMenuItems(item.name), item.name)
+                      }
                       className="group hover:bg-black/[0.01] dark:hover:bg-white/[0.01] transition-colors"
                     >
                       <td className="py-4 md:py-5 px-2">
                         <div className="text-sm font-black text-gray-900 dark:text-white group-hover:text-brand-start transition-colors uppercase tracking-tight">
                           {item.name}
                         </div>
-                        <div className="text-3xs xs:text-2xs font-mono text-gray-400 mt-1 break-all">{item.id}</div>
+                        <div className="text-3xs xs:text-2xs font-mono text-gray-400 mt-1 break-all">
+                          {item.id}
+                        </div>
                       </td>
 
                       <td className="py-4 md:py-5 px-2 text-center">
@@ -507,7 +520,9 @@ export const GuardianViewV2: React.FC = () => {
 
                       <td
                         className={`py-5 px-2 text-right text-xs-plus font-black ${
-                          item.status === guardian.status_delayed ? 'text-rose-500' : 'text-gray-400'
+                          item.status === guardian.status_delayed
+                            ? 'text-rose-500'
+                            : 'text-gray-400'
                         }`}
                       >
                         {item.delay}
@@ -525,7 +540,12 @@ export const GuardianViewV2: React.FC = () => {
                           aria-label={`${t.dashboard.context_menu.explain_ai}: ${item.name}`}
                           title={t.dashboard.context_menu.explain_ai}
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
                             <path
                               strokeLinecap="round"
                               strokeLinejoin="round"
@@ -568,8 +588,18 @@ export const GuardianViewV2: React.FC = () => {
                 {qualityIssues.length === 0 ? (
                   <div className="py-10 md:py-12 text-center">
                     <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto text-emerald-500 mb-4">
-                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      <svg
+                        className="w-6 h-6"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
                       </svg>
                     </div>
                     <span className="text-xs font-black uppercase tracking-widest text-gray-400">
@@ -580,7 +610,9 @@ export const GuardianViewV2: React.FC = () => {
                   qualityIssues.map((issue) => (
                     <div
                       key={issue.id}
-                      onContextMenu={(event) => openMenu(event, buildMenuItems(issue.title), issue.title)}
+                      onContextMenu={(event) =>
+                        openMenu(event, buildMenuItems(issue.title), issue.title)
+                      }
                       className="rounded-[1.5rem] border border-black/5 dark:border-white/5 bg-black/[0.02] dark:bg-white/[0.02] p-5 xs:p-6 group/issue hover:border-brand-start/30 transition-all cursor-pointer"
                       onClick={() => handleExplain(issue.title)}
                       role="button"
@@ -602,8 +634,8 @@ export const GuardianViewV2: React.FC = () => {
                             issue.severity === guardian.severity_critical
                               ? 'bg-rose-500/10 text-rose-500 border-rose-500/20'
                               : issue.severity === guardian.severity_warning
-                              ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
-                              : 'bg-blue-500/10 text-blue-500 border-blue-500/20'
+                                ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                                : 'bg-blue-500/10 text-blue-500 border-blue-500/20'
                           }`}
                         >
                           {issue.severity}
@@ -675,13 +707,17 @@ export const GuardianViewV2: React.FC = () => {
                     <div className="text-xs font-black uppercase tracking-widest opacity-60">
                       {guardian.rag.coverage_label}
                     </div>
-                    <div className="text-xl md:text-2xl font-black">{guardian.rag.coverage_value}</div>
+                    <div className="text-xl md:text-2xl font-black">
+                      {guardian.rag.coverage_value}
+                    </div>
                   </div>
                   <div>
                     <div className="text-xs font-black uppercase tracking-widest opacity-60">
                       {guardian.rag.status_label}
                     </div>
-                    <div className="text-xl md:text-2xl font-black">{guardian.rag.status_value}</div>
+                    <div className="text-xl md:text-2xl font-black">
+                      {guardian.rag.status_value}
+                    </div>
                   </div>
                 </div>
 

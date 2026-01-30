@@ -9,7 +9,8 @@ type ChatMessage = {
 };
 
 const createId = (): string => {
-  const randomId = typeof globalThis !== 'undefined' ? globalThis.crypto?.randomUUID?.() : undefined;
+  const randomId =
+    typeof globalThis !== 'undefined' ? globalThis.crypto?.randomUUID?.() : undefined;
   return randomId ?? `${Date.now()}_${Math.random().toString(16).slice(2)}`;
 };
 
@@ -41,7 +42,9 @@ export const LandingChatWidget: React.FC<{
       placeholder: isPL ? 'Zadaj pytanie…' : 'Ask a question…',
       send: isPL ? 'Wyślij' : 'Send',
       startTrial: isPL ? 'Testuj 14 dni' : 'Start 14-day trial',
-      disclaimer: isPL ? 'Wersja demo — odpowiedzi są symulowane.' : 'Demo — responses are simulated.',
+      disclaimer: isPL
+        ? 'Wersja demo — odpowiedzi są symulowane.'
+        : 'Demo — responses are simulated.',
       demoReply: isPL
         ? 'W wersji produkcyjnej Papa AI odpowiada w oparciu o Twoje dane (marts) i kontekst w dashboardzie.'
         : 'In production, Papa AI answers using your data (marts) and dashboard context.',
@@ -138,15 +141,32 @@ export const LandingChatWidget: React.FC<{
                 className="w-9 h-9 rounded-2xl bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-all flex items-center justify-center text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
                 aria-label={copy.close}
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2.5}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             </div>
 
-            <div ref={scrollRef} className="max-h-[340px] overflow-y-auto p-4 space-y-3 no-scrollbar">
+            <div
+              ref={scrollRef}
+              className="max-h-[340px] overflow-y-auto p-4 space-y-3 no-scrollbar"
+            >
               {messages.map((m) => (
-                <div key={m.id} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div
+                  key={m.id}
+                  className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
                   <div
                     className={`max-w-[92%] rounded-2xl px-4 py-3 text-sm leading-relaxed border shadow-sm ${
                       m.role === 'user'
@@ -180,8 +200,19 @@ export const LandingChatWidget: React.FC<{
                   className="w-11 h-11 rounded-2xl brand-gradient-bg text-white flex items-center justify-center shadow-lg hover:scale-[1.02] active:scale-[0.985] transition-all disabled:opacity-40 disabled:pointer-events-none"
                   aria-label={copy.send}
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 19l9-2-9-18-9 18 9 2zm0 0v-8" />
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2.5}
+                      d="M12 19l9-2-9-18-9 18 9 2zm0 0v-8"
+                    />
                   </svg>
                 </button>
               </form>
@@ -210,7 +241,13 @@ export const LandingChatWidget: React.FC<{
         aria-expanded={isOpen}
       >
         <div className="w-9 h-9 rounded-2xl brand-gradient-bg flex items-center justify-center shadow-lg">
-          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <svg
+            className="w-5 h-5 text-white"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"

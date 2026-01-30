@@ -45,8 +45,7 @@ const renderAnimatedTitle = (title: string) => {
 
   return words.map((word, i) => {
     const lower = word.toLowerCase();
-    const isIntelligence =
-      lower.includes('inteligencj') || lower.includes('intelligence');
+    const isIntelligence = lower.includes('inteligencj') || lower.includes('intelligence');
 
     return (
       <React.Fragment key={`${word}-${i}`}>
@@ -68,90 +67,80 @@ interface FeatureCardProps {
   reducedMotion: boolean;
 }
 
-const FeatureCard = memo(
-  ({ feature, index, onSelect, reducedMotion }: FeatureCardProps) => {
-    const handleSelect = useCallback(() => {
-      onSelect(feature);
-    }, [onSelect, feature]);
+const FeatureCard = memo(({ feature, index, onSelect, reducedMotion }: FeatureCardProps) => {
+  const handleSelect = useCallback(() => {
+    onSelect(feature);
+  }, [onSelect, feature]);
 
-    const titleId = useMemo(
-      () => `feature-title-${feature.title.replace(/\s+/g, '-').toLowerCase()}`,
-      [feature.title],
-    );
+  const titleId = useMemo(
+    () => `feature-title-${feature.title.replace(/\s+/g, '-').toLowerCase()}`,
+    [feature.title]
+  );
 
-    const descId = useMemo(
-      () => `feature-desc-${feature.title.replace(/\s+/g, '-').toLowerCase()}`,
-      [feature.title],
-    );
+  const descId = useMemo(
+    () => `feature-desc-${feature.title.replace(/\s+/g, '-').toLowerCase()}`,
+    [feature.title]
+  );
 
-    return (
-      <motion.button
-        type="button"
-        aria-haspopup="dialog"
-        aria-labelledby={titleId}
-        aria-describedby={descId}
-        onClick={handleSelect}
-        initial={reducedMotion ? false : { opacity: 0, y: 20 }}
-        whileInView={reducedMotion ? undefined : { opacity: 1, y: 0 }}
-        viewport={reducedMotion ? undefined : { once: true, margin: '-100px' }}
-        transition={
-          reducedMotion ? undefined : { delay: index * 0.05, duration: 0.8 }
-        }
-        whileHover={reducedMotion ? undefined : { y: -5, scale: 1.01 }}
-        className="group relative p-8 rounded-[2rem] md:rounded-[2.5rem] flex flex-col cursor-pointer border border-black/5 dark:border-white/5 bg-white/90 dark:bg-[#0A0A0C]/85 backdrop-blur-xl hover:border-brand-start/40 hover:shadow-2xl transition-all overflow-hidden text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-start/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#0A0A0C]"
-      >
-        <ScanningRay enabled={!reducedMotion} />
+  return (
+    <motion.button
+      type="button"
+      aria-haspopup="dialog"
+      aria-labelledby={titleId}
+      aria-describedby={descId}
+      onClick={handleSelect}
+      initial={reducedMotion ? false : { opacity: 0, y: 20 }}
+      whileInView={reducedMotion ? undefined : { opacity: 1, y: 0 }}
+      viewport={reducedMotion ? undefined : { once: true, margin: '-100px' }}
+      transition={reducedMotion ? undefined : { delay: index * 0.05, duration: 0.8 }}
+      whileHover={reducedMotion ? undefined : { y: -5, scale: 1.01 }}
+      className="group relative p-8 rounded-[2rem] md:rounded-[2.5rem] flex flex-col cursor-pointer border border-black/5 dark:border-white/5 bg-white/90 dark:bg-[#0A0A0C]/85 backdrop-blur-xl hover:border-brand-start/40 hover:shadow-2xl transition-all overflow-hidden text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-start/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#0A0A0C]"
+    >
+      <ScanningRay enabled={!reducedMotion} />
 
-        <div className="flex-grow relative z-20">
-          <div className="mb-5 flex gap-1" aria-hidden="true">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="w-1 h-1 bg-brand-start/20 rounded-full" />
-            ))}
-          </div>
-
-          <h3
-            id={titleId}
-            className="text-lg md:text-xl font-black tracking-tighter text-gray-900 dark:text-white mb-4 group-hover:brand-gradient-text transition-all duration-500 leading-tight uppercase"
-          >
-            {feature.title}
-          </h3>
-
-          <p
-            id={descId}
-            className="text-xs md:text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-8 font-medium"
-          >
-            {feature.desc}
-          </p>
+      <div className="flex-grow relative z-20">
+        <div className="mb-5 flex gap-1" aria-hidden="true">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="w-1 h-1 bg-brand-start/20 rounded-full" />
+          ))}
         </div>
 
-        <div className="relative z-20 pt-6 border-t border-black/5 dark:border-white/5">
-          <ul className="grid grid-cols-1 gap-2.5">
-            {feature.details.slice(0, 3).map((detail, i) => (
-              <li
-                key={`${detail}-${i}`}
-                className="flex items-center gap-2.5 group/item"
-              >
-                <div
-                  className="w-1 h-1 rounded-full bg-brand-start/20 group-hover/item:bg-brand-start transition-all"
-                  aria-hidden="true"
-                />
-                <span className="text-xs md:text-xs-plus text-gray-700 dark:text-gray-300 font-bold uppercase tracking-tight opacity-70 group-hover/item:opacity-100">
-                  {detail}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </motion.button>
-    );
-  },
-);
+        <h3
+          id={titleId}
+          className="text-lg md:text-xl font-black tracking-tighter text-gray-900 dark:text-white mb-4 group-hover:brand-gradient-text transition-all duration-500 leading-tight uppercase"
+        >
+          {feature.title}
+        </h3>
+
+        <p
+          id={descId}
+          className="text-xs md:text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-8 font-medium"
+        >
+          {feature.desc}
+        </p>
+      </div>
+
+      <div className="relative z-20 pt-6 border-t border-black/5 dark:border-white/5">
+        <ul className="grid grid-cols-1 gap-2.5">
+          {feature.details.slice(0, 3).map((detail, i) => (
+            <li key={`${detail}-${i}`} className="flex items-center gap-2.5 group/item">
+              <div
+                className="w-1 h-1 rounded-full bg-brand-start/20 group-hover/item:bg-brand-start transition-all"
+                aria-hidden="true"
+              />
+              <span className="text-xs md:text-xs-plus text-gray-700 dark:text-gray-300 font-bold uppercase tracking-tight opacity-70 group-hover/item:opacity-100">
+                {detail}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </motion.button>
+  );
+});
 FeatureCard.displayName = 'FeatureCard';
 
-export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
-  t,
-  onFeatureClick,
-}) => {
+export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ t, onFeatureClick }) => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
 
@@ -160,15 +149,11 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
     offset: ['start end', 'end start'],
   });
 
-  const opacity = useTransform(
-    scrollYProgress,
-    [0, 0.15, 0.85, 1],
-    [0.3, 1, 1, 0.3],
-  );
+  const opacity = useTransform(scrollYProgress, [0, 0.15, 0.85, 1], [0.3, 1, 1, 0.3]);
 
   const animatedTitle = useMemo(
     () => renderAnimatedTitle(t.featuresSection.title),
-    [t.featuresSection.title],
+    [t.featuresSection.title]
   );
 
   const headingId = 'features-heading';

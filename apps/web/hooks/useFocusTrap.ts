@@ -77,7 +77,7 @@ export const useFocusTrap = (isActive: boolean) => {
         }
       }
     },
-    [isActive],
+    [isActive]
   );
 
   useEffect(() => {
@@ -115,9 +115,7 @@ export const useFocusTrap = (isActive: boolean) => {
       // - aktywny element to body/null
       // - albo fokus był w kontenerze, który właśnie się zamyka
       const shouldRestore =
-        !active ||
-        active === document.body ||
-        (container && active && container.contains(active));
+        !active || active === document.body || (container && active && container.contains(active));
 
       if (shouldRestore) {
         prev?.focus?.();

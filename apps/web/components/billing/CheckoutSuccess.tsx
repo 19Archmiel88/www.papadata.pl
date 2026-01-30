@@ -24,7 +24,10 @@ export const CheckoutSuccess: React.FC = () => {
     let timer: number | undefined;
     if (!isAuthenticated) {
       try {
-        window.localStorage.setItem('pd_post_login_redirect', `${location.pathname}${location.search}`);
+        window.localStorage.setItem(
+          'pd_post_login_redirect',
+          `${location.pathname}${location.search}`
+        );
       } catch {
         // ignore
       }
@@ -49,12 +52,22 @@ export const CheckoutSuccess: React.FC = () => {
       })
       .catch((error: unknown) => {
         setStatus('error');
-        setMessage(error instanceof Error ? error.message : 'Nie udało się odświeżyć statusu subskrypcji.');
+        setMessage(
+          error instanceof Error ? error.message : 'Nie udało się odświeżyć statusu subskrypcji.'
+        );
       });
     return () => {
       if (timer) window.clearTimeout(timer);
     };
-  }, [isAuthenticated, location.pathname, location.search, navigate, openModal, redirectPath, setBillingState]);
+  }, [
+    isAuthenticated,
+    location.pathname,
+    location.search,
+    navigate,
+    openModal,
+    redirectPath,
+    setBillingState,
+  ]);
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-white dark:bg-[#050507] text-gray-900 dark:text-gray-100 px-6">
@@ -63,7 +76,9 @@ export const CheckoutSuccess: React.FC = () => {
           <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
           <p className="text-xs font-black uppercase tracking-[0.3em] text-emerald-600">SUCCESS</p>
         </div>
-        <h1 className="text-2xl md:text-3xl font-black tracking-tight mb-3">Płatność potwierdzona</h1>
+        <h1 className="text-2xl md:text-3xl font-black tracking-tight mb-3">
+          Płatność potwierdzona
+        </h1>
         <p className="text-sm text-gray-600 dark:text-gray-300 mb-6">{message}</p>
 
         {status === 'error' && (

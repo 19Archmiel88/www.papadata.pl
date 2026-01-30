@@ -1,16 +1,16 @@
-import { Test } from "@nestjs/testing";
-import { INestApplication } from "@nestjs/common";
-import { FastifyAdapter } from "@nestjs/platform-fastify";
-import request from "supertest";
-import { AppModule } from "../src/app.module";
-import { resetApiConfig } from "../src/common/config";
+import { Test } from '@nestjs/testing';
+import { INestApplication } from '@nestjs/common';
+import { FastifyAdapter } from '@nestjs/platform-fastify';
+import request from 'supertest';
+import { AppModule } from '../src/app.module';
+import { resetApiConfig } from '../src/common/config';
 import {
   BillingRepository,
   type TenantBillingRow,
   type WebhookEventRow,
   type TenantStatusRow,
-} from "../src/common/billing.repository";
-import { TimeProvider } from "../src/common/time.provider";
+} from '../src/common/billing.repository';
+import { TimeProvider } from '../src/common/time.provider';
 
 class InMemoryBillingRepository implements Partial<BillingRepository> {
   private readonly billing = new Map<string, TenantBillingRow>();
@@ -27,7 +27,7 @@ class InMemoryBillingRepository implements Partial<BillingRepository> {
 
   async startTrialIfMissing(input: {
     tenantId: string;
-    plan: TenantBillingRow["plan"];
+    plan: TenantBillingRow['plan'];
     trialEndsAt: string;
   }): Promise<boolean> {
     if (this.billing.has(input.tenantId)) return false;
@@ -36,7 +36,7 @@ class InMemoryBillingRepository implements Partial<BillingRepository> {
       stripeCustomerId: null,
       stripeSubscriptionId: null,
       plan: input.plan,
-      billingStatus: "trialing",
+      billingStatus: 'trialing',
       trialEndsAt: input.trialEndsAt,
       currentPeriodEnd: null,
     });
@@ -50,7 +50,7 @@ class InMemoryBillingRepository implements Partial<BillingRepository> {
   async setTenantDeleted(tenantId: string): Promise<void> {
     this.tenantStatus.set(tenantId, {
       tenantId,
-      status: "deleted",
+      status: 'deleted',
       deletedAt: new Date().toISOString(),
     });
   }
@@ -58,7 +58,7 @@ class InMemoryBillingRepository implements Partial<BillingRepository> {
   async upsertWebhookEvent(input: {
     eventId: string;
     eventType: string;
-    status: "received" | "processed" | "failed";
+    status: 'received' | 'processed' | 'failed';
     attempts?: number;
     lastError?: string | null;
   }): Promise<void> {
@@ -94,7 +94,7 @@ class InMemoryBillingRepository implements Partial<BillingRepository> {
   async upsertSource(): Promise<void> {}
 }
 
-describe("Billing trial + enforcement (e2e)", () => {
+describe('Billing trial + enforcement (e2e)', () => {
   let app!: INestApplication;
   let billingRepo!: InMemoryBillingRepository;
   let timeProvider!: {
@@ -104,20 +104,20 @@ describe("Billing trial + enforcement (e2e)", () => {
   };
   let authToken: string;
 
-  const baseNowMs = Date.parse("2026-01-01T00:00:00Z");
+  const baseNowMs = Date.parse('2026-01-01T00:00:00Z');
 
   beforeAll(async () => {
-    process.env.APP_MODE = "demo";
-    process.env.JWT_SECRET = "test-secret";
-    process.env.JWT_ISSUER = "test-issuer";
-    process.env.JWT_AUDIENCE = "test-audience";
-    process.env.ENTITLEMENTS_CACHE_TTL_MS = "0";
-    process.env.ENTITLEMENTS_PLAN = "";
-    process.env.ENTITLEMENTS_BILLING_STATUS = "";
-    process.env.ENTITLEMENTS_TRIAL_ENDS_AT = "";
-    process.env.STRIPE_SECRET_KEY = "";
-    process.env.STRIPE_CUSTOMER_ID = "";
-    process.env.STRIPE_CUSTOMER_MAP = "";
+    process.env.APP_MODE = 'demo';
+    process.env.JWT_SECRET = 'test-secret';
+    process.env.JWT_ISSUER = 'test-issuer';
+    process.env.JWT_AUDIENCE = 'test-audience';
+    process.env.ENTITLEMENTS_CACHE_TTL_MS = '0';
+    process.env.ENTITLEMENTS_PLAN = '';
+    process.env.ENTITLEMENTS_BILLING_STATUS = '';
+    process.env.ENTITLEMENTS_TRIAL_ENDS_AT = '';
+    process.env.STRIPE_SECRET_KEY = '';
+    process.env.STRIPE_CUSTOMER_ID = '';
+    process.env.STRIPE_CUSTOMER_MAP = '';
     resetApiConfig();
 
     billingRepo = new InMemoryBillingRepository();
@@ -140,7 +140,7 @@ describe("Billing trial + enforcement (e2e)", () => {
       .compile();
 
     app = moduleRef.createNestApplication(new FastifyAdapter());
-    app.setGlobalPrefix("api");
+    app.setGlobalPrefix('api');
     await app.init();
     const instance = app.getHttpAdapter().getInstance() as {
       ready?: () => Promise<void>;
@@ -154,77 +154,77 @@ describe("Billing trial + enforcement (e2e)", () => {
     await app?.close();
   });
 
-  it("blocks premium when no billing data", async () => {
+  it('blocks premium when no billing data', async () => {
     const res = await request(app.getHttpServer())
-      .post("/api/ai/chat?stream=0")
-      .set("Content-Type", "application/json")
-      .send({ prompt: "Test" });
+      .post('/api/ai/chat?stream=0')
+      .set('Content-Type', 'application/json')
+      .send({ prompt: 'Test' });
 
     expect(res.status).toBe(403);
-    expect(res.body?.code).toBe("entitlements_blocked");
+    expect(res.body?.code).toBe('entitlements_blocked');
   });
 
-  it("keeps non-premium health endpoint open even when premium is blocked", async () => {
-    const res = await request(app.getHttpServer()).get("/api/health");
+  it('keeps non-premium health endpoint open even when premium is blocked', async () => {
+    const res = await request(app.getHttpServer()).get('/api/health');
     expect([200, 201]).toContain(res.status);
-    expect(res.body?.status).toBe("ok");
+    expect(res.body?.status).toBe('ok');
   });
 
-  it("starts trial on registration and allows premium", async () => {
+  it('starts trial on registration and allows premium', async () => {
     const registerRes = await request(app.getHttpServer())
-      .post("/api/auth/register")
-      .set("Content-Type", "application/json")
+      .post('/api/auth/register')
+      .set('Content-Type', 'application/json')
       .send({
-        email: "trial@example.com",
-        password: "Passw0rd!",
-        nip: "1234563218",
-        companyName: "Test Co",
-        companyAddress: "Test Street 1",
+        email: 'trial@example.com',
+        password: 'Passw0rd!',
+        nip: '1234563218',
+        companyName: 'Test Co',
+        companyAddress: 'Test Street 1',
       });
 
     expect([200, 201]).toContain(registerRes.status);
     const token = registerRes.body?.accessToken;
-    expect(typeof token).toBe("string");
+    expect(typeof token).toBe('string');
     authToken = token;
 
     const res = await request(app.getHttpServer())
-      .post("/api/ai/chat?stream=0")
-      .set("Content-Type", "application/json")
-      .set("Authorization", `Bearer ${authToken}`)
-      .send({ prompt: "Test" });
+      .post('/api/ai/chat?stream=0')
+      .set('Content-Type', 'application/json')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({ prompt: 'Test' });
 
     expect([200, 201]).toContain(res.status);
   });
 
-  it("blocks premium after trial expires", async () => {
+  it('blocks premium after trial expires', async () => {
     timeProvider.setNowMs(baseNowMs + 15 * 24 * 60 * 60 * 1000);
 
     const res = await request(app.getHttpServer())
-      .post("/api/ai/chat?stream=0")
-      .set("Content-Type", "application/json")
-      .set("Authorization", `Bearer ${authToken}`)
-      .send({ prompt: "Test" });
+      .post('/api/ai/chat?stream=0')
+      .set('Content-Type', 'application/json')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({ prompt: 'Test' });
 
     expect(res.status).toBe(403);
-    expect(res.body?.code).toBe("entitlements_blocked");
+    expect(res.body?.code).toBe('entitlements_blocked');
   });
 
-  it("restores access after payment activation", async () => {
+  it('restores access after payment activation', async () => {
     await billingRepo.upsertTenantBilling({
-      tenantId: "1234563218",
-      stripeCustomerId: "cus_123",
-      stripeSubscriptionId: "sub_123",
-      plan: "professional",
-      billingStatus: "active",
+      tenantId: '1234563218',
+      stripeCustomerId: 'cus_123',
+      stripeSubscriptionId: 'sub_123',
+      plan: 'professional',
+      billingStatus: 'active',
       trialEndsAt: null,
       currentPeriodEnd: null,
     });
 
     const res = await request(app.getHttpServer())
-      .post("/api/ai/chat?stream=0")
-      .set("Content-Type", "application/json")
-      .set("Authorization", `Bearer ${authToken}`)
-      .send({ prompt: "Test" });
+      .post('/api/ai/chat?stream=0')
+      .set('Content-Type', 'application/json')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({ prompt: 'Test' });
 
     expect([200, 201]).toContain(res.status);
   });

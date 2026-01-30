@@ -6,28 +6,71 @@ const REPORT_JSON = path.join(ROOT, 'docs', 'audits', 'encoding-audit.json');
 const REPORT_MD = path.join(ROOT, 'docs', 'audits', 'encoding-audit.md');
 
 const EXCLUDED_DIRS = new Set([
-  'node_modules', '.next', 'dist', 'build', '.git', '.turbo', '.cache', 'coverage',
-  '.playwright', 'test-results', 'playwright-report', '.vscode'
+  'node_modules',
+  '.next',
+  'dist',
+  'build',
+  '.git',
+  '.turbo',
+  '.cache',
+  'coverage',
+  '.playwright',
+  'test-results',
+  'playwright-report',
+  '.vscode',
 ]);
 
-const EXCLUDED_PATH_PREFIXES = [
-  'docs/audits/backup/',
-];
+const EXCLUDED_PATH_PREFIXES = ['docs/audits/backup/'];
 
 const BINARY_EXTS = new Set([
-  '.png', '.jpg', '.jpeg', '.gif', '.webp', '.svgz', '.ico',
-  '.pdf', '.woff', '.woff2', '.ttf', '.eot', '.zip', '.gz',
-  '.tar', '.7z', '.rar', '.mp4', '.mp3', '.mov', '.avi',
-  '.exe', '.dll', '.bin'
+  '.png',
+  '.jpg',
+  '.jpeg',
+  '.gif',
+  '.webp',
+  '.svgz',
+  '.ico',
+  '.pdf',
+  '.woff',
+  '.woff2',
+  '.ttf',
+  '.eot',
+  '.zip',
+  '.gz',
+  '.tar',
+  '.7z',
+  '.rar',
+  '.mp4',
+  '.mp3',
+  '.mov',
+  '.avi',
+  '.exe',
+  '.dll',
+  '.bin',
 ]);
 
-const CONFIG_EXTS = new Set([
-  '.json', '.yml', '.yaml', '.env', '.ini', '.toml', '.properties'
-]);
+const CONFIG_EXTS = new Set(['.json', '.yml', '.yaml', '.env', '.ini', '.toml', '.properties']);
 
 const TEXT_EXT_HINTS = new Set([
-  '.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs', '.json', '.jsonc', '.yml', '.yaml',
-  '.md', '.txt', '.css', '.scss', '.html', '.sh', '.ps1', '.env', '.env.example'
+  '.ts',
+  '.tsx',
+  '.js',
+  '.jsx',
+  '.mjs',
+  '.cjs',
+  '.json',
+  '.jsonc',
+  '.yml',
+  '.yaml',
+  '.md',
+  '.txt',
+  '.css',
+  '.scss',
+  '.html',
+  '.sh',
+  '.ps1',
+  '.env',
+  '.env.example',
 ]);
 
 const SMART_QUOTES = /[\u2018\u2019\u201C\u201D]/g;
@@ -113,7 +156,7 @@ const collectIssues = (filePath, buf) => {
       path: relPath,
       type: 'BOM',
       details: bomType,
-      recommendation: 'Remove BOM for UTF-8 text files.'
+      recommendation: 'Remove BOM for UTF-8 text files.',
     });
   }
 
@@ -122,7 +165,7 @@ const collectIssues = (filePath, buf) => {
       path: relPath,
       type: 'Encoding',
       details: bomType,
-      recommendation: 'Convert to UTF-8 (without BOM).'
+      recommendation: 'Convert to UTF-8 (without BOM).',
     });
   }
 
@@ -134,7 +177,7 @@ const collectIssues = (filePath, buf) => {
       path: relPath,
       type: 'HiddenChar',
       details: `BOM character (U+FEFF) at lines: ${bomInMiddle.join(', ')}`,
-      recommendation: 'Remove BOM characters inside file.'
+      recommendation: 'Remove BOM characters inside file.',
     });
   }
 
@@ -144,7 +187,7 @@ const collectIssues = (filePath, buf) => {
       path: relPath,
       type: 'HiddenChar',
       details: `NBSP (U+00A0) at lines: ${nbspLines.join(', ')}`,
-      recommendation: 'Replace NBSP with regular spaces.'
+      recommendation: 'Replace NBSP with regular spaces.',
     });
   }
 
@@ -154,7 +197,7 @@ const collectIssues = (filePath, buf) => {
       path: relPath,
       type: 'HiddenChar',
       details: `Zero-width space (U+200B) at lines: ${zwspLines.join(', ')}`,
-      recommendation: 'Remove zero-width spaces.'
+      recommendation: 'Remove zero-width spaces.',
     });
   }
 
@@ -166,7 +209,7 @@ const collectIssues = (filePath, buf) => {
       path: relPath,
       type: 'SmartQuotes',
       details: `Smart quotes at lines: ${smartLines.join(', ')}`,
-      recommendation: 'Replace smart quotes with ASCII quotes.'
+      recommendation: 'Replace smart quotes with ASCII quotes.',
     });
   }
 
@@ -175,7 +218,7 @@ const collectIssues = (filePath, buf) => {
       path: relPath,
       type: 'EOL',
       details: 'Mixed CRLF/LF line endings',
-      recommendation: 'Normalize line endings.'
+      recommendation: 'Normalize line endings.',
     });
   }
 
@@ -184,7 +227,7 @@ const collectIssues = (filePath, buf) => {
       path: relPath,
       type: 'EOL',
       details: 'CRLF in .sh file',
-      recommendation: 'Convert to LF for shell scripts.'
+      recommendation: 'Convert to LF for shell scripts.',
     });
   }
 
@@ -196,7 +239,7 @@ const collectIssues = (filePath, buf) => {
         path: relPath,
         type: 'JSON',
         details: `Invalid JSON: ${err.message}`,
-        recommendation: 'Fix JSON syntax / encoding issues.'
+        recommendation: 'Fix JSON syntax / encoding issues.',
       });
     }
   }
@@ -207,7 +250,7 @@ const collectIssues = (filePath, buf) => {
         path: relPath,
         type: 'Env',
         details: 'Smart quotes found in env file',
-        recommendation: 'Use straight ASCII quotes or no quotes.'
+        recommendation: 'Use straight ASCII quotes or no quotes.',
       });
     }
   }
@@ -250,15 +293,24 @@ const main = () => {
   walk(ROOT, results);
 
   results.scanned.sort();
-  results.issues.sort((a, b) => (a.path === b.path ? a.type.localeCompare(b.type) : a.path.localeCompare(b.path)));
+  results.issues.sort((a, b) =>
+    a.path === b.path ? a.type.localeCompare(b.type) : a.path.localeCompare(b.path)
+  );
 
   fs.mkdirSync(path.dirname(REPORT_JSON), { recursive: true });
-  fs.writeFileSync(REPORT_JSON, JSON.stringify({
-    generatedAt: new Date().toISOString(),
-    scannedCount: results.scanned.length,
-    issueCount: results.issues.length,
-    issues: results.issues
-  }, null, 2));
+  fs.writeFileSync(
+    REPORT_JSON,
+    JSON.stringify(
+      {
+        generatedAt: new Date().toISOString(),
+        scannedCount: results.scanned.length,
+        issueCount: results.issues.length,
+        issues: results.issues,
+      },
+      null,
+      2
+    )
+  );
 
   const header = [
     '# Encoding Audit',
@@ -268,7 +320,7 @@ const main = () => {
     `Issues: ${results.issues.length}`,
     '',
     '| Path | Type | Details | Recommendation |',
-    '| --- | --- | --- | --- |'
+    '| --- | --- | --- | --- |',
   ];
 
   const rows = results.issues.map((issue) => {

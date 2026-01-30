@@ -1,11 +1,14 @@
 # Engineering — Data model (KPI contract + Demo dataset) — Production
 
 ## Cel
+
 Spójne KPI przez jeden model danych, wykorzystywany w:
+
 - dashboardzie produkcyjnym (dane klienta),
 - dashboardzie demo (dane syntetyczne/mock) w trybie 1:1.
 
 Powiązane:
+
 - UX dashboard (high-level): `../ux/ui-specs/DASHBOARD.md`
 - UI spec (source of truth): `../../../docs/ui-spec/00_INDEX.md`
 - Integracje: `INTEGRACJE.md`
@@ -16,6 +19,7 @@ Powiązane:
 ## Przykładowe fakty i wymiary (high-level)
 
 ### Fakty (facts)
+
 - `fact_orders`
 - `fact_order_items`
 - `fact_ad_spend`
@@ -23,6 +27,7 @@ Powiązane:
 - `fact_refunds`
 
 ### Wymiary (dimensions)
+
 - `dim_date`
 - `dim_product`
 - `dim_customer`
@@ -30,6 +35,7 @@ Powiązane:
 - `dim_campaign`
 
 Minimalne pola (standard):
+
 - `fact_orders`: `order_id`, `date`, `currency`, `gross_revenue`, `net_revenue`, `channel`, `campaign_id`, `customer_id`
 - `fact_order_items`: `order_id`, `product_id`, `quantity`, `gross_revenue`, `cogs`
 - `fact_ad_spend`: `date`, `channel`, `campaign_id`, `spend`, `clicks`, `impressions`
@@ -44,15 +50,19 @@ Minimalne pola (standard):
 ---
 
 ## KPI contract (minimum)
+
 Definicje KPI musza byc w jednym miejscu i miec wersjonowanie.
 
 Zrodlo prawdy dla definicji KPI:
+
 - `kpi-definitions.md`
 
 Zrodlo prawdy dla kontraktow API (ksztalty odpowiedzi):
+
 - `libs/shared/src/contracts/*`
 
 Dla kazdej metryki wymagane:
+
 - definicja (wzor),
 - jednostka/waluta,
 - okno czasowe (jesli dotyczy),
@@ -63,6 +73,7 @@ Dla kazdej metryki wymagane:
 ---
 
 ## Atrybucja i porównania
+
 - Dostępne modele atrybucji: `last_click` oraz `data_driven` (kontrakt w [libs/shared/src/contracts/analytics.ts](../../libs/shared/src/contracts/analytics.ts#L17-L28)).
 - `last_click`: cały przychód przypisywany do ostatniego kanału/kampanii.
 - `data_driven`: przychód rozkładany proporcjonalnie do wpływu kanałów (model statystyczny po stronie data layer).
@@ -71,6 +82,7 @@ Dla kazdej metryki wymagane:
 ---
 
 ## Governance i jakość danych
+
 - definicje KPI w jednym miejscu,
 - lineage: źródło → transformacja → metryka → dashboard,
 - testy jakości:
@@ -80,12 +92,15 @@ Dla kazdej metryki wymagane:
   - **consistency** (sumy w raportach vs detail).
 
 Freshness/coverage w UI:
+
 - Widok Guardian i Pipeline prezentują tabelę świeżości oraz coverage (źródła, status, last sync, opóźnienie) — [apps/web/components/dashboard/GuardianViewV2.tsx](../../apps/web/components/dashboard/GuardianViewV2.tsx#L341-L433) i [apps/web/components/dashboard/PipelineView.tsx](../../apps/web/components/dashboard/PipelineView.tsx#L382-L494)
 
 ---
 
 ## Demo dataset (wymog dla DEMO 1:1)
+
 DEMO musi używać danych:
+
 - syntetycznych lub przykładowych (**bez PII** i bez danych klienta),
 - spójnych w całej aplikacji (ten sam zestaw danych dla wszystkich widoków),
 - realistycznych (wartości i relacje „mają sens”),
@@ -94,11 +109,13 @@ DEMO musi używać danych:
   - QA i demo script były stabilne.
 
 Zalecenia:
+
 - zakres czasu: 90 dni z trendami i 2-3 anomaliami (spike/spadek),
 - kilka kanalow + kilka kampanii + miks produktow,
 - segmenty klientow bez danych identyfikowalnych.
 
 ### Aktualne miejsca danych DEMO (kod)
+
 - `apps/web/components/dashboard/OverviewViewV2.tsx` — generator wykresow i tabel (seeded).
 - `apps/web/translations.ts` — probki nazw kampanii i SKU w tabelach.
 

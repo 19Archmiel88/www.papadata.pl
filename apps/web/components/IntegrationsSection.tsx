@@ -100,7 +100,10 @@ export const IntegrationsSection: React.FC<IntegrationsSectionProps> = ({ t }) =
   const descId = `integrations-desc-${sectionId}`;
 
   const featuredItems = useMemo(() => (integrations || []).filter(Boolean).slice(0, 8), []);
-  const getName = useCallback((id: string) => t.integrations.items[id]?.name ?? id, [t.integrations.items]);
+  const getName = useCallback(
+    (id: string) => t.integrations.items[id]?.name ?? id,
+    [t.integrations.items]
+  );
 
   const handleOpenAll = useCallback(() => {
     openModal('integrations', {
@@ -120,7 +123,7 @@ export const IntegrationsSection: React.FC<IntegrationsSectionProps> = ({ t }) =
 
       openModal('integration_connect', { integration: item });
     },
-    [getName, openModal],
+    [getName, openModal]
   );
 
   return (
@@ -228,9 +231,7 @@ export const IntegrationsSection: React.FC<IntegrationsSectionProps> = ({ t }) =
                     </p>
                   </div>
 
-                  {isSoon && (
-                    <span className="sr-only">{t.integrations.status_soon}</span>
-                  )}
+                  {isSoon && <span className="sr-only">{t.integrations.status_soon}</span>}
                 </motion.button>
               );
             })}

@@ -13,26 +13,32 @@ Demo is a product mode: DEMO = PROD 1:1 (same UI/UX, data/AI/persistence are moc
 ## Quickstart (local)
 
 ### Requirements
+
 - Node.js: >=18.18 <23 (recommended 20/22 LTS)
 - pnpm: >= 9
 
 ### Environment
+
 Create local env files from examples:
+
 ```bash
 cp apps/api/.env.example apps/api/.env.local
 cp apps/web/.env.example apps/web/.env.local
 ```
+
 ```powershell
 Copy-Item -Path apps\api\.env.example -Destination apps\api\.env.local -Force
 Copy-Item -Path apps\web\.env.example -Destination apps\web\.env.local -Force
 ```
 
 ### Install
+
 ```bash
 pnpm install
 ```
 
 ### Run
+
 ```bash
 # terminal 1
 pnpm run api:dev
@@ -44,5 +50,6 @@ pnpm run dev
 More details: `docs/runbooks/local-verify.md`.
 
 ## Notes
+
 - Web build in the monorepo: use `pnpm --filter @papadata/web build`. `pnpm -C apps/web build` requires a prior `pnpm -w install` (or `pnpm -C apps/web install`) so Vite is available.
 - Production promotion: `pnpm run promote:prod` triggers `cloudbuild/prod.yaml` via `gcloud builds submit`. Requires `gcloud` auth with permission to run Cloud Build in `papadata-platform-prod` and either `GOOGLE_CLOUD_PROJECT`/`GCP_PROJECT_ID` set to `papadata-platform-prod` or `CONFIRM_PROD=1`.

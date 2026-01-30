@@ -33,7 +33,7 @@ test('ModalContainer renders active modal', async ({ mount }) => {
           </ModalProvider>
         </AuthProvider>
       </UIProvider>
-    </HashRouter>,
+    </HashRouter>
   );
   await expect(component).toBeVisible();
 });

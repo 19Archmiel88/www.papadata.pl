@@ -1,17 +1,21 @@
 # STG Release Runbook — API (ETAP 2: PUSH -> AUTO DEPLOY NA STG)
 
 ## Cel i zakres
+
 Wdrozenie backendu API na STG przez push do Git i Cloud Build. Po deployu
 pipeline uruchamia `tools/verify-stg.mjs`.
 
 ## Wymagania
+
 - Node.js: >=18.18 <23
 - pnpm: >=9
 - Projekt GCP: `papadata-platform-stg`
 - Cloud Run region: `europe-central2`
 
 ## Wymagane ENV/Secrets (Cloud Run)
+
 ENV:
+
 - `APP_MODE=demo`
 - `PORT=8080`
 - `NODE_ENV=production`
@@ -27,6 +31,7 @@ ENV:
 - `AI_TIMEOUT_MS=12000`
 
 Secrets (Secret Manager -> Cloud Run):
+
 - `DATABASE_URL`
 - `JWT_SECRET`
 - `STRIPE_SECRET_KEY`
@@ -35,13 +40,18 @@ Secrets (Secret Manager -> Cloud Run):
 Uwaga: brak ENV dla entitlements = brak premium by default (fail-closed starter/canceled).
 
 ## Migracje (Cloud SQL)
+
 Canonical path:
+
 ```bash
 pnpm --filter @papadata/api run db:migrate
 ```
+
 Plik referencyjny schematu:
+
 - `docs/runbooks/cloudsql-schema.sql`
 
 ## Verifikacja po deployu
+
 - `node tools/verify-stg.mjs`
 - Logi Cloud Logging (brak 5xx po deployu)

@@ -21,7 +21,7 @@ test('ContextMenu renders', async ({ mount }) => {
     <ContextMenu
       menu={{ x: 10, y: 10, label: 'Menu', items: [{ id: 'a', label: 'Item' }] }}
       onClose={() => {}}
-    />,
+    />
   );
   await expect(component).toBeVisible();
 });
@@ -34,23 +34,20 @@ test('Widget states render', async ({ mount }) => {
       <WidgetErrorState title="Error" desc="Desc" />
       <WidgetOfflineState title="Offline" desc="Desc" />
       <WidgetEmptyState title="Empty" desc="Desc" />
-    </div>,
+    </div>
   );
   await expect(component).toBeVisible();
 });
 
 test('LazySection renders', async ({ mount }) => {
-  const component = await mountWithProviders(
-    mount,
-    <LazySection title="Title" desc="Desc" />,
-  );
+  const component = await mountWithProviders(mount, <LazySection title="Title" desc="Desc" />);
   await expect(component).toBeVisible();
 });
 
 test('TrendChartCard renders', async ({ mount }) => {
   const component = await mountWithProviders(
     mount,
-    <TrendChartCard title="Trend" series={[{ id: 's1', label: 'S1', points: [1, 2, 3] }]} />,
+    <TrendChartCard title="Trend" series={[{ id: 's1', label: 'S1', points: [1, 2, 3] }]} />
   );
   await expect(component).toBeVisible();
 });

@@ -27,7 +27,10 @@ function parseLegalDoc(content: string, fallbackTitle: string): { title: string;
   const headlineMatch = firstLine.match(/^(#{1,3})\s+(.*)$/);
   if (headlineMatch) {
     const title = (headlineMatch[2] ?? '').trim() || fallbackTitle;
-    const body = rawLines.slice(firstNonEmptyIdx + 1).join('\n').trim();
+    const body = rawLines
+      .slice(firstNonEmptyIdx + 1)
+      .join('\n')
+      .trim();
     return { title, body };
   }
 
@@ -40,7 +43,10 @@ export const LegalDocPage: React.FC<LegalDocPageProps> = memo(
     const titleId = `legal-doc-title-${pageId}`;
     const bodyId = `legal-doc-body-${pageId}`;
 
-    const { title, body } = useMemo(() => parseLegalDoc(content, fallbackTitle), [content, fallbackTitle]);
+    const { title, body } = useMemo(
+      () => parseLegalDoc(content, fallbackTitle),
+      [content, fallbackTitle]
+    );
 
     const handleBack = useCallback(() => {
       onBack();
@@ -57,7 +63,9 @@ export const LegalDocPage: React.FC<LegalDocPageProps> = memo(
                 <Logo className="w-8 h-8 text-gray-900 dark:text-white" />
               </div>
               <div className="flex flex-col">
-                <span className="text-xl font-black tracking-tight text-gray-900 dark:text-white">PapaData</span>
+                <span className="text-xl font-black tracking-tight text-gray-900 dark:text-white">
+                  PapaData
+                </span>
                 <span className="text-xs font-mono font-bold tracking-[0.3em] text-gray-500 uppercase">
                   {t.footer.col3_title}
                 </span>
@@ -95,7 +103,7 @@ export const LegalDocPage: React.FC<LegalDocPageProps> = memo(
         </div>
       </div>
     );
-  },
+  }
 );
 
 LegalDocPage.displayName = 'LegalDocPage';

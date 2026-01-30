@@ -67,14 +67,31 @@ export const TrialNoticeModal: React.FC<TrialNoticeModalProps> = ({
         type="button"
         aria-label={t.common.close}
       >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2.5}
+            d="M6 18L18 6M6 6l12 12"
+          />
         </svg>
       </button>
 
       <div className="px-8 sm:px-12 py-12 text-center space-y-6">
         <div className="w-16 h-16 rounded-3xl bg-emerald-500 flex items-center justify-center mx-auto shadow-2xl">
-          <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <svg
+            className="w-8 h-8 text-white"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"

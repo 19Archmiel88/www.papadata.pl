@@ -14,6 +14,7 @@ Cel: egzekucja planów (Starter/Professional/Trial), monitoring płatności oraz
 ## 0) Workflow (jak to przechodzi przez środowiska)
 
 ### Etap 1 — LOKAL (kod + migracje)
+
 - Przygotowujesz lokalnie w repo:
   - kod API (webhooki, entitlements, limity, joby),
   - migracje SQL: `apps/api/migrations/*` (canonical path),
@@ -21,10 +22,12 @@ Cel: egzekucja planów (Starter/Professional/Trial), monitoring płatności oraz
 - Lokalna weryfikacja: lint/testy/smoke (API+WEB).
 
 ### Etap 2 — PUSH → STG (auto deploy runtime)
+
 - Push do Git.
 - STG aktualizuje runtime automatycznie (Cloud Run/pipeline).
 
 ### Etap 3 — STG (pełna weryfikacja)
+
 - W STG robisz:
   - uruchomienie migracji (`pnpm --filter @papadata/api run db:migrate`),
   - ustawienie secretów/env w API (Cloud Run),
@@ -32,6 +35,7 @@ Cel: egzekucja planów (Starter/Professional/Trial), monitoring płatności oraz
   - E2E: rejestracja → trial → płatność → zmiana planu → limity.
 
 ### Etap 4 — PROD (promocja)
+
 - Po pozytywnym STG: wdrożenie na PROD (papadata-platform-prod).
 - Te same kroki (schema/sekrety/webhooki/joby) są już gotowe 1:1.
 
@@ -40,21 +44,25 @@ Cel: egzekucja planów (Starter/Professional/Trial), monitoring płatności oraz
 ## 1) Wymagane działania (MUST)
 
 ### 1.1 Stripe
+
 - Ustaw metadata `tenant_id` w Stripe (Customer lub Subscription).
 
 ### 1.2 Cloud SQL
+
 - Zastosuj migracje do Cloud SQL:
   - `pnpm --filter @papadata/api run db:migrate`
 - Plik referencyjny:
   - `docs/runbooks/cloudsql-schema.sql`
 
 ### 1.3 API ENV/Secrets (Cloud Run)
+
 - Ustaw w API:
   - `DATABASE_URL`
   - `STRIPE_WEBHOOK_SECRET`
   - `AI_USAGE_LIMIT_*`
 
 ### 1.4 Zależności w API
+
 - Doinstaluj w `apps/api`:
   - `pg`
   - `fastify-raw-body`
@@ -78,6 +86,7 @@ Cel: egzekucja planów (Starter/Professional/Trial), monitoring płatności oraz
   - raporty tygodniowe
 
 Źródło domyślnych limitów w API:
+
 - `apps/api/src/common/entitlements.service.ts`
 
 ---
@@ -87,7 +96,9 @@ Cel: egzekucja planów (Starter/Professional/Trial), monitoring płatności oraz
 Kanał prawdy: Stripe Webhooks + zapis do Cloud SQL.
 
 ### 3.1 Webhooki (MUST)
+
 Zdarzenia:
+
 - `customer.subscription.created`
 - `customer.subscription.updated`
 - `customer.subscription.deleted`
@@ -95,18 +106,23 @@ Zdarzenia:
 - `invoice.payment_failed`
 
 Endpointy (aliasy):
+
 - `POST /api/webhooks/stripe` (preferowany)
 - `POST /api/billing/webhook` (wsteczna kompatybilnosc)
 
 Wymóg techniczny:
+
 - API musi mieć ustawiony `STRIPE_WEBHOOK_SECRET`
 - webhook endpoint musi działać w STG przed promocją na PROD
 
 ### 3.2 Retry job (MUST)
+
 Kod:
+
 - `apps/api/src/jobs/retry-stripe-webhooks.ts`
 
 Uruchomienie:
+
 - Cloud Run Job + Cloud Scheduler (np. co 10 min)
 
 ---
@@ -114,9 +130,11 @@ Uruchomienie:
 ## 4) Stan w Cloud SQL (schemat i pola)
 
 Schemat:
+
 - `docs/runbooks/cloudsql-schema.sql`
 
 Tabela `tenant_billing` (minimalnie):
+
 - `tenant_id`
 - `stripe_customer_id`
 - `stripe_subscription_id`
@@ -127,6 +145,7 @@ Tabela `tenant_billing` (minimalnie):
 - `updated_at`
 
 Egzekucja:
+
 - API odczytuje status i plan z Cloud SQL (ENV tylko w demo i tylko jawnie ustawione),
 - generuje `Entitlements`,
 - blokuje funkcje po `trial_expired` lub `past_due`.
@@ -136,6 +155,7 @@ Egzekucja:
 ## 5) Monitorowanie pakietu AI (miesięczne limity)
 
 Tabela `ai_usage` (Cloud SQL):
+
 - `tenant_id`
 - `period_start`
 - `period_end`
@@ -144,11 +164,13 @@ Tabela `ai_usage` (Cloud SQL):
 - `tokens_out`
 
 Limity wg planu (z ENV):
+
 - `AI_USAGE_LIMIT_BASIC`
 - `AI_USAGE_LIMIT_PRIORITY`
 - `AI_USAGE_LIMIT_FULL`
 
 Egzekucja:
+
 - przed wywołaniem AI: sprawdź `Entitlements` i `ai_usage`,
 - po przekroczeniu limitu: blokada endpointu AI (HTTP 402/429 + komunikat w UI).
 
@@ -157,9 +179,11 @@ Egzekucja:
 ## 6) Limit źródeł danych (MUST)
 
 Wymóg:
+
 - liczba źródeł w integracjach nie może przekroczyć `Entitlements.limits.maxSources`.
 
 Egzekucja:
+
 - przy dodawaniu integracji: policz aktywne źródła dla tenant,
 - jeśli limit przekroczony: blokada dodania + UI prompt do odłączenia źródeł.
 
@@ -168,12 +192,14 @@ Egzekucja:
 ## 7) Zmiana planu: Trial → Starter (bez usuwania danych)
 
 Zasada:
+
 - nie usuwamy danych automatycznie,
 - blokujemy dodawanie nowych źródeł powyżej limitu,
 - UI wymusza odłączenie nadmiaru,
 - po zejściu do 3 źródeł: pełny dostęp Starter.
 
 Kroki:
+
 1. Zmiana planu w Stripe.
 2. Webhook aktualizuje `tenant_billing.plan = starter`.
 3. API przelicza `Entitlements`.
@@ -184,6 +210,7 @@ Kroki:
 ## 7.5) Backfill niespojnych danych
 
 Skrypt jednorazowy:
+
 - `apps/api/src/jobs/backfill-billing.ts`
 - Tryb dry-run (domyslny): bez zmian w DB.
 - Tryb apply: `BACKFILL_APPLY=1` (wymaga `DATABASE_URL`).
@@ -206,6 +233,7 @@ Skrypt jednorazowy:
 ## 10) Panel admin (API)
 
 Tylko role `owner`/`admin`:
+
 - `GET /api/admin/ai-usage?tenantId=...`
 - `GET /api/admin/sources?tenantId=...`
 - `GET /api/admin/billing?tenantId=...`
@@ -234,6 +262,7 @@ Tylko role `owner`/`admin`:
   - `org.delete`
 
 Runbook rotacji hasła DB:
+
 - `docs/runbooks/db-password-rotation.md`
 
 ---
@@ -241,6 +270,7 @@ Runbook rotacji hasła DB:
 ## 14) Definition of Done (STG → PROD)
 
 ### STG
+
 - Schema Cloud SQL zaaplikowany (`cloudsql-schema.sql`).
 - `STRIPE_WEBHOOK_SECRET`, `DATABASE_URL`, `AI_USAGE_LIMIT_*` ustawione w API.
 - Webhook `POST /api/billing/webhook` przyjmuje zdarzenia i zapisuje stan do `tenant_billing`.
@@ -248,4 +278,5 @@ Runbook rotacji hasła DB:
 - Limity AI i źródeł egzekwowane runtime.
 
 ### PROD
+
 - Te same elementy działają w `papadata-platform-prod` po promocji.

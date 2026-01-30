@@ -17,8 +17,11 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
   const navigate = useNavigate();
 
   const isLandingRoute = useMemo(
-    () => ['/', '/features', '/pricing', '/integrations', '/faq', '/security'].includes(location.pathname),
-    [location.pathname],
+    () =>
+      ['/', '/features', '/pricing', '/integrations', '/faq', '/security'].includes(
+        location.pathname
+      ),
+    [location.pathname]
   );
 
   const [scrolled, setScrolled] = useState(false);
@@ -168,7 +171,9 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
       }
     }
 
-    if (['about', 'features', 'pricing', 'integrations', 'faq', 'knowledge', 'security'].includes(id)) {
+    if (
+      ['about', 'features', 'pricing', 'integrations', 'faq', 'knowledge', 'security'].includes(id)
+    ) {
       handleNavAction(id);
     }
   };
@@ -238,7 +243,12 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
                       viewBox="0 0 24 24"
                       aria-hidden="true"
                     >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={3}
+                        d="M19 9l-7 7-7-7"
+                      />
                     </svg>
                   )}
                 </button>
@@ -279,7 +289,9 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
                 type="button"
                 onClick={toggleTheme}
                 className="w-8 h-8 flex items-center justify-center rounded-xl bg-black/5 dark:bg-white/5 hover:bg-brand-start/10 transition-all cursor-pointer"
-                aria-label={theme === 'light' ? t.common.toggle_theme_dark : t.common.toggle_theme_light}
+                aria-label={
+                  theme === 'light' ? t.common.toggle_theme_dark : t.common.toggle_theme_light
+                }
               >
                 {theme === 'light' ? '🌙' : '☀️'}
               </button>
@@ -310,16 +322,18 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
               className="lg:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-black/5 dark:bg-white/5 text-gray-900 dark:text-white"
               aria-label={mobileMenuOpen ? t.common.close_menu : t.common.open_menu}
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2.5}
-                  d={
-                    mobileMenuOpen
-                      ? 'M6 18L18 6M6 6l12 12'
-                      : 'M4 6h16M4 12h16M4 18h16'
-                  }
+                  d={mobileMenuOpen ? 'M6 18L18 6M6 6l12 12' : 'M4 6h16M4 12h16M4 18h16'}
                 />
               </svg>
             </button>
@@ -344,7 +358,11 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
                       className="text-sm font-black uppercase tracking-widest text-gray-900 dark:text-white flex items-center justify-between w-full"
                     >
                       {item.label}
-                      {item.dropdown && <span className="text-brand-start text-xs">{t.nav.mobile_dropdown_hint}</span>}
+                      {item.dropdown && (
+                        <span className="text-brand-start text-xs">
+                          {t.nav.mobile_dropdown_hint}
+                        </span>
+                      )}
                     </button>
                     {item.dropdown && (
                       <div className="grid grid-cols-1 gap-2 pl-4 border-l border-brand-start/20">
@@ -366,14 +384,20 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
 
               <div className="pt-6 border-t border-black/5 dark:border-white/5 flex items-center justify-between">
                 <div className="flex gap-4">
-                  <button type="button" onClick={() => setLang(lang === 'en' ? 'pl' : 'en')} className="text-xs font-black uppercase font-mono">
+                  <button
+                    type="button"
+                    onClick={() => setLang(lang === 'en' ? 'pl' : 'en')}
+                    className="text-xs font-black uppercase font-mono"
+                  >
                     {lang}
                   </button>
                   <button
                     type="button"
                     onClick={toggleTheme}
                     className="text-lg"
-                    aria-label={theme === 'light' ? t.common.toggle_theme_dark : t.common.toggle_theme_light}
+                    aria-label={
+                      theme === 'light' ? t.common.toggle_theme_dark : t.common.toggle_theme_light
+                    }
                   >
                     {theme === 'light' ? '🌙' : '☀️'}
                   </button>
@@ -410,16 +434,25 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
               bottom: isLandingRoute
                 ? `calc(24px + var(--pd-floating-offset, 0px) + env(safe-area-inset-bottom, 0px))`
                 : 'calc(24px + env(safe-area-inset-bottom, 0px))',
-              right: isLandingRoute
-                ? `calc(24px + var(--pd-chat-panel-offset, 0px))`
-                : '24px',
+              right: isLandingRoute ? `calc(24px + var(--pd-chat-panel-offset, 0px))` : '24px',
             }}
             className="fixed z-[1900] w-[50px] h-[50px] md:w-[56px] md:h-[56px] rounded-2xl bg-white dark:bg-[#121217] border border-black/10 dark:border-white/10 text-gray-900 dark:text-white shadow-[0_15px_35px_rgba(0,0,0,0.2)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex items-center justify-center hover:border-brand-start/50 hover:scale-105 active:scale-95 transition-all cursor-pointer group overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-start"
             aria-label={t.common.scroll_to_top}
           >
             <div className="absolute inset-0 bg-brand-start opacity-0 group-hover:opacity-[0.03] transition-opacity" />
-            <svg className="w-5 h-5 relative z-10 transition-transform group-hover:-translate-y-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+            <svg
+              className="w-5 h-5 relative z-10 transition-transform group-hover:-translate-y-1"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2.5}
+                d="M5 10l7-7m0 0l7 7m-7-7v18"
+              />
             </svg>
           </motion.button>
         )}
@@ -431,18 +464,28 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
 
         <div className="relative max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-5 gap-12 md:gap-16 mb-16 md:mb-20">
           <div className="col-span-1 md:col-span-2 space-y-6 md:space-y-8">
-            <button type="button" onClick={scrollToTop} className="flex items-center gap-3 md:gap-4 group cursor-pointer">
+            <button
+              type="button"
+              onClick={scrollToTop}
+              className="flex items-center gap-3 md:gap-4 group cursor-pointer"
+            >
               <Logo className="w-8 h-8 md:w-10 md:h-10 text-white transition-transform group-hover:scale-105" />
-              <span className="font-black text-white tracking-tighter text-2xl md:text-3xl">PapaData</span>
+              <span className="font-black text-white tracking-tighter text-2xl md:text-3xl">
+                PapaData
+              </span>
             </button>
             <p className="text-gray-400 text-base md:text-lg max-w-md font-medium leading-relaxed italic opacity-80">
               {t.footer.tagline}
             </p>
-            <span className="text-xs font-black uppercase tracking-[0.3em] text-gray-500">{t.footer.hosting}</span>
+            <span className="text-xs font-black uppercase tracking-[0.3em] text-gray-500">
+              {t.footer.hosting}
+            </span>
           </div>
 
           <div className="space-y-6">
-            <h4 className="text-white text-xs font-black uppercase tracking-[0.3em]">{t.footer.col1_title}</h4>
+            <h4 className="text-white text-xs font-black uppercase tracking-[0.3em]">
+              {t.footer.col1_title}
+            </h4>
             <ul className="space-y-3 md:space-y-4">
               {t.footer.col1_links.map((link) => (
                 <li key={link.actionId}>
@@ -459,7 +502,9 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
           </div>
 
           <div className="space-y-6">
-            <h4 className="text-white text-xs font-black uppercase tracking-[0.3em]">{t.footer.col2_title}</h4>
+            <h4 className="text-white text-xs font-black uppercase tracking-[0.3em]">
+              {t.footer.col2_title}
+            </h4>
             <ul className="space-y-3 md:space-y-4">
               {t.footer.col2_links.map((link) => (
                 <li key={link.actionId}>
@@ -476,7 +521,9 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
           </div>
 
           <div className="space-y-6">
-            <h4 className="text-white text-xs font-black uppercase tracking-[0.3em]">{t.footer.col3_title}</h4>
+            <h4 className="text-white text-xs font-black uppercase tracking-[0.3em]">
+              {t.footer.col3_title}
+            </h4>
             <ul className="space-y-3 md:space-y-4">
               {t.footer.col3_links.map((link) => (
                 <li key={link.actionId}>
@@ -496,7 +543,9 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
         <div className="relative max-w-7xl mx-auto px-6 pt-10 border-t border-white/5 flex flex-col gap-6 text-white/30">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="flex items-center gap-6 md:gap-8">
-              <span className="text-3xs md:text-xs font-black uppercase tracking-[0.2em]">{t.footer.copyright}</span>
+              <span className="text-3xs md:text-xs font-black uppercase tracking-[0.2em]">
+                {t.footer.copyright}
+              </span>
               <div className="h-4 w-[1px] bg-white/10 hidden md:block" />
               <div className="flex items-center gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -506,8 +555,12 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
               </div>
             </div>
             <div className="flex gap-6 md:gap-8">
-              <span className="text-3xs md:text-xs font-black tracking-[0.2em] uppercase">{t.footer.region}</span>
-              <span className="text-3xs md:text-xs font-black tracking-[0.2em] uppercase">{t.footer.meta.protocol_level_value}</span>
+              <span className="text-3xs md:text-xs font-black tracking-[0.2em] uppercase">
+                {t.footer.region}
+              </span>
+              <span className="text-3xs md:text-xs font-black tracking-[0.2em] uppercase">
+                {t.footer.meta.protocol_level_value}
+              </span>
             </div>
           </div>
 

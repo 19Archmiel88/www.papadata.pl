@@ -1,4 +1,4 @@
-export type PremiumFeatureId = "ai" | "exports" | "integrations" | "reports";
+export type PremiumFeatureId = 'ai' | 'exports' | 'integrations' | 'reports';
 
 export type PremiumFeatureDefinition = {
   feature: PremiumFeatureId;
@@ -13,40 +13,37 @@ export type PremiumFeatureDefinition = {
  */
 export const PREMIUM_FEATURES: PremiumFeatureDefinition[] = [
   {
-    feature: "ai",
-    description: "AI chat + analytics responses (rate limited + usage ledger)",
-    endpoints: ["/api/ai/chat"],
-    owner: "ai",
+    feature: 'ai',
+    description: 'AI chat + analytics responses (rate limited + usage ledger)',
+    endpoints: ['/api/ai/chat'],
+    owner: 'ai',
   },
   {
-    feature: "exports",
-    description: "CSV exports",
-    endpoints: ["/api/exports", "/api/exports/:id"],
-    owner: "exports",
+    feature: 'exports',
+    description: 'CSV exports',
+    endpoints: ['/api/exports', '/api/exports/:id'],
+    owner: 'exports',
   },
   {
-    feature: "integrations",
-    description: "OAuth/connect flows for data sources",
+    feature: 'integrations',
+    description: 'OAuth/connect flows for data sources',
+    endpoints: ['/api/integrations/:provider/connect', '/api/integrations/:provider/callback'],
+    owner: 'integrations',
+  },
+  {
+    feature: 'reports',
+    description: 'Dashboard + reporting views',
     endpoints: [
-      "/api/integrations/:provider/connect",
-      "/api/integrations/:provider/callback",
+      '/api/dashboard/overview',
+      '/api/dashboard/pandl',
+      '/api/dashboard/ads',
+      '/api/dashboard/customers',
+      '/api/dashboard/products',
+      '/api/dashboard/guardian',
+      '/api/dashboard/alerts',
+      '/api/dashboard/knowledge',
     ],
-    owner: "integrations",
-  },
-  {
-    feature: "reports",
-    description: "Dashboard + reporting views",
-    endpoints: [
-      "/api/dashboard/overview",
-      "/api/dashboard/pandl",
-      "/api/dashboard/ads",
-      "/api/dashboard/customers",
-      "/api/dashboard/products",
-      "/api/dashboard/guardian",
-      "/api/dashboard/alerts",
-      "/api/dashboard/knowledge",
-    ],
-    owner: "dashboard",
+    owner: 'dashboard',
   },
 ];
 
@@ -58,5 +55,5 @@ export const premiumEndpointIndex = (): Record<string, PremiumFeatureId> =>
       });
       return acc;
     },
-    {} as Record<string, PremiumFeatureId>,
+    {} as Record<string, PremiumFeatureId>
   );

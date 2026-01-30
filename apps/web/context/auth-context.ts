@@ -11,7 +11,7 @@ export interface AuthContextType {
   setIsAuthenticated: (val: boolean) => void;
   setToken: (token: string | null) => void;
   setBillingState: (
-    state: { plan?: string; subscriptionStatus?: string; trialEndsAt?: string | null } | null,
+    state: { plan?: string; subscriptionStatus?: string; trialEndsAt?: string | null } | null
   ) => void;
   logout: () => void;
 }

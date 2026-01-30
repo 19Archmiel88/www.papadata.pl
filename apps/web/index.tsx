@@ -3,11 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { HashRouter } from 'react-router-dom';
 import App from './App';
 import './index.css';
-import {
-  initConsentMode,
-  applyStoredConsent,
-  loadStoredConsent,
-} from './utils/consent-mode';
+import { initConsentMode, applyStoredConsent, loadStoredConsent } from './utils/consent-mode';
 import { initObservability } from './utils/observability.provider';
 import { validateWebConfig } from './config';
 

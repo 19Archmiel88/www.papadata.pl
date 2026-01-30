@@ -22,13 +22,17 @@ const ComputingPulse = memo(({ label }: { label: string }) => {
           <motion.div
             key={i}
             animate={reduceMotion ? undefined : { height: [3, 8, 3] }}
-            transition={reduceMotion ? undefined : { duration: 1, repeat: Infinity, delay: i * 0.2 }}
+            transition={
+              reduceMotion ? undefined : { duration: 1, repeat: Infinity, delay: i * 0.2 }
+            }
             className="w-0.5 bg-brand-start/40 rounded-full"
             style={reduceMotion ? { height: 4 } : undefined}
           />
         ))}
       </div>
-      <span className="text-4xs font-mono font-black text-brand-start tracking-widest uppercase">{label}</span>
+      <span className="text-4xs font-mono font-black text-brand-start tracking-widest uppercase">
+        {label}
+      </span>
     </div>
   );
 });
@@ -95,7 +99,10 @@ const CustomSlider = memo(
           >
             {label}
           </label>
-          <span className="text-xs md:text-sm font-black text-brand-start tabular-nums shrink-0" aria-live="polite">
+          <span
+            className="text-xs md:text-sm font-black text-brand-start tabular-nums shrink-0"
+            aria-live="polite"
+          >
             {value}
             {suffix}
           </span>
@@ -128,7 +135,7 @@ const CustomSlider = memo(
         </div>
       </div>
     );
-  },
+  }
 );
 CustomSlider.displayName = 'CustomSlider';
 
@@ -147,9 +154,15 @@ export const RoiSection: React.FC<RoiSectionProps> = ({ t, onCtaClick }) => {
   const [analysisHours, setAnalysisHours] = useState(15);
   const [hourlyRate, setHourlyRate] = useState(150);
 
-  const totalTimeRecovered = useMemo(() => reportsCount + analysisHours, [reportsCount, analysisHours]);
+  const totalTimeRecovered = useMemo(
+    () => reportsCount + analysisHours,
+    [reportsCount, analysisHours]
+  );
 
-  const monthlySavings = useMemo(() => totalTimeRecovered * hourlyRate, [totalTimeRecovered, hourlyRate]);
+  const monthlySavings = useMemo(
+    () => totalTimeRecovered * hourlyRate,
+    [totalTimeRecovered, hourlyRate]
+  );
 
   const annualSavings = useMemo(() => monthlySavings * 12, [monthlySavings]);
 
@@ -161,7 +174,7 @@ export const RoiSection: React.FC<RoiSectionProps> = ({ t, onCtaClick }) => {
 
   const formatter = useMemo(
     () => getNumberFormatter(t.langCode || 'pl-PL', { maximumFractionDigits: 0 }),
-    [t.langCode],
+    [t.langCode]
   );
 
   const netEfficiencyLabel = t.roi.net_efficiency_label;
@@ -179,12 +192,17 @@ export const RoiSection: React.FC<RoiSectionProps> = ({ t, onCtaClick }) => {
   };
 
   return (
-    <section id="roi" className="py-16 md:py-32 px-4 md:px-6 max-w-7xl mx-auto relative overflow-hidden">
+    <section
+      id="roi"
+      className="py-16 md:py-32 px-4 md:px-6 max-w-7xl mx-auto relative overflow-hidden"
+    >
       <div className="grid lg:grid-cols-[1fr_1.1fr] gap-10 lg:gap-20 items-start">
         <div className="space-y-6 md:space-y-8 animate-reveal order-2 lg:order-1 text-center lg:text-left">
           <header className="space-y-4">
             <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-brand-start/5 border border-brand-start/20">
-              <span className="text-xs font-black tracking-[0.4em] uppercase text-brand-start">{t.roi.pill}</span>
+              <span className="text-xs font-black tracking-[0.4em] uppercase text-brand-start">
+                {t.roi.pill}
+              </span>
             </div>
             <h2
               className="font-black tracking-tighter leading-[1.1] text-gray-900 dark:text-white py-2 uppercase"

@@ -94,7 +94,7 @@ export const SettingsWorkspaceView: React.FC = () => {
           setMaskingEnabled(data.maskingEnabled);
         }
         const preferredRegion = (data.regions ?? []).find(
-          (value): value is GcpRegion => value === 'europe-central2' || value === 'europe-west1',
+          (value): value is GcpRegion => value === 'europe-central2' || value === 'europe-west1'
         );
         if (preferredRegion) setRegion(preferredRegion);
       })
@@ -121,18 +121,17 @@ export const SettingsWorkspaceView: React.FC = () => {
   ]);
 
   const retentionOptions = useMemo(() => {
-    const baseOptions =
-      (t.dashboard.settings_workspace_v2.data.retention_options ?? []) as Array<{
-        value?: number | null;
-        label?: string;
-      }>;
+    const baseOptions = (t.dashboard.settings_workspace_v2.data.retention_options ?? []) as Array<{
+      value?: number | null;
+      label?: string;
+    }>;
     const apiOptions = workspaceData?.retentionOptions ?? [];
     if (!apiOptions.length) return baseOptions;
 
     const baseMap = new Map(
       baseOptions
         .filter((option) => typeof option?.value === 'number')
-        .map((option) => [option.value as number, option]),
+        .map((option) => [option.value as number, option])
     );
 
     return apiOptions.map((value) => {
@@ -143,8 +142,8 @@ export const SettingsWorkspaceView: React.FC = () => {
   const retentionWarning = t.dashboard.settings_workspace_v2.data.retention_warning;
 
   const attributionModels = useMemo(() => {
-    const baseModels =
-      (t.dashboard.settings_workspace_v2.attribution.models ?? []) as AttributionModel[];
+    const baseModels = (t.dashboard.settings_workspace_v2.attribution.models ??
+      []) as AttributionModel[];
     const apiModels = workspaceData?.attributionModels ?? [];
     if (!apiModels.length) return baseModels;
 
@@ -154,8 +153,8 @@ export const SettingsWorkspaceView: React.FC = () => {
   }, [t, workspaceData]);
 
   const activeConnectors = useMemo(() => {
-    const baseItems =
-      (t.dashboard.settings_workspace_v2.integrations.items ?? []) as ActiveConnector[];
+    const baseItems = (t.dashboard.settings_workspace_v2.integrations.items ??
+      []) as ActiveConnector[];
     const apiConnectors = workspaceData?.connectors ?? [];
     if (!apiConnectors.length) return baseItems;
 
@@ -167,8 +166,8 @@ export const SettingsWorkspaceView: React.FC = () => {
       const label = fallback?.label ?? i18nMeta?.name ?? connector.name ?? String(connector.id);
       const desc = fallback?.desc ?? i18nMeta?.detail ?? '';
       const status = connector.enabled
-        ? fallback?.status ?? 'Active'
-        : fallback?.status ?? 'Disabled';
+        ? (fallback?.status ?? 'Active')
+        : (fallback?.status ?? 'Disabled');
       return { id: connector.id, label, desc, status };
     });
   }, [t, workspaceData]);
@@ -324,11 +323,13 @@ export const SettingsWorkspaceView: React.FC = () => {
                 title={isLocked ? lockTooltip : undefined}
                 className="w-full px-5 py-4 rounded-2xl border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 text-sm font-bold outline-none focus:border-brand-start/50 transition-all appearance-none"
               >
-                {retentionOptions.map((option: { value?: number | null; label?: string }, index: number) => (
-                  <option key={option.value ?? option.label ?? index} value={option.value ?? ''}>
-                    {option.label}
-                  </option>
-                ))}
+                {retentionOptions.map(
+                  (option: { value?: number | null; label?: string }, index: number) => (
+                    <option key={option.value ?? option.label ?? index} value={option.value ?? ''}>
+                      {option.label}
+                    </option>
+                  )
+                )}
               </select>
             </div>
 
@@ -373,7 +374,9 @@ export const SettingsWorkspaceView: React.FC = () => {
                 onClick={() => {
                   if (isLocked) {
                     setContextLabel?.(lockTooltip);
-                    setAiDraft?.(`${lockTooltip} • ${t.dashboard.settings_workspace_v2.privacy.masking_label}`);
+                    setAiDraft?.(
+                      `${lockTooltip} • ${t.dashboard.settings_workspace_v2.privacy.masking_label}`
+                    );
                     return;
                   }
                   setMaskingEnabled(!maskingEnabled);

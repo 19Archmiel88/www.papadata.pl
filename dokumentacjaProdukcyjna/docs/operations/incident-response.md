@@ -1,9 +1,11 @@
 # Operations — Incident Response (Production + Public DEMO 1:1)
 
 ## Cel
+
 Zdefiniować proces reagowania na incydenty dostępności, bezpieczeństwa, jakości danych oraz incydenty AI — dla środowiska produkcyjnego oraz publicznego DEMO.
 
 Powiązane (źródła prawdy):
+
 - Runbook: `runbook.md`
 - Observability: `../engineering/observability.md`
 - Security baseline: `../engineering/security.md`
@@ -14,6 +16,7 @@ Powiązane (źródła prawdy):
 ---
 
 ## 0) Zasady ogólne
+
 - Priorytet: **bezpieczeństwo danych** > **dostępność** > **koszt** > **komfort UX**.
 - W incydencie ograniczamy komunikację do jednego kanału “war room” + ticket.
 - Nie wklejamy PII/sekretów do Slacka/Teams/ticketów. Jeśli potrzebne, używamy bezpiecznego kanału (Google Workspace Drive z ograniczonym dostępem i wygasającym linkiem; dla sekretów Secret Manager lub zaszyfrowane archiwum z hasłem przekazywanym osobnym kanałem).
@@ -22,7 +25,9 @@ Powiązane (źródła prawdy):
 ---
 
 ## 1) Definicja incydentu
+
 Incydent to zdarzenie, które:
+
 - powoduje niedostępność usługi (w całości lub krytycznych funkcji),
 - narusza poufność/integralność danych,
 - powoduje ryzykowne zachowanie AI (np. ujawnianie danych, brak safety),
@@ -40,6 +45,7 @@ Incydent to zdarzenie, które:
 - **Comms/Support** — Support Lead; status page, komunikaty do klientów, obsługa zgłoszeń.
 
 Minimalny podział odpowiedzialności:
+
 - IC: “co robimy teraz”, timeline, status updates.
 - Eng Lead: “dlaczego i jak naprawiamy”, zmiany techniczne.
 - Support/Comms: “co mówimy i gdzie”.
@@ -75,36 +81,42 @@ Minimalny podział odpowiedzialności:
 ## 3.2 Progi alertow (MVP, do strojenia)
 
 **Uptime**
+
 - `/` lub `/api/health` niedostepne w 3 kolejnych probach w 5 minutach.
 
 **Frontend**
+
 - Error rate > 2% w 5 minut.
 - 50+ bledow runtime w 5 minut.
 
 **Backend**
+
 - 5xx rate > 2% w 5 minut.
 - p95 latency > 1500 ms przez 10 minut.
 
 **AI**
+
 - Timeout rate > 5% w 5 minut.
 - Safety blocks > 10% w 10 minut.
 
 **Koszt / abuse (DEMO)**
+
 - Wzrost zapytan AI > 3x tydzien do tygodnia (alert kosztowy).
 - Nienaturalny wzrost ruchu z jednego ASN/IP (sygnal do WAF/rate limit).
 
 Tagowanie alertow:
+
 - `mode=demo|prod`, `env=dev|staging|prod`, `release`.
 
 ---
 
 ## 3.3 Reakcja na alert (minimum)
 
-1) Potwierdz alert i wyznacz ownera (z 3.1).
-2) Sprawdz `mode` i `env` oraz ostatni release.
-3) Triage wg SEV + uruchom war room dla SEV0/SEV1.
-4) Mitigacja: rollback / kill switch / ograniczenia ruchu.
-5) Aktualizacja statusu wg sekcji 6.
+1. Potwierdz alert i wyznacz ownera (z 3.1).
+2. Sprawdz `mode` i `env` oraz ostatni release.
+3. Triage wg SEV + uruchom war room dla SEV0/SEV1.
+4. Mitigacja: rollback / kill switch / ograniczenia ruchu.
+5. Aktualizacja statusu wg sekcji 6.
 
 ---
 
@@ -113,6 +125,7 @@ Tagowanie alertow:
 > Cel: jednolite kryteria i przewidywalna komunikacja.
 
 ### 4.1 Kryteria SEV (minimum)
+
 - **SEV0 (Critical)**
   - szeroka niedostępność produkcji, lub
   - potwierdzony/prawdopodobny wyciek danych/sekretów, lub
@@ -129,6 +142,7 @@ Tagowanie alertow:
   - minor/kosmetyka, brak istotnego wpływu.
 
 ### 4.2 Oczekiwane czasy (response/update)
+
 - SEV0:
   - start triage: do 15 min
   - status update: co 60 min
@@ -147,7 +161,9 @@ Tagowanie alertow:
 ## 5) Workflow incydentu (end-to-end)
 
 ### 5.1 Detekcja
+
 Źródła:
+
 - alerty z obserwowalności,
 - zgłoszenia support,
 - monitoring syntetyczny,
@@ -157,7 +173,9 @@ Tagowanie alertow:
 IC lub on-call uruchamia “incident ticket” i war room dla SEV0/SEV1.
 
 ### 5.2 Triage (pierwsze 15 minut)
+
 Zbierz minimum:
+
 - co nie działa (symptomy), od kiedy, jaka skala,
 - czy dotyczy DEMO czy PROD (`mode=demo|prod`),
 - wpływ na SLA (jeśli dotyczy) i kluczowe flow,
@@ -166,27 +184,33 @@ Zbierz minimum:
 - czy jest ryzyko kosztowe (AI).
 
 Checklist:
+
 - [ ] utworzony incident ticket
 - [ ] wyznaczony IC i Eng Lead
 - [ ] war room uruchomiony (SEV0/SEV1)
 - [ ] pierwsza notatka: “Impact + czas startu + zakres”
 
 ### 5.3 Mitigation (szybkie ograniczenie wpływu)
+
 Możliwe działania:
+
 - rollback wersji (patrz `runbook.md`),
 - feature flag / kill switch (np. wyłączenie AI drawer),
 - degradacja kontrolowana (np. read-only, wyłączenie kosztownych funkcji),
 - w public DEMO: wzmocnienie rate limiting / bot protection.
 
 Mechanizm kill switch:
+
 - Cloud Run env `AI_ENABLED`, `AI_ENABLED_DEMO`, `AI_ENABLED_PROD` (zmiana przez Ops/Platform po akceptacji IC).
 - Dodatkowo: szybki rollback release według `runbook.md`.
 
 ### 5.4 Recovery (przywrócenie)
+
 - przywrócenie usługi i weryfikacja (smoke tests z `runbook.md`),
 - monitoring po naprawie (co najmniej 30–60 min dla SEV0/SEV1); progi: 5xx < 1%, p95 < 1200 ms, frontend error rate < 1% utrzymane przez 60 min.
 
 ### 5.5 Zamknięcie incydentu
+
 - potwierdzenie stabilności,
 - final status update,
 - zaplanowanie RCA/postmortem (sekcja 9).
@@ -196,17 +220,20 @@ Mechanizm kill switch:
 ## 6) Komunikacja (internal + status page + klient)
 
 ### 6.1 Zasady
+
 - Aktualizacje informują o stanie i działaniach, nie obiecują czasu naprawy, jeśli niepewne.
 - “ETA kolejnej aktualizacji” jest OK; “ETA naprawy” tylko gdy potwierdzone.
 - Dla SEV0/SEV1 status page jest domyślny, chyba że umowa stanowi inaczej.
 
 ### 6.2 Template status update (zewnętrzny)
+
 - **Status:** Investigating / Identified / Monitoring / Resolved
 - **Impact:** co nie działa, dla kogo (zakres)
 - **Mitigation:** co robimy teraz
 - **Next update:** kiedy kolejna aktualizacja
 
 ### 6.3 Template wewnętrzny (war room note)
+
 - Start time (UTC + lokalnie)
 - Severity
 - Scope (demo/prod, tenants)
@@ -219,32 +246,37 @@ Mechanizm kill switch:
 ## 7) Public DEMO 1:1 — specyficzne incydenty
 
 Typowe:
+
 - abuse/boty (spike ruchu),
 - koszt AI / timeouty / safety blocks,
 - scraping,
 - awarie routingu SPA (rewrites) wpływające na demo.
 
 Mitigacje (minimum):
+
 - rate limiting / bot mitigation — Cloud Armor WAF + reguły rate-based,
 - tymczasowe wyłączenie AI w DEMO (fallback UI),
 - oddzielenie telemetryki DEMO vs PROD (`mode=demo|prod`),
 - jeśli demo degraduje prod: priorytetem jest ochrona prod (odcięcie/limit demo).
 
 Playbook: **cost spike AI (DEMO)**
-1) kill switch: wyłącz AI w DEMO,
-2) zaostrz rate limit/WAF,
-3) sprawdź logi i wzorce ruchu,
-4) jeśli podejrzenie wycieku klucza: rotacja klucza w Secret Manager (nowa wersja sekretu), aktualizacja Cloud Run i odcięcie starej wersji.
+
+1. kill switch: wyłącz AI w DEMO,
+2. zaostrz rate limit/WAF,
+3. sprawdź logi i wzorce ruchu,
+4. jeśli podejrzenie wycieku klucza: rotacja klucza w Secret Manager (nowa wersja sekretu), aktualizacja Cloud Run i odcięcie starej wersji.
 
 ---
 
 ## 8) Incydenty bezpieczeństwa / RODO (minimum)
 
 Role zgodne z DPA i Privacy Policy:
+
 - Produkcja: klient jest Administratorem, Papadata jest Procesorem.
 - Public DEMO: Papadata jest Administratorem.
 
 ### 8.1 Zasady dowodowe (evidence handling)
+
 - Zabezpiecz logi/ślady/timeline.
 - Nie kopiuj danych osobowych do ticketów/czatów.
 - Zapisuj:
@@ -254,19 +286,24 @@ Role zgodne z DPA i Privacy Policy:
   - działania mitigacyjne i kto je wykonał.
 
 ### 8.2 Kwalifikacja incydentu (decision)
+
 Checklist:
+
 - [ ] Czy były dane osobowe? (PII)
 - [ ] Czy doszło do utraty poufności/integralności/dostępności?
 - [ ] Jaki zakres i liczba podmiotów danych? (szacunek)
 - [ ] Czy wymagane notyfikacje? (organ / klienci / osoby)
 
 Jeśli kwalifikuje się jako naruszenie ochrony danych:
+
 - zgłoszenie do organu w 72h (jeśli wymagane),
 - komunikacja do klientów/osób, jeśli wysokie ryzyko,
 - pełna dokumentacja: impact, dane, działania naprawcze.
 
 ### 8.3 Legal hold
+
 Jeśli wymagane:
+
 - wstrzymać automatyczne usuwanie logów/artefaktów związanych z incydentem: zwiększyć retencję w Cloud Logging i wyłączyć TTL w BigQuery/GCS dla zakresu incydentu.
 
 ---
@@ -285,11 +322,13 @@ Jeśli wymagane:
 ## 10) Data/Analytics incident (błędne KPI / złe dane)
 
 Sygnały:
+
 - “KPI skaczą nienaturalnie”
 - “Brakuje danych z integracji”
 - “Rozjazd ROAS vs spend”
 
 Checklist:
+
 - [ ] czy to dotyczy jednego źródła czy wielu
 - [ ] sprawdź freshness (opóźnienie importu)
 - [ ] sprawdź transformacje / walidacje jakości (jeśli macie)
@@ -317,6 +356,7 @@ Link w UI: `/integrations` (status połączeń) oraz Overview (karty freshness/c
 ---
 
 ## 12) Checklist przed go-live
+
 - Status page aktywna i zweryfikowana.
 - Kanały wsparcia i bezpieczeństwa aktywne (support@papadata.pl, security@papadata.pl).
 - WAF/Rate limiting skonfigurowany (Cloud Armor).

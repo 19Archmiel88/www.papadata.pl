@@ -1,28 +1,18 @@
-import { Injectable } from "@nestjs/common";
-import type {
-  Entitlements,
-  PlanId,
-  BillingStatus,
-  ReportCadence,
-  AiTier,
-} from "@papadata/shared";
-import Stripe from "stripe";
-import { getAppMode } from "./app-mode";
-import { resolveStripeCustomerId } from "./billing.utils";
-import { getApiConfig } from "./config";
-import { BillingRepository } from "./billing.repository";
-import { TimeProvider } from "./time.provider";
+import { Injectable } from '@nestjs/common';
+import type { Entitlements, PlanId, BillingStatus, ReportCadence, AiTier } from '@papadata/shared';
+import Stripe from 'stripe';
+import { getAppMode } from './app-mode';
+import { resolveStripeCustomerId } from './billing.utils';
+import { getApiConfig } from './config';
+import { BillingRepository } from './billing.repository';
+import { TimeProvider } from './time.provider';
 
 const TRIAL_DAYS = 14;
 
 const parsePlan = (value?: string): PlanId | null => {
   if (!value) return null;
   const normalized = value.trim().toLowerCase();
-  if (
-    normalized === "starter" ||
-    normalized === "professional" ||
-    normalized === "enterprise"
-  ) {
+  if (normalized === 'starter' || normalized === 'professional' || normalized === 'enterprise') {
     return normalized;
   }
   return null;
@@ -32,11 +22,11 @@ const parseBillingStatus = (value?: string): BillingStatus | null => {
   if (!value) return null;
   const normalized = value.trim().toLowerCase();
   if (
-    normalized === "trialing" ||
-    normalized === "active" ||
-    normalized === "past_due" ||
-    normalized === "canceled" ||
-    normalized === "trial_expired"
+    normalized === 'trialing' ||
+    normalized === 'active' ||
+    normalized === 'past_due' ||
+    normalized === 'canceled' ||
+    normalized === 'trial_expired'
   ) {
     return normalized;
   }
@@ -46,11 +36,7 @@ const parseBillingStatus = (value?: string): BillingStatus | null => {
 const parseCadence = (value?: string): ReportCadence | null => {
   if (!value) return null;
   const normalized = value.trim().toLowerCase();
-  if (
-    normalized === "weekly" ||
-    normalized === "daily" ||
-    normalized === "realtime"
-  ) {
+  if (normalized === 'weekly' || normalized === 'daily' || normalized === 'realtime') {
     return normalized;
   }
   return null;
@@ -59,11 +45,7 @@ const parseCadence = (value?: string): ReportCadence | null => {
 const parseAiTier = (value?: string): AiTier | null => {
   if (!value) return null;
   const normalized = value.trim().toLowerCase();
-  if (
-    normalized === "basic" ||
-    normalized === "priority" ||
-    normalized === "full"
-  ) {
+  if (normalized === 'basic' || normalized === 'priority' || normalized === 'full') {
     return normalized;
   }
   return null;
@@ -84,45 +66,44 @@ const toIsoFromUnixSeconds = (value?: number | null): string | undefined => {
 const normalizeBillingStatus = (
   status: BillingStatus,
   trialEndsAt: string | undefined,
-  nowMs: number,
+  nowMs: number
 ): BillingStatus => {
-  if (status !== "trialing") return status;
-  if (!trialEndsAt) return "trial_expired";
-  return nowMs > Date.parse(trialEndsAt) ? "trial_expired" : status;
+  if (status !== 'trialing') return status;
+  if (!trialEndsAt) return 'trial_expired';
+  return nowMs > Date.parse(trialEndsAt) ? 'trial_expired' : status;
 };
 
 const applyGracePeriod = (
   status: BillingStatus,
   currentPeriodEnd: string | undefined,
-  nowMs: number,
+  nowMs: number
 ): BillingStatus => {
-  if (status !== "past_due" || !currentPeriodEnd) return status;
+  if (status !== 'past_due' || !currentPeriodEnd) return status;
   const graceDays = getApiConfig().entitlements.gracePeriodDays ?? 0;
   if (graceDays <= 0) return status;
-  const graceUntil =
-    Date.parse(currentPeriodEnd) + graceDays * 24 * 60 * 60 * 1000;
-  return nowMs <= graceUntil ? "active" : status;
+  const graceUntil = Date.parse(currentPeriodEnd) + graceDays * 24 * 60 * 60 * 1000;
+  return nowMs <= graceUntil ? 'active' : status;
 };
 
 const defaultsByPlan = (plan: PlanId) => {
   switch (plan) {
-    case "starter":
+    case 'starter':
       return {
         maxSources: 3,
-        reportCadence: "weekly" as ReportCadence,
-        aiTier: "basic" as AiTier,
+        reportCadence: 'weekly' as ReportCadence,
+        aiTier: 'basic' as AiTier,
       };
-    case "enterprise":
+    case 'enterprise':
       return {
         maxSources: 999,
-        reportCadence: "realtime" as ReportCadence,
-        aiTier: "full" as AiTier,
+        reportCadence: 'realtime' as ReportCadence,
+        aiTier: 'full' as AiTier,
       };
     default:
       return {
         maxSources: 15,
-        reportCadence: "daily" as ReportCadence,
-        aiTier: "priority" as AiTier,
+        reportCadence: 'daily' as ReportCadence,
+        aiTier: 'priority' as AiTier,
       };
   }
 };
@@ -135,24 +116,24 @@ const getCacheTtlMs = () => {
 const createStripeClient = () => {
   const apiKey = getApiConfig().stripe.secretKey;
   if (!apiKey) return null;
-  return new Stripe(apiKey, { apiVersion: "2023-10-16" });
+  return new Stripe(apiKey, { apiVersion: '2023-10-16' });
 };
 
-type EntitlementsSource = "db" | "stripe" | "env" | "fail_closed";
+type EntitlementsSource = 'db' | 'stripe' | 'env' | 'fail_closed';
 
 const deriveReason = (
   source: EntitlementsSource,
   status: BillingStatus,
   trialEndsAt: string | undefined,
-  nowMs: number,
+  nowMs: number
 ): string | undefined => {
-  if (status === "trial_expired") return "trial_expired";
-  if (status === "canceled") return "canceled";
-  if (status === "past_due") return "past_due";
-  if (status === "trialing" && trialEndsAt && nowMs > Date.parse(trialEndsAt)) {
-    return "trial_expired";
+  if (status === 'trial_expired') return 'trial_expired';
+  if (status === 'canceled') return 'canceled';
+  if (status === 'past_due') return 'past_due';
+  if (status === 'trialing' && trialEndsAt && nowMs > Date.parse(trialEndsAt)) {
+    return 'trial_expired';
   }
-  if (source === "fail_closed") return "missing_billing";
+  if (source === 'fail_closed') return 'missing_billing';
   return undefined;
 };
 
@@ -160,14 +141,11 @@ const deriveReason = (
 export class EntitlementsService {
   private readonly stripe = createStripeClient();
   private readonly cacheTtlMs = getCacheTtlMs();
-  private readonly cache = new Map<
-    string,
-    { value: Entitlements; expiresAt: number }
-  >();
+  private readonly cache = new Map<string, { value: Entitlements; expiresAt: number }>();
 
   constructor(
     private readonly billingRepository: BillingRepository,
-    private readonly timeProvider: TimeProvider,
+    private readonly timeProvider: TimeProvider
   ) {}
 
   private nowMs(): number {
@@ -175,7 +153,7 @@ export class EntitlementsService {
   }
 
   async getEntitlements(tenantId?: string): Promise<Entitlements> {
-    const cacheKey = tenantId ?? "default";
+    const cacheKey = tenantId ?? 'default';
     const nowMs = this.nowMs();
     const cached = this.cache.get(cacheKey);
     if (cached && cached.expiresAt > nowMs) {
@@ -188,11 +166,11 @@ export class EntitlementsService {
       const fromDb = await this.billingRepository.getTenantBilling(tenantId);
       if (fromDb) {
         entitlements = this.buildEntitlements(
-          "db",
+          'db',
           fromDb.plan,
           fromDb.billingStatus,
           fromDb.trialEndsAt ?? undefined,
-          fromDb.currentPeriodEnd ?? undefined,
+          fromDb.currentPeriodEnd ?? undefined
         );
       }
     }
@@ -227,8 +205,7 @@ export class EntitlementsService {
   }
 
   isTrialExpired(entitlements: Entitlements): boolean {
-    if (!entitlements.trialEndsAt)
-      return entitlements.billingStatus === "trial_expired";
+    if (!entitlements.trialEndsAt) return entitlements.billingStatus === 'trial_expired';
     return this.nowMs() > Date.parse(entitlements.trialEndsAt);
   }
 
@@ -236,93 +213,63 @@ export class EntitlementsService {
     return entitlements.isPremiumAllowed;
   }
 
-  isFeatureAllowed(
-    entitlements: Entitlements,
-    feature: keyof Entitlements["features"],
-  ): boolean {
+  isFeatureAllowed(entitlements: Entitlements, feature: keyof Entitlements['features']): boolean {
     if (!entitlements.features[feature]) return false;
     return this.isAccountActive(entitlements);
   }
 
   private getEnvEntitlements(): Entitlements | null {
-    if (getAppMode() !== "demo") return null;
+    if (getAppMode() !== 'demo') return null;
     const env = getApiConfig().entitlements;
     const explicitPlan = parsePlan(env.plan);
     const explicitStatus = parseBillingStatus(env.billingStatus);
     const trialEndsAt = parseTrialEndsAt(env.trialEndsAt);
-    const hasExplicit =
-      Boolean(explicitPlan) || Boolean(explicitStatus) || Boolean(trialEndsAt);
+    const hasExplicit = Boolean(explicitPlan) || Boolean(explicitStatus) || Boolean(trialEndsAt);
     if (!hasExplicit) {
       return null;
     }
 
     let resolvedTrialEndsAt = trialEndsAt;
-    if (explicitStatus === "trialing" && !resolvedTrialEndsAt) {
-      resolvedTrialEndsAt = new Date(
-        this.nowMs() + TRIAL_DAYS * 24 * 60 * 60 * 1000,
-      ).toISOString();
+    if (explicitStatus === 'trialing' && !resolvedTrialEndsAt) {
+      resolvedTrialEndsAt = new Date(this.nowMs() + TRIAL_DAYS * 24 * 60 * 60 * 1000).toISOString();
     }
 
     let billingStatus: BillingStatus;
     if (explicitStatus) {
       billingStatus = explicitStatus;
     } else if (resolvedTrialEndsAt) {
-      billingStatus = normalizeBillingStatus(
-        "trialing",
-        resolvedTrialEndsAt,
-        this.nowMs(),
-      );
+      billingStatus = normalizeBillingStatus('trialing', resolvedTrialEndsAt, this.nowMs());
     } else {
-      billingStatus = "canceled";
+      billingStatus = 'canceled';
     }
 
-    const plan = explicitPlan ?? "starter";
-    return this.buildEntitlements(
-      "env",
-      plan,
-      billingStatus,
-      resolvedTrialEndsAt,
-    );
+    const plan = explicitPlan ?? 'starter';
+    return this.buildEntitlements('env', plan, billingStatus, resolvedTrialEndsAt);
   }
 
   private getFailClosedEntitlements(): Entitlements {
-    return this.buildEntitlements("fail_closed", "starter", "canceled");
+    return this.buildEntitlements('fail_closed', 'starter', 'canceled');
   }
 
-  private async getStripeEntitlements(
-    customerId: string,
-  ): Promise<Entitlements> {
+  private async getStripeEntitlements(customerId: string): Promise<Entitlements> {
     if (!this.stripe) return this.getFailClosedEntitlements();
 
     const subscription = await this.fetchSubscription(customerId);
     if (!subscription) return this.getFailClosedEntitlements();
 
     const trialEndsAt = toIsoFromUnixSeconds(subscription.trial_end);
-    const billingStatusRaw = this.resolveStripeBillingStatus(
-      subscription.status,
-      trialEndsAt,
-    );
-    const currentPeriodEnd = toIsoFromUnixSeconds(
-      subscription.current_period_end ?? undefined,
-    );
+    const billingStatusRaw = this.resolveStripeBillingStatus(subscription.status, trialEndsAt);
+    const currentPeriodEnd = toIsoFromUnixSeconds(subscription.current_period_end ?? undefined);
     const plan = this.resolveStripePlan(subscription);
 
-    return this.buildEntitlements(
-      "stripe",
-      plan,
-      billingStatusRaw,
-      trialEndsAt,
-      currentPeriodEnd,
-    );
+    return this.buildEntitlements('stripe', plan, billingStatusRaw, trialEndsAt, currentPeriodEnd);
   }
 
-  private async fetchSubscription(
-    customerId: string,
-  ): Promise<Stripe.Subscription | null> {
+  private async fetchSubscription(customerId: string): Promise<Stripe.Subscription | null> {
     if (!this.stripe) return null;
     const subscriptions = await this.stripe.subscriptions.list({
       customer: customerId,
-      status: "all",
+      status: 'all',
       limit: 5,
     });
     if (!subscriptions.data.length) return null;
@@ -356,12 +303,10 @@ export class EntitlementsService {
     const planFromMeta = parsePlan(subscription.metadata?.plan);
     if (planFromMeta) return planFromMeta;
 
-    const priceMetaPlan = parsePlan(
-      subscription.items.data[0]?.price?.metadata?.plan,
-    );
+    const priceMetaPlan = parsePlan(subscription.items.data[0]?.price?.metadata?.plan);
     if (priceMetaPlan) return priceMetaPlan;
 
-    return "starter";
+    return 'starter';
   }
 
   private resolvePlanFromPriceIds(priceIds: string[]): PlanId | null {
@@ -371,30 +316,24 @@ export class EntitlementsService {
       priceEnterprise: enterpriseId,
     } = getApiConfig().stripe;
 
-    if (starterId && priceIds.includes(starterId)) return "starter";
-    if (enterpriseId && priceIds.includes(enterpriseId)) return "enterprise";
-    if (professionalId && priceIds.includes(professionalId))
-      return "professional";
+    if (starterId && priceIds.includes(starterId)) return 'starter';
+    if (enterpriseId && priceIds.includes(enterpriseId)) return 'enterprise';
+    if (professionalId && priceIds.includes(professionalId)) return 'professional';
     return null;
   }
 
   private resolveStripeBillingStatus(
     status: Stripe.Subscription.Status,
-    trialEndsAt?: string,
+    trialEndsAt?: string
   ): BillingStatus {
-    if (status === "active") return "active";
-    if (status === "trialing")
-      return normalizeBillingStatus("trialing", trialEndsAt, this.nowMs());
-    if (status === "past_due" || status === "unpaid") return "past_due";
-    if (status === "canceled") return "canceled";
-    if (
-      status === "incomplete" ||
-      status === "incomplete_expired" ||
-      status === "paused"
-    ) {
-      return "past_due";
+    if (status === 'active') return 'active';
+    if (status === 'trialing') return normalizeBillingStatus('trialing', trialEndsAt, this.nowMs());
+    if (status === 'past_due' || status === 'unpaid') return 'past_due';
+    if (status === 'canceled') return 'canceled';
+    if (status === 'incomplete' || status === 'incomplete_expired' || status === 'paused') {
+      return 'past_due';
     }
-    return "canceled";
+    return 'canceled';
   }
 
   private buildEntitlements(
@@ -402,32 +341,22 @@ export class EntitlementsService {
     plan: PlanId,
     billingStatus: BillingStatus,
     trialEndsAt?: string,
-    currentPeriodEnd?: string,
+    currentPeriodEnd?: string
   ): Entitlements {
     const nowMs = this.nowMs();
-    const normalizedStatus = normalizeBillingStatus(
-      billingStatus,
-      trialEndsAt,
-      nowMs,
-    );
-    const resolvedStatus = applyGracePeriod(
-      normalizedStatus,
-      currentPeriodEnd,
-      nowMs,
-    );
-    const effectivePlan = resolvedStatus === "trialing" ? "professional" : plan;
+    const normalizedStatus = normalizeBillingStatus(billingStatus, trialEndsAt, nowMs);
+    const resolvedStatus = applyGracePeriod(normalizedStatus, currentPeriodEnd, nowMs);
+    const effectivePlan = resolvedStatus === 'trialing' ? 'professional' : plan;
     const defaults = defaultsByPlan(effectivePlan);
     const env = getApiConfig().entitlements;
 
     const maxSources = Number(env.maxSources ?? defaults.maxSources);
-    const reportCadence =
-      parseCadence(env.reportCadence) ?? defaults.reportCadence;
+    const reportCadence = parseCadence(env.reportCadence) ?? defaults.reportCadence;
     const aiTier = parseAiTier(env.aiTier) ?? defaults.aiTier;
 
     const isPremiumAllowed =
-      resolvedStatus === "active" ||
-      (resolvedStatus === "trialing" &&
-        !(trialEndsAt && nowMs > Date.parse(trialEndsAt)));
+      resolvedStatus === 'active' ||
+      (resolvedStatus === 'trialing' && !(trialEndsAt && nowMs > Date.parse(trialEndsAt)));
 
     const reason = deriveReason(source, resolvedStatus, trialEndsAt, nowMs);
 
@@ -445,9 +374,7 @@ export class EntitlementsService {
       trialEndsAt,
       reason,
       limits: {
-        maxSources: Number.isFinite(maxSources)
-          ? maxSources
-          : defaults.maxSources,
+        maxSources: Number.isFinite(maxSources) ? maxSources : defaults.maxSources,
         reportCadence,
         aiTier,
       },

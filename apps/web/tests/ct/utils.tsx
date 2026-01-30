@@ -23,15 +23,17 @@ const Providers: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 
 export const mountWithProviders = async (
   mount: (component: React.ReactElement) => Promise<import('@playwright/test').Locator>,
-  ui: React.ReactElement,
+  ui: React.ReactElement
 ) =>
   mount(
     <HashRouter>
       <Providers>{ui}</Providers>
-    </HashRouter>,
+    </HashRouter>
   );
 
-const DashboardOutletShell = ({ context }: { context: DashboardOutletContext }) => <Outlet context={context} />;
+const DashboardOutletShell = ({ context }: { context: DashboardOutletContext }) => (
+  <Outlet context={context} />
+);
 
 export const createDashboardContext = (): DashboardOutletContext => ({
   t,
@@ -63,7 +65,7 @@ export const createDashboardContext = (): DashboardOutletContext => ({
 
 export const mountDashboardView = async (
   mount: (component: React.ReactElement) => Promise<import('@playwright/test').Locator>,
-  ui: React.ReactElement,
+  ui: React.ReactElement
 ) => {
   const context = createDashboardContext();
 
@@ -76,7 +78,7 @@ export const mountDashboardView = async (
           </Route>
         </Routes>
       </Providers>
-    </MemoryRouter>,
+    </MemoryRouter>
   );
 };
 

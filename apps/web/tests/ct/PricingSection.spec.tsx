@@ -10,7 +10,7 @@ test.beforeEach(async ({ page }) => {
 test('PricingSection renders', async ({ mount }) => {
   const component = await mountWithProviders(
     mount,
-    <PricingSection t={t} onCompare={() => {}} onPlanCtaClick={() => {}} />,
+    <PricingSection t={t} onCompare={() => {}} onPlanCtaClick={() => {}} />
   );
   await expect(component).toBeVisible();
 });

@@ -38,7 +38,7 @@ const checkTmpDelete = () => {
         'Windows delete permissions look blocked in repo root.',
         'Fix ACL/AV exclusions and rerun "pnpm run diagnose:windows".',
         `Error: ${err?.code ?? err}`,
-      ].join('\n'),
+      ].join('\n')
     );
   }
 };
@@ -50,7 +50,7 @@ if (existsSync(npmLock) || existsSync(npmShrinkwrap)) {
       'Remove it and use pnpm-lock.yaml only:',
       '- package-lock.json',
       '- npm-shrinkwrap.json',
-    ].join('\n'),
+    ].join('\n')
   );
 }
 

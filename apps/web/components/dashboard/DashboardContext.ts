@@ -42,7 +42,10 @@ export interface DashboardOutletContext {
   // Integrations & tenants / backend sync
   integrationStatus: Record<string, IntegrationConnectionState>;
   onIntegrationConnect: (item: IntegrationItem) => void;
-  openIntegrationModal?: (item: IntegrationItem, onConnect?: (item: IntegrationItem) => void) => void;
+  openIntegrationModal?: (
+    item: IntegrationItem,
+    onConnect?: (item: IntegrationItem) => void
+  ) => void;
 
   tenants?: TenantSummary[];
   integrationsRemote?: IntegrationSummary[];

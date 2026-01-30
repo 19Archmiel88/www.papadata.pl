@@ -43,7 +43,9 @@ export const ContactModal: React.FC<ContactModalProps> = ({ t, isOpen = true, on
 
   const clientRequestId = useMemo(() => {
     if (typeof window === 'undefined') return 'ssr';
-    return (crypto as any)?.randomUUID?.() ?? `req_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+    return (
+      (crypto as any)?.randomUUID?.() ?? `req_${Date.now()}_${Math.random().toString(16).slice(2)}`
+    );
   }, []);
 
   const fieldError = useMemo(() => {
@@ -101,16 +103,33 @@ export const ContactModal: React.FC<ContactModalProps> = ({ t, isOpen = true, on
         className="absolute top-6 right-6 p-2 rounded-xl bg-black/5 dark:bg-white/5 hover:bg-brand-start transition-all text-gray-500 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-start/60"
         aria-label={t.common.close}
       >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2.5}
+            d="M6 18L18 6M6 6l12 12"
+          />
         </svg>
       </button>
 
       <div className="p-8 sm:p-12">
-        <h3 id={titleId} className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
+        <h3
+          id={titleId}
+          className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tight"
+        >
           {t.footer.meta.contact_title}
         </h3>
-        <p id={descId} className="mt-3 text-sm text-gray-500 dark:text-gray-400 font-medium leading-relaxed">
+        <p
+          id={descId}
+          className="mt-3 text-sm text-gray-500 dark:text-gray-400 font-medium leading-relaxed"
+        >
           {t.footer.meta.contact_desc}
         </p>
 
@@ -205,7 +224,9 @@ export const ContactModal: React.FC<ContactModalProps> = ({ t, isOpen = true, on
               />
 
               <div className="flex items-center justify-between text-xs font-black uppercase tracking-widest text-gray-400">
-                <span>{messageOk ? t.footer.meta.contact_message_ok : t.footer.meta.contact_message_min}</span>
+                <span>
+                  {messageOk ? t.footer.meta.contact_message_ok : t.footer.meta.contact_message_min}
+                </span>
                 <span className={remaining < 0 ? 'text-rose-500' : ''}>{remaining}</span>
               </div>
             </div>

@@ -16,7 +16,7 @@ export const DialogOverlay = React.forwardRef<
     ref={ref}
     className={cn(
       'fixed inset-0 bg-black/50 backdrop-blur-sm data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=closed]:animate-out data-[state=closed]:fade-out-0',
-      className,
+      className
     )}
     {...props}
   />
@@ -33,7 +33,7 @@ export const DialogContent = React.forwardRef<
       ref={ref}
       className={cn(
         'fixed left-1/2 top-1/2 z-50 grid w-[min(520px,92vw)] max-h-[85vh] translate-x-[-50%] translate-y-[-50%] gap-6 rounded-3xl border border-white/10 bg-gradient-to-br from-[#0b0b0f] to-[#141420] p-6 shadow-[0_30px_90px_rgba(0,0,0,0.45)] text-white data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95',
-        className,
+        className
       )}
       {...props}
     >
@@ -46,11 +46,10 @@ export const DialogContent = React.forwardRef<
 ));
 DialogContent.displayName = DialogPrimitive.Content.displayName;
 
-export const DialogHeader: React.FC<
-  React.HTMLAttributes<HTMLDivElement>
-> = ({ className, ...props }) => (
-  <div className={cn('space-y-2 text-left', className)} {...props} />
-);
+export const DialogHeader: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
+  className,
+  ...props
+}) => <div className={cn('space-y-2 text-left', className)} {...props} />;
 
 export const DialogTitle = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Title>,

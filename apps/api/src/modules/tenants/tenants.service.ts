@@ -1,15 +1,15 @@
-import { Injectable } from "@nestjs/common";
-import type { TenantStatusPayload, TenantSummary } from "@papadata/shared";
-import { getAppMode } from "../../common/app-mode";
+import { Injectable } from '@nestjs/common';
+import type { TenantStatusPayload, TenantSummary } from '@papadata/shared';
+import { getAppMode } from '../../common/app-mode';
 
 @Injectable()
 export class TenantsService {
   private readonly tenants: TenantSummary[] = [
     {
-      id: "demo",
-      name: "PapaData Demo",
+      id: 'demo',
+      name: 'PapaData Demo',
       mode: getAppMode(),
-      status: "active",
+      status: 'active',
     },
   ];
 
@@ -28,9 +28,9 @@ export class TenantsService {
     const seed = Math.max(1, id.length);
     const coverage = Math.min(0.95, 0.6 + (seed % 10) * 0.03);
 
-    if (mode === "demo") {
+    if (mode === 'demo') {
       return {
-        mode: "demo",
+        mode: 'demo',
         lastSyncAt: undefined,
         hasIntegrations: false,
         coverage: 0.12,
@@ -38,7 +38,7 @@ export class TenantsService {
     }
 
     return {
-      mode: "live",
+      mode: 'live',
       lastSyncAt,
       hasIntegrations: true,
       coverage,

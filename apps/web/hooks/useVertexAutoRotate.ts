@@ -12,7 +12,10 @@ interface AutoRotateOptions {
   /**
    * Optional callback for analytics/telemetry.
    */
-  onChange?: (index: number, meta: { reason: 'auto' | 'manual' | 'next' | 'prev' | 'reset' | 'clamp' }) => void;
+  onChange?: (
+    index: number,
+    meta: { reason: 'auto' | 'manual' | 'next' | 'prev' | 'reset' | 'clamp' }
+  ) => void;
 }
 
 /**
@@ -41,7 +44,15 @@ export const useVertexAutoRotate = ({
     if (intervalMs <= 0) return false;
     if (lockOnUserInteraction && isUserControlled) return false;
     return true;
-  }, [hasItems, intervalMs, isDisabled, isPaused, isUserControlled, itemCount, lockOnUserInteraction]);
+  }, [
+    hasItems,
+    intervalMs,
+    isDisabled,
+    isPaused,
+    isUserControlled,
+    itemCount,
+    lockOnUserInteraction,
+  ]);
 
   const clampIndex = useCallback(
     (value: number) => {
@@ -51,7 +62,7 @@ export const useVertexAutoRotate = ({
       if (value > max) return max;
       return value;
     },
-    [hasItems, itemCount],
+    [hasItems, itemCount]
   );
 
   const clearTimer = useCallback(() => {
@@ -72,7 +83,7 @@ export const useVertexAutoRotate = ({
         return clamped;
       });
     },
-    [clampIndex, onChange],
+    [clampIndex, onChange]
   );
 
   // Keep index valid when itemCount changes.
@@ -116,7 +127,7 @@ export const useVertexAutoRotate = ({
       setIsUserControlled(true);
       setIndexWithMeta(newIndex, 'manual');
     },
-    [setIndexWithMeta],
+    [setIndexWithMeta]
   );
 
   const next = useCallback(() => {

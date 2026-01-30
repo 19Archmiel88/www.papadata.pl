@@ -3,6 +3,7 @@
 Roadmapa dotyczy przejścia z demo/POC do wersji produkcyjnej.
 
 ## 0) Demo/POC (obecnie)
+
 - Landing + dashboard demo
 - Mock dane
 - AI drawer scaffold
@@ -10,6 +11,7 @@ Roadmapa dotyczy przejścia z demo/POC do wersji produkcyjnej.
 - Legal/compliance templates
 
 ## 1) MVP (pierwsze wdrożenie)
+
 - Minimalny backend:
   - persystencja użytkownika i ustawień
   - przechowywanie konfiguracji integracji
@@ -21,12 +23,14 @@ Roadmapa dotyczy przejścia z demo/POC do wersji produkcyjnej.
 - Obsługa pełnych stanów empty/error/offline w całym UI
 
 ## 2) Growth
+
 - RBAC (role: owner/admin/analyst/viewer)
 - Audyt logów i zdarzeń (minimalna observability)
 - Wersjonowanie raportów i harmonogramy
 - Rozszerzenie integracji
 
 ## 3) Enterprise
+
 - SSO (SAML/OIDC)
 - SLA + procedury incident response
 - Polityki retencji i backupy
@@ -34,6 +38,7 @@ Roadmapa dotyczy przejścia z demo/POC do wersji produkcyjnej.
 - Hardening bezpieczeństwa (CSP, org policies)
 
 ## Ryzyka/Dependencies
+
 - Zmiany regulacyjne (AI Act/DSA/Data Act interpretacje)
 - Dostępność konektorów i koszty API
 - Jakość danych i modelowanie (BigQuery)

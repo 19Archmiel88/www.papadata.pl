@@ -1,12 +1,7 @@
-import { Injectable, OnModuleDestroy } from "@nestjs/common";
-import {
-  Pool,
-  type PoolClient,
-  type QueryResult,
-  type QueryResultRow,
-} from "pg";
-import { getApiConfig } from "./config";
-import { getLogger } from "./logger";
+import { Injectable, OnModuleDestroy } from '@nestjs/common';
+import { Pool, type PoolClient, type QueryResult, type QueryResultRow } from 'pg';
+import { getApiConfig } from './config';
+import { getLogger } from './logger';
 
 @Injectable()
 export class DbService implements OnModuleDestroy {
@@ -25,12 +20,12 @@ export class DbService implements OnModuleDestroy {
       }
     ).database;
     if (!url) {
-      if (getApiConfig().appMode !== "demo") {
-        this.logger.error("DATABASE_URL missing; refusing to start in prod.");
-        throw new Error("DATABASE_URL is required outside demo mode");
+      if (getApiConfig().appMode !== 'demo') {
+        this.logger.error('DATABASE_URL missing; refusing to start in prod.');
+        throw new Error('DATABASE_URL is required outside demo mode');
       }
       this.pool = null;
-      this.logger.warn("DATABASE_URL missing; DB features disabled.");
+      this.logger.warn('DATABASE_URL missing; DB features disabled.');
       return;
     }
     this.pool = new Pool({
@@ -50,17 +45,17 @@ export class DbService implements OnModuleDestroy {
 
   async query<T extends QueryResultRow = QueryResultRow>(
     text: string,
-    params?: unknown[],
+    params?: unknown[]
   ): Promise<QueryResult<T>> {
     if (!this.pool) {
-      throw new Error("Database is not configured");
+      throw new Error('Database is not configured');
     }
     return this.pool.query<T>(text, params);
   }
 
   async withClient<T>(fn: (client: PoolClient) => Promise<T>): Promise<T> {
     if (!this.pool) {
-      throw new Error("Database is not configured");
+      throw new Error('Database is not configured');
     }
     const client = await this.pool.connect();
     try {

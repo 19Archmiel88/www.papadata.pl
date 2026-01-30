@@ -77,8 +77,7 @@ const emptyReports: DashboardReportsV2 = {
 };
 
 export const ReportsView: React.FC = () => {
-  const { t, setContextLabel, setAiDraft, isDemo } =
-    useOutletContext<DashboardOutletContext>();
+  const { t, setContextLabel, setAiDraft, isDemo } = useOutletContext<DashboardOutletContext>();
   const { menu, openMenu, closeMenu } = useContextMenu();
   const demoTooltip = t.dashboard.demo_tooltip;
 
@@ -153,12 +152,8 @@ export const ReportsView: React.FC = () => {
       <section className="rounded-3xl border border-black/10 dark:border-white/10 bg-white/90 dark:bg-[#0b0b0f] p-6 shadow-xl">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-              {reports.title}
-            </h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              {reports.desc}
-            </p>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{reports.title}</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{reports.desc}</p>
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -171,9 +166,7 @@ export const ReportsView: React.FC = () => {
             <InteractiveButton
               variant="primary"
               className="!px-4 !py-2 !text-xs rounded-full"
-              onClick={() =>
-                handleAction(generate.cta, reports.title)
-              }
+              onClick={() => handleAction(generate.cta, reports.title)}
               disabled={isDemo}
               title={isDemo ? demoTooltip : undefined}
             >
@@ -181,9 +174,7 @@ export const ReportsView: React.FC = () => {
             </InteractiveButton>
             <button
               type="button"
-              onClick={(event) =>
-                openMenu(event, buildMenuItems(reports.title), reports.title)
-              }
+              onClick={(event) => openMenu(event, buildMenuItems(reports.title), reports.title)}
               aria-label={`${t.dashboard.context_menu.label}: ${reports.title}`}
               className="p-2 rounded-full border border-black/10 dark:border-white/10 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
             >
@@ -207,9 +198,7 @@ export const ReportsView: React.FC = () => {
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                 {lastReport.title}
               </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {lastReport.desc}
-              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{lastReport.desc}</p>
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -222,11 +211,7 @@ export const ReportsView: React.FC = () => {
               <button
                 type="button"
                 onClick={(event) =>
-                  openMenu(
-                    event,
-                    buildMenuItems(lastReport.title),
-                    lastReport.title
-                  )
+                  openMenu(event, buildMenuItems(lastReport.title), lastReport.title)
                 }
                 aria-label={`${t.dashboard.context_menu.label}: ${lastReport.title}`}
                 className="p-2 rounded-full border border-black/10 dark:border-white/10 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
@@ -248,28 +233,20 @@ export const ReportsView: React.FC = () => {
               {lastReport.name}
             </div>
             <div className="mt-2 text-xs text-gray-500">
-              {lastReport.range_label}:{' '}
-              {lastReport.range_value}
+              {lastReport.range_label}: {lastReport.range_value}
             </div>
             <div className="text-xs text-gray-500">
-              {lastReport.date_label}:{' '}
-              {lastReport.date_value}
+              {lastReport.date_label}: {lastReport.date_value}
             </div>
             <div className="text-xs text-gray-500">
-              {lastReport.language_label}:{' '}
-              {lastReport.language_value}
+              {lastReport.language_label}: {lastReport.language_value}
             </div>
 
             <div className="mt-4 flex flex-wrap gap-2">
               <InteractiveButton
                 variant="secondary"
                 className="!px-3 !py-2 !text-xs rounded-full"
-                onClick={() =>
-                  handleAction(
-                    lastReport.cta_preview,
-                    lastReport.name
-                  )
-                }
+                onClick={() => handleAction(lastReport.cta_preview, lastReport.name)}
                 disabled={isDemo}
                 title={isDemo ? demoTooltip : undefined}
               >
@@ -292,12 +269,7 @@ export const ReportsView: React.FC = () => {
               <InteractiveButton
                 variant="secondary"
                 className="!px-3 !py-2 !text-xs rounded-full"
-                onClick={() =>
-                  handleAction(
-                    lastReport.cta_resend,
-                    lastReport.name
-                  )
-                }
+                onClick={() => handleAction(lastReport.cta_resend, lastReport.name)}
                 disabled={isDemo}
                 title={isDemo ? demoTooltip : undefined}
               >
@@ -307,13 +279,9 @@ export const ReportsView: React.FC = () => {
           </div>
 
           <div className="mt-6">
-            <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
-              {diff.title}
-            </h4>
+            <h4 className="text-sm font-semibold text-gray-900 dark:text-white">{diff.title}</h4>
             {diffItems.length === 0 ? (
-              <div className="mt-3 text-xs text-gray-500">
-                —
-              </div>
+              <div className="mt-3 text-xs text-gray-500">—</div>
             ) : (
               <ul className="mt-2 space-y-1 text-xs text-gray-500">
                 {diffItems.map((item: string) => (
@@ -375,7 +343,9 @@ export const ReportsView: React.FC = () => {
               listItems.map((report) => (
                 <div
                   key={report.id}
-                  onContextMenu={(event) => openMenu(event, buildMenuItems(report.name), report.name)}
+                  onContextMenu={(event) =>
+                    openMenu(event, buildMenuItems(report.name), report.name)
+                  }
                   className="rounded-2xl border border-black/10 dark:border-white/10 bg-white/70 dark:bg-white/5 p-4"
                 >
                   <div className="flex items-center justify-between">
@@ -391,9 +361,7 @@ export const ReportsView: React.FC = () => {
                     <button
                       type="button"
                       className="text-xs text-brand-start hover:underline"
-                      onClick={() =>
-                        handleAction(listActions.preview, report.name)
-                      }
+                      onClick={() => handleAction(listActions.preview, report.name)}
                       disabled={isDemo}
                       title={isDemo ? demoTooltip : undefined}
                     >
@@ -402,9 +370,7 @@ export const ReportsView: React.FC = () => {
                     <button
                       type="button"
                       className="text-xs text-gray-500 hover:text-gray-900 dark:hover:text-white"
-                      onClick={() =>
-                        handleAction(listActions.download, report.name)
-                      }
+                      onClick={() => handleAction(listActions.download, report.name)}
                       disabled={isDemo}
                       title={isDemo ? demoTooltip : undefined}
                     >
@@ -467,9 +433,7 @@ export const ReportsView: React.FC = () => {
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
               {generate.title}
             </h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              {generate.desc}
-            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{generate.desc}</p>
           </div>
 
           <div className="flex items-center gap-2">
@@ -482,13 +446,7 @@ export const ReportsView: React.FC = () => {
             </button>
             <button
               type="button"
-              onClick={(event) =>
-                openMenu(
-                  event,
-                  buildMenuItems(generate.title),
-                  generate.title
-                )
-              }
+              onClick={(event) => openMenu(event, buildMenuItems(generate.title), generate.title)}
               aria-label={`${t.dashboard.context_menu.label}: ${generate.title}`}
               className="p-2 rounded-full border border-black/10 dark:border-white/10 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
             >

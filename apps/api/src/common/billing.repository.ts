@@ -1,6 +1,6 @@
-import { Injectable } from "@nestjs/common";
-import type { BillingStatus, PlanId } from "@papadata/shared";
-import { DbService } from "./db.service";
+import { Injectable } from '@nestjs/common';
+import type { BillingStatus, PlanId } from '@papadata/shared';
+import { DbService } from './db.service';
 
 export type TenantBillingRow = {
   tenantId: string;
@@ -29,14 +29,14 @@ export type TenantSourceRow = {
 
 export type TenantStatusRow = {
   tenantId: string;
-  status: "active" | "deleted";
+  status: 'active' | 'deleted';
   deletedAt?: string | null;
 };
 
 export type WebhookEventRow = {
   eventId: string;
   eventType: string;
-  status: "received" | "processed" | "failed";
+  status: 'received' | 'processed' | 'failed';
   attempts: number;
   lastError?: string | null;
 };
@@ -66,7 +66,7 @@ export class BillingRepository {
       `SELECT tenant_id, stripe_customer_id, stripe_subscription_id, plan, billing_status, trial_ends_at, current_period_end
        FROM tenant_billing
        WHERE tenant_id = $1`,
-      [tenantId],
+      [tenantId]
     );
     const row = rows[0];
     if (!row) return null;
@@ -110,7 +110,7 @@ export class BillingRepository {
         input.billingStatus,
         input.trialEndsAt ?? null,
         input.currentPeriodEnd ?? null,
-      ],
+      ]
     );
   }
 
@@ -129,15 +129,12 @@ export class BillingRepository {
          updated_at
        ) VALUES ($1,$2,'trialing',$3,now())
        ON CONFLICT (tenant_id) DO NOTHING`,
-      [input.tenantId, input.plan, input.trialEndsAt],
+      [input.tenantId, input.plan, input.trialEndsAt]
     );
     return (rowCount ?? 0) > 0;
   }
 
-  async getAiUsage(
-    tenantId: string,
-    periodStart: string,
-  ): Promise<AiUsageRow | null> {
+  async getAiUsage(tenantId: string, periodStart: string): Promise<AiUsageRow | null> {
     if (!this.db.isEnabled()) return null;
     const { rows } = await this.db.query<{
       tenant_id: string;
@@ -150,7 +147,7 @@ export class BillingRepository {
       `SELECT tenant_id, period_start, period_end, requests_count, tokens_in, tokens_out
        FROM ai_usage
        WHERE tenant_id = $1 AND period_start = $2`,
-      [tenantId, periodStart],
+      [tenantId, periodStart]
     );
     const row = rows[0];
     if (!row) return null;
@@ -200,7 +197,7 @@ export class BillingRepository {
         requestsDelta,
         tokensInDelta,
         tokensOutDelta,
-      ],
+      ]
     );
   }
 
@@ -210,15 +207,12 @@ export class BillingRepository {
       `SELECT COUNT(*)::text AS count
        FROM tenant_sources
        WHERE tenant_id = $1 AND status = 'connected'`,
-      [tenantId],
+      [tenantId]
     );
     return Number(rows[0]?.count ?? 0);
   }
 
-  async getSource(
-    tenantId: string,
-    provider: string,
-  ): Promise<TenantSourceRow | null> {
+  async getSource(tenantId: string, provider: string): Promise<TenantSourceRow | null> {
     if (!this.db.isEnabled()) return null;
     const { rows } = await this.db.query<{
       tenant_id: string;
@@ -228,7 +222,7 @@ export class BillingRepository {
       `SELECT tenant_id, provider, status
        FROM tenant_sources
        WHERE tenant_id = $1 AND provider = $2`,
-      [tenantId, provider],
+      [tenantId, provider]
     );
     const row = rows[0];
     if (!row) return null;
@@ -252,7 +246,7 @@ export class BillingRepository {
        ON CONFLICT (tenant_id, provider) DO UPDATE SET
          status = EXCLUDED.status,
          updated_at = now()`,
-      [input.tenantId, input.provider, input.status],
+      [input.tenantId, input.provider, input.status]
     );
   }
 
@@ -260,13 +254,13 @@ export class BillingRepository {
     if (!this.db.isEnabled()) return null;
     const { rows } = await this.db.query<{
       tenant_id: string;
-      status: "active" | "deleted";
+      status: 'active' | 'deleted';
       deleted_at: string | null;
     }>(
       `SELECT tenant_id, status, deleted_at
        FROM tenant_status
        WHERE tenant_id = $1`,
-      [tenantId],
+      [tenantId]
     );
     const row = rows[0];
     if (!row) return null;
@@ -286,14 +280,14 @@ export class BillingRepository {
          status = 'deleted',
          deleted_at = now(),
          updated_at = now()`,
-      [tenantId],
+      [tenantId]
     );
   }
 
   async upsertWebhookEvent(input: {
     eventId: string;
     eventType: string;
-    status: "received" | "processed" | "failed";
+    status: 'received' | 'processed' | 'failed';
     attempts?: number;
     lastError?: string | null;
   }): Promise<void> {
@@ -312,13 +306,7 @@ export class BillingRepository {
          attempts = stripe_webhook_events.attempts + EXCLUDED.attempts,
          last_error = EXCLUDED.last_error,
          updated_at = now()`,
-      [
-        input.eventId,
-        input.eventType,
-        input.status,
-        input.attempts ?? 0,
-        input.lastError ?? null,
-      ],
+      [input.eventId, input.eventType, input.status, input.attempts ?? 0, input.lastError ?? null]
     );
   }
 
@@ -327,14 +315,14 @@ export class BillingRepository {
     const { rows } = await this.db.query<{
       event_id: string;
       event_type: string;
-      status: "received" | "processed" | "failed";
+      status: 'received' | 'processed' | 'failed';
       attempts: number;
       last_error: string | null;
     }>(
       `SELECT event_id, event_type, status, attempts, last_error
        FROM stripe_webhook_events
        WHERE event_id = $1`,
-      [eventId],
+      [eventId]
     );
     const row = rows[0];
     if (!row) return null;
@@ -352,7 +340,7 @@ export class BillingRepository {
     const { rows } = await this.db.query<{
       event_id: string;
       event_type: string;
-      status: "failed";
+      status: 'failed';
       attempts: number;
       last_error: string | null;
     }>(
@@ -361,13 +349,13 @@ export class BillingRepository {
        WHERE status = 'failed'
        ORDER BY updated_at DESC
        LIMIT $1`,
-      [limit],
+      [limit]
     );
     return rows.map(
       (row: {
         event_id: string;
         event_type: string;
-        status: "failed";
+        status: 'failed';
         attempts: number;
         last_error: string | null;
       }) => ({
@@ -376,7 +364,7 @@ export class BillingRepository {
         status: row.status,
         attempts: row.attempts,
         lastError: row.last_error,
-      }),
+      })
     );
   }
 
@@ -390,7 +378,7 @@ export class BillingRepository {
         input.actorId ?? null,
         input.action,
         input.details ? JSON.stringify(input.details) : null,
-      ],
+      ]
     );
   }
 }

@@ -10,7 +10,7 @@ test.beforeEach(async ({ page }) => {
 test('PromoModal renders', async ({ mount }) => {
   const component = await mountWithProviders(
     mount,
-    <PromoModal t={t} onClose={() => {}} onSelectPlan={() => {}} onDemo={() => {}} isOpen />,
+    <PromoModal t={t} onClose={() => {}} onSelectPlan={() => {}} onDemo={() => {}} isOpen />
   );
   await expect(component).toBeVisible();
 });

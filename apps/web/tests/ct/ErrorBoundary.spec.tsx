@@ -12,7 +12,7 @@ test('ErrorBoundary renders children', async ({ mount }) => {
     mount,
     <ErrorBoundary>
       <div>Child</div>
-    </ErrorBoundary>,
+    </ErrorBoundary>
   );
   await expect(component).toContainText('Child');
 });

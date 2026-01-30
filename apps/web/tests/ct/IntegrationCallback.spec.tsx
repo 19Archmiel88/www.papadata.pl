@@ -13,17 +13,20 @@ test.beforeEach(async ({ page }) => {
 
 test('IntegrationCallback renders', async ({ mount }) => {
   const component = await mount(
-    <MemoryRouter initialEntries={["/app/integrations/callback/google?code=demo&state=1"]}>
+    <MemoryRouter initialEntries={['/app/integrations/callback/google?code=demo&state=1']}>
       <UIProvider>
         <AuthProvider>
           <ModalProvider>
             <Routes>
-              <Route path="/app/integrations/callback/:provider" element={<IntegrationCallback />} />
+              <Route
+                path="/app/integrations/callback/:provider"
+                element={<IntegrationCallback />}
+              />
             </Routes>
           </ModalProvider>
         </AuthProvider>
       </UIProvider>
-    </MemoryRouter>,
+    </MemoryRouter>
   );
   await expect(component).toBeVisible();
 });

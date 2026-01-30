@@ -41,8 +41,7 @@ const createClsAccumulator = () => {
     // - first entry
     // - gap > 1s
     // - window length > 5s
-    const isNewSession =
-      sessionStart === 0 || t - sessionLast > 1000 || t - sessionStart > 5000;
+    const isNewSession = sessionStart === 0 || t - sessionLast > 1000 || t - sessionStart > 5000;
 
     if (isNewSession) {
       sessionValue = v;

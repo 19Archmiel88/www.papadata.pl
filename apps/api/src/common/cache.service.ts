@@ -1,5 +1,5 @@
-import { Injectable, OnModuleDestroy } from "@nestjs/common";
-import { getApiConfig } from "./config";
+import { Injectable, OnModuleDestroy } from '@nestjs/common';
+import { getApiConfig } from './config';
 
 type CacheEntry = {
   value: unknown;

@@ -57,12 +57,7 @@ const resolveEsbuildBinary = (viteEntry) => {
   const info = resolveEsbuildPackage(viteEntry);
   if (!info) return null;
   const esbuildDepsRoot = resolve(info.esbuildRoot, '..');
-  const binPath = join(
-    esbuildDepsRoot,
-    '@esbuild',
-    'win32-x64',
-    'esbuild.exe',
-  );
+  const binPath = join(esbuildDepsRoot, '@esbuild', 'win32-x64', 'esbuild.exe');
   return existsSync(binPath) ? binPath : null;
 };
 
@@ -87,7 +82,7 @@ const findEsbuildBinary = (preferredVersion) => {
         'node_modules',
         '@esbuild',
         platformPkg,
-        'esbuild.exe',
+        'esbuild.exe'
       );
       if (existsSync(candidate)) return candidate;
     }
@@ -98,13 +93,7 @@ const findEsbuildBinary = (preferredVersion) => {
     for (const entry of entries) {
       if (!entry.isDirectory()) continue;
       if (!entry.name.startsWith(preferredPrefix)) continue;
-      const candidate = join(
-        pnpmRoot,
-        entry.name,
-        'node_modules',
-        'esbuild',
-        'esbuild.exe',
-      );
+      const candidate = join(pnpmRoot, entry.name, 'node_modules', 'esbuild', 'esbuild.exe');
       if (existsSync(candidate)) return candidate;
     }
   }
@@ -119,7 +108,7 @@ const findEsbuildBinary = (preferredVersion) => {
         'node_modules',
         '@esbuild',
         platformPkg,
-        'esbuild.exe',
+        'esbuild.exe'
       );
       if (existsSync(candidate)) return candidate;
     }
@@ -128,13 +117,7 @@ const findEsbuildBinary = (preferredVersion) => {
   for (const entry of entries) {
     if (!entry.isDirectory()) continue;
     if (!entry.name.startsWith('esbuild@')) continue;
-    const candidate = join(
-      pnpmRoot,
-      entry.name,
-      'node_modules',
-      'esbuild',
-      'esbuild.exe',
-    );
+    const candidate = join(pnpmRoot, entry.name, 'node_modules', 'esbuild', 'esbuild.exe');
     if (existsSync(candidate)) return candidate;
   }
 
@@ -150,7 +133,7 @@ const checkTmpDelete = () => {
   } catch (err) {
     console.warn(
       `Windows delete permission issue in repo root. ` +
-        `Run "pnpm run diagnose:windows" and verify ACL/AV exclusions. (${err?.code ?? err})`,
+        `Run "pnpm run diagnose:windows" and verify ACL/AV exclusions. (${err?.code ?? err})`
     );
     return false;
   }
@@ -161,8 +144,7 @@ if (isWindows) {
   checkTmpDelete();
   if (!env.ESBUILD_BINARY_PATH) {
     const esbuildPath =
-      resolveEsbuildBinary(viteCli) ??
-      findEsbuildBinary(resolveEsbuildVersion(viteCli));
+      resolveEsbuildBinary(viteCli) ?? findEsbuildBinary(resolveEsbuildVersion(viteCli));
     if (esbuildPath) {
       env.ESBUILD_BINARY_PATH = esbuildPath;
     }

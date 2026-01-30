@@ -41,8 +41,5 @@ export default defineConfig({
     timeout: 120_000,
     env: webServerEnv,
   },
-  reporter: [
-    ['html', { outputFolder: 'playwright-report', open: 'never' }],
-    ['list'],
-  ],
+  reporter: [['html', { outputFolder: 'playwright-report', open: 'never' }], ['list']],
 });

@@ -10,7 +10,7 @@ test.beforeEach(async ({ page }) => {
 test('LegalDocPage renders', async ({ mount }) => {
   const component = await mountWithProviders(
     mount,
-    <LegalDocPage t={t} content="Test" fallbackTitle="Legal" onBack={() => {}} />,
+    <LegalDocPage t={t} content="Test" fallbackTitle="Legal" onBack={() => {}} />
   );
   await expect(component).toBeVisible();
 });

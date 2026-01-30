@@ -36,7 +36,7 @@ const findEsbuildBinary = () => {
         'node_modules',
         '@esbuild',
         platformPkg,
-        'esbuild.exe',
+        'esbuild.exe'
       );
       if (existsSync(candidate)) return candidate;
     }
@@ -45,13 +45,7 @@ const findEsbuildBinary = () => {
   for (const entry of entries) {
     if (!entry.isDirectory()) continue;
     if (!entry.name.startsWith('esbuild@')) continue;
-    const candidate = join(
-      pnpmRoot,
-      entry.name,
-      'node_modules',
-      'esbuild',
-      'esbuild.exe',
-    );
+    const candidate = join(pnpmRoot, entry.name, 'node_modules', 'esbuild', 'esbuild.exe');
     if (existsSync(candidate)) return candidate;
   }
 
@@ -99,11 +93,6 @@ if (result.error) {
 }
 
 if (result.stderr?.length) {
-  const snippet = result.stderr
-    .toString()
-    .trim()
-    .split(/\r?\n/)
-    .slice(0, 3)
-    .join(' | ');
+  const snippet = result.stderr.toString().trim().split(/\r?\n/).slice(0, 3).join(' | ');
   if (snippet) log('esbuild_stderr', snippet);
 }

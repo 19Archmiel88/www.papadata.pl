@@ -78,7 +78,9 @@ export const AdsViewV2: React.FC = () => {
   } | null>(null);
   const [mixMetric, setMixMetric] = useState<'spend' | 'revenue'>('spend');
   const [effMetric, setEffMetric] = useState<'roas' | 'cpa'>('roas');
-  const [drilldownLevel, setDrilldownLevel] = useState<'campaign' | 'adset' | 'creative'>('campaign');
+  const [drilldownLevel, setDrilldownLevel] = useState<'campaign' | 'adset' | 'creative'>(
+    'campaign'
+  );
   const [adsData, setAdsData] = useState<DashboardAdsResponse | null>(null);
   const [adsError, setAdsError] = useState<string | null>(null);
   const demoTooltip = t.dashboard.demo_tooltip;
@@ -88,11 +90,11 @@ export const AdsViewV2: React.FC = () => {
   const locale = t.langCode ?? 'pl-PL';
   const numberFormatter = useMemo(
     () => getNumberFormatter(locale, { maximumFractionDigits: 0 }),
-    [locale],
+    [locale]
   );
   const percentFormatter = useMemo(
     () => getNumberFormatter(locale, { maximumFractionDigits: 1 }),
-    [locale],
+    [locale]
   );
 
   // WYMÓG: waluta zawsze PLN (niezależnie od tłumaczeń)
@@ -146,7 +148,7 @@ export const AdsViewV2: React.FC = () => {
 
   const overallCpa = useMemo(
     () => adsData?.kpis?.find((kpi) => kpi.key === 'cpa')?.value,
-    [adsData],
+    [adsData]
   );
 
   const channelMetrics = useMemo(() => {
@@ -157,9 +159,7 @@ export const AdsViewV2: React.FC = () => {
         const revenue = getMetricValue(row, 'revenue');
         const roas = getMetricValue(row, 'roas', spend ? revenue / spend : 0);
         const fallbackCpa =
-          typeof overallCpa === 'number'
-            ? overallCpa
-            : 34 + seeded(idx + 5, baseSeed) * 12;
+          typeof overallCpa === 'number' ? overallCpa : 34 + seeded(idx + 5, baseSeed) * 12;
         const cpa = getMetricValue(row, 'cpa', fallbackCpa);
         const label = getDimensionValue(row, 'name', row.id);
         return {
@@ -171,7 +171,7 @@ export const AdsViewV2: React.FC = () => {
           roas,
           cpa,
           trend: Array.from({ length: 12 }).map((_, i) =>
-            clamp(20 + seeded(i + idx, baseSeed) * 70, 10, 100),
+            clamp(20 + seeded(i + idx, baseSeed) * 70, 10, 100)
           ),
         };
       });
@@ -192,7 +192,7 @@ export const AdsViewV2: React.FC = () => {
         roas,
         cpa,
         trend: Array.from({ length: 12 }).map((_, i) =>
-          clamp(20 + seeded(i + idx, baseSeed) * 70, 10, 100),
+          clamp(20 + seeded(i + idx, baseSeed) * 70, 10, 100)
         ),
       };
     });
@@ -214,7 +214,7 @@ export const AdsViewV2: React.FC = () => {
   const effectiveChannelId = selectedChannel ?? filteredByGlobal;
   const filteredChannels = useMemo(
     () => channelMetrics.filter((row) => !effectiveChannelId || row.id === effectiveChannelId),
-    [channelMetrics, effectiveChannelId],
+    [channelMetrics, effectiveChannelId]
   );
 
   const totalsSource = filteredChannels.length ? filteredChannels : channelMetrics;
@@ -240,7 +240,7 @@ export const AdsViewV2: React.FC = () => {
           pct: (value / total) * 100,
         }));
       }),
-    [channelMetrics, mixMetric, mixSlots, timeSeed],
+    [channelMetrics, mixMetric, mixSlots, timeSeed]
   );
 
   const totalsAllChannels = useMemo(() => {
@@ -257,7 +257,7 @@ export const AdsViewV2: React.FC = () => {
         spendShare: (row.spend / totalsAllChannels.spend) * 100,
         revenueShare: (row.revenue / totalsAllChannels.revenue) * 100,
       })),
-    [channelMetrics, totalsAllChannels],
+    [channelMetrics, totalsAllChannels]
   );
 
   const shareGradient = (metric: 'spend' | 'revenue') => {
@@ -282,7 +282,7 @@ export const AdsViewV2: React.FC = () => {
         });
         return acc;
       },
-      { offset: 0, list: [] as { color: string; start: number; end: number }[] },
+      { offset: 0, list: [] as { color: string; start: number; end: number }[] }
     );
 
     return `conic-gradient(${stops.list
@@ -333,7 +333,7 @@ export const AdsViewV2: React.FC = () => {
           roas,
           cpa,
         };
-      }),
+      })
     );
     return rows.slice(0, 8);
   }, [
@@ -354,7 +354,7 @@ export const AdsViewV2: React.FC = () => {
   const handleSetAlert = (label: string) => {
     const prompt = `${t.dashboard.context_menu.set_alert}: ${t.dashboard.ads_v2.ai_prompt.replace(
       '{name}',
-      label,
+      label
     )}`;
     setContextLabel?.(label);
     setAiDraft?.(prompt);
@@ -420,11 +420,13 @@ export const AdsViewV2: React.FC = () => {
   const dashboardAny = t.dashboard as any;
   const adsMatrixTitle = dashboardAny.ads_channel_matrix ?? t.dashboard.ads_v2.title;
   const adsMatrixChannelLabel = dashboardAny.ads_col_channel ?? t.dashboard.context_label;
-  const adsMatrixSpendLabel = dashboardAny.ads_col_spend ?? t.dashboard.ads_v2.media_mix.metric_spend;
+  const adsMatrixSpendLabel =
+    dashboardAny.ads_col_spend ?? t.dashboard.ads_v2.media_mix.metric_spend;
   const adsMatrixRevenueLabel =
     dashboardAny.ads_col_revenue ?? t.dashboard.ads_v2.media_mix.metric_revenue;
   const adsMatrixRoasLabel = dashboardAny.ads_col_roas ?? t.dashboard.ads_v2.summary.roas_label;
-  const adsMatrixMerLabel = dashboardAny.ads_spend_vs_revenue ?? t.dashboard.ads_v2.summary.roas_label;
+  const adsMatrixMerLabel =
+    dashboardAny.ads_spend_vs_revenue ?? t.dashboard.ads_v2.summary.roas_label;
   const adsMatrixCpaLabel = dashboardAny.ads_col_cpa ?? t.dashboard.ads_v2.efficiency.title;
   const drilldownTitle = dashboardAny.ads_open_live ?? t.dashboard.ads_v2.efficiency.title;
   const drilldownDesc = dashboardAny.ads_model_refreshed ?? t.dashboard.ads_v2.desc;
@@ -434,8 +436,8 @@ export const AdsViewV2: React.FC = () => {
     drilldownLevel === 'campaign'
       ? t.dashboard.ads_v2.drilldown.level_campaign
       : drilldownLevel === 'adset'
-      ? t.dashboard.ads_v2.drilldown.level_adset
-      : t.dashboard.ads_v2.drilldown.level_creative;
+        ? t.dashboard.ads_v2.drilldown.level_adset
+        : t.dashboard.ads_v2.drilldown.level_creative;
 
   const gridSkeleton = (className: string) => (
     <div className={className}>
@@ -452,7 +454,7 @@ export const AdsViewV2: React.FC = () => {
     id: string,
     label: string,
     segmentValue: number,
-    segmentPct: number,
+    segmentPct: number
   ) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
@@ -538,7 +540,10 @@ export const AdsViewV2: React.FC = () => {
             <div className="flex items-center gap-3 px-4 py-2 rounded-2xl bg-brand-start/10 border border-brand-start/30 text-brand-start font-black text-xs uppercase tracking-widest">
               <span>{t.dashboard.context_label}:</span>
               <span className="text-gray-900 dark:text-white">
-                {t.dashboard.ads_v2.media_mix.context_template.replace('{name}', selectedChannelLabel)}
+                {t.dashboard.ads_v2.media_mix.context_template.replace(
+                  '{name}',
+                  selectedChannelLabel
+                )}
               </span>
               <button
                 type="button"
@@ -547,7 +552,12 @@ export const AdsViewV2: React.FC = () => {
                 aria-label={t.common.close ?? 'Close'}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={3}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             </div>
@@ -630,7 +640,10 @@ export const AdsViewV2: React.FC = () => {
 
               <div className="relative h-full flex items-end justify-between gap-4 z-10">
                 {mixBars.map((bar, idx) => (
-                  <div key={idx} className="flex-1 flex flex-col justify-end gap-3 h-full group/bar">
+                  <div
+                    key={idx}
+                    className="flex-1 flex flex-col justify-end gap-3 h-full group/bar"
+                  >
                     <div className="flex flex-col justify-end h-full rounded-[1rem] overflow-hidden border border-black/5 dark:border-white/5 bg-black/5 shadow-inner">
                       {bar.map((segment, segIdx) => {
                         const channel = channelMetrics[segIdx];
@@ -652,7 +665,13 @@ export const AdsViewV2: React.FC = () => {
                             }
                             onBlur={() => setHoveredSegment(null)}
                             onKeyDown={(e) =>
-                              handleSegmentKeyDown(e, channel.id, channel.label, segment.value, segment.pct)
+                              handleSegmentKeyDown(
+                                e,
+                                channel.id,
+                                channel.label,
+                                segment.value,
+                                segment.pct
+                              )
                             }
                             onMouseEnter={() =>
                               setHoveredSegment({
@@ -667,8 +686,8 @@ export const AdsViewV2: React.FC = () => {
                               isSelected
                                 ? 'opacity-100 scale-x-105'
                                 : isDimmed
-                                ? 'opacity-20 grayscale'
-                                : 'opacity-85 hover:opacity-100'
+                                  ? 'opacity-20 grayscale'
+                                  : 'opacity-85 hover:opacity-100'
                             }`}
                             style={{ height: `${segment.pct}%` }}
                             aria-label={`${channel.label}: ${formatCurrency(segment.value)} (${formatPercent(segment.pct)})`}
@@ -685,8 +704,8 @@ export const AdsViewV2: React.FC = () => {
                       {timeRange === '1d'
                         ? `${idx * 2}:00`
                         : timeRange === '7d'
-                        ? `D${idx + 1}`
-                        : `P${idx + 1}`}
+                          ? `D${idx + 1}`
+                          : `P${idx + 1}`}
                     </div>
                   </div>
                 ))}
@@ -701,7 +720,7 @@ export const AdsViewV2: React.FC = () => {
                         colorRamp[
                           Math.max(
                             0,
-                            channelMetrics.findIndex((c) => c.id === hoveredSegment.id),
+                            channelMetrics.findIndex((c) => c.id === hoveredSegment.id)
                           ) % colorRamp.length
                         ]
                       }`}
@@ -732,11 +751,15 @@ export const AdsViewV2: React.FC = () => {
                   type="button"
                   onClick={() => handleChannelSelect(c.id, c.label)}
                   className={`flex items-center gap-2.5 group transition-all ${
-                    effectiveChannelId === c.id ? 'scale-110 opacity-100' : 'opacity-60 hover:opacity-100'
+                    effectiveChannelId === c.id
+                      ? 'scale-110 opacity-100'
+                      : 'opacity-60 hover:opacity-100'
                   }`}
                   aria-pressed={effectiveChannelId === c.id}
                 >
-                  <div className={`w-3 h-3 rounded-full ${colorRamp[i % colorRamp.length]} shadow-lg`} />
+                  <div
+                    className={`w-3 h-3 rounded-full ${colorRamp[i % colorRamp.length]} shadow-lg`}
+                  />
                   <span className="text-xs font-black uppercase tracking-widest text-gray-600 dark:text-gray-300">
                     {c.label}
                   </span>
@@ -758,7 +781,9 @@ export const AdsViewV2: React.FC = () => {
                 disabled={isDemo}
                 title={isDemo ? demoTooltip : undefined}
                 className={`text-xs font-black uppercase tracking-widest ${
-                  isDemo ? 'text-gray-400' : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                  isDemo
+                    ? 'text-gray-400'
+                    : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
                 }`}
               >
                 {t.dashboard.context_menu.set_alert}
@@ -815,7 +840,9 @@ export const AdsViewV2: React.FC = () => {
                   disabled={isDemo}
                   title={isDemo ? demoTooltip : undefined}
                   className={`text-xs font-black uppercase tracking-widest ${
-                    isDemo ? 'text-gray-400' : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                    isDemo
+                      ? 'text-gray-400'
+                      : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
                   }`}
                 >
                   {t.dashboard.context_menu.set_alert}
@@ -827,7 +854,9 @@ export const AdsViewV2: React.FC = () => {
               <div
                 key={row.id}
                 onClick={() => handleChannelSelect(row.id, row.label)}
-                onContextMenu={(e) => openMenu(e, buildMenuItems(row.label, '/dashboard/ads'), row.label)}
+                onContextMenu={(e) =>
+                  openMenu(e, buildMenuItems(row.label, '/dashboard/ads'), row.label)
+                }
                 className={`group p-6 rounded-[2rem] border transition-all duration-500 cursor-pointer overflow-hidden relative ${
                   effectiveChannelId === row.id
                     ? 'bg-brand-start border-brand-start shadow-2xl shadow-brand-start/20 translate-x-2'
@@ -850,7 +879,8 @@ export const AdsViewV2: React.FC = () => {
                         effectiveChannelId === row.id ? 'text-white/60' : 'text-gray-500'
                       }`}
                     >
-                      {dashboardAny.status_label ?? 'Status'}: {dashboardAny.status_optimal ?? 'Optimal'}
+                      {dashboardAny.status_label ?? 'Status'}:{' '}
+                      {dashboardAny.status_optimal ?? 'Optimal'}
                     </span>
                   </div>
 
@@ -869,7 +899,10 @@ export const AdsViewV2: React.FC = () => {
                 </div>
 
                 <div className="relative z-10 mt-6">
-                  <Sparkline values={row.trend} color={effectiveChannelId === row.id ? 'bg-white' : 'bg-brand-start'} />
+                  <Sparkline
+                    values={row.trend}
+                    color={effectiveChannelId === row.id ? 'bg-white' : 'bg-brand-start'}
+                  />
                 </div>
               </div>
             ))}
@@ -886,7 +919,9 @@ export const AdsViewV2: React.FC = () => {
                 <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
                   {adsMatrixTitle}
                 </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">{t.dashboard.ads_v2.desc}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                  {t.dashboard.ads_v2.desc}
+                </p>
               </div>
               <button
                 type="button"
@@ -911,7 +946,9 @@ export const AdsViewV2: React.FC = () => {
                   <div
                     key={row.id}
                     onClick={() => handleChannelSelect(row.id, row.label)}
-                    onContextMenu={(e) => openMenu(e, buildMenuItems(row.label, '/dashboard/ads'), row.label)}
+                    onContextMenu={(e) =>
+                      openMenu(e, buildMenuItems(row.label, '/dashboard/ads'), row.label)
+                    }
                     className={`grid grid-cols-6 gap-2 px-4 py-3 text-xs-plus font-black uppercase tracking-widest cursor-pointer transition-colors ${
                       effectiveChannelId === row.id
                         ? 'bg-brand-start/10 text-brand-start'
@@ -922,7 +959,9 @@ export const AdsViewV2: React.FC = () => {
                     <span className="text-right tabular-nums">{formatCurrency(row.spend)}</span>
                     <span className="text-right tabular-nums">{formatCurrency(row.revenue)}</span>
                     <span className="text-right tabular-nums">{formatRoas(row.roas)}</span>
-                    <span className="text-right tabular-nums">{formatRoas(row.revenue / Math.max(row.spend, 1))}</span>
+                    <span className="text-right tabular-nums">
+                      {formatRoas(row.revenue / Math.max(row.spend, 1))}
+                    </span>
                     <span className="text-right tabular-nums">{formatCurrency(row.cpa)}</span>
                   </div>
                 ))}
@@ -943,7 +982,9 @@ export const AdsViewV2: React.FC = () => {
                 disabled={isDemo}
                 title={isDemo ? demoTooltip : undefined}
                 className={`text-xs font-black uppercase tracking-widest ${
-                  isDemo ? 'text-gray-400' : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                  isDemo
+                    ? 'text-gray-400'
+                    : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
                 }`}
               >
                 {t.dashboard.context_menu.set_alert}
@@ -958,7 +999,9 @@ export const AdsViewV2: React.FC = () => {
                 <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
                   {drilldownTitle}
                 </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">{drilldownDesc}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                  {drilldownDesc}
+                </p>
               </div>
               <div className="flex items-center gap-2 p-1.5 bg-black/5 dark:bg-white/5 rounded-2xl border border-black/5 dark:border-white/5">
                 <button
@@ -1015,15 +1058,21 @@ export const AdsViewV2: React.FC = () => {
                   <div
                     key={row.id}
                     onClick={() => handleExplain(row.name)}
-                    onContextMenu={(e) => openMenu(e, buildMenuItems(row.name, '/dashboard/ads'), row.name)}
+                    onContextMenu={(e) =>
+                      openMenu(e, buildMenuItems(row.name, '/dashboard/ads'), row.name)
+                    }
                     className="grid grid-cols-7 gap-2 px-4 py-3 text-xs-plus font-black uppercase tracking-widest text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white cursor-pointer"
                   >
                     <span>{shortLabelFromName(row.channel)}</span>
                     <span className="truncate">{row.name}</span>
-                    <span className="lorem text-right tabular-nums">{formatCurrency(row.spend)}</span>
+                    <span className="lorem text-right tabular-nums">
+                      {formatCurrency(row.spend)}
+                    </span>
                     <span className="text-right tabular-nums">{formatCurrency(row.revenue)}</span>
                     <span className="text-right tabular-nums">{formatRoas(row.roas)}</span>
-                    <span className="text-right tabular-nums">{formatRoas(row.revenue / Math.max(row.spend, 1))}</span>
+                    <span className="text-right tabular-nums">
+                      {formatRoas(row.revenue / Math.max(row.spend, 1))}
+                    </span>
                     <span className="text-right tabular-nums">{formatCurrency(row.cpa)}</span>
                   </div>
                 ))}
@@ -1044,7 +1093,9 @@ export const AdsViewV2: React.FC = () => {
                 disabled={isDemo}
                 title={isDemo ? demoTooltip : undefined}
                 className={`text-xs font-black uppercase tracking-widest ${
-                  isDemo ? 'text-gray-400' : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                  isDemo
+                    ? 'text-gray-400'
+                    : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
                 }`}
               >
                 {t.dashboard.context_menu.set_alert}
@@ -1086,7 +1137,7 @@ export const AdsViewV2: React.FC = () => {
                       <div className="absolute inset-3 rounded-full bg-white dark:bg-[#0b0b0f] flex items-center justify-center shadow-inner">
                         <span className="text-lg font-black text-gray-900 dark:text-white tracking-tighter">
                           {Math.round(
-                            shareData[0]?.[item.id === 'spend' ? 'spendShare' : 'revenueShare'] || 0,
+                            shareData[0]?.[item.id === 'spend' ? 'spendShare' : 'revenueShare'] || 0
                           )}
                           %
                         </span>
@@ -1101,7 +1152,9 @@ export const AdsViewV2: React.FC = () => {
                           onClick={() => handleChannelSelect(row.id, row.label)}
                         >
                           <div className="flex items-center gap-2">
-                            <div className={`w-2 h-2 rounded-full ${colorRamp[idx % colorRamp.length]}`} />
+                            <div
+                              className={`w-2 h-2 rounded-full ${colorRamp[idx % colorRamp.length]}`}
+                            />
                             <span className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-widest group-hover/row:text-brand-start transition-colors">
                               {row.label}
                             </span>
@@ -1128,7 +1181,9 @@ export const AdsViewV2: React.FC = () => {
                       disabled={isDemo}
                       title={isDemo ? demoTooltip : undefined}
                       className={`text-xs font-black uppercase tracking-widest ${
-                        isDemo ? 'text-gray-400' : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                        isDemo
+                          ? 'text-gray-400'
+                          : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
                       }`}
                     >
                       {t.dashboard.context_menu.set_alert}
@@ -1163,7 +1218,9 @@ export const AdsViewV2: React.FC = () => {
                       handleExplain(item.name);
                     }
                   }}
-                  onContextMenu={(e) => openMenu(e, buildMenuItems(item.name, '/dashboard/ads'), item.name)}
+                  onContextMenu={(e) =>
+                    openMenu(e, buildMenuItems(item.name, '/dashboard/ads'), item.name)
+                  }
                   className="p-6 rounded-[2rem] bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 hover:border-brand-start/30 transition-all group/creative cursor-pointer"
                 >
                   <div className="flex items-start justify-between mb-6">
@@ -1203,19 +1260,25 @@ export const AdsViewV2: React.FC = () => {
 
                   <div className="grid grid-cols-3 gap-4 pt-6 border-t border-black/5 dark:border-white/5">
                     <div>
-                      <div className="text-3xs font-black text-gray-400 uppercase tracking-widest">CTR</div>
+                      <div className="text-3xs font-black text-gray-400 uppercase tracking-widest">
+                        CTR
+                      </div>
                       <div className="text-xs font-black text-gray-900 dark:text-white">
                         {formatPercent(item.ctr)}
                       </div>
                     </div>
                     <div>
-                      <div className="text-3xs font-black text-gray-400 uppercase tracking-widest">CVR</div>
+                      <div className="text-3xs font-black text-gray-400 uppercase tracking-widest">
+                        CVR
+                      </div>
                       <div className="text-xs font-black text-gray-900 dark:text-white">
                         {formatPercent(item.cvr)}
                       </div>
                     </div>
                     <div>
-                      <div className="text-3xs font-black text-gray-400 uppercase tracking-widest">CPA</div>
+                      <div className="text-3xs font-black text-gray-400 uppercase tracking-widest">
+                        CPA
+                      </div>
                       <div className="text-xs font-black text-gray-900 dark:text-white">
                         {formatCurrency(item.cpa)}
                       </div>
@@ -1239,7 +1302,9 @@ export const AdsViewV2: React.FC = () => {
                 disabled={isDemo}
                 title={isDemo ? demoTooltip : undefined}
                 className={`text-xs font-black uppercase tracking-widest ${
-                  isDemo ? 'text-gray-400' : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                  isDemo
+                    ? 'text-gray-400'
+                    : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
                 }`}
               >
                 {creativesActions?.alert ?? t.dashboard.context_menu.set_alert}
@@ -1250,7 +1315,9 @@ export const AdsViewV2: React.FC = () => {
                 disabled={isDemo}
                 title={isDemo ? demoTooltip : undefined}
                 className={`text-xs font-black uppercase tracking-widest ${
-                  isDemo ? 'text-gray-400' : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                  isDemo
+                    ? 'text-gray-400'
+                    : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
                 }`}
               >
                 {creativesActions?.report ?? t.dashboard.context_menu.add_report}

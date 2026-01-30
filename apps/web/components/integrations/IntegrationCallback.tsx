@@ -46,7 +46,10 @@ export const IntegrationCallback: React.FC = () => {
       setStatus('auth');
       setMessage('Zaloguj się, aby dokończyć łączenie integracji.');
       try {
-        window.localStorage.setItem('pd_post_login_redirect', `${location.pathname}${location.search}`);
+        window.localStorage.setItem(
+          'pd_post_login_redirect',
+          `${location.pathname}${location.search}`
+        );
       } catch {
         // ignore
       }
@@ -87,7 +90,18 @@ export const IntegrationCallback: React.FC = () => {
     return () => {
       if (timer) window.clearTimeout(timer);
     };
-  }, [code, errorParam, isAuthenticated, location.pathname, location.search, navigate, openModal, provider, refresh, state]);
+  }, [
+    code,
+    errorParam,
+    isAuthenticated,
+    location.pathname,
+    location.search,
+    navigate,
+    openModal,
+    provider,
+    refresh,
+    state,
+  ]);
 
   const badge = useMemo(() => {
     if (status === 'success') return { label: 'CONNECTED', color: 'emerald' } as const;
@@ -121,7 +135,9 @@ export const IntegrationCallback: React.FC = () => {
     <main className="min-h-screen flex items-center justify-center bg-white dark:bg-[#050507] text-gray-900 dark:text-gray-100 px-6">
       <div className="max-w-xl w-full rounded-[2.5rem] border border-white/10 bg-white/90 dark:bg-[#0a0a0c] p-10 shadow-2xl">
         <div className="flex items-center gap-3 mb-4">
-          <span className={`text-xs font-black uppercase tracking-[0.3em] px-3 py-1 rounded-full border ${badgeClass}`}>
+          <span
+            className={`text-xs font-black uppercase tracking-[0.3em] px-3 py-1 rounded-full border ${badgeClass}`}
+          >
             {badge.label}
           </span>
         </div>

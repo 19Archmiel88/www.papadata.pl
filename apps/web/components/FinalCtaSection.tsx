@@ -101,7 +101,7 @@ export const FinalCtaSection: React.FC<FinalCtaSectionProps> = memo(
         </div>
       </section>
     );
-  },
+  }
 );
 
 FinalCtaSection.displayName = 'FinalCtaSection';

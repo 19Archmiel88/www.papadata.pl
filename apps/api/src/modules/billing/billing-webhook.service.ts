@@ -1,50 +1,43 @@
-import { Injectable, ServiceUnavailableException } from "@nestjs/common";
-import Stripe from "stripe";
-import type { BillingStatus, PlanId } from "@papadata/shared";
-import { getApiConfig } from "../../common/config";
-import { BillingRepository } from "../../common/billing.repository";
-import { getLogger } from "../../common/logger";
-import { TimeProvider } from "../../common/time.provider";
+import { Injectable, ServiceUnavailableException } from '@nestjs/common';
+import Stripe from 'stripe';
+import type { BillingStatus, PlanId } from '@papadata/shared';
+import { getApiConfig } from '../../common/config';
+import { BillingRepository } from '../../common/billing.repository';
+import { getLogger } from '../../common/logger';
+import { TimeProvider } from '../../common/time.provider';
 
 const createStripeClient = () => {
   const apiKey = getApiConfig().stripe.secretKey;
   if (!apiKey) return null;
-  return new Stripe(apiKey, { apiVersion: "2023-10-16" });
+  return new Stripe(apiKey, { apiVersion: '2023-10-16' });
 };
 
 const mapStatus = (
   status: Stripe.Subscription.Status,
   trialEndsAt: string | undefined,
-  nowMs: number,
+  nowMs: number
 ): BillingStatus => {
-  if (status === "active") return "active";
-  if (status === "trialing") {
+  if (status === 'active') return 'active';
+  if (status === 'trialing') {
     if (trialEndsAt && nowMs > Date.parse(trialEndsAt)) {
-      return "trial_expired";
+      return 'trial_expired';
     }
-    return "trialing";
+    return 'trialing';
   }
-  if (status === "past_due" || status === "unpaid") return "past_due";
-  if (status === "canceled") return "canceled";
-  if (
-    status === "incomplete" ||
-    status === "incomplete_expired" ||
-    status === "paused"
-  ) {
-    return "past_due";
+  if (status === 'past_due' || status === 'unpaid') return 'past_due';
+  if (status === 'canceled') return 'canceled';
+  if (status === 'incomplete' || status === 'incomplete_expired' || status === 'paused') {
+    return 'past_due';
   }
-  return "canceled";
+  return 'canceled';
 };
 
 const mapPlanFromPriceIds = (priceIds: string[]): PlanId => {
-  const { priceStarter, priceProfessional, priceEnterprise } =
-    getApiConfig().stripe;
-  if (priceStarter && priceIds.includes(priceStarter)) return "starter";
-  if (priceEnterprise && priceIds.includes(priceEnterprise))
-    return "enterprise";
-  if (priceProfessional && priceIds.includes(priceProfessional))
-    return "professional";
-  return "starter";
+  const { priceStarter, priceProfessional, priceEnterprise } = getApiConfig().stripe;
+  if (priceStarter && priceIds.includes(priceStarter)) return 'starter';
+  if (priceEnterprise && priceIds.includes(priceEnterprise)) return 'enterprise';
+  if (priceProfessional && priceIds.includes(priceProfessional)) return 'professional';
+  return 'starter';
 };
 
 @Injectable()
@@ -54,57 +47,42 @@ export class BillingWebhookService {
 
   constructor(
     private readonly billingRepository: BillingRepository,
-    private readonly timeProvider: TimeProvider,
+    private readonly timeProvider: TimeProvider
   ) {}
 
-  async handleWebhook(
-    rawBody: string,
-    signature: string | undefined,
-  ): Promise<void> {
-    const secret = (
-      getApiConfig().stripe as { webhookSecret?: string | undefined }
-    ).webhookSecret;
+  async handleWebhook(rawBody: string, signature: string | undefined): Promise<void> {
+    const secret = (getApiConfig().stripe as { webhookSecret?: string | undefined }).webhookSecret;
     if (!this.stripe || !secret) {
-      this.logger.warn("Stripe not configured; webhook rejected.");
-      throw new ServiceUnavailableException("Stripe webhook unavailable");
+      this.logger.warn('Stripe not configured; webhook rejected.');
+      throw new ServiceUnavailableException('Stripe webhook unavailable');
     }
     if (!signature) {
-      throw new Error("Missing Stripe signature");
+      throw new Error('Missing Stripe signature');
     }
-    const event = this.stripe.webhooks.constructEvent(
-      rawBody,
-      signature,
-      secret,
-    );
+    const event = this.stripe.webhooks.constructEvent(rawBody, signature, secret);
     const existing = await this.billingRepository.getWebhookEvent(event.id);
-    if (existing?.status === "processed") {
+    if (existing?.status === 'processed') {
       this.logger.info(
         { eventId: event.id, eventType: event.type },
-        "Stripe webhook already processed",
+        'Stripe webhook already processed'
       );
       return;
     }
 
-    await this.trackWebhook(event.id, event.type, "received");
+    await this.trackWebhook(event.id, event.type, 'received');
     try {
       await this.handleStripeEvent(event);
-      await this.trackWebhook(event.id, event.type, "processed", 1);
+      await this.trackWebhook(event.id, event.type, 'processed', 1);
       await this.billingRepository.insertAuditEvent({
-        tenantId: "system",
-        action: "stripe.webhook.processed",
+        tenantId: 'system',
+        action: 'stripe.webhook.processed',
         details: { eventId: event.id, eventType: event.type },
       });
     } catch (error: any) {
-      await this.trackWebhook(
-        event.id,
-        event.type,
-        "failed",
-        1,
-        error?.message,
-      );
+      await this.trackWebhook(event.id, event.type, 'failed', 1, error?.message);
       await this.billingRepository.insertAuditEvent({
-        tenantId: "system",
-        action: "stripe.webhook.failed",
+        tenantId: 'system',
+        action: 'stripe.webhook.failed',
         details: {
           eventId: event.id,
           eventType: event.type,
@@ -117,13 +95,13 @@ export class BillingWebhookService {
 
   async handleStripeEvent(event: Stripe.Event): Promise<void> {
     switch (event.type) {
-      case "customer.subscription.created":
-      case "customer.subscription.updated":
-      case "customer.subscription.deleted":
+      case 'customer.subscription.created':
+      case 'customer.subscription.updated':
+      case 'customer.subscription.deleted':
         await this.handleSubscription(event.data.object as Stripe.Subscription);
         break;
-      case "invoice.paid":
-      case "invoice.payment_failed":
+      case 'invoice.paid':
+      case 'invoice.payment_failed':
         await this.handleInvoice(event.data.object as Stripe.Invoice);
         break;
       default:
@@ -134,9 +112,9 @@ export class BillingWebhookService {
   private async trackWebhook(
     eventId: string,
     eventType: string,
-    status: "received" | "processed" | "failed",
+    status: 'received' | 'processed' | 'failed',
     attempts = 0,
-    lastError?: string,
+    lastError?: string
   ): Promise<void> {
     await this.billingRepository.upsertWebhookEvent({
       eventId,
@@ -147,9 +125,7 @@ export class BillingWebhookService {
     });
   }
 
-  private async resolveTenantIdFromCustomer(
-    customerId: string,
-  ): Promise<string | null> {
+  private async resolveTenantIdFromCustomer(customerId: string): Promise<string | null> {
     if (!this.stripe) return null;
     try {
       const customer = await this.stripe.customers.retrieve(customerId);
@@ -166,25 +142,16 @@ export class BillingWebhookService {
     return null;
   }
 
-  private async handleSubscription(
-    subscription: Stripe.Subscription,
-  ): Promise<void> {
+  private async handleSubscription(subscription: Stripe.Subscription): Promise<void> {
     const customerId =
-      typeof subscription.customer === "string"
-        ? subscription.customer
-        : subscription.customer?.id;
+      typeof subscription.customer === 'string' ? subscription.customer : subscription.customer?.id;
     if (!customerId) return;
 
     const meta = subscription.metadata || {};
     const tenantId =
-      meta.tenant_id ||
-      meta.tenantId ||
-      (await this.resolveTenantIdFromCustomer(customerId));
+      meta.tenant_id || meta.tenantId || (await this.resolveTenantIdFromCustomer(customerId));
     if (!tenantId) {
-      this.logger.warn(
-        { customerId },
-        "Missing tenantId for subscription webhook",
-      );
+      this.logger.warn({ customerId }, 'Missing tenantId for subscription webhook');
       return;
     }
 
@@ -194,15 +161,15 @@ export class BillingWebhookService {
     const billingStatus = mapStatus(
       subscription.status,
       trialEndsAt ?? undefined,
-      this.timeProvider.nowMs(),
+      this.timeProvider.nowMs()
     );
 
     const priceIds = subscription.items.data
       .map((item) => item.price?.id)
       .filter(Boolean) as string[];
     let plan = mapPlanFromPriceIds(priceIds);
-    if (billingStatus === "trialing") {
-      plan = "professional";
+    if (billingStatus === 'trialing') {
+      plan = 'professional';
     }
 
     await this.billingRepository.upsertTenantBilling({
@@ -220,14 +187,12 @@ export class BillingWebhookService {
 
   private async handleInvoice(invoice: Stripe.Invoice): Promise<void> {
     const customerId =
-      typeof invoice.customer === "string"
-        ? invoice.customer
-        : invoice.customer?.id;
+      typeof invoice.customer === 'string' ? invoice.customer : invoice.customer?.id;
     if (!customerId) return;
 
     const tenantId = await this.resolveTenantIdFromCustomer(customerId);
     if (!tenantId) {
-      this.logger.warn({ customerId }, "Missing tenantId for invoice webhook");
+      this.logger.warn({ customerId }, 'Missing tenantId for invoice webhook');
       return;
     }
 
@@ -235,14 +200,12 @@ export class BillingWebhookService {
       .map((line) => line.price?.id)
       .filter(Boolean) as string[];
     const plan = mapPlanFromPriceIds(priceIds);
-    const status: BillingStatus = invoice.paid ? "active" : "past_due";
+    const status: BillingStatus = invoice.paid ? 'active' : 'past_due';
     await this.billingRepository.upsertTenantBilling({
       tenantId,
       stripeCustomerId: customerId,
       stripeSubscriptionId:
-        typeof invoice.subscription === "string"
-          ? invoice.subscription
-          : invoice.subscription?.id,
+        typeof invoice.subscription === 'string' ? invoice.subscription : invoice.subscription?.id,
       plan,
       billingStatus: status,
       trialEndsAt: null,

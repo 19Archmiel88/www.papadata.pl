@@ -65,34 +65,40 @@
    - Omnibus: jeśli promocje -> najniższa cena z 30 dni
 
 10. **FAQ**
-   - Akordeon
+
+- Akordeon
 
 11. **Final CTA**
-   - Karta gradientowa z podwójnym CTA
+
+- Karta gradientowa z podwójnym CTA
 
 12. **Footer**
-   - Brand/short description + social
-   - Kolumny: Product / Resources / Company
-   - Status systemu
-   - Linki prawne
-   - Modale treści (opcjonalne w demo)
-   - Deklaracja dostępności
+
+- Brand/short description + social
+- Kolumny: Product / Resources / Company
+- Status systemu
+- Linki prawne
+- Modale treści (opcjonalne w demo)
+- Deklaracja dostępności
 
 ## Dashboard (demo)
 
 ### Wejście
+
 - Z landing: przycisk “See Demo” / “Start Trial” prowadzi do dashboard (w demo: bez auth)
 
 ### Layout
+
 - Sidebar + Topbar
 - Topbar:
-   - badge “Demo mode”
-   - zakres dat: preset `1d/7d/30d/90d/mtd/qtd/ytd` + custom
-   - przycisk AI Assistant
-   - powiadomienia: ikona widoczna, w DEMO bez realnych alertów
-   - avatar/menu: “Guest” w DEMO, role i konto w PROD
+  - badge “Demo mode”
+  - zakres dat: preset `1d/7d/30d/90d/mtd/qtd/ytd` + custom
+  - przycisk AI Assistant
+  - powiadomienia: ikona widoczna, w DEMO bez realnych alertów
+  - avatar/menu: “Guest” w DEMO, role i konto w PROD
 
 ### Widoki
+
 - **Overview**: KPI + area/pie
 - **Analytics**: insight AI + bar/line
 - **Reports**: karty pobrania / download
@@ -103,11 +109,13 @@
 - **AI Assistant Drawer**: kontekstowy chat
 
 ### Walidacje/mocki
+
 - Dane: `generateData` / `MOCK_*` (tablice statyczne + losowe generowanie)
 - Formularze: HTML `required`, sukces symuluje timeout
 - AI: createChatSession; bez klucza API brak odpowiedzi i czytelny komunikat
 
 ### Braki do uzupełnienia w implementacji
+
 - puste stany (empty)
 - error states
 - offline states

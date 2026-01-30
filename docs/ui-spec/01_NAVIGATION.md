@@ -1,12 +1,14 @@
 # Navigation
 
 ## Routes (React Router + HashRouter)
+
 Źródła: [apps/web/App.tsx](apps/web/App.tsx), [apps/web/index.tsx](apps/web/index.tsx)
 
 Uwaga: routing działa przez `HashRouter`, więc URL-e mają postać `/#/route`
 (np. `/#/dashboard/overview`). `ensureHashRouterPath` przekierowuje `/foo` -> `/#/foo`.
 
 ### Landing
+
 - / → LandingPage
 - /features → LandingPage (scroll do #features)
 - /pricing → LandingPage (scroll do #pricing)
@@ -15,6 +17,7 @@ Uwaga: routing działa przez `HashRouter`, więc URL-e mają postać `/#/route`
 - /security → LandingPage (scroll do #security)
 
 ### Legal
+
 - /legal/terms → LegalDocPage (terms-of-service.md)
 - /legal/privacy → LegalDocPage (privacy-policy.md)
 - /legal/cookies → LegalDocPage (cookies-policy.md)
@@ -24,18 +27,22 @@ Uwaga: routing działa przez `HashRouter`, więc URL-e mają postać `/#/route`
 - /legal/accessibility → LegalDocPage (accessibility-statement.md)
 
 ### Billing callbacks
+
 - /billing/success → CheckoutSuccess
 - /billing/cancel → CheckoutCancel
 
 ### App alias
+
 - /app → redirect do /dashboard/overview
 - /app/:view → redirect do /dashboard/:view
 - /app/integrations/callback/:provider → IntegrationCallback
 
 ### Health
+
 - /health → JSON health response
 
 ### Dashboard (nested under /dashboard)
+
 - /dashboard → redirect do /dashboard/overview
 - /dashboard/overview
 - /dashboard/ads
@@ -54,9 +61,11 @@ Uwaga: routing działa przez `HashRouter`, więc URL-e mają postać `/#/route`
 - /dashboard/settings/org
 
 ### Fallback
-- * → redirect do /
+
+- - → redirect do /
 
 ## In-page anchors
+
 Źródło: [apps/web/MainLayout.tsx](apps/web/MainLayout.tsx), [apps/web/LandingPage.tsx](apps/web/LandingPage.tsx)
 
 - #features
@@ -67,15 +76,18 @@ Uwaga: routing działa przez `HashRouter`, więc URL-e mają postać `/#/route`
 - #roi
 
 ## Primary navigation actions
+
 - Header nav i footer links → scroll do sekcji lub route’y legal.
 - CTA „DEMO” (header) → /dashboard?mode=demo (parametr używany w telemetry, nie przełącza UI)
 - CTA „Zaloguj” → modal auth (login)
 
 Reguły query params:
+
 - `mode` używany tylko w telemetry (useApi); UI tryb DEMO zależy od `/api/health`.
 - `plan` nie jest obsługiwany przez UI.
 
 ## Redirect rules
+
 - /dashboard → /dashboard/overview
 - /dashboard/settings → /dashboard/settings/workspace
 - /app → /dashboard/overview
@@ -83,4 +95,5 @@ Reguły query params:
 - unknown route → /
 
 Nawigacja z footeru:
+
 - `cookie_settings` → event `open-cookie-settings`.

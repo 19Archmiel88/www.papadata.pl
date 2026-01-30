@@ -10,7 +10,12 @@ test.beforeEach(async ({ page }) => {
 test('VideoModal renders', async ({ mount }) => {
   const component = await mountWithProviders(
     mount,
-    <VideoModal t={t} onClose={() => {}} isOpen src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ" />,
+    <VideoModal
+      t={t}
+      onClose={() => {}}
+      isOpen
+      src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ"
+    />
   );
   await expect(component).toBeVisible();
 });

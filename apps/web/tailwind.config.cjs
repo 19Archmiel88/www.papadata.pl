@@ -2,12 +2,7 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: 'class',
-  content: [
-    './index.html',
-    './**/*.{ts,tsx}',
-    '!./node_modules/**',
-    '!./dist/**',
-  ],
+  content: ['./index.html', './**/*.{ts,tsx}', '!./node_modules/**', '!./dist/**'],
   theme: {
     screens: {
       xs: '360px',
@@ -62,10 +57,8 @@ module.exports = {
         },
       },
       backgroundImage: {
-        'brand-gradient':
-          'linear-gradient(135deg, #4F46E5 0%, #0EA5E9 100%)',
-        'neon-halo':
-          'radial-gradient(circle at top, rgba(34,211,238,0.35), transparent 60%)',
+        'brand-gradient': 'linear-gradient(135deg, #4F46E5 0%, #0EA5E9 100%)',
+        'neon-halo': 'radial-gradient(circle at top, rgba(34,211,238,0.35), transparent 60%)',
       },
       animation: {
         aurora: 'aurora 30s ease infinite alternate',

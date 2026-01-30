@@ -327,4 +327,3 @@ export const fetchSettingsWorkspace = () =>
 export const fetchSettingsOrg = () => apiGet<SettingsOrgResponse>('/settings/org');
 
 export const fetchIntegrations = () => apiGet<IntegrationSummary[]>('/integrations');
-

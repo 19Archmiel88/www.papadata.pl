@@ -19,7 +19,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           type={type}
           className={cn(
             'flex h-11 w-full rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-black/40 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-start/50 shadow-inner',
-            className,
+            className
           )}
           ref={ref}
           {...props}
@@ -31,6 +31,6 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         ) : null}
       </label>
     );
-  },
+  }
 );
 Input.displayName = 'Input';

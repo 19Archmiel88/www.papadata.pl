@@ -17,7 +17,7 @@ export default defineConfig(({ mode }) => {
     require.resolve('@sentry/browser', { paths: [__dirname] });
   } catch {
     sentryAlias = {
-      '@sentry/browser': path.resolve(__dirname, './utils/sentry.stub.ts')
+      '@sentry/browser': path.resolve(__dirname, './utils/sentry.stub.ts'),
     };
   }
 
@@ -31,9 +31,9 @@ export default defineConfig(({ mode }) => {
         '/api': {
           target: apiTarget,
           changeOrigin: true,
-          secure: false
-        }
-      }
+          secure: false,
+        },
+      },
     },
     plugins: [react()],
     resolve: {
@@ -41,14 +41,14 @@ export default defineConfig(({ mode }) => {
       alias: {
         '@': path.resolve(__dirname, '.'),
         '@papadata/shared': path.resolve(__dirname, '../../libs/shared/src/index.ts'),
-        ...sentryAlias
-      }
+        ...sentryAlias,
+      },
     },
     test: {
       environment: 'jsdom',
       globals: true,
       include: ['tests/unit/**/*.test.ts'],
-      exclude: ['tests/e2e/**']
-    }
+      exclude: ['tests/e2e/**'],
+    },
   };
 });

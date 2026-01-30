@@ -1,4 +1,4 @@
-import { getApiConfig } from "./config";
+import { getApiConfig } from './config';
 
 export const getObservabilityConfig = () => {
   const { observability } = getApiConfig();

@@ -1,5 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { lookupCompanyByNip, type CompanyLookupResponse, type CompanyLookupError } from '../data/company';
+import {
+  lookupCompanyByNip,
+  type CompanyLookupResponse,
+  type CompanyLookupError,
+} from '../data/company';
 import { ApiRequestError } from '../data/api';
 import { normalizeApiError } from './useApiError';
 

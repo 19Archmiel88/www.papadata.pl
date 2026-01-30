@@ -1,7 +1,14 @@
 import React from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from './ui/dialog';
 import { Input } from './ui/input';
 
 export const ShadcnShowcase: React.FC = () => {
@@ -15,10 +22,18 @@ export const ShadcnShowcase: React.FC = () => {
   };
 
   return (
-    <Card title="UI Kit — shadcn/ui" action={<span className="text-2xs font-black uppercase tracking-[0.22em] text-gray-400">Starter set</span>}>
+    <Card
+      title="UI Kit — shadcn/ui"
+      action={
+        <span className="text-2xs font-black uppercase tracking-[0.22em] text-gray-400">
+          Starter set
+        </span>
+      }
+    >
       <CardContent>
         <p className="text-sm text-gray-600 dark:text-gray-300">
-          Korzystamy z shadcn/ui jako standardu komponentów. Poniżej mini-stub: pole, przycisk i dialog zgodnie z nową biblioteką.
+          Korzystamy z shadcn/ui jako standardu komponentów. Poniżej mini-stub: pole, przycisk i
+          dialog zgodnie z nową biblioteką.
         </p>
         <form className="flex flex-col md:flex-row gap-3" onSubmit={handleSubmit}>
           <Input
@@ -44,7 +59,8 @@ export const ShadcnShowcase: React.FC = () => {
                 <DialogHeader>
                   <DialogTitle>Standard UI</DialogTitle>
                   <DialogDescription>
-                    Button/Input/Dialog/Card pochodzą z shadcn/ui i są trzymane w <code>apps/web/components/ui</code> jako standard projektowy.
+                    Button/Input/Dialog/Card pochodzą z shadcn/ui i są trzymane w{' '}
+                    <code>apps/web/components/ui</code> jako standard projektowy.
                   </DialogDescription>
                 </DialogHeader>
               </DialogContent>

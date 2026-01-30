@@ -2,12 +2,7 @@ import React, { useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate, useOutletContext } from 'react-router-dom';
 import { DashboardOutletContext } from './DashboardContext';
 import { InteractiveButton } from '../InteractiveButton';
-import {
-  ContextMenu,
-  LazySection,
-  TrendChartCard,
-  WidgetEmptyState,
-} from './DashboardPrimitives';
+import { ContextMenu, LazySection, TrendChartCard, WidgetEmptyState } from './DashboardPrimitives';
 import { clamp } from './DashboardPrimitives.constants';
 import { useContextMenu } from './DashboardPrimitives.hooks';
 import {
@@ -80,9 +75,7 @@ const KpiCard: React.FC<{
   <div className="dashboard-surface dashboard-card dashboard-card--compact space-y-3 group transition-all hover:border-brand-start/40 overflow-hidden">
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-2">
-        <span className="text-xs font-black text-gray-500 uppercase tracking-widest">
-          {label}
-        </span>
+        <span className="text-xs font-black text-gray-500 uppercase tracking-widest">{label}</span>
 
         {/* Info hint (tooltip via title). Using span to avoid "button with no action". */}
         <span
@@ -155,7 +148,6 @@ export const OverviewViewV2: React.FC = () => {
 
   const demoTooltip = t.dashboard.demo_tooltip;
 
-
   const locale = t.langCode ?? 'pl-PL';
 
   const timeMultiplier = useMemo(
@@ -171,15 +163,15 @@ export const OverviewViewV2: React.FC = () => {
     [timeRange]
   );
 
-  const isStale = useMemo(
-    () => ['90d', 'ytd', 'qtd', 'custom'].includes(timeRange),
-    [timeRange]
-  );
+  const isStale = useMemo(() => ['90d', 'ytd', 'qtd', 'custom'].includes(timeRange), [timeRange]);
 
-  const formatCurrencyValue = useMemo(() => (value: number) => formatCurrency(value, locale), [locale]);
+  const formatCurrencyValue = useMemo(
+    () => (value: number) => formatCurrency(value, locale),
+    [locale]
+  );
   const formatCurrencyCompactValue = useMemo(
     () => (value: number) => formatCompactCurrency(value, locale),
-    [locale],
+    [locale]
   );
   const formatPercentValueLocal = useMemo(
     () => (value: number) => formatPercentValue(value, locale, 1),
@@ -262,7 +254,7 @@ export const OverviewViewV2: React.FC = () => {
         spend: Math.round(spendSeries[index] ?? 0),
         roas: Number((roasSeries[index] ?? 0).toFixed(2)),
       })),
-    [revenueSeries, spendSeries, roasSeries],
+    [revenueSeries, spendSeries, roasSeries]
   );
 
   const totals = useMemo(() => {
@@ -327,7 +319,7 @@ export const OverviewViewV2: React.FC = () => {
       const nA = typeof vA === 'number' ? vA : Number(vA);
       const nB = typeof vB === 'number' ? vB : Number(vB);
 
-      return campSort.dir === 'desc' ? (nB > nA ? 1 : -1) : (nA > nB ? 1 : -1);
+      return campSort.dir === 'desc' ? (nB > nA ? 1 : -1) : nA > nB ? 1 : -1;
     });
   }, [safeCampaignSamples, baseSeed, timeMultiplier, campSort]);
 
@@ -383,7 +375,7 @@ export const OverviewViewV2: React.FC = () => {
       const nA = typeof vA === 'number' ? vA : Number(vA);
       const nB = typeof vB === 'number' ? vB : Number(vB);
 
-      return skuSort.dir === 'desc' ? (nB > nA ? 1 : -1) : (nA > nB ? 1 : -1);
+      return skuSort.dir === 'desc' ? (nB > nA ? 1 : -1) : nA > nB ? 1 : -1;
     });
   }, [safeSkuSamples, baseSeed, timeMultiplier, skuSort]);
 
@@ -516,8 +508,8 @@ export const OverviewViewV2: React.FC = () => {
                       alert.severity === 'critical'
                         ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)] animate-pulse'
                         : alert.severity === 'warning'
-                        ? 'bg-amber-500'
-                        : 'bg-blue-500'
+                          ? 'bg-amber-500'
+                          : 'bg-blue-500'
                     }`}
                   />
                 </div>
@@ -533,7 +525,8 @@ export const OverviewViewV2: React.FC = () => {
                     onClick={() => handleExplain(alert.title)}
                     className="text-2xs font-black uppercase tracking-widest text-brand-start hover:underline"
                   >
-                    {t.dashboard.overview_v2?.alerts?.action_ai ?? t.dashboard.context_menu.explain_ai}
+                    {t.dashboard.overview_v2?.alerts?.action_ai ??
+                      t.dashboard.context_menu.explain_ai}
                   </button>
                   <button
                     type="button"
@@ -558,7 +551,9 @@ export const OverviewViewV2: React.FC = () => {
           isPos={true}
           def={t.dashboard.overview_v2?.kpis?.defs?.revenue ?? ''}
           onExplain={() => handleExplain('Revenue Performance')}
-          explainLabel={t.dashboard.overview_v2?.kpis?.explain_action ?? t.dashboard.context_menu.explain_ai}
+          explainLabel={
+            t.dashboard.overview_v2?.kpis?.explain_action ?? t.dashboard.context_menu.explain_ai
+          }
           isStale={isStale}
           staleLabel={staleLabel}
         />
@@ -569,7 +564,9 @@ export const OverviewViewV2: React.FC = () => {
           isPos={false}
           def={t.dashboard.overview_v2?.kpis?.defs?.spend ?? ''}
           onExplain={() => handleExplain('Spend Performance')}
-          explainLabel={t.dashboard.overview_v2?.kpis?.explain_action ?? t.dashboard.context_menu.explain_ai}
+          explainLabel={
+            t.dashboard.overview_v2?.kpis?.explain_action ?? t.dashboard.context_menu.explain_ai
+          }
           isStale={isStale}
           staleLabel={staleLabel}
         />
@@ -580,7 +577,9 @@ export const OverviewViewV2: React.FC = () => {
           isPos={true}
           def={t.dashboard.overview_v2?.kpis?.defs?.profit ?? ''}
           onExplain={() => handleExplain('Net Profit Trends')}
-          explainLabel={t.dashboard.overview_v2?.kpis?.explain_action ?? t.dashboard.context_menu.explain_ai}
+          explainLabel={
+            t.dashboard.overview_v2?.kpis?.explain_action ?? t.dashboard.context_menu.explain_ai
+          }
           isStale={isStale}
           staleLabel={staleLabel}
         />
@@ -591,7 +590,9 @@ export const OverviewViewV2: React.FC = () => {
           isPos={true}
           def={t.dashboard.overview_v2?.kpis?.defs?.roas ?? ''}
           onExplain={() => handleExplain('ROAS Efficiency')}
-          explainLabel={t.dashboard.overview_v2?.kpis?.explain_action ?? t.dashboard.context_menu.explain_ai}
+          explainLabel={
+            t.dashboard.overview_v2?.kpis?.explain_action ?? t.dashboard.context_menu.explain_ai
+          }
           isStale={isStale}
           staleLabel={staleLabel}
         />
@@ -602,7 +603,9 @@ export const OverviewViewV2: React.FC = () => {
           isPos={true}
           def={t.dashboard.overview_v2?.kpis?.defs?.aov ?? ''}
           onExplain={() => handleExplain('AOV Factors')}
-          explainLabel={t.dashboard.overview_v2?.kpis?.explain_action ?? t.dashboard.context_menu.explain_ai}
+          explainLabel={
+            t.dashboard.overview_v2?.kpis?.explain_action ?? t.dashboard.context_menu.explain_ai
+          }
           isStale={isStale}
           staleLabel={staleLabel}
         />
@@ -613,7 +616,9 @@ export const OverviewViewV2: React.FC = () => {
           isPos={true}
           def={t.dashboard.overview_v2?.kpis?.defs?.new_returning ?? ''}
           onExplain={() => handleExplain('Customer Retention')}
-          explainLabel={t.dashboard.overview_v2?.kpis?.explain_action ?? t.dashboard.context_menu.explain_ai}
+          explainLabel={
+            t.dashboard.overview_v2?.kpis?.explain_action ?? t.dashboard.context_menu.explain_ai
+          }
           isStale={isStale}
           staleLabel={staleLabel}
         />
@@ -624,7 +629,9 @@ export const OverviewViewV2: React.FC = () => {
           isPos={true}
           def={t.dashboard.overview_v2?.kpis?.defs?.ltv_30d ?? ''}
           onExplain={() => handleExplain('LTV Projections')}
-          explainLabel={t.dashboard.overview_v2?.kpis?.explain_action ?? t.dashboard.context_menu.explain_ai}
+          explainLabel={
+            t.dashboard.overview_v2?.kpis?.explain_action ?? t.dashboard.context_menu.explain_ai
+          }
           isStale={isStale}
           staleLabel={staleLabel}
         />
@@ -648,10 +655,7 @@ export const OverviewViewV2: React.FC = () => {
         </div>
         <div className="h-[320px]" data-testid="recharts-trend">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart
-              data={trendData}
-              margin={{ top: 16, right: 12, left: 0, bottom: 8 }}
-            >
+            <LineChart data={trendData} margin={{ top: 16, right: 12, left: 0, bottom: 8 }}>
               <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
               <XAxis dataKey="label" stroke="currentColor" tick={{ fontSize: 11 }} />
               <YAxis stroke="currentColor" tick={{ fontSize: 11 }} />
@@ -883,7 +887,9 @@ export const OverviewViewV2: React.FC = () => {
             <div className="flex items-center gap-3">
               <button
                 type="button"
-                onClick={() => handleExplain(t.dashboard.overview_v2?.tables?.campaigns?.title ?? 'Campaigns')}
+                onClick={() =>
+                  handleExplain(t.dashboard.overview_v2?.tables?.campaigns?.title ?? 'Campaigns')
+                }
                 className="text-2xs font-black uppercase text-brand-start hover:underline"
               >
                 {t.dashboard.context_menu.explain_ai}
@@ -1045,7 +1051,9 @@ export const OverviewViewV2: React.FC = () => {
             <div className="flex items-center gap-3">
               <button
                 type="button"
-                onClick={() => handleExplain(t.dashboard.overview_v2?.tables?.skus?.title ?? 'SKUs')}
+                onClick={() =>
+                  handleExplain(t.dashboard.overview_v2?.tables?.skus?.title ?? 'SKUs')
+                }
                 className="text-2xs font-black uppercase text-brand-start hover:underline"
               >
                 {t.dashboard.context_menu.explain_ai}

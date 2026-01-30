@@ -10,7 +10,13 @@ test.beforeEach(async ({ page }) => {
 test('IntegrationsModal renders', async ({ mount }) => {
   const component = await mountWithProviders(
     mount,
-    <IntegrationsModal t={t} category="all" isOpen onClose={() => {}} onSelectIntegration={() => {}} />,
+    <IntegrationsModal
+      t={t}
+      category="all"
+      isOpen
+      onClose={() => {}}
+      onSelectIntegration={() => {}}
+    />
   );
   await expect(component).toBeVisible();
 });

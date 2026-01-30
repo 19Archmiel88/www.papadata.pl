@@ -8,13 +8,7 @@ import {
 } from './analytics.js';
 import { AppMode } from './common.js';
 
-export type AIFinishReason =
-  | 'stop'
-  | 'safety'
-  | 'error'
-  | 'timeout'
-  | 'rate_limited'
-  | 'cancelled';
+export type AIFinishReason = 'stop' | 'safety' | 'error' | 'timeout' | 'rate_limited' | 'cancelled';
 
 export interface AIContext {
   view: string;

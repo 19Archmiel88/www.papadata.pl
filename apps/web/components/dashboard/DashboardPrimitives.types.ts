@@ -7,19 +7,17 @@ export type ContextMenuItem = {
   disabledReason?: string;
 };
 
-export type ContextMenuState =
-  | {
-      x: number;
-      y: number;
-      anchorRect?: {
-        left: number;
-        right: number;
-        top: number;
-        bottom: number;
-        width: number;
-        height: number;
-      };
-      items: ContextMenuItem[];
-      label: string;
-    }
-  | null;
+export type ContextMenuState = {
+  x: number;
+  y: number;
+  anchorRect?: {
+    left: number;
+    right: number;
+    top: number;
+    bottom: number;
+    width: number;
+    height: number;
+  };
+  items: ContextMenuItem[];
+  label: string;
+} | null;

@@ -38,10 +38,13 @@ const PromoModalComponent: React.FC<PromoModalProps> = ({
 
   const trustMeta = useMemo(
     () => [t.promo_v2.system_label, t.promo_v2.trust_bar].filter(Boolean).join(' · '),
-    [t.promo_v2.system_label, t.promo_v2.trust_bar],
+    [t.promo_v2.system_label, t.promo_v2.trust_bar]
   );
 
-  const headerPill = useMemo(() => t.promo_v2.trust_security_label, [t.promo_v2.trust_security_label]);
+  const headerPill = useMemo(
+    () => t.promo_v2.trust_security_label,
+    [t.promo_v2.trust_security_label]
+  );
 
   const handleStarterSelect = useCallback(() => {
     if (localMode === 'intercept') {
@@ -72,8 +75,19 @@ const PromoModalComponent: React.FC<PromoModalProps> = ({
         aria-label={t.common.close}
         className="absolute top-6 right-6 p-2.5 rounded-2xl bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-all text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-start/60"
       >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2.5}
+            d="M6 18L18 6M6 6l12 12"
+          />
         </svg>
       </button>
 
@@ -111,7 +125,9 @@ const PromoModalComponent: React.FC<PromoModalProps> = ({
               </div>
 
               <div>
-                <h3 className="text-xl font-black text-gray-900 dark:text-white">{mainCopy.pro_card.name}</h3>
+                <h3 className="text-xl font-black text-gray-900 dark:text-white">
+                  {mainCopy.pro_card.name}
+                </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">{mainCopy.pro_card.desc}</p>
               </div>
 
@@ -141,8 +157,12 @@ const PromoModalComponent: React.FC<PromoModalProps> = ({
               </div>
 
               <div>
-                <h3 className="text-xl font-black text-gray-900 dark:text-white">{mainCopy.starter_card.name}</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">{mainCopy.starter_card.desc}</p>
+                <h3 className="text-xl font-black text-gray-900 dark:text-white">
+                  {mainCopy.starter_card.name}
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {mainCopy.starter_card.desc}
+                </p>
               </div>
 
               <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
@@ -165,7 +185,9 @@ const PromoModalComponent: React.FC<PromoModalProps> = ({
           </div>
 
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="text-xs font-medium text-gray-500 dark:text-gray-400">{mainCopy.microcopy}</div>
+            <div className="text-xs font-medium text-gray-500 dark:text-gray-400">
+              {mainCopy.microcopy}
+            </div>
             <InteractiveButton
               variant="secondary"
               onClick={onDemo}
@@ -175,7 +197,9 @@ const PromoModalComponent: React.FC<PromoModalProps> = ({
             </InteractiveButton>
           </div>
 
-          <div className="text-xs uppercase tracking-[0.3em] text-gray-400 text-center">{trustMeta}</div>
+          <div className="text-xs uppercase tracking-[0.3em] text-gray-400 text-center">
+            {trustMeta}
+          </div>
         </div>
       ) : (
         <div className="px-6 sm:px-10 lg:px-12 py-12 space-y-8 text-center">
@@ -183,7 +207,10 @@ const PromoModalComponent: React.FC<PromoModalProps> = ({
             {t.promo_v2.plan_meta.standard_label}
           </div>
 
-          <h2 id={titleId} className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white">
+          <h2
+            id={titleId}
+            className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white"
+          >
             {interceptCopy.title}
           </h2>
 

@@ -10,7 +10,7 @@ test.beforeEach(async ({ page }) => {
 test('ComingSoonModal renders', async ({ mount }) => {
   const component = await mountWithProviders(
     mount,
-    <ComingSoonModal t={t} context="Test" onClose={() => {}} isOpen />,
+    <ComingSoonModal t={t} context="Test" onClose={() => {}} isOpen />
   );
   await expect(component).toBeVisible();
 });

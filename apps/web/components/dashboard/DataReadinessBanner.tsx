@@ -15,7 +15,11 @@ const formatLastSync = (value?: string) => {
   return dt.toLocaleString();
 };
 
-export const DataReadinessBanner: React.FC<DataReadinessBannerProps> = ({ status, loading, error }) => {
+export const DataReadinessBanner: React.FC<DataReadinessBannerProps> = ({
+  status,
+  loading,
+  error,
+}) => {
   const navigate = useNavigate();
   const lastSync = useMemo(() => formatLastSync(status?.lastSyncAt), [status?.lastSyncAt]);
 
@@ -23,7 +27,9 @@ export const DataReadinessBanner: React.FC<DataReadinessBannerProps> = ({ status
     return (
       <div className="mb-6 rounded-2xl border border-blue-500/20 bg-blue-500/5 px-4 py-3 md:px-6 md:py-4 flex items-center gap-3">
         <span className="h-3 w-3 rounded-full border-2 border-blue-500 border-t-transparent animate-spin" />
-        <span className="text-xs font-black uppercase tracking-widest text-blue-600">Sprawdzanie stanu danych…</span>
+        <span className="text-xs font-black uppercase tracking-widest text-blue-600">
+          Sprawdzanie stanu danych…
+        </span>
       </div>
     );
   }
@@ -31,7 +37,9 @@ export const DataReadinessBanner: React.FC<DataReadinessBannerProps> = ({ status
   if (error) {
     return (
       <div className="mb-6 rounded-2xl border border-rose-500/20 bg-rose-500/5 px-4 py-3 md:px-6 md:py-4">
-        <div className="text-xs font-black uppercase tracking-widest text-rose-600">Błąd statusu danych</div>
+        <div className="text-xs font-black uppercase tracking-widest text-rose-600">
+          Błąd statusu danych
+        </div>
         <p className="text-xs text-rose-600/90 mt-1">{error}</p>
       </div>
     );
@@ -58,14 +66,18 @@ export const DataReadinessBanner: React.FC<DataReadinessBannerProps> = ({ status
     return (
       <div className="mb-6 rounded-2xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 md:px-6 md:py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <div className="text-xs font-black uppercase tracking-widest text-amber-600">Trwa synchronizacja</div>
+          <div className="text-xs font-black uppercase tracking-widest text-amber-600">
+            Trwa synchronizacja
+          </div>
           <p className="text-xs text-amber-700/90 mt-1">
             {lastSync ? `Ostatni sync: ${lastSync}` : 'Synchronizujemy dane z integracji.'}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <span className="h-3 w-3 rounded-full border-2 border-amber-500 border-t-transparent animate-spin" />
-          <span className="text-xs font-black uppercase tracking-widest text-amber-600">PROCESSING</span>
+          <span className="text-xs font-black uppercase tracking-widest text-amber-600">
+            PROCESSING
+          </span>
         </div>
       </div>
     );
@@ -75,7 +87,9 @@ export const DataReadinessBanner: React.FC<DataReadinessBannerProps> = ({ status
     return (
       <div className="mb-6 rounded-2xl border border-brand-start/20 bg-brand-start/5 px-4 py-3 md:px-6 md:py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <div className="text-xs font-black uppercase tracking-widest text-brand-start">Podłącz integracje</div>
+          <div className="text-xs font-black uppercase tracking-widest text-brand-start">
+            Podłącz integracje
+          </div>
           <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">
             Nie mamy jeszcze żadnych danych. Dodaj integracje, aby rozpocząć synchronizację.
           </p>
@@ -95,7 +109,9 @@ export const DataReadinessBanner: React.FC<DataReadinessBannerProps> = ({ status
     return (
       <div className="mb-6 rounded-2xl border border-sky-500/20 bg-sky-500/5 px-4 py-3 md:px-6 md:py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <div className="text-xs font-black uppercase tracking-widest text-sky-600">Dane demonstracyjne</div>
+          <div className="text-xs font-black uppercase tracking-widest text-sky-600">
+            Dane demonstracyjne
+          </div>
           <p className="text-xs text-sky-700/90 mt-1">
             Oglądasz przykładowe dane. Podłącz integracje, aby przejść na dane produkcyjne.
           </p>

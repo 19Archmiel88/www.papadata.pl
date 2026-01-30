@@ -12,7 +12,10 @@ export const CheckoutCancel: React.FC = () => {
   useEffect(() => {
     if (isAuthenticated) return;
     try {
-      window.localStorage.setItem('pd_post_login_redirect', `${location.pathname}${location.search}`);
+      window.localStorage.setItem(
+        'pd_post_login_redirect',
+        `${location.pathname}${location.search}`
+      );
     } catch {
       // ignore
     }

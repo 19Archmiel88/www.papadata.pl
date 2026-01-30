@@ -1,12 +1,4 @@
-export type DatePreset =
-  | '1d'
-  | '7d'
-  | '30d'
-  | '90d'
-  | 'mtd'
-  | 'qtd'
-  | 'ytd'
-  | 'custom';
+export type DatePreset = '1d' | '7d' | '30d' | '90d' | 'mtd' | 'qtd' | 'ytd' | 'custom';
 
 export type ComparePreset = 'previous_period' | 'yoy' | null;
 

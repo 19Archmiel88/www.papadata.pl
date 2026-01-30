@@ -9,7 +9,12 @@ interface ComingSoonModalProps {
   onClose: () => void;
 }
 
-export const ComingSoonModal: React.FC<ComingSoonModalProps> = ({ t, context, isOpen = true, onClose }) => {
+export const ComingSoonModal: React.FC<ComingSoonModalProps> = ({
+  t,
+  context,
+  isOpen = true,
+  onClose,
+}) => {
   const titleId = useId();
   const descId = useId();
 
@@ -30,15 +35,37 @@ export const ComingSoonModal: React.FC<ComingSoonModalProps> = ({ t, context, is
         type="button"
         aria-label={t.common.close}
       >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2.5}
+            d="M6 18L18 6M6 6l12 12"
+          />
         </svg>
       </button>
 
       <div className="px-8 sm:px-12 py-12 text-center space-y-6">
         <div className="w-16 h-16 brand-gradient-bg rounded-3xl flex items-center justify-center mx-auto shadow-2xl">
-          <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l2 2m8-2a8 8 0 11-16 0 8 8 0 0116 0z" />
+          <svg
+            className="w-8 h-8 text-white"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 8v4l2 2m8-2a8 8 0 11-16 0 8 8 0 0116 0z"
+            />
           </svg>
         </div>
 
@@ -48,11 +75,17 @@ export const ComingSoonModal: React.FC<ComingSoonModalProps> = ({ t, context, is
           </div>
         )}
 
-        <h3 id={titleId} className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
+        <h3
+          id={titleId}
+          className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tight"
+        >
           {t.common.coming_soon_title}
         </h3>
 
-        <p id={descId} className="text-sm sm:text-base text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
+        <p
+          id={descId}
+          className="text-sm sm:text-base text-gray-600 dark:text-gray-400 font-medium leading-relaxed"
+        >
           {t.common.coming_soon_desc}
         </p>
 

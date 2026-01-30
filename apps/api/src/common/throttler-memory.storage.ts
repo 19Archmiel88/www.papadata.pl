@@ -1,6 +1,6 @@
-import { Injectable, OnModuleDestroy } from "@nestjs/common";
-import { ThrottlerStorage } from "@nestjs/throttler";
-import type { ThrottlerStorageRecord } from "@nestjs/throttler/dist/throttler-storage-record.interface";
+import { Injectable, OnModuleDestroy } from '@nestjs/common';
+import { ThrottlerStorage } from '@nestjs/throttler';
+import type { ThrottlerStorageRecord } from '@nestjs/throttler/dist/throttler-storage-record.interface';
 
 type MemoryState = {
   totalHits: number;
@@ -9,9 +9,7 @@ type MemoryState = {
 };
 
 @Injectable()
-export class ThrottlerMemoryStorage
-  implements ThrottlerStorage, OnModuleDestroy
-{
+export class ThrottlerMemoryStorage implements ThrottlerStorage, OnModuleDestroy {
   private storage = new Map<string, MemoryState>();
   private cleanupInterval: ReturnType<typeof setInterval> | null = null;
 
@@ -36,7 +34,7 @@ export class ThrottlerMemoryStorage
     ttl: number,
     limit: number,
     blockDuration: number,
-    throttlerName: string,
+    throttlerName: string
   ): Promise<ThrottlerStorageRecord> {
     const now = Date.now();
     const k = `throttle:${throttlerName}:${key}`;
@@ -76,9 +74,7 @@ export class ThrottlerMemoryStorage
 
     const isBlocked = !!(s.blockExpiresAt && now < s.blockExpiresAt);
     const timeToExpire = Math.max(0, s.windowExpiresAt - now);
-    const timeToBlockExpire = isBlocked
-      ? Math.max(0, (s.blockExpiresAt as number) - now)
-      : 0;
+    const timeToBlockExpire = isBlocked ? Math.max(0, (s.blockExpiresAt as number) - now) : 0;
 
     this.storage.set(k, s);
 

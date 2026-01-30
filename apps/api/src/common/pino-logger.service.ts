@@ -1,9 +1,9 @@
-import type { LoggerService } from "@nestjs/common";
-import type { Logger } from "pino";
-import { getLogger } from "./logger";
+import type { LoggerService } from '@nestjs/common';
+import type { Logger } from 'pino';
+import { getLogger } from './logger';
 
 const toMessage = (message: unknown): string =>
-  typeof message === "string" ? message : JSON.stringify(message);
+  typeof message === 'string' ? message : JSON.stringify(message);
 
 export class PinoLoggerService implements LoggerService {
   private readonly logger: Logger;

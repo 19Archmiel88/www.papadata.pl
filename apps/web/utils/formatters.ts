@@ -56,7 +56,7 @@ const setCache = (key: string, formatter: Intl.NumberFormat, limit: number) => {
 export const getNumberFormatter = (
   locale: string,
   options: Intl.NumberFormatOptions = {},
-  cacheLimit: number = DEFAULT_CACHE_LIMIT,
+  cacheLimit: number = DEFAULT_CACHE_LIMIT
 ) => {
   const key = buildKey(locale, options);
 
@@ -79,7 +79,7 @@ export const formatNumber = (
   options: Intl.NumberFormatOptions = {
     maximumFractionDigits: DEFAULT_NUMBER_MAX_FRACTION,
   },
-  fallback: string = '—',
+  fallback: string = '—'
 ) => {
   if (!Number.isFinite(value)) return fallback;
   return getNumberFormatter(locale, options).format(value);
@@ -89,7 +89,7 @@ export const formatPercent = (
   value: number,
   locale: string,
   maximumFractionDigits = DEFAULT_PERCENT_FRACTION,
-  fallback: string = '—',
+  fallback: string = '—'
 ) => {
   // Intl percent expects fraction: 0.25 => 25%
   if (!Number.isFinite(value)) return fallback;
@@ -105,7 +105,7 @@ export const formatPercentValue = (
   value: number,
   locale: string,
   maximumFractionDigits = DEFAULT_PERCENT_FRACTION,
-  fallback: string = '—',
+  fallback: string = '—'
 ) => {
   if (!Number.isFinite(value)) return fallback;
   const digits = maximumFractionDigits ?? DEFAULT_PERCENT_FRACTION;
@@ -120,7 +120,7 @@ export const formatSignedPercentValue = (
   value: number,
   locale: string,
   maximumFractionDigits = DEFAULT_PERCENT_FRACTION,
-  fallback: string = '—',
+  fallback: string = '—'
 ) => {
   if (!Number.isFinite(value)) return fallback;
   const abs = Math.abs(value);
@@ -138,7 +138,7 @@ export const formatRatio = (
   locale: string,
   maximumFractionDigits = 2,
   suffix = 'x',
-  fallback: string = '—',
+  fallback: string = '—'
 ) => {
   if (!Number.isFinite(value)) return fallback;
   const formatted = getNumberFormatter(locale, { maximumFractionDigits }).format(value);
@@ -149,7 +149,7 @@ export const formatCurrency = (
   value: number,
   locale: string,
   maximumFractionDigits = 0,
-  fallback: string = '—',
+  fallback: string = '—'
 ) => {
   // Requirement: currency always PLN
   if (!Number.isFinite(value)) return fallback;
@@ -164,7 +164,7 @@ export const formatCompactCurrency = (
   value: number,
   locale: string,
   maximumFractionDigits = 1,
-  fallback: string = '—',
+  fallback: string = '—'
 ) => {
   // Requirement: currency always PLN
   if (!Number.isFinite(value)) return fallback;

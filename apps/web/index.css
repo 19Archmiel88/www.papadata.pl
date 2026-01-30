@@ -24,8 +24,10 @@ section[id] {
 }
 
 /* Accessible focus styles */
-:where(a, button, [role='button'], input, textarea, select):focus-visible:not([class*='focus-visible:ring']) {
-  outline: 2px solid #4F46E5;
+:where(a, button, [role='button'], input, textarea, select):focus-visible:not(
+    [class*='focus-visible:ring']
+  ) {
+  outline: 2px solid #4f46e5;
   outline-offset: 3px;
 }
 
@@ -64,22 +66,14 @@ html:not(.dark) .aurora-blob {
 }
 
 .brand-gradient-text {
- background: linear-gradient(135deg, #4F46E5 0%, #0EA5E9 100%);
+  background: linear-gradient(135deg, #4f46e5 0%, #0ea5e9 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .animated-gradient-text {
-  background: linear-gradient(
-    to right,
-    #4F46E5,
-    #0EA5E9,
-    #8B5CF6,
-    #0EA5E9,
-    #4F46E5
-
-  );
+  background: linear-gradient(to right, #4f46e5, #0ea5e9, #8b5cf6, #0ea5e9, #4f46e5);
   background-size: 200% auto;
   background-clip: text;
   -webkit-background-clip: text;
@@ -95,7 +89,7 @@ html:not(.dark) .aurora-blob {
 }
 
 .brand-gradient-bg {
-  background: linear-gradient(135deg, #4F46E5 0%, #0EA5E9 100%);
+  background: linear-gradient(135deg, #4f46e5 0%, #0ea5e9 100%);
 }
 
 .glass {
@@ -159,20 +153,8 @@ html:not(.dark) .aurora-blob {
 }
 
 .marquee-mask {
-  mask-image: linear-gradient(
-    to right,
-    transparent,
-    black 15%,
-    black 85%,
-    transparent
-  );
-  -webkit-mask-image: linear-gradient(
-    to right,
-    transparent,
-    black 15%,
-    black 85%,
-    transparent
-  );
+  mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
 }
 
 .no-scrollbar::-webkit-scrollbar {

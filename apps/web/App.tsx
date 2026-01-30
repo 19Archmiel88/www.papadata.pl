@@ -236,11 +236,15 @@ const App: React.FC = () => {
                 />
                 <Route
                   path="/legal/privacy"
-                  element={<LegalRoute docPath="privacy-policy.md" fallbackTitle="Privacy Policy" />}
+                  element={
+                    <LegalRoute docPath="privacy-policy.md" fallbackTitle="Privacy Policy" />
+                  }
                 />
                 <Route
                   path="/legal/cookies"
-                  element={<LegalRoute docPath="cookies-policy.md" fallbackTitle="Cookies Policy" />}
+                  element={
+                    <LegalRoute docPath="cookies-policy.md" fallbackTitle="Cookies Policy" />
+                  }
                 />
                 <Route
                   path="/legal/dpa"
@@ -248,7 +252,9 @@ const App: React.FC = () => {
                 />
                 <Route
                   path="/legal/subprocessors"
-                  element={<LegalRoute docPath="privacy-and-data.md" fallbackTitle="Subprocessors" />}
+                  element={
+                    <LegalRoute docPath="privacy-and-data.md" fallbackTitle="Subprocessors" />
+                  }
                 />
                 <Route
                   path="/legal/ai"
@@ -267,23 +273,121 @@ const App: React.FC = () => {
                 {/* Dashboard + nested routes */}
                 <Route path="/dashboard" element={<DashboardLayout />}>
                   <Route index element={<DashboardIndexRedirect />} />
-                  <Route path="overview" element={<ErrorBoundary><OverviewViewV2 /></ErrorBoundary>} />
-                  <Route path="ads" element={<ErrorBoundary><AdsViewV2 /></ErrorBoundary>} />
-                  <Route path="growth" element={<ErrorBoundary><GrowthView /></ErrorBoundary>} />
-                  <Route path="pandl" element={<ErrorBoundary><PandLViewV2 /></ErrorBoundary>} />
-                  <Route path="reports" element={<ErrorBoundary><ReportsView /></ErrorBoundary>} />
-                  <Route path="customers" element={<ErrorBoundary><CustomersViewV2 /></ErrorBoundary>} />
-                  <Route path="products" element={<ErrorBoundary><ProductsViewV2 /></ErrorBoundary>} />
-                  <Route path="pipeline" element={<ErrorBoundary><PipelineView /></ErrorBoundary>} />
-                  <Route path="guardian" element={<ErrorBoundary><GuardianViewV2 /></ErrorBoundary>} />
-                  <Route path="alerts" element={<ErrorBoundary><AlertsViewV2 /></ErrorBoundary>} />
-                  <Route path="integrations" element={<ErrorBoundary><IntegrationsViewV2 /></ErrorBoundary>} />
-                  <Route path="knowledge" element={<ErrorBoundary><KnowledgeView /></ErrorBoundary>} />
+                  <Route
+                    path="overview"
+                    element={
+                      <ErrorBoundary>
+                        <OverviewViewV2 />
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="ads"
+                    element={
+                      <ErrorBoundary>
+                        <AdsViewV2 />
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="growth"
+                    element={
+                      <ErrorBoundary>
+                        <GrowthView />
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="pandl"
+                    element={
+                      <ErrorBoundary>
+                        <PandLViewV2 />
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="reports"
+                    element={
+                      <ErrorBoundary>
+                        <ReportsView />
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="customers"
+                    element={
+                      <ErrorBoundary>
+                        <CustomersViewV2 />
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="products"
+                    element={
+                      <ErrorBoundary>
+                        <ProductsViewV2 />
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="pipeline"
+                    element={
+                      <ErrorBoundary>
+                        <PipelineView />
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="guardian"
+                    element={
+                      <ErrorBoundary>
+                        <GuardianViewV2 />
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="alerts"
+                    element={
+                      <ErrorBoundary>
+                        <AlertsViewV2 />
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="integrations"
+                    element={
+                      <ErrorBoundary>
+                        <IntegrationsViewV2 />
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="knowledge"
+                    element={
+                      <ErrorBoundary>
+                        <KnowledgeView />
+                      </ErrorBoundary>
+                    }
+                  />
 
                   {/* Settings */}
                   <Route path="settings" element={<DashboardSettingsRedirect />} />
-                  <Route path="settings/workspace" element={<ErrorBoundary><SettingsWorkspaceView /></ErrorBoundary>} />
-                  <Route path="settings/org" element={<ErrorBoundary><SettingsOrgView /></ErrorBoundary>} />
+                  <Route
+                    path="settings/workspace"
+                    element={
+                      <ErrorBoundary>
+                        <SettingsWorkspaceView />
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="settings/org"
+                    element={
+                      <ErrorBoundary>
+                        <SettingsOrgView />
+                      </ErrorBoundary>
+                    }
+                  />
                 </Route>
 
                 {/* Fallback */}

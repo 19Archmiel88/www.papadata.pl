@@ -5,4 +5,4 @@ Scanned files: 374
 Issues: 0
 
 | Path | Type | Details | Recommendation |
-| --- | --- | --- | --- |
+| ---- | ---- | ------- | -------------- |

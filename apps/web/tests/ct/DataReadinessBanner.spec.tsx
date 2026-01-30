@@ -10,7 +10,11 @@ test.beforeEach(async ({ page }) => {
 test('DataReadinessBanner renders', async ({ mount }) => {
   const component = await mountWithProviders(
     mount,
-    <DataReadinessBanner status={{ mode: 'live', lastSyncAt: new Date().toISOString() } as any} loading={false} error={null} />,
+    <DataReadinessBanner
+      status={{ mode: 'live', lastSyncAt: new Date().toISOString() } as any}
+      loading={false}
+      error={null}
+    />
   );
   await expect(component).toBeVisible();
 });
