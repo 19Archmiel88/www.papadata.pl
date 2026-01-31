@@ -9,7 +9,12 @@ if (!process.env.APP_MODE) {
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const appRoot = resolve(scriptDir, '..');
+const repoRoot = resolve(appRoot, '..', '..');
 const jestCli = resolve(appRoot, 'node_modules', 'jest', 'bin', 'jest.js');
+
+// Load a CJS shim to satisfy packages expecting require('signal-exit') === function.
+const signalExitShim = resolve(repoRoot, 'scripts', 'signal-exit-shim.cjs');
+const shimOption = `--require ${signalExitShim.replace(/\\/g, '/')}`;
 
 const forwardedArgs = process.argv.slice(2);
 const baseArgs = ['--config', './test/jest-e2e.json'];
@@ -25,11 +30,15 @@ const useNode = existsSync(jestCli);
 const command = useNode ? process.execPath : 'pnpm';
 const args = useNode ? [jestCli, ...jestArgs] : ['exec', 'jest', ...jestArgs];
 
+// Prepend shim to NODE_OPTIONS (keep existing flags if present).
+const nodeOptions = [shimOption, process.env.NODE_OPTIONS].filter(Boolean).join(' ');
+
 const child = spawn(command, args, {
   shell: isWindows,
   stdio: 'inherit',
   env: {
     ...process.env,
+    NODE_OPTIONS: nodeOptions,
   },
 });
 
