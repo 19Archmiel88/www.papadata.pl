@@ -1896,6 +1896,26 @@ export interface DashboardData {
   // Added remaining missing properties to resolve TypeScript errors in DashboardSection.tsx
   session_processing: string;
   session_error: string;
+  command_empty: string;
+  command_nav_hint: string;
+  command_action_report: string;
+  command_action_report_desc: string;
+  command_action_alert: string;
+  command_action_alert_desc: string;
+  command_action_pipeline: string;
+  command_action_pipeline_desc: string;
+  command_action_integrations: string;
+  command_action_integrations_desc: string;
+  command_action_go_live: string;
+  command_action_go_live_desc: string;
+  command_action_workspace: string;
+  command_action_workspace_desc: string;
+  command_resource_roas: string;
+  command_resource_roas_desc: string;
+  command_resource_bigquery: string;
+  command_resource_bigquery_desc: string;
+  command_resource_ai: string;
+  command_resource_ai_desc: string;
   filter_country: string;
   filter_device: string;
   filter_channel: string;

@@ -5,6 +5,14 @@
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
   },
+  "transformIgnorePatterns": [],
+  "globals": {
+    "ts-jest": {
+      "tsconfig": {
+        "allowJs": true
+      }
+    }
+  },
   "collectCoverageFrom": ["src/**/*.(t|j)s"],
   "testEnvironment": "node"
 }

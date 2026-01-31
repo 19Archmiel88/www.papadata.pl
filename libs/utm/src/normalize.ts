@@ -1,5 +1,5 @@
 import type { ChannelGroup } from './channel-groups';
-import { CHANNEL_RULES } from './channel-groups';
+import { CHANNEL_RULES, type ChannelGroup } from './channel-groups';
 
 export type UtmInput = {
   source?: string | null;

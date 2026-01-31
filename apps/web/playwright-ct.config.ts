@@ -1,6 +1,7 @@
 import { defineConfig, devices } from '@playwright/experimental-ct-react';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { defineConfig, devices } from '@playwright/experimental-ct-react';
 import react from '@vitejs/plugin-react';
 
 const __filename = fileURLToPath(import.meta.url);

@@ -9,15 +9,25 @@ import { normalizeApiError } from '../../hooks/useApiError';
 import { Logo } from '../Logo';
 import { CookieBanner } from '../CookieBanner';
 import { OfflineBanner } from '../OfflineBanner';
+import { safeLocalStorage } from '../../utils/safeLocalStorage';
 import { integrations, integrationsByProvider, IntegrationItem } from '../../data/integrations';
 import { DataReadinessBanner } from './DataReadinessBanner';
+import { BillingPaywall } from './BillingPaywall';
+import { TrialBanner } from './TrialBanner';
+import { COOKIE_ACK_KEY, persistCookieAck } from './cookie-resolution';
+import {
+  computeAiEnabled,
+  computeIsAccountActive,
+  computeIsDataStale,
+  deriveEntitlements,
+} from './access';
 import {
   DashboardOutletContext,
   GcpRegion,
   IntegrationConnectionState,
   TimeRange,
 } from './DashboardContext';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useTenantStatus } from '../../hooks/useTenantStatus';
 import { useIntegrations } from '../../hooks/useIntegrations';
 
@@ -110,36 +120,32 @@ export const DashboardSection: React.FC = () => {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement | null>(null);
   const [sessionStartTime] = useState(new Date());
-  const [lastUpdate] = useState(() => new Date(Date.now() - 45 * 60 * 1000));
+  const [healthTimestamp, setHealthTimestamp] = useState<string | null>(null);
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const [now, setNow] = useState(() => new Date());
   const [appMode, setAppMode] = useState<DashboardOutletContext['appMode']>('prod');
   const [billingSummary, setBillingSummary] = useState<BillingSummary | null>(null);
   const [billingError, setBillingError] = useState<string | null>(null);
   const tenantId = useMemo(() => {
     if (typeof window === 'undefined') return undefined;
-    return window.localStorage.getItem('pd_active_tenant_id') || undefined;
+    return safeLocalStorage.getItem('pd_active_tenant_id') || undefined;
   }, []);
   const tenantStatus = useTenantStatus(tenantId, 45_000);
 
   // Dashboard context: AI + filtry
   const [contextLabel, setContextLabel] = useState<string | null>(null);
   const [aiDraft, setAiDraft] = useState<string | null>(null);
-  const [aiMode, setAiMode] = useState<boolean>(true);
+  const [aiMode, setAiMode] = useState<boolean>(false);
   const [filters, setFilters] = useState<Partial<Record<string, string>>>({
     country: 'all',
     store: 'all',
     device: 'all',
     channel: 'all',
   });
+  const [cookiesResolvedAt, setCookiesResolvedAt] = useState<number | null>(null);
 
   // Demo-only: identyfikator sesji (footer)
-  const [peerId] = useState(() => {
-    const stored = sessionStorage.getItem('sysLogId');
-    if (stored) return stored;
-    const newId = Math.random().toString(36).substring(7).toUpperCase();
-    sessionStorage.setItem('sysLogId', newId);
-    return newId;
-  });
+  const [peerId, setPeerId] = useState<string>('');
 
   // Backend/integrations state
   const [integrationStatus, setIntegrationStatus] = useState<
@@ -186,8 +192,32 @@ export const DashboardSection: React.FC = () => {
     });
   }, [integrationsRemote]);
 
+  useEffect(() => {
+    const timestamps: number[] = [];
+    const push = (value?: string | null) => {
+      if (!value) return;
+      const parsed = Date.parse(value);
+      if (!Number.isNaN(parsed)) {
+        timestamps.push(parsed);
+      }
+    };
+
+    push(healthTimestamp);
+    push(integrationsLastSync ?? null);
+    push(tenantStatus.status?.lastSyncAt ?? null);
+
+    if (timestamps.length === 0) {
+      setLastUpdate(null);
+      return;
+    }
+
+    const mostRecent = Math.max(...timestamps);
+    setLastUpdate(new Date(mostRecent));
+  }, [healthTimestamp, integrationsLastSync, tenantStatus.status?.lastSyncAt]);
+
   // Sidebar: desktop breakpoint (Tailwind lg = 1024px)
   const isDesktop = useMediaQuery('(min-width: 1024px)');
+  const reduceMotion = useReducedMotion();
 
   // Refs for focus management
   const mobileCloseBtnRef = useRef<HTMLButtonElement | null>(null);
@@ -198,6 +228,43 @@ export const DashboardSection: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const stored = safeLocalStorage.getItem(COOKIE_ACK_KEY);
+      if (stored) {
+        const parsed = Number(stored);
+        setCookiesResolvedAt(Number.isNaN(parsed) ? Date.now() : parsed);
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!cookiesResolvedAt) return;
+    // hook for observability: value kept to avoid unused state lint errors
+  }, [cookiesResolvedAt]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const storage = window.sessionStorage;
+      const stored = storage.getItem('sysLogId');
+      if (stored) {
+        setPeerId(stored);
+        return;
+      }
+      const newId = Math.random().toString(36).substring(7).toUpperCase();
+      storage.setItem('sysLogId', newId);
+      setPeerId(newId);
+    } catch {
+      if (!peerId) {
+        setPeerId(Math.random().toString(36).substring(7).toUpperCase());
+      }
+    }
+  }, [peerId]);
+
+  useEffect(() => {
     let isActive = true;
 
     const loadBilling = async () => {
@@ -206,8 +273,9 @@ export const DashboardSection: React.FC = () => {
         if (!isActive) return;
         const resolvedMode = health.mode === 'demo' ? 'demo' : 'prod';
         setAppMode(resolvedMode);
+        setHealthTimestamp(health.timestamp ?? null);
 
-        if (health.mode === 'demo') {
+        if (resolvedMode === 'demo') {
           setBillingSummary(null);
           setBillingError(null);
           return;
@@ -219,6 +287,7 @@ export const DashboardSection: React.FC = () => {
         setBillingError(null);
       } catch (error) {
         if (!isActive) return;
+        setBillingSummary(null);
         setBillingError(normalizeApiError(error, t.common.error_desc));
       }
     };
@@ -239,24 +308,34 @@ export const DashboardSection: React.FC = () => {
   const trialExpired = billingSummary?.isTrialExpired ?? false;
   const planId = billingSummary?.plan ?? 'professional';
   const canManageBilling = billingSummary?.canManageSubscription ?? false;
-  const isAccountActive = billingSummary
-    ? billingSummary.billingStatus === 'active' ||
-      (billingSummary.billingStatus === 'trialing' && !trialExpired)
-    : true;
-  const isReadOnly = !isDemo && !isAccountActive;
-  const isDataStale = now.getTime() - lastUpdate.getTime() > 4 * 60 * 60 * 1000;
+  const entitlements = useMemo(() => deriveEntitlements(billingSummary), [billingSummary]);
+  const isAccountActive = isDemo
+    ? true
+    : computeIsAccountActive(billingSummary, trialExpired, isDemo);
+  const isReadOnly = isDemo ? false : !isAccountActive;
+  const canUseIntegrations =
+    !isDemo && entitlements.isPremiumAllowed && entitlements.features.integrations && !isReadOnly;
+  const isDataStale = computeIsDataStale(lastUpdate, now);
+  const permissions = useMemo(
+    () => ({
+      export: entitlements.features.exports && entitlements.isPremiumAllowed && !isReadOnly,
+      manage_integrations: canUseIntegrations,
+      manage_subscription: canManageBilling,
+      ai_write: aiMode && !isReadOnly,
+    }),
+    [
+      aiMode,
+      canManageBilling,
+      canUseIntegrations,
+      entitlements.features.exports,
+      entitlements.isPremiumAllowed,
+      isReadOnly,
+    ]
+  );
 
   useEffect(() => {
-    if (isDemo) {
-      setAiMode(true);
-      return;
-    }
-    if (!billingSummary) return;
-    const isActive =
-      billingSummary.billingStatus === 'active' ||
-      (billingSummary.billingStatus === 'trialing' && !billingSummary.isTrialExpired);
-    setAiMode(billingSummary.entitlements.features.ai && isActive);
-  }, [billingSummary, isDemo]);
+    setAiMode(computeAiEnabled(entitlements, trialExpired, isDemo));
+  }, [entitlements, isDemo, trialExpired]);
 
   // User menu: klik poza + Escape
   useEffect(() => {
@@ -340,9 +419,13 @@ export const DashboardSection: React.FC = () => {
     t.dashboard.status_ready,
   ]);
 
-  const handleCookieResolution = () => {};
+  const handleCookieResolution = useCallback(() => {
+    const ts = persistCookieAck();
+    setCookiesResolvedAt(ts);
+  }, []);
 
   const formattedLastUpdate = useMemo(() => {
+    if (!lastUpdate) return '—';
     return new Intl.DateTimeFormat(t.langCode ?? 'pl-PL', {
       hour: '2-digit',
       minute: '2-digit',
@@ -548,7 +631,7 @@ export const DashboardSection: React.FC = () => {
         openDemoNotice(integrationName);
         return;
       }
-      if (isReadOnly) {
+      if (!canUseIntegrations) {
         handleUpgrade();
         return;
       }
@@ -566,7 +649,7 @@ export const DashboardSection: React.FC = () => {
       handleIntegrationConnect,
       handleUpgrade,
       isDemo,
-      isReadOnly,
+      canUseIntegrations,
       openDemoNotice,
       openModal,
       t.integrations.items,
@@ -812,13 +895,14 @@ export const DashboardSection: React.FC = () => {
     sessionStatus,
     lastUpdateLabel: formattedLastUpdate,
     isDataStale,
+    permissions,
     tenantStatus: tenantStatus.status,
     tenantStatusLoading: tenantStatus.loading,
     tenantStatusError: tenantStatus.error,
   };
 
   const commonLabels = t.common as unknown as Record<string, string | undefined>;
-  const dashboardLabels = t.dashboard as Record<string, string | undefined>;
+  const dashboardLabels = t.dashboard as unknown as Record<string, string | undefined>;
   const pinLabel = commonLabels.pin ?? dashboardLabels.sidebar_pin ?? 'Pin';
   const unpinLabel = commonLabels.unpin ?? dashboardLabels.sidebar_unpin ?? 'Unpin';
 
@@ -1112,10 +1196,10 @@ export const DashboardSection: React.FC = () => {
         <AnimatePresence>
           {isMobileSidebarOpen && (
             <motion.aside
-              initial={{ x: -320 }}
-              animate={{ x: 0 }}
-              exit={{ x: -320 }}
-              transition={{ type: 'tween', duration: 0.25 }}
+              initial={reduceMotion ? false : { x: -320 }}
+              animate={reduceMotion ? false : { x: 0 }}
+              exit={reduceMotion ? undefined : { x: -320 }}
+              transition={reduceMotion ? { duration: 0 } : { type: 'tween', duration: 0.25 }}
               onMouseEnter={() => setIsSidebarHovered(true)}
               onMouseLeave={() => setIsSidebarHovered(false)}
               className="fixed left-0 top-0 h-dvh bg-gray-200/40 dark:bg-[#070709] border-r border-black/10 dark:border-white/5 flex flex-col z-[3050] w-72 shadow-2xl"
@@ -1407,73 +1491,13 @@ export const DashboardSection: React.FC = () => {
             )}
 
             {isReadOnly && (
-              <section className="mb-6 rounded-3xl border border-amber-500/30 bg-amber-500/10 px-6 py-6 md:px-8 md:py-7 space-y-6">
-                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                  <div className="space-y-2">
-                    <div className="text-xs font-black uppercase tracking-widest text-amber-600">
-                      {t.dashboard.billing.read_only_badge}
-                    </div>
-                    <h3 className="text-xl font-black text-amber-800/90 dark:text-amber-200/90 uppercase tracking-tight">
-                      {t.dashboard.billing.paywall_title}
-                    </h3>
-                    <p className="text-sm text-amber-800/80 dark:text-amber-200/80 font-medium">
-                      {t.dashboard.billing.paywall_desc}
-                    </p>
-                  </div>
-                  {canManageBilling ? (
-                    <div className="flex flex-col sm:flex-row gap-3">
-                      <button
-                        type="button"
-                        onClick={handleUpgrade}
-                        className="px-5 py-3 rounded-xl bg-amber-500 text-white text-xs font-black uppercase tracking-widest shadow-lg hover:bg-amber-400 transition-colors"
-                      >
-                        {primaryBillingCta}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleManageSubscription}
-                        className="px-5 py-3 rounded-xl border border-amber-500/40 text-amber-700 text-xs font-black uppercase tracking-widest hover:bg-amber-500/10 transition-colors"
-                      >
-                        {t.dashboard.billing.manage_link}
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="text-xs font-black uppercase tracking-widest text-amber-700">
-                      {t.dashboard.billing.paywall_member_cta}
-                    </div>
-                  )}
-                </div>
-
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="rounded-2xl border border-amber-500/20 bg-white/60 dark:bg-white/5 p-4">
-                    <div className="text-xs font-black uppercase tracking-widest text-amber-600 mb-3">
-                      {t.dashboard.billing.paywall_allowed_title}
-                    </div>
-                    <ul className="space-y-2 text-xs-plus text-amber-800/80 dark:text-amber-200/80">
-                      {t.dashboard.billing.paywall_allowed_items.map((item) => (
-                        <li key={item} className="flex items-start gap-2">
-                          <span className="mt-2 w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                          <span>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div className="rounded-2xl border border-amber-500/20 bg-white/60 dark:bg-white/5 p-4">
-                    <div className="text-xs font-black uppercase tracking-widest text-amber-600 mb-3">
-                      {t.dashboard.billing.paywall_blocked_title}
-                    </div>
-                    <ul className="space-y-2 text-xs-plus text-amber-800/80 dark:text-amber-200/80">
-                      {t.dashboard.billing.paywall_blocked_items.map((item) => (
-                        <li key={item} className="flex items-start gap-2">
-                          <span className="mt-2 w-1.5 h-1.5 rounded-full bg-rose-500" />
-                          <span>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </section>
+              <BillingPaywall
+                t={t}
+                canManageBilling={canManageBilling}
+                primaryBillingCta={primaryBillingCta}
+                onUpgrade={handleUpgrade}
+                onManageSubscription={handleManageSubscription}
+              />
             )}
 
             {!tenantId && (
@@ -1503,34 +1527,15 @@ export const DashboardSection: React.FC = () => {
             />
 
             {isTrial && trialDaysValue > 0 && !isReadOnly && (
-              <div className="mb-6 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-3 md:px-6 md:py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div className="space-y-1">
-                  <div className="text-xs font-black uppercase tracking-widest text-emerald-600">
-                    {t.dashboard.billing.trial_banner_tag}
-                  </div>
-                  <p className="text-sm text-emerald-700/90 dark:text-emerald-200/90 font-medium">
-                    {canManageBilling ? trialBannerOwner : trialBannerMember}
-                  </p>
-                </div>
-                {canManageBilling && (
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <button
-                      type="button"
-                      onClick={handleUpgrade}
-                      className="px-4 py-2 rounded-xl bg-emerald-500 text-white text-xs font-black uppercase tracking-widest shadow-lg hover:bg-emerald-400 transition-colors"
-                    >
-                      {primaryBillingCta}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleManageSubscription}
-                      className="px-4 py-2 rounded-xl border border-emerald-500/40 text-emerald-700 text-xs font-black uppercase tracking-widest hover:bg-emerald-500/10 transition-colors"
-                    >
-                      {t.dashboard.billing.manage_link}
-                    </button>
-                  </div>
-                )}
-              </div>
+              <TrialBanner
+                t={t}
+                canManageBilling={canManageBilling}
+                primaryBillingCta={primaryBillingCta}
+                trialBannerOwner={trialBannerOwner}
+                trialBannerMember={trialBannerMember}
+                onUpgrade={handleUpgrade}
+                onManageSubscription={handleManageSubscription}
+              />
             )}
 
             <Outlet context={outletContext} />
