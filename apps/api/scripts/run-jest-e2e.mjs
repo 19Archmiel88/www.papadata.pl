@@ -9,10 +9,7 @@ if (!process.env.APP_MODE) {
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const appRoot = resolve(scriptDir, '..');
-const repoRoot = resolve(appRoot, '..', '..');
 const jestCli = resolve(appRoot, 'node_modules', 'jest', 'bin', 'jest.js');
-const signalExitShim = resolve(repoRoot, 'scripts', 'signal-exit-shim.js');
-const shimOption = `--require ${signalExitShim.replace(/\\/g, '/')}`;
 
 const forwardedArgs = process.argv.slice(2);
 const baseArgs = ['--config', './test/jest-e2e.json'];
@@ -26,18 +23,13 @@ if (isWindows && !forceWorkers && !jestArgs.includes('--runInBand')) {
 
 const useNode = existsSync(jestCli);
 const command = useNode ? process.execPath : 'pnpm';
-const args = useNode
-  ? ['--require', signalExitShim.replace(/\\/g, '/'), jestCli, ...jestArgs]
-  : ['exec', 'jest', ...jestArgs];
-const nodeOptions = [process.env.NODE_OPTIONS, shimOption].filter(Boolean).join(' ');
+const args = useNode ? [jestCli, ...jestArgs] : ['exec', 'jest', ...jestArgs];
 
 const child = spawn(command, args, {
-  shell: process.platform === 'win32',
+  shell: isWindows,
   stdio: 'inherit',
   env: {
     ...process.env,
-    NODE_OPTIONS: nodeOptions,
-    DEBUG_SIGNAL_EXIT_SHIM: '1',
   },
 });
 

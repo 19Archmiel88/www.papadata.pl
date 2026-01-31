@@ -39,7 +39,7 @@
     "lint-staged": "^15.2.10",
     "prettier": "^3.3.3",
     "semver": "^7.3.8",
-    "signal-exit": "3.0.7"
+    "signal-exit": "^4.1.0"
   },
   "lint-staged": {
     "apps/api/**/*.{ts,tsx}": [
@@ -55,7 +55,7 @@
   },
   "pnpm": {
     "overrides": {
-      "signal-exit": "3.0.7"
+      "signal-exit": "^4.1.0"
     }
   },
   "engines": {
